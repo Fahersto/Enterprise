@@ -15,22 +15,30 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow)
 {
+	// Create Console
+	#ifdef EP_DEBUG
+		//TODO: Create Console
+	#endif
+	
+	// Handle command line arguments
+	// TODO: Handle command line arguments
+	
+	// Create the Application
 	auto app = Enterprise::CreateApplication();
 
-	HWND hWnd = CreateClientWindow(hInstance);	// Create the game window and store the handle.
-	if (!hWnd)									// Abort if window fails to create.
-		return 1;
-	app->Init();  //app->Init(hWnd);									// Initialize Game.
-	ShowWindow(hWnd, nCmdShow);					// Tell Windows to display the window.
-	// InitializeDebugConsole();						// Create console TODO: conditionalize the console
-
-	// TODO: Handle command line arguments
+	// TODO: Abstract window creation so it can be handled by Application
+	{
+		HWND hWnd = CreateClientWindow(hInstance);	// Create the game window and store the handle.
+		if (!hWnd)									// Abort if window fails to create.
+			return 1;
+		ShowWindow(hWnd, nCmdShow);					// Tell Windows to display the window.
+	}
 
 	// Set up timers for Update() and Draw() calls
 	__int64 CurrentTick, LastTick, TickFrequency;
-	__int64 UpdateAccumulator = 0, DrawAccumulator = 0;
+	__int64 UpdateAccumulator = 0, DrawAccumulator = 0; //TODO: Evaluate if a tick-based accumulator is a problem.
 	QueryPerformanceFrequency((LARGE_INTEGER*)& TickFrequency); //Gets the ticks per second.
-	QueryPerformanceCounter((LARGE_INTEGER*)& CurrentTick);
+	QueryPerformanceCounter((LARGE_INTEGER*)& CurrentTick); //Gets the system time in ticks
 	LastTick = CurrentTick;
 	__int64 UpdateDeltaInTicks = TickFrequency / UPDATE_SPEED;
 	__int64 DrawDeltaInTicks = TickFrequency / DRAW_SPEED;
@@ -39,9 +47,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	MSG msg = { 0 };
 	while (WM_QUIT != msg.message)
 	{
-		// Handle Windows Messages
+		
+		// Dispatch Windows Messages
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			// TODO: Abstract this code into Application:Tick() or Window:Tick().
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -61,25 +71,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				app->Update(); // CORE CALL!
 				UpdateAccumulator -= UpdateDeltaInTicks;
 			}
-
 			// Draw
 			if (DrawAccumulator >= DrawDeltaInTicks) {
 				app->Draw();// app->Draw(double(UpdateAccumulator / UpdateDeltaInTicks)); // CORE CALL!
 				DrawAccumulator = 0;
 			}
 		}
-
 		//// TODO: Make DestroyWindow a platform-agnostic callback
 		//if (!game.isRunning)
 		//	DestroyWindow(hWnd);
 	}
 
-	app->Cleanup(); //CORE CALL!
-	//CleanupDebugConsole(); // TODO: Conditionalize the console.
-	delete app;
-
-	// return this part of the WM_QUIT message to Windows
-	return (int)msg.wParam;
+	delete app; // Clean up the Aplication
+	return (int)msg.wParam; // return this part of the WM_QUIT message to Windows
 }
 
 // WinProc:

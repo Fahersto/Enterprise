@@ -4,29 +4,33 @@
 class Sandbox : public Enterprise::Application
 {
 public:
+	//Called before everything else in the application.  Create windows and set up initial game state here.
 	Sandbox()
 	{
+		#ifdef EP_DEBUG
+		// Set Initial conditions for testing
+		// TODO: set this with a JSON or LUA file?
+		#else
+		// Set Initial conditions for final game
+		#endif
 	}
 
-	void Init() override
+	//Called as rapidly as possible
+	virtual void Tick() override 
 	{
 	}
 
-	void Tick() override {
-
-	}
-
-	void Update() override
+	//Called at update rate (consistent timestep)
+	virtual void Update() override
 	{
 	}
 
-	void Draw() override
+	//Called when rendering a new frame (variable timestep)
+	virtual void Draw() override
 	{
 	}
 
-	void Cleanup() override {
-	}
-
+	//Called 
 	~Sandbox()
 	{
 	}

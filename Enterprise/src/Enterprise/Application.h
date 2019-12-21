@@ -4,18 +4,14 @@ namespace Enterprise
 {
 	class Application
 	{
-	private:
-		//Enterprise::Console* consoleImpl;
 	public:
-		Application();
-		virtual void Init() = 0;
-		virtual void Tick() = 0;
-		virtual void Update() = 0;
-		virtual void Draw() = 0;
-		virtual void Cleanup() = 0;
-		virtual ~Application();
+		Application(); // Called at program start
+		virtual void Tick() = 0; // Called as frequently as possible
+		virtual void Update() = 0; // Called at Update Rate (fixed timestep)
+		virtual void Draw() = 0; // Called when rendering (based on framerate settings)
+		virtual ~Application(); // Called at program end
 	};
 
-	//To be defined in Client
+	// Creator/getter for client application.  Defined in Client.
 	Application* CreateApplication();
 }
