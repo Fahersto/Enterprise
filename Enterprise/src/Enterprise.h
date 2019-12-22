@@ -5,6 +5,7 @@ Enterprise.h
 This file is to be included into the client application.  It simplifies the number of includes needed by a client project.
 */
 
+#include "Enterprise/Log.h"
 #include "Enterprise/Application.h"
 
 // -------------------- Entry Point! ------------------

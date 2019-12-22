@@ -57,8 +57,8 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Enterprise\src\</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EP_DEBUG;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Enterprise\src\;$(SolutionDir)Enterprise\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EP_CLIENTSCOPE;EP_DEBUG;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -73,8 +73,8 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Enterprise\src\</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EP_RELEASE;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Enterprise\src\;$(SolutionDir)Enterprise\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EP_CLIENTSCOPE;EP_RELEASE;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

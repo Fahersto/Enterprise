@@ -13,6 +13,13 @@ public:
 		#else
 		// Set Initial conditions for final game
 		#endif
+
+		Enterprise::Log::Init();
+		EP_TRACE("Trace from Client");
+		EP_WARN("Warn from Client");
+		EP_INFO("Info from Client");
+		EP_ERROR("Error from Client");
+		EP_FATAL("Fatal from Client");
 	}
 
 	//Called as rapidly as possible

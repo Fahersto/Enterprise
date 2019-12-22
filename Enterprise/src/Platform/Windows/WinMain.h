@@ -10,8 +10,18 @@
 #include <windowsx.h>
 #include <Xinput.h>
 
+//used in the debug window stuff
+#include <stdio.h> 
+#include <fcntl.h>
+#include <io.h>
+#include <iostream>
+#include <fstream>
+
 // WinProc Function (Handles Windows messages)
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // Window Helper Function
 HWND CreateClientWindow(HINSTANCE hInstance);
+
+void InitializeDebugConsole();
+void CleanupDebugConsole();
