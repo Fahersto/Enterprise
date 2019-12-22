@@ -13,13 +13,11 @@
   <ItemGroup>
     <ClInclude Include="src\Enterprise\Application.h" />
     <ClInclude Include="src\Enterprise.h" />
-    <ClInclude Include="src\Enterprise\Console.h" />
     <ClInclude Include="src\Enterprise\EntryPoint.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Enterprise\Application.cpp" />
-    <ClCompile Include="src\Enterprise\Console.cpp" />
     <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

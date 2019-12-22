@@ -7,19 +7,10 @@
 */
 
 
-// Creates and returns the client Application.
+// Creates and returns the client Application.  Defined in client.
 extern Enterprise::Application* Enterprise::CreateApplication();
 
-//#ifdef EP_PLATFORM_WINDOWS
-//#include "Platform/Windows/WinMain.h"
-//// TODO: Include the main functions for other platforms here.
-//#endif
-//
-
-#include <stdio.h>
-
-int main()
-{
-	printf("Test\n");
-	return 0;
-}
+// Include the appropriate Main function.
+#ifdef EP_PLATFORM_WINDOWS
+#include "Platform/Windows/WinMain.h"
+#endif
