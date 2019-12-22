@@ -1,8 +1,8 @@
+#include "EP_PCH.h"
 #include "WinMain.h"
 
-
-#include "..//..//Enterprise/Log.h"
-#include "..//..//Enterprise/Application.h"
+#include "Enterprise/Console.h"
+#include "Enterprise/Application.h"
 
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE "ENTERPRISE PRE-ALPHA"

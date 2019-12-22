@@ -27,7 +27,13 @@
     <ClInclude Include="src\Enterprise\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Log.h">
+    <ClInclude Include="src\Enterprise\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EP_PCH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,7 +44,10 @@
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Log.cpp">
+    <ClCompile Include="src\EP_PCH.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

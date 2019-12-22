@@ -11,15 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Enterprise\Log.h" />
+    <ClInclude Include="src\Enterprise\Core.h" />
+    <ClInclude Include="src\Enterprise\Console.h" />
     <ClInclude Include="src\Enterprise\Application.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\EntryPoint.h" />
+    <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Enterprise\Log.cpp" />
+    <ClCompile Include="src\Enterprise\Console.cpp" />
     <ClCompile Include="src\Enterprise\Application.cpp" />
+    <ClCompile Include="src\EP_PCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EP_PCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EP_PCH.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -70,7 +78,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>EP_CORESCOPE;EP_DEBUG;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Enterprise\vendor\spdlog\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)vendor\spdlog\include</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>EP_PCH.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -86,7 +96,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>EP_CORESCOPE;EP_RELEASE;EP_PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Enterprise\vendor\spdlog\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)vendor\spdlog\include</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>EP_PCH.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -97,4 +109,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <PropertyGroup Condition="'$(Language)'=='C++'">
+    <CAExcludePath>$(ThirdPartyDirectory);$(CAExcludePath)</CAExcludePath>
+  </PropertyGroup>
 </Project>

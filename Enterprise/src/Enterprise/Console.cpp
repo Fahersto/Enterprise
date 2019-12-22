@@ -1,11 +1,12 @@
-#include "Log.h"
+#include "EP_PCH.h"
+#include "Console.h"
 
 namespace Enterprise
 {
-	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
-	std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
+	std::shared_ptr<spdlog::logger> Console::s_CoreLogger;
+	std::shared_ptr<spdlog::logger> Console::s_ClientLogger;
 
-	void Log::Init()
+	void Console::Init()
 	{
 		spdlog::set_pattern("%^[%T] %n: %v%$");
 

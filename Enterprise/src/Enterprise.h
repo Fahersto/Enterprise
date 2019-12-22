@@ -1,11 +1,13 @@
 #pragma once
 
-/*
-Enterprise.h
-This file is to be included into the client application.  It simplifies the number of includes needed by a client project.
+/* Enterprise.h
+	This header includes all headers needed by the client.  All a client should need to include will be included when
+	including this file.
+	
+	This file should not be included anywhere in Enterprise.  This should only be included externally.
 */
 
-#include "Enterprise/Log.h"
+#include "Enterprise/Console.h"
 #include "Enterprise/Application.h"
 
 // -------------------- Entry Point! ------------------
