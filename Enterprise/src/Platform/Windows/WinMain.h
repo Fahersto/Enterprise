@@ -10,6 +10,3 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 // Window Helper Function
 HWND CreateClientWindow(HINSTANCE hInstance);
-
-void InitializeDebugConsole();
-void CleanupDebugConsole();

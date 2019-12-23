@@ -18,21 +18,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_ int nCmdShow)
 {
 	// Create Console
-	#ifdef EP_DEBUG
-	InitializeDebugConsole();
+	#ifdef EP_CONFIG_DEBUG
+	Enterprise::Console::Init();
 	#endif
-	
-	// Handle command line arguments
-	// TODO: Handle command line arguments
+
+	// TODO: Handle command line arguments here
 	
 	// Create the Application
 	auto app = Enterprise::CreateApplication();
-
-	EP_TRACE("Trace from Core");
-	EP_WARN("Warn from Core");
-	EP_INFO("Info from Core");
-	EP_ERROR("Error from Core");
-	EP_FATAL("Fatal from Core");
 
 	// TODO: Abstract window creation so it can be handled by Application
 	{
@@ -91,7 +84,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	}
 
 	delete app; // Clean up the Aplication
-	CleanupDebugConsole();
+
+	#ifdef EP_CONFIG_DEBUG
+	Enterprise::Console::Cleanup(); // Close the debug console
+	#endif
+	
 	return (int)msg.wParam; // return this part of the WM_QUIT message to Windows
 }
 
@@ -205,49 +202,4 @@ HWND CreateClientWindow(HINSTANCE hInstance)
 		OutputDebugString("\nFAILED TO CREATE WINDOW\n");
 
 	return hWnd;
-}
-
-// Creates a debug console window.  Called in Init().
-void InitializeDebugConsole()
-{
-	//Create a console for this application
-	AllocConsole();
-	//Redirect unbuffered STDOUT to the console
-	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
-	FILE* COutputHandle = _fdopen(SystemOutput, "w");
-	*stdout = *COutputHandle;
-	std::setvbuf(stdout, NULL, _IONBF, 0);
-
-	//Redirect unbuffered STDERR to the console
-	HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
-	int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
-	FILE* CErrorHandle = _fdopen(SystemError, "w");
-	*stderr = *CErrorHandle;
-	std::setvbuf(stderr, NULL, _IONBF, 0);
-
-	//Redirect unbuffered STDIN to the console
-	HANDLE ConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
-	int SystemInput = _open_osfhandle(intptr_t(ConsoleInput), _O_TEXT);
-	FILE* CInputHandle = _fdopen(SystemInput, "r");
-	*stdin = *CInputHandle;
-	std::setvbuf(stdin, NULL, _IONBF, 0);
-
-	//make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
-	std::ios::sync_with_stdio(true);
-}
-// Cleans up the console window.  Called in Cleanup().
-void CleanupDebugConsole()
-{
-	//Write "Press any key to exit"
-	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD CharsWritten;
-	WriteConsole(ConsoleOutput, "\nClient has closed.  Press any key to exit", 42, &CharsWritten, 0);
-	//Disable line-based input mode so we can get a single character
-	HANDLE ConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
-	SetConsoleMode(ConsoleInput, 0);
-	//Read a single character
-	TCHAR InputBuffer;
-	DWORD CharsRead;
-	ReadConsole(ConsoleInput, &InputBuffer, 1, &CharsRead, 0);
 }
