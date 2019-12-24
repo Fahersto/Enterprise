@@ -18,7 +18,7 @@ namespace Enterprise
 		#endif
 
 		// Set up loggers
-		spdlog::set_pattern("%6n %^[%T]: %v%$ (%oms)");
+		spdlog::set_pattern("%6n %^[%T]: %v%$");
 		s_CoreLogger = spdlog::stdout_color_mt("CORE");
 		s_CoreLogger->set_level(spdlog::level::trace);
 		s_ClientLogger = spdlog::stdout_color_mt("CLIENT");
@@ -34,7 +34,7 @@ namespace Enterprise
 		// Display prompt
 		HANDLE h_ConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		DWORD CharsWritten;
-		WriteConsole(h_ConsoleOut, L"\nClient has closed.  Press any key to exit", 42, &CharsWritten, 0);
+		WriteConsole(h_ConsoleOut, L"\nApplication has closed.  Press any key to exit", 47, &CharsWritten, 0);
 
 		// Change input mode to accept single characters
 		HANDLE h_ConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -43,7 +43,7 @@ namespace Enterprise
 		// Read keypress
 		TCHAR InputBuffer;
 		DWORD CharsRead;
-		FlushConsoleInputBuffer(h_ConsoleIn); //Prevents earlier keypresses from closing the program
+		FlushConsoleInputBuffer(h_ConsoleIn); //Prevents prior keypresses from closing the program
 		ReadConsole(h_ConsoleIn, &InputBuffer, 1, &CharsRead, 0);
 
 		#endif

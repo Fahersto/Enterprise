@@ -1,4 +1,3 @@
-#include "EP_PCH.h"
 #include <Enterprise.h>
 
 class Sandbox : public Enterprise::Application
@@ -8,7 +7,7 @@ public:
 	Sandbox()
 	{
 		//TODO: Conditionalize this between debug and release builds.
-		EP_DEBUG("Sandbox instantiated!");
+		EP_INFO("Sandbox instantiated!");
 	}
 
 	//Called as rapidly as possible
@@ -32,7 +31,7 @@ public:
 	//Called at program end
 	~Sandbox()
 	{
-		EP_DEBUG("Sandbox destroyed.");
+		EP_INFO("Sandbox destroyed.");
 	}
 };
 

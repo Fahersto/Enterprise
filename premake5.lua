@@ -27,8 +27,13 @@ project "Enterprise"
     kind "StaticLib"
     language "C++"
 
+    -- Build locations
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    -- Set up PCH
+    pchheader "EP_PCH.h"
+    pchsource "Enterprise/src/EP_PCH.cpp"
 
     defines "EP_SCOPE_CORE"
 
