@@ -5,7 +5,7 @@
 #include "Enterprise/Application.h"
 
 // TODO: Move window configuration to a .ini or something
-#define WIN_TITLE "ENTERPRISE PRE-ALPHA"
+#define WIN_TITLE L"ENTERPRISE PRE-ALPHA"
 #define UPDATE_SPEED 60
 #define DRAW_SPEED 60
 #define WIN_WIDTH 1080
@@ -169,12 +169,12 @@ HWND CreateClientWindow(HINSTANCE hInstance)
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);				// Default mouse cursor.
 	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);	// Fill color when window is redrawn (set to none).
 	wc.lpszMenuName = NULL;									// Menu name (none, because we have no menus).
-	wc.lpszClassName = "ENTERPRISEWNDCLASS";				// Friendly name for this window class.
+	wc.lpszClassName = L"ENTERPRISEWNDCLASS";				// Friendly name for this window class.
 
 	// Register window class
 	if (!RegisterClassEx(&wc))
 	{
-		OutputDebugString("\nFAILED TO CREATE WINDOW CLASS\n");
+		OutputDebugString(L"\nFAILED TO CREATE WINDOW CLASS\n");
 		return NULL;
 	}
 
@@ -185,7 +185,7 @@ HWND CreateClientWindow(HINSTANCE hInstance)
 
 	// Create window.
 	hWnd = CreateWindowEx(NULL,							// We're not using an extended window style
-		"ENTERPRISEWNDCLASS",
+		L"ENTERPRISEWNDCLASS",
 		WIN_TITLE,										// Window title
 		winStyle,
 		800,											// X-position of the window
@@ -199,7 +199,7 @@ HWND CreateClientWindow(HINSTANCE hInstance)
 
 	// Throw error message if window fails to create.
 	if (!hWnd)
-		OutputDebugString("\nFAILED TO CREATE WINDOW\n");
+		OutputDebugString(L"\nFAILED TO CREATE WINDOW\n");
 
 	return hWnd;
 }

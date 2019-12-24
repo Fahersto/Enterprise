@@ -2,7 +2,7 @@
 #include "Console.h"
 
 // Title of the debug console
-#define EP_CONSOLE_TITLE "Enterprise Debug Console"
+#define EP_CONSOLE_TITLE L"Enterprise Debug Console"
 
 namespace Enterprise
 {
@@ -34,7 +34,7 @@ namespace Enterprise
 		// Display prompt
 		HANDLE h_ConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		DWORD CharsWritten;
-		WriteConsole(h_ConsoleOut, "\nClient has closed.  Press any key to exit", 42, &CharsWritten, 0);
+		WriteConsole(h_ConsoleOut, L"\nClient has closed.  Press any key to exit", 42, &CharsWritten, 0);
 
 		// Change input mode to accept single characters
 		HANDLE h_ConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
