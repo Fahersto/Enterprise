@@ -137,6 +137,10 @@
     <ClInclude Include="src\Enterprise\Application.h" />
     <ClInclude Include="src\Enterprise\Console.h" />
     <ClInclude Include="src\Enterprise\EntryPoint.h" />
+    <ClInclude Include="src\Enterprise\Event\ApplicationEvent.h" />
+    <ClInclude Include="src\Enterprise\Event\Event.h" />
+    <ClInclude Include="src\Enterprise\Event\KeyEvent.h" />
+    <ClInclude Include="src\Enterprise\Event\MouseEvent.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,10 @@
 #include <iostream>
 #include <fstream>
 
+#include <string>
+#include <sstream>
+#include <functional>
+
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>

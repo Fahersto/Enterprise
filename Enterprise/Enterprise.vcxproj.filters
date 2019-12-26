@@ -4,6 +4,9 @@
     <Filter Include="Enterprise">
       <UniqueIdentifier>{E61AA5D8-D2D2-E625-3BDA-BF8127B18116}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Event">
+      <UniqueIdentifier>{B7B02806-A3A9-4758-CCDB-2CDDB8332764}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
     </Filter>
@@ -23,6 +26,18 @@
     </ClInclude>
     <ClInclude Include="src\Enterprise\EntryPoint.h">
       <Filter>Enterprise</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Event\ApplicationEvent.h">
+      <Filter>Enterprise\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Event\Event.h">
+      <Filter>Enterprise\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Event\KeyEvent.h">
+      <Filter>Enterprise\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Event\MouseEvent.h">
+      <Filter>Enterprise\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WinMain.h">
       <Filter>Platform\Windows</Filter>

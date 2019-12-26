@@ -4,6 +4,10 @@
 #include "Enterprise/Console.h"
 #include "Enterprise/Application.h"
 
+#include "Enterprise/Event/ApplicationEvent.h"
+#include "Enterprise/Event/KeyEvent.h"
+#include "Enterprise/Event/MouseEvent.h"
+
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE L"ENTERPRISE PRE-ALPHA"
 #define UPDATE_SPEED 60
@@ -97,6 +101,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 	case WM_DESTROY:
+		// TODO: Dispatch, Handle Are You Sure situations
+		EP_TRACE(Enterprise::Event_WindowClose());
 		PostQuitMessage(0);
 		return 0;
 		break;
@@ -104,22 +110,28 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		//game.isFocussed = wParam == TRUE;
 		if (wParam == TRUE)
 		{
-			// TODO: Handle when the window gains focus
+			// TODO: Dispatch
+			EP_TRACE(Enterprise::Event_WindowFocus());
 		}
 		else
 		{
-			// TODO: Handle when the window loses focus
 			//iInput.ClearInput();
+
+			// TODO: Dispatch
+			EP_TRACE(Enterprise::Event_WindowLostFocus());
 		}
 		return 0;
 		break;
 	case WM_CHAR:
-		//TODO: Handle character entry (regular typing).
+		// TODO: Handle modifiers and dispatch
+		EP_TRACE(Enterprise::Event_KeyChar(wParam, 0));
 		return 0;
 		break;
 	case WM_MOUSEMOVE:
 		// Inform Input of the cursor's current location:
 		// iInput.UpdateMousePos(LOWORD(lParam), HIWORD(lParam));
+
+		EP_TRACE(Enterprise::Event_MousePosition(LOWORD(lParam), HIWORD(lParam)));
 		return 0;
 		break;
 	case WM_INPUT:
