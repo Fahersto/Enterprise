@@ -12,7 +12,7 @@ namespace Enterprise
 		inline int GetButton() { return m_Button; }
 
 		EVENT_CLASS_TYPE(EventType::MouseButtonDown)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseButtons)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseCursor | EventCategory_MouseDelta)
 		EVENT_CLASS_DEBUGSTRING(m_Button)
 	private:
 		int m_Button;
@@ -27,7 +27,7 @@ namespace Enterprise
 		inline int GetButton() { return m_Button; }
 
 		EVENT_CLASS_TYPE(EventType::MouseButtonUp)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseButtons)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseCursor | EventCategory_MouseDelta)
 		EVENT_CLASS_DEBUGSTRING(m_Button)
 	private:
 		int m_Button;
@@ -59,7 +59,7 @@ namespace Enterprise
 		inline int GetY() { return m_Y; }
 
 		EVENT_CLASS_TYPE(EventType::MouseScroll)
-		EVENT_CLASS_CATEGORY(EventCategory_Input)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseCursor | EventCategory_MouseDelta)
 		EVENT_CLASS_DEBUGSTRING(m_Y << ", " << m_Y)
 	private:
 		int m_X, m_Y;
@@ -75,7 +75,7 @@ namespace Enterprise
 		inline int GetY() { return m_Y; }
 
 		EVENT_CLASS_TYPE(EventType::MousePosition)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MousePosition)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_MouseCursor)
 		EVENT_CLASS_DEBUGSTRING(m_X << ", " << m_Y)
 	private:
 		short m_X, m_Y;

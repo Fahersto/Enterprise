@@ -13,7 +13,7 @@ namespace Enterprise
 		inline int GetKeyCode() const { return m_KeyCode; }
 		
 		EVENT_CLASS_TYPE(EventType::KeyDown)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_KeyboardRaw)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard)
 		EVENT_CLASS_DEBUGSTRING(m_KeyCode)
 
 	private:
@@ -27,7 +27,7 @@ namespace Enterprise
 			: m_KeyCode(keycode) {}
 
 		EVENT_CLASS_TYPE(EventType::KeyUp)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_KeyboardRaw)
+		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard)
 		EVENT_CLASS_DEBUGSTRING(m_KeyCode)
 	
 	private:
@@ -43,7 +43,7 @@ namespace Enterprise
 			: m_Char(character), m_Modifiers(modifiers) {}
 
 		EVENT_CLASS_TYPE(EventType::KeyChar)
-		EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_KeyboardChar)
+		EVENT_CLASS_CATEGORY(EventCategory_Input)
 		EVENT_CLASS_DEBUGSTRING(m_Char << ", modifiers not yet handled")
 
 	private:
