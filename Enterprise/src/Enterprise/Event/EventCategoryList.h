@@ -6,6 +6,7 @@
 	abort the definitions in the files where this header is included.
 */
 
+//TODO: Remove the need for all the "EventType".
 EVENTCATEGORY(Application, EventType::WindowClose, EventType::WindowMove, EventType::WindowResize, EventType::WindowFocus, EventType::WindowLostFocus)
 EVENTCATEGORY(Input, EventType::KeyDown, EventType::KeyUp, EventType::KeyChar, EventType::MouseButtonDown, EventType::MouseButtonUp, EventType::MouseScroll, EventType::MouseDelta, EventType::MousePosition)
 EVENTCATEGORY(Keyboard, EventType::KeyDown, EventType::KeyUp)

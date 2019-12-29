@@ -6,9 +6,6 @@ namespace Enterprise
 	class Dispatcher
 	{
 	public:
-		// Map of which categories have which types in them.
-		static std::array<std::vector<EventType>, size_t(EventCategory::NumOfCategories)> EventCategoryMatrix;
-
 		// Add a callback to the callback buffer for the selected EventType.
 		// Callbacks take the form bool OnEvent(std::shared_ptr<Event> e).
 		inline static void SubscribeToType(EventType type, std::function<bool(std::shared_ptr<Event>)> callback) 
@@ -40,5 +37,8 @@ namespace Enterprise
 
 		// This is an array of callback buffers.  Each event type has a vector here, at the array index equal to its EventType.
 		static std::vector<std::function<bool(std::shared_ptr<Event>)>> callbackLists[(int)EventType::NumOfTypes];
+		
+		// Map of which categories have which types in them. Dim 1: Category, Dim 2: Categories
+		static std::array<std::vector<EventType>, size_t(EventCategory::NumOfCategories)> EventCategoryMatrix;
 	};
 }

@@ -56,3 +56,17 @@
 
 // Get last argument - placeholder decrements by one
 #define M_GET_LAST(...) M_GET_ELEM(M_NARGS(__VA_ARGS__), _, __VA_ARGS__ ,,,,,,,,,,,)
+
+
+// VA_SELECT allows you to specify overloads based on the number of __VA_ARGS__.
+// Stolen from https://stackoverflow.com/questions/16683146/can-macros-be-overloaded-by-number-of-arguments?lq=1
+
+#define EXPAND( x ) x
+
+#define CAT( A, B ) A ## B
+#define SELECT( NAME, NUM ) CAT( NAME ## _, NUM )
+
+#define GET_COUNT(_1, _2, _3, _4, _5, _6, _7 /* ad nauseam */, COUNT, ...) COUNT
+#define VA_SIZE(...) EXPAND(GET_COUNT( __VA_ARGS__, 7, 6, 5, 4, 3, 2, 1 ))
+
+#define VA_SELECT(NAME, ... ) SELECT( NAME, EXPAND(VA_SIZE(__VA_ARGS__) ) ) (__VA_ARGS__)

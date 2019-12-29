@@ -1,7 +1,8 @@
 #include <Enterprise.h>
+#include "Enterprise/Event/Event.h"
 #include "Enterprise/Event/Dispatcher.h"
-#include "Enterprise/Event/MouseEvent.h"
-#include "Enterprise/Event/KeyEvent.h"
+//#include "Enterprise/Event/MouseEvent.h"
+//#include "Enterprise/Event/KeyEvent.h"
 
 using namespace Enterprise;
 
@@ -25,19 +26,25 @@ public:
 		//Dispatcher::SubscribeToType(EventType::MouseButtonUp, OnEvent);
 		//Dispatcher::SubscribeToType(EventType::KeyDown, OnEvent);
 
-		Dispatcher::SubscribeToCategory(EventCategory::Keyboard, OnEvent);
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_MouseDelta>(5, 5));
 
-		Dispatcher::BroadcastEvent(std::make_shared<Event_MouseButtonDown>(1));
-		Dispatcher::BroadcastEvent(std::make_shared<Event_MouseScroll>(2, 2));
-		Dispatcher::BroadcastEvent(std::make_shared<Event_MouseButtonUp>(3));
-		Dispatcher::BroadcastEvent(std::make_shared<Event_KeyDown>(4));
+		//Event* test = new Event_MouseDelta(10, 10);
+		//delete test;
 
-		//EP_TRACE("This is a Trace");
-		//EP_DEBUG("This is a Debug");
-		//EP_INFO("This is an Info");
-		//EP_WARN("This is a Warning");
-		//EP_ERROR("This is an Error");
-		//EP_FATAL("This is a Fatal error");
+		//Dispatcher::SubscribeToCategory(EventCategory::MouseDelta, OnEvent);
+
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_MouseButtonDown>(1));
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_MouseScroll>(2, 2));
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_MouseButtonUp>(3));
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_KeyDown>(4));
+		//Dispatcher::BroadcastEvent(std::make_shared<Event_MouseButtonDown>());
+
+		EP_TRACE("This is a Trace");
+		EP_DEBUG("This is a Debug");
+		EP_INFO("This is an Info");
+		EP_WARN("This is a Warning");
+		EP_ERROR("This is an Error");
+		EP_FATAL("This is a Fatal error");
 
 	}
 
@@ -47,8 +54,6 @@ public:
 		EP_INFO("Sandbox destroyed.");
 	}
 };
-
-//EP_STARTSTATE(Sandbox);
 
 Application* Enterprise::CreateApplication()
 {

@@ -5,26 +5,31 @@
 
 	WARNING: despite your compiler's warnings, do not define EVENTTYPE in this file.  If you do, it will
 	abort the definitions in the files where this header is included.
+
+	EVENTTYPE(name)
+	EVENTTYPE(name, var1_type, var1_name)
+	EVENTTYPE(name, var1_type, var2_type, var1_name, var2_name)
+	EVENTTYPE(name, var1_type, var2_type, var3_type, var1_name, var2_name, var3_name)
 */
 
 // Application events -----------------------------------------------------------
 EVENTTYPE(WindowClose)
-EVENTTYPE(WindowMove)
-EVENTTYPE(WindowResize)
+EVENTTYPE(WindowMove, int , int , X , Y)
+EVENTTYPE(WindowResize , int , int , X  , Y)
 EVENTTYPE(WindowFocus)
 EVENTTYPE(WindowLostFocus)
 
 // Input events -----------------------------------------------------------------
 // Keyboard
-EVENTTYPE(KeyDown)
-EVENTTYPE(KeyUp)
-EVENTTYPE(KeyChar)
+EVENTTYPE(KeyDown , int , Code)
+EVENTTYPE(KeyUp , int , Code)
+EVENTTYPE(KeyChar , int , Code)
 // Mouse
-EVENTTYPE(MouseButtonDown)
-EVENTTYPE(MouseButtonUp)
-EVENTTYPE(MouseDelta)
-EVENTTYPE(MouseScroll)
-EVENTTYPE(MousePosition)
+EVENTTYPE(MouseButtonDown , int , Code)
+EVENTTYPE(MouseButtonUp , int , Code)
+EVENTTYPE(MouseDelta , int , int , X , Y)
+EVENTTYPE(MouseScroll , int , int , Y , X)
+EVENTTYPE(MousePosition , int , int , X , Y)
 
 // File events ------------------------------------------------------------------
 EVENTTYPE(FileOpenRequest)
