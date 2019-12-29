@@ -133,6 +133,8 @@
   <ItemGroup>
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\Enterprise\Event\Dispatcher.h" />
+    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h" />
+    <ClInclude Include="src\Enterprise\Event\EventTypeList.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application.h" />

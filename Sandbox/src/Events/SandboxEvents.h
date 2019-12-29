@@ -1,68 +1,47 @@
-#pragma once
-#include "Enterprise/Event/Event.h"
-
-enum class EventType
-{
-	// Used by Dispatcher to determine when dealing with client event types
-	none = (int)Enterprise::EventType::NumOfTypes,
-	
-	// Game management
-	Score,
-	PauseGame,
-	GameModeChange,
-
-	// Health
-	AOE,
-	Damage,
-
-	// AI
-	AI_Distraction,
-	Inquiring,
-	Pursuit,
-	Bunkered,
-
-	// Player info
-	PlayerPosition,
-	PlayerOOA,
-	PlayerInjured,
-
-	// Used by Dispatcher to allocate resources
-	NumOfTypes
-};
-
-enum class EventCategory
-{
-	// Used by Dispatcher to determine when dealing with client event types
-	None = (int)Enterprise::EventCategory::NumOfTypes,
-
-	// Game management
-	Score,
-	PauseGame,
-	GameModeChange,
-
-	// Health
-	AOE,
-	Damage,
-
-	// AI
-	AI_Distraction,
-	Inquiring,
-	Pursuit,
-	Bunkered,
-
-	// Player info
-	PlayerPosition,
-	PlayerOOA,
-	PlayerInjured,
-
-	// Used by Dispatcher to allocate resources
-	NumOfTypes
-};
-
-std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>> eventCallbackList[(int)EventType::NumOfTypes];
-
-std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>>* getClientCallbackLists()
-{
-
-	return nullptr;
-}
+//#pragma once
+//#include "Enterprise/Event/Event.h"
+//
+//namespace Sandbox {
+//	// Enumerate all the client EventTypes
+//	enum class EventType
+//	{
+//		// By starting the count here, we ensure the enumeration values are unique between core and client EventTypes
+//		DONOTUSE = (int)Enterprise::EventType::NumOfTypes,
+//
+//		#define CLIENTEVENTTYPE(x) x, 
+//		#include "SandboxETL.h"
+//		#undef CLIENTEVENTTYPE
+//
+//		// Used by Dispatcher to allocate resources
+//		NumOfTypes
+//	};
+//
+//	// Enumerate all the client EventCategorys
+//	enum class EventCategory
+//	{
+//		// By starting the count here, we ensure the enumeration values are unique between core and client EventCategorys
+//		DONOTUSE = (int)Enterprise::EventCategory::NumOfCategories,
+//
+//		#define CLIENTEVENTTYPE(x) x, 
+//		#include "SandboxETL.h"
+//		#undef CLIENTEVENTTYPE
+//
+//		// Used by Dispatcher to allocate resources
+//		NumOfCategories
+//	};
+//
+//	// Define the client EventCategory bitfield constants
+//	#define CLIENTEVENTCATEGORY(x) const int EventCategory_##x = BIT ((int)EventCategory::x);
+//	#include"SandboxECL.h"
+//	#undef CLIENTEVENTCATEGORY
+//
+//
+//	//---------------------------------------------
+//	std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>> eventCallbackList[(int)EventType::NumOfTypes];
+//
+//	std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>>* getClientCallbackLists()
+//	{
+//
+//		return nullptr;
+//	}
+//}

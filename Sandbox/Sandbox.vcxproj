@@ -139,6 +139,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Events\SandboxECL.h" />
+    <ClInclude Include="src\Events\SandboxETL.h" />
     <ClInclude Include="src\Events\SandboxEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

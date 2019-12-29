@@ -4,8 +4,10 @@
 */
 
 #include <memory>
+#include <array>
 #include <iostream>
 #include <fstream>
+#include <tuple>
 
 #include <string>
 #include <sstream>

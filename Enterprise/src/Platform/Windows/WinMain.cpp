@@ -133,7 +133,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		// iInput.UpdateMousePos(LOWORD(lParam), HIWORD(lParam));
 
 		//EP_TRACE(Enterprise::Event_MousePosition(LOWORD(lParam), HIWORD(lParam)));
-		Enterprise::Dispatcher::BroadcastEvent(std::make_shared<Enterprise::Event_MousePosition>(LOWORD(lParam), HIWORD(lParam)));
+		//Enterprise::Dispatcher::BroadcastEvent(std::make_shared<Enterprise::Event_MousePosition>(LOWORD(lParam), HIWORD(lParam)));
 		return 0;
 		break;
 	case WM_INPUT:

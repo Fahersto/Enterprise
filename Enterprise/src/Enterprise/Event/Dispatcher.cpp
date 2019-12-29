@@ -1,33 +1,31 @@
 #include "EP_PCH.h"
 #include "Dispatcher.h"
 
-extern std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>>* getClientCallbackLists();
+//extern std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>>* getClientCallbackLists();
 
 namespace Enterprise {
 
-	// Don't use in Dispatcher function parameters
+	// Readability helpers (don't use in function parameters; IntelliSense hates it)
 	using eventPtr = std::shared_ptr<Event>;
 	using callbackPtr = std::function<bool(eventPtr)>;
 
-	// Static vector definitions (without this, no translation unit would have the definitions)
+	// Static vector definitions (without these, no translation unit would have the definitions)
 	std::vector<eventPtr> Dispatcher::eventBuffer;
 	std::vector<callbackPtr> Dispatcher::callbackLists[(int)EventType::NumOfTypes];
 
+	std::array<std::vector<EventType>, size_t(EventCategory::NumOfCategories)> Dispatcher::EventCategoryMatrix;
+
 	void Dispatcher::Init()
 	{
-		// Reserve sizes for all vectors
-		eventBuffer.reserve(20);
-		
-		// Iterate through the vector of callback vectors
-		for (int i = 0; i < (int)EventType::NumOfTypes; i++)
-		{
-			callbackLists[i].reserve(10); // Reserve space for this vector of callbacks
-		}
-	}
+		// Reserve sizes for the event buffer
+		eventBuffer.reserve(20); 
+		// Reserve sizes for the callback vectors
+		for (int i = 0; i < (int)EventType::NumOfTypes; i++) { callbackLists[i].reserve(10); }
 
-	void Dispatcher::SubscribeToCategory(int category, std::function<bool(eventPtr)> callback)
-	{
-
+		// Populate the EventCategoryMatrix
+		#define EVENTCATEGORY(category, ...) Dispatcher::EventCategoryMatrix.at((size_t)EventCategory::category) = std::vector<EventType>{__VA_ARGS__};
+		#include "EventCategoryList.h"
+		#undef EVENTCATEGORY
 	}
 
 	void Dispatcher::Update()

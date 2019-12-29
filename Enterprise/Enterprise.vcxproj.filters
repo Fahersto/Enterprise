@@ -43,6 +43,8 @@
       <Filter>Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Event\Dispatcher.h" />
+    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h" />
+    <ClInclude Include="src\Enterprise\Event\EventTypeList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
