@@ -27,24 +27,22 @@
     <ClInclude Include="src\Enterprise\EntryPoint.h">
       <Filter>Enterprise</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\ApplicationEvent.h">
+    <ClInclude Include="src\Enterprise\Event\Dispatcher.h">
       <Filter>Enterprise\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Event\Event.h">
       <Filter>Enterprise\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\KeyEvent.h">
+    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h">
       <Filter>Enterprise\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\MouseEvent.h">
+    <ClInclude Include="src\Enterprise\Event\EventTypeList.h">
       <Filter>Enterprise\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WinMain.h">
       <Filter>Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\Dispatcher.h" />
-    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h" />
-    <ClInclude Include="src\Enterprise\Event\EventTypeList.h" />
+    <ClInclude Include="src\Enterprise\Event\EventClasses.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
@@ -54,9 +52,11 @@
     <ClCompile Include="src\Enterprise\Console.cpp">
       <Filter>Enterprise</Filter>
     </ClCompile>
+    <ClCompile Include="src\Enterprise\Event\Dispatcher.cpp">
+      <Filter>Enterprise\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Platform\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Event\Dispatcher.cpp" />
   </ItemGroup>
 </Project>

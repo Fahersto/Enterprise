@@ -1,9 +1,12 @@
 // Hint files help the Visual Studio IDE interpret Visual C++ identifiers
 // such as names of functions and macros.
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
-#define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
-#define EVENT_CLASS_DEBUGSTRING(__VA_ARGS__) std::string ToString() const override { std::stringstream ss; ss << GetName() << " " << __VA_ARGS__; return ss.str(); }
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } virtual EventType GetEventType() const override { return GetStaticType(); } virtual const char* GetName() const override { return #type; }
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } virtual EventType GetEventType() const override { return GetStaticType(); }
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } virtual EventType GetEventType() const override { return GetStaticType(); } virtual const char* GetName() const override { return #type; }
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } virtual EventType GetEventType() const override { return GetStaticType(); }
+
+#define EVENTTYPE(name)
+#define EVENTTYPE_1(name, var1_type, var1_name)
+#define EVENTTYPE_2(name, var1_type, var2_type, var1_name, var2_name)
+#define EVENTTYPE_3(name, var1_type, var2_type, var3_type, var1_name, var2_name, var3_name)
+#define EVENTTYPE(type, ...)
+#define EVENTTYPE_1(type, ...)
+#define EVENTTYPE_2(type, ...)
+#define EVENTTYPE_3(type, ...)

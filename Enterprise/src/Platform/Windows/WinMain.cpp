@@ -5,9 +5,6 @@
 #include "Enterprise/Application.h"
 
 #include "Enterprise/Event/Dispatcher.h"
-#include "Enterprise/Event/ApplicationEvent.h"
-#include "Enterprise/Event/KeyEvent.h"
-#include "Enterprise/Event/MouseEvent.h"
 
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE L"ENTERPRISE PRE-ALPHA"

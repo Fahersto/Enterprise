@@ -134,17 +134,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Events\SandboxECL.h" />
+    <ClInclude Include="src\Events\SandboxETL.h" />
+    <ClInclude Include="src\Events\SandboxEvents.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Enterprise\Enterprise.vcxproj">
       <Project>{E61AA5D8-D2D2-E625-3BDA-BF8127B18116}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\Events\SandboxECL.h" />
-    <ClInclude Include="src\Events\SandboxETL.h" />
-    <ClInclude Include="src\Events\SandboxEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

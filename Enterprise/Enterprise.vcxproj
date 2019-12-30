@@ -135,27 +135,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Core.h" />
-    <ClInclude Include="src\Enterprise\Event\Dispatcher.h" />
-    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h" />
-    <ClInclude Include="src\Enterprise\Event\EventTypeList.h" />
+    <ClInclude Include="src\Enterprise\Event\EventClasses.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application.h" />
     <ClInclude Include="src\Enterprise\Console.h" />
     <ClInclude Include="src\Enterprise\EntryPoint.h" />
-    <ClInclude Include="src\Enterprise\Event\ApplicationEvent.h" />
+    <ClInclude Include="src\Enterprise\Event\Dispatcher.h" />
     <ClInclude Include="src\Enterprise\Event\Event.h" />
-    <ClInclude Include="src\Enterprise\Event\KeyEvent.h" />
-    <ClInclude Include="src\Enterprise\Event\MouseEvent.h" />
+    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h" />
+    <ClInclude Include="src\Enterprise\Event\EventTypeList.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Enterprise\Event\Dispatcher.cpp" />
     <ClCompile Include="src\EP_PCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Application.cpp" />
     <ClCompile Include="src\Enterprise\Console.cpp" />
+    <ClCompile Include="src\Enterprise\Event\Dispatcher.cpp" />
     <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
