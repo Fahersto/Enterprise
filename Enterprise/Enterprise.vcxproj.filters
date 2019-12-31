@@ -4,8 +4,8 @@
     <Filter Include="Enterprise">
       <UniqueIdentifier>{E61AA5D8-D2D2-E625-3BDA-BF8127B18116}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Enterprise\Event">
-      <UniqueIdentifier>{B7B02806-A3A9-4758-CCDB-2CDDB8332764}</UniqueIdentifier>
+    <Filter Include="Enterprise\Events">
+      <UniqueIdentifier>{0AC83ECB-76DE-3C61-BF55-C8822BAB0DE9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
@@ -27,22 +27,24 @@
     <ClInclude Include="src\Enterprise\EntryPoint.h">
       <Filter>Enterprise</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\Dispatcher.h">
-      <Filter>Enterprise\Event</Filter>
+    <ClInclude Include="src\Enterprise\Events\BaseEvent.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\Event.h">
-      <Filter>Enterprise\Event</Filter>
+    <ClInclude Include="src\Enterprise\Events\Dispatcher.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\EventCategoryList.h">
-      <Filter>Enterprise\Event</Filter>
+    <ClInclude Include="src\Enterprise\Events\ECL_Core.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\EventTypeList.h">
-      <Filter>Enterprise\Event</Filter>
+    <ClInclude Include="src\Enterprise\Events\ETL_Core.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Events.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WinMain.h">
       <Filter>Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Event\EventClasses.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
@@ -52,8 +54,8 @@
     <ClCompile Include="src\Enterprise\Console.cpp">
       <Filter>Enterprise</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Event\Dispatcher.cpp">
-      <Filter>Enterprise\Event</Filter>
+    <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
+      <Filter>Enterprise\Events</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Platform\Windows</Filter>

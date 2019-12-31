@@ -1,8 +1,6 @@
 #include "EP_PCH.h"
 #include "Dispatcher.h"
 
-//extern std::vector<std::function<bool(std::shared_ptr<Enterprise::Event>)>>* getClientCallbackLists();
-
 namespace Enterprise {
 
 	// Readability helpers (don't use in function parameters; IntelliSense hates it)
@@ -24,7 +22,8 @@ namespace Enterprise {
 
 		// Populate the EventCategoryMatrix
 		#define EVENTCATEGORY(category, ...) Dispatcher::EventCategoryMatrix.at((size_t)EventCategory::category) = std::vector<EventType>{__VA_ARGS__};
-		#include "EventCategoryList.h"
+		// TODO: Add listing for "All" category.
+		#include "ECL_Core.h"
 		#undef EVENTCATEGORY
 	}
 

@@ -1,9 +1,15 @@
 #pragma once
-#include "Event.h"
+#include "BaseEvent.h"
 
-namespace Enterprise
+/* Events.h
+	This class contains all of the Event subclasses.  Include this file to access events.
+
+	These classes are generated from the list of Event types in ETL_Core.h.
+*/
+
+namespace Enterprise::Events
 {
-	// Macros for event logging boilerplate code
+	// Macros for event logging code
 	#ifdef EP_CONFIG_DEBUG
 	#define EVENTCLASS_DEBUGMEMBERS(name) \
 		virtual const char* GetName() const override { return #name; }
@@ -39,18 +45,19 @@ namespace Enterprise
 	#define EVENTCLASS_DEBUGMEMBERS_3(...) 
 	#endif
 
-	// Event permutations
-	#define EVENTTYPE(name) class Event_##name : public Event \
+	// Memberless classes
+	#define EVENTTYPE(name) class E_##name : public Event \
 	{ \
 	public: \
 		static EventType GetStaticType() { return EventType::##name; } \
 		virtual EventType GetEventType() const override { return GetStaticType(); } \
 		EVENTCLASS_DEBUGMEMBERS(name) \
 	};
-	#define EVENTTYPE_1(name, var1_type, var1_name) class Event_##name : public Enterprise::Event \
+	// One-member classes
+	#define EVENTTYPE_1(name, var1_type, var1_name) class E_##name : public Enterprise::Event \
 	{ \
 	public: \
-		Event_##name(var1_type var1_name) \
+		E_##name(var1_type var1_name) \
 			: m_##var1_name##(var1_name) {} \
 		inline var1_type Get_##var1_name##() { return m_##var1_name; } \
 		static EventType GetStaticType() { return EventType::##name; } \
@@ -59,10 +66,11 @@ namespace Enterprise
 	private: \
 		var1_type m_##var1_name; \
 	};
-	#define EVENTTYPE_2(name, var1_type, var2_type, var1_name, var2_name) class Event_##name : public Event \
+	// Two-member classes
+	#define EVENTTYPE_2(name, var1_type, var2_type, var1_name, var2_name) class E_##name : public Event \
 	{ \
 	public: \
-		Event_##name(var1_type var1_name, var2_type var2_name) \
+		E_##name(var1_type var1_name, var2_type var2_name) \
 			: m_##var1_name##(var1_name), m_##var2_name##(var2_name) {} \
 		inline var1_type Get_##var1_name##() { return m_##var1_name; } \
 		inline var2_type Get_##var2_name##() { return m_##var2_name; } \
@@ -73,10 +81,11 @@ namespace Enterprise
 		var1_type m_##var1_name; \
 		var2_type m_##var2_name; \
 	};
-	#define EVENTTYPE_3(name, var1_type, var2_type, var3_type, var1_name, var2_name, var3_name) class Event_##name : public Event \
+	// Three-member classes
+	#define EVENTTYPE_3(name, var1_type, var2_type, var3_type, var1_name, var2_name, var3_name) class E_##name : public Event \
 	{ \
 	public: \
-		Event_##name(var1_type var1_name, var2_type var2_name, var3_type var3_name) \
+		E_##name(var1_type var1_name, var2_type var2_name, var3_type var3_name) \
 			: m_##var1_name##(var1_name), m_##var2_name##(var2_name), m_##var3_name##(var3_name) {} \
 		inline var1_type Get_##var1_name##() { return m_##var1_name; } \
 		inline var2_type Get_##var2_name##() { return m_##var2_name; } \
@@ -90,10 +99,10 @@ namespace Enterprise
 		var3_type m_##var3_name; \
 	};
 
-	// Here's where we actually generate the classes.  The above macro definitions are applied to the contents of this header file.
-	#include "EventTypeList.h"
+	// Here's where the classes are actually generated.  The above macro definitions are applied to the contents of this header file.
+	#include "ETL_Core.h"
 
-	// Undefining all the macros used here so that they aren't visible where EventClasses.h is included.
+	// Undefining all the macros used here so that they aren't available elsewhere.
 	#undef EVENTTYPE
 	#undef EVENTTYPE_1
 	#undef EVENTTYPE_2

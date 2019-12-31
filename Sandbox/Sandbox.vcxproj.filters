@@ -6,13 +6,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\SandboxECL.h">
-      <Filter>Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Events\SandboxETL.h">
-      <Filter>Events</Filter>
-    </ClInclude>
     <ClInclude Include="src\Events\SandboxEvents.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\ECL_Sandbox.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Events\ETL_Sandbox.h">
       <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>

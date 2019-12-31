@@ -4,7 +4,7 @@
 #include "Enterprise/Console.h"
 #include "Enterprise/Application.h"
 
-#include "Enterprise/Event/Dispatcher.h"
+#include "Enterprise/Events/Dispatcher.h"
 
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE L"ENTERPRISE PRE-ALPHA"

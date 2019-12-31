@@ -1,8 +1,15 @@
 #pragma once
-#include "Event.h"
+#include "BaseEvent.h"
 
 namespace Enterprise 
 {
+	/* Dispatcher
+		The Dispatcher is Enterprise's event handling system.
+
+		Broadcasted Events are buffered and dispatched to its subscribers, in order of priority, at the 
+		start of each Update().  SubscribeToType() allows you to register a callback function for specific
+		Event types, and SubscribeToCategory() allows you to subscribe to several at once.
+	*/
 	class Dispatcher
 	{
 	public:
@@ -22,6 +29,7 @@ namespace Enterprise
 				++eventTypeIterator)
 			{
 				callbackLists[size_t(*eventTypeIterator)].emplace_back(callback);
+				//TODO: add a warning if a subscriber is already subscribed to this Event type.
 			}
 		}
 
@@ -41,4 +49,7 @@ namespace Enterprise
 		// Map of which categories have which types in them. Dim 1: Category, Dim 2: Categories
 		static std::array<std::vector<EventType>, size_t(EventCategory::NumOfCategories)> EventCategoryMatrix;
 	};
+
+	// Express create and disptach a new Event.
+	#define EP_QUICKEVENT(eType, ...) Dispatcher::BroadcastEvent(CreateEvent<eType>(__VA_ARGS__))
 }

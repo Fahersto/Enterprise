@@ -1,10 +1,9 @@
 #include "EP_PCH.h"
-#include "Application.h"
 
+#include "Application.h"
 #include "Console.h"
 
-#include "Enterprise/Event/Event.h"
-#include "Enterprise/Event/Dispatcher.h"
+#include "Enterprise/Events/Dispatcher.h"
 
 bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event> e)
 {
