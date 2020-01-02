@@ -18,6 +18,8 @@ namespace Enterprise::Event {
 		#endif
 	};
 
+	#define EP_EVENTPTR std::shared_ptr<Enterprise::Event::Event>
+
 	// FUNCTIONS ----------------------------------------------------------------------------------
 
 	// Helper function which instantiates a new Event, then returns an std::shared_ptr to it.
@@ -36,6 +38,6 @@ namespace Enterprise::Event {
 	// Overload the output stream operator for logging purposes
 	#ifdef EP_CONFIG_DEBUG
 	inline std::ostream& operator << (std::ostream& os, const Event& e) { return os << e.ToString(); }
-	inline std::ostream& operator << (std::ostream& os, std::shared_ptr<Event> e) { return os << e->ToString(); }
+	inline std::ostream& operator << (std::ostream& os, EP_EVENTPTR e) { return os << e->ToString(); }
 	#endif
 }

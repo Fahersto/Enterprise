@@ -1,17 +1,15 @@
 #include <Enterprise.h>
-#include "Enterprise/Events/CoreEvents.h"
+
 #include "Events\SandboxEvents.h"
-#include "Enterprise/Events/Dispatcher.h"
+using namespace Sandbox;
 
-using namespace Enterprise;
-
-bool OnEvent(std::shared_ptr<Event::Event> e)
+bool OnEvent(EP_EVENTPTR e)
 {
 	EP_TRACE(e);
 	return false;
 }
 
-class SandboxApp : public Application
+class SandboxApp : public Enterprise::Application
 {
 public:
 	//Called before everything else in the application.  Create windows and set up initial game state here.
@@ -21,13 +19,11 @@ public:
 
 		EP_INFO("SandboxApp instantiated!");
 
-		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::Application, OnEvent);
+		Enterprise::Dispatcher::SubscribeToCategory(Event::CategoryIDs::PlayerInfo, OnEvent);
+		Enterprise::Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::Input, OnEvent);
 
-		EP_QUICKEVENT(Event::WindowMove, 100, 100);
-		EP_QUICKEVENT(Event::MouseButtonDown, 1);
-	
-		Sandbox::Event::NewGameMode e(10);
-		EP_TRACE(e);
+		EP_QUICKEVENT(Enterprise::Event::KeyChar, 'a');
+		EP_QUICKEVENT(Event::PlayerPosition, 10.1, 5.2, 1.3);
 	}
 
 	//Called at program end
@@ -37,7 +33,7 @@ public:
 	}
 };
 
-Application* Enterprise::CreateApplication()
+Enterprise::Application* Enterprise::CreateApplication()
 {
 	// Add any game-specific pre-launch code here.
 	return new SandboxApp();

@@ -2,8 +2,8 @@
 	A list of all client Event types and their member variables.  Add to this list to make new Event types
 	available in the client.
 
-	Comments directly above each macro will be visible in the IntelliSense tooltip.  You can use this
-	to write a description which will be available to anyone trying to use the Event type.
+	Comments directly above each macro will be visible in the class's IntelliSense tooltip.  You can use
+	this to write a description which will be available to anyone trying to use the Event type.
 
 	WARNINGS:
 	- Despite your compiler's protests, do NOT define the macros in this file.  They are defined in

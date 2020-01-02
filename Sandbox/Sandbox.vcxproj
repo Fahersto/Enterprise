@@ -136,6 +136,7 @@
     <ClInclude Include="src\Events\SandboxEvents.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ClientCallbacks.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>
   <ItemGroup>

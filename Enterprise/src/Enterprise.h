@@ -7,8 +7,16 @@
 	This file should not be included anywhere in Enterprise.  This should only be included externally.
 */
 
+//Core defines and macros
+#include "Core.h"
+
+//Application
 #include "Enterprise/Console.h"
 #include "Enterprise/Application.h"
+
+//Event System
+#include "Enterprise\Events\Dispatcher.h"
+#include "Enterprise\Events\CoreEvents.h"
 
 // -------------------- Entry Point! ------------------
 #include "Enterprise/EntryPoint.h"

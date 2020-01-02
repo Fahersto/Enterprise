@@ -9,7 +9,7 @@
 	- Preprocessor "\" line break rules apply.
 
 	Macros:
-	- EVENTCATEGORY(name, ...types): 
+	- EVENTCATEGORY(name, ...types):
 	Defines a category with the given name.  Each argument after the first is the name of a TypeID in
 	that category.
 */

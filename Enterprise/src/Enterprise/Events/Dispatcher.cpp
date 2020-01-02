@@ -1,37 +1,47 @@
 #include "EP_PCH.h"
 #include "Dispatcher.h"
+#include "CoreEvents.h"
 
-namespace Enterprise::Event {
+namespace Enterprise {
+
+	using namespace Event;
 
 	// Readability helpers
-	using eventPtr = std::shared_ptr<Event>;
-	using callbackPtr = std::function<bool(eventPtr)>;
+	using callbackPtr = std::function<bool(EP_EVENTPTR)>;
 
-	// Static vector definitions
-	std::vector<eventPtr> Dispatcher::eventBuffer;
-	std::vector<callbackPtr> Dispatcher::callbackLists[TypeIDs::NumOfCoreTypes];
-	std::array<std::vector<unsigned int>, CategoryIDs::NumOfCoreCategories> Dispatcher::EventCategoryMatrix;
+	// Static definitions
+	std::vector<EP_EVENTPTR> Dispatcher::eventBuffer;
+	std::vector<callbackPtr>* Dispatcher::callbackLists;
+	std::vector<unsigned int>* Dispatcher::EventCategoryMatrix;
+	unsigned int Dispatcher::m_NumOfEventTypes = 0, Dispatcher::m_NumOfEventCategories = 0, Dispatcher::m_BufferSize = 0;
 
 	// FUNCTIONS ----------------------------------------------------------------------------------
 
 	// Set up Dispatcher
 	void Dispatcher::Init()
 	{
-		// Reserve buffer space
-		eventBuffer.reserve(20); 
-		for (int i = 0; i < TypeIDs::NumOfCoreTypes; i++) { callbackLists[i].reserve(10); }
+		InitClientAllocation();
 
-		// Populate EventCategoryMatrix
-		#define EVENTCATEGORY(category, ...) Dispatcher::EventCategoryMatrix.at(CategoryIDs::category) = std::vector<unsigned int>{__VA_ARGS__};
+		// Reserve buffer space
+		eventBuffer.reserve(m_BufferSize);
+		callbackLists = new std::vector<callbackPtr>[m_NumOfEventTypes];
+		EventCategoryMatrix = new std::vector<unsigned int>[m_NumOfEventCategories];
+		for (unsigned int i = 0; i < m_NumOfEventTypes; ++i) { callbackLists[i].reserve(10); } //TODO: Set individual callback buffer values
+
+		// Populate the core entries of the Event Category Matrix
+		#define EVENTCATEGORY(category, ...) Dispatcher::EventCategoryMatrix[CategoryIDs::category] = std::vector<unsigned int>{__VA_ARGS__};
 		#include "CoreEvents_CategoryList.h"
 		#undef EVENTCATEGORY
+
+		// Populate the client entries of the Event Category Matrix
+		InitClientECM();
 	}
 
 	// Register a callback for all Event types in a category
-	void Dispatcher::SubscribeToCategory(unsigned int categoryID, std::function<bool(std::shared_ptr<Event>)> callback)
+	void Dispatcher::SubscribeToCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback)
 	{
-		for (auto eventTypeIterator = EventCategoryMatrix.at(categoryID).begin();
-			eventTypeIterator != EventCategoryMatrix.at(categoryID).end();
+		for (auto eventTypeIterator = EventCategoryMatrix[categoryID].begin();
+			eventTypeIterator != EventCategoryMatrix[categoryID].end();
 			++eventTypeIterator)
 		{
 			callbackLists[size_t(*eventTypeIterator)].emplace_back(callback);
@@ -43,7 +53,7 @@ namespace Enterprise::Event {
 	void Dispatcher::Update()
 	{
 		// Event buffer iteration
-		for (std::vector<eventPtr>::iterator event_iterator = eventBuffer.begin();
+		for (std::vector<EP_EVENTPTR>::iterator event_iterator = eventBuffer.begin();
 			event_iterator != eventBuffer.end();
 			++event_iterator) {
 

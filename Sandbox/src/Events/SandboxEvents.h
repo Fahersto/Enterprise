@@ -19,14 +19,14 @@ namespace Sandbox::Event
 		enum {
 			None = Enterprise::Event::TypeIDs::NumOfCoreTypes,
 			#include "SandboxEvents_TypeList.h"
-			NumOfClientTypes
+			NumOfTypes
 		};
 	}
 	namespace CategoryIDs {
 		enum {
 			All = Enterprise::Event::CategoryIDs::NumOfCoreCategories,
 			#include "SandboxEvents_CategoryList.h"
-			NumOfClientCategories
+			NumOfCategories
 		};
 	}
 	#include "Enterprise\Events\Generation\EndEnums.h"
@@ -36,3 +36,4 @@ namespace Sandbox::Event
 	#include "SandboxEvents_TypeList.h"
 	#include "Enterprise\Events\Generation\EndClasses.h"
 }
+

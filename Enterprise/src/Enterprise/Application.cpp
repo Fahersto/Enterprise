@@ -14,7 +14,7 @@ bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event::Event> e)
 namespace Enterprise {
 	Application::Application()
 	{
-		Event::Dispatcher::Init();
+		Dispatcher::Init();
 	}
 
 	void Application::Tick()
@@ -23,7 +23,7 @@ namespace Enterprise {
 
 	void Application::Update()
 	{
-		Event::Dispatcher::Update();
+		Dispatcher::Update();
 	}
 
 	void Application::Draw()

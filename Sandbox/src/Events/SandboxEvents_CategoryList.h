@@ -14,7 +14,15 @@
 	that category.
 */
 
-EVENTCATEGORY(PlayerInfo)
+EVENTCATEGORY(PlayerInfo, \
+	TypeIDs::PlayerPosition, \
+	TypeIDs::PlayerOOA, \
+	TypeIDs::PlayerHurt)
+EVENTCATEGORY(Health, TypeIDs::HealthAOE)
 EVENTCATEGORY(Gameplay)
 EVENTCATEGORY(Gunplay)
-EVENTCATEGORY(AI)
+EVENTCATEGORY(AI, \
+	TypeIDs::AI_Distracted, \
+	TypeIDs::AI_Curious, \
+	TypeIDs::AI_Pursuit, \
+	TypeIDs::AI_Bunkering)
