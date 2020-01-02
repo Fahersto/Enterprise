@@ -9,10 +9,10 @@
     <ClInclude Include="src\Events\SandboxEvents.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Events\ECL_Sandbox.h">
+    <ClInclude Include="src\Events\SandboxEvents_CategoryList.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Events\ETL_Sandbox.h">
+    <ClInclude Include="src\Events\SandboxEvents_TypeList.h">
       <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,11 +2,13 @@
 // such as names of functions and macros.
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 
-#define EVENTTYPE(name)
-#define EVENTTYPE_1(name, var1_type, var1_name)
-#define EVENTTYPE_2(name, var1_type, var2_type, var1_name, var2_name)
-#define EVENTTYPE_3(name, var1_type, var2_type, var3_type, var1_name, var2_name, var3_name)
+#define EVENTCLASS_DEBUGMEMBERS(...) 
+#define EVENTCLASS_DEBUGMEMBERS_1(...) 
+#define EVENTCLASS_DEBUGMEMBERS_2(...) 
+#define EVENTCLASS_DEBUGMEMBERS_3(...) 
+
 #define EVENTTYPE(type, ...)
 #define EVENTTYPE_1(type, ...)
 #define EVENTTYPE_2(type, ...)
 #define EVENTTYPE_3(type, ...)
+#define EVENTCATEGORY(category, ...)

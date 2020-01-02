@@ -1,3 +1,5 @@
+// DON'T USE HEADER GUARD
+
 /* ETL_Core.h (Event Type List)
 	A list of all core Event types, including names and types of their members.
 	

@@ -33,17 +33,21 @@
     <ClInclude Include="src\Enterprise\Events\Dispatcher.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\ECL_Core.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\ETL_Core.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Events.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WinMain.h">
       <Filter>Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\CoreEvents.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\EndClasses.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\EndEnums.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
+    <ClInclude Include="src\Enterprise\Events\CoreEvents_TypeList.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

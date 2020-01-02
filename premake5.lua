@@ -46,7 +46,8 @@ project "Enterprise"
     includedirs
     {
         "%{prj.name}/src",
-        "%{prj.name}/vendor/spdlog/include"
+        "%{prj.name}/vendor/spdlog/include",
+        "E:/Software Projects/_Libraries/boost_1_72_0"
     }
  
     filter "system:windows"

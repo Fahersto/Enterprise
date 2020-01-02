@@ -131,8 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\ECL_Sandbox.h" />
-    <ClInclude Include="src\Events\ETL_Sandbox.h" />
+    <ClInclude Include="src\Events\SandboxEvents_CategoryList.h" />
+    <ClInclude Include="src\Events\SandboxEvents_TypeList.h" />
     <ClInclude Include="src\Events\SandboxEvents.h" />
   </ItemGroup>
   <ItemGroup>

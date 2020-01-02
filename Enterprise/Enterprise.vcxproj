@@ -77,11 +77,12 @@
       <PrecompiledHeaderFile>EP_PCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>EP_SCOPE_CORE;EP_PLATFORM_WINDOWS;EP_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +95,7 @@
       <PrecompiledHeaderFile>EP_PCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>EP_SCOPE_CORE;EP_PLATFORM_WINDOWS;EP_CONFIG_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -102,6 +103,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,7 +117,7 @@
       <PrecompiledHeaderFile>EP_PCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>EP_SCOPE_CORE;EP_PLATFORM_WINDOWS;EP_CONFIG_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -123,6 +125,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,6 +135,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Core.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\EndEnums.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\EndClasses.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application.h" />
@@ -139,9 +146,9 @@
     <ClInclude Include="src\Enterprise\EntryPoint.h" />
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h" />
     <ClInclude Include="src\Enterprise\Events\Dispatcher.h" />
-    <ClInclude Include="src\Enterprise\Events\ECL_Core.h" />
-    <ClInclude Include="src\Enterprise\Events\ETL_Core.h" />
-    <ClInclude Include="src\Enterprise\Events\Events.h" />
+    <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h" />
+    <ClInclude Include="src\Enterprise\Events\CoreEvents_TypeList.h" />
+    <ClInclude Include="src\Enterprise\Events\CoreEvents.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>

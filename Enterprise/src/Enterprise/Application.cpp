@@ -5,7 +5,7 @@
 
 #include "Enterprise/Events/Dispatcher.h"
 
-bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event> e)
+bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event::Event> e)
 {
 	EP_TRACE("Application::OnEvent called: {}", *e);
 	return true;
@@ -14,7 +14,7 @@ bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event> e)
 namespace Enterprise {
 	Application::Application()
 	{
-		Dispatcher::Init();
+		Event::Dispatcher::Init();
 	}
 
 	void Application::Tick()
@@ -23,7 +23,7 @@ namespace Enterprise {
 
 	void Application::Update()
 	{
-		Dispatcher::Update();
+		Event::Dispatcher::Update();
 	}
 
 	void Application::Draw()
