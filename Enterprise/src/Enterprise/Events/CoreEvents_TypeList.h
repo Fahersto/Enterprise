@@ -30,38 +30,51 @@
 
 // Application events -----------------------------------------------------------
 
+// User clicked the close button on the game window.
 EVENTTYPE(WindowClose)
+// User has dragged the window to a new location.
 EVENTTYPE_2(WindowMove, int, X, int, Y)
-EVENTTYPE_2(WindowResize, int, X, int, Y)
+// User has resized the window.
+EVENTTYPE_2(WindowResize, int, Width, int, Height)
+// The game window has entered focus.
 EVENTTYPE(WindowFocus)
+// The game window has lost focus.
 EVENTTYPE(WindowLostFocus)
 
 // Input events -----------------------------------------------------------------
 // Keyboard
 
-EVENTTYPE_1(KeyDown, int, Code)
-EVENTTYPE_1(KeyUp, int, Code)
-EVENTTYPE_1(KeyChar, int, Code)
+// A key was just pressed.
+EVENTTYPE_1(KeyDown, int, KeyCode)
+// A key was just released.
+EVENTTYPE_1(KeyUp, int, KeyCode)
+// A character was just entered with the keyboard.
+EVENTTYPE_1(KeyChar, int, Character)
 
 // Mouse
 
-EVENTTYPE_1(MouseButtonDown, int, Code)
-EVENTTYPE_1(MouseButtonUp, int, Code)
-EVENTTYPE_2(MouseDelta, int, X, int, Y)
-EVENTTYPE_2(MouseScroll, int, X, int, Y)
-EVENTTYPE_2(MousePosition, int, X, int, Y)
+// The user clicked a mouse button.
+EVENTTYPE_1(MouseButtonDown, int, ButtonCode)
+// The user released a mouse button.
+EVENTTYPE_1(MouseButtonUp, int, ButtonCode)
+// The user mas moved the mouse.
+EVENTTYPE_2(MouseDelta, int, DeltaX, int, DeltaY)
+// The user has used the scroll wheel (2D, some mice can scroll left and right).
+EVENTTYPE_2(MouseScroll, int, DeltaX, int, DeltaY)
+// The user has moved the cursor.
+EVENTTYPE_2(MousePosition, int, CursorX, int, CursorY)
 
 // File events ------------------------------------------------------------------
 
-EVENTTYPE(FileOpenRequest)
-EVENTTYPE(FileOpenComplete)
-EVENTTYPE(FileSaveRequest)
-EVENTTYPE(FileSaveComplete)
+//EVENTTYPE(FileOpenRequest)
+//EVENTTYPE(FileOpenComplete)
+//EVENTTYPE(FileSaveRequest)
+//EVENTTYPE(FileSaveComplete)
 
 // Audio events -----------------------------------------------------------------
-
-EVENTTYPE(PlayAudioAsset)
-EVENTTYPE(PauseAudioAsset)
-EVENTTYPE(StepAudioAsset)
-EVENTTYPE(AudioParameter)
-EVENTTYPE(StopAudioAsset)
+//
+//EVENTTYPE(PlayAudioAsset)
+//EVENTTYPE(PauseAudioAsset)
+//EVENTTYPE(StepAudioAsset)
+//EVENTTYPE(AudioParameter)
+//EVENTTYPE(StopAudioAsset)

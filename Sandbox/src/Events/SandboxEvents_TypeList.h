@@ -32,30 +32,30 @@
 
 //PLAYER INFORMATION-----------------------------------------------------------------------------
 
-// The 3D coordinates of the player's location.  This is broadcasted every update.
-EVENTTYPE_3(PlayerPosition, float, X, float, Y, float, Z)
-// An alert that the player is out of ammo.
-EVENTTYPE(PlayerOOA)
-// An alert that the player took damage last Update().
-EVENTTYPE(PlayerHurt)
-
-//GAMEPLAY ----------------------------------------------------------------------------------------
-
-// Broadcasted when the score changes.
-EVENTTYPE_1(Score, int, NewScore)
-// Broadcasted when the player pauses the game.
-EVENTTYPE(PauseGame)
-// Broadcasted when changing game modes.
-EVENTTYPE_1(NewGameMode, int, ModeId)
-
-//HEALTH ------------------------------------------------------------------------------------------
-
-EVENTTYPE_2(HealthAOE, float, Position, int, HealthDelta)
-EVENTTYPE_1(Damage, int, HealthLost)
-
-//AI ----------------------------------------------------------------------------------------------
-
-EVENTTYPE(AI_Distracted)
-EVENTTYPE(AI_Curious)
-EVENTTYPE(AI_Pursuit)
-EVENTTYPE(AI_Bunkering)
+//// The 3D coordinates of the player's location.  This is broadcasted every update.
+//EVENTTYPE_3(PlayerPosition, float, X, float, Y, float, Z)
+//// An alert that the player is out of ammo.
+//EVENTTYPE(PlayerOOA)
+//// An alert that the player took damage last Update().
+//EVENTTYPE(PlayerHurt)
+//
+////GAMEPLAY ----------------------------------------------------------------------------------------
+//
+//// Broadcasted when the score changes.
+//EVENTTYPE_1(Score, int, NewScore)
+//// Broadcasted when the player pauses the game.
+//EVENTTYPE(PauseGame)
+//// Broadcasted when changing game modes.
+//EVENTTYPE_1(NewGameMode, int, ModeId)
+//
+////HEALTH ------------------------------------------------------------------------------------------
+//
+//EVENTTYPE_2(HealthAOE, float, Position, int, HealthDelta)
+//EVENTTYPE_1(Damage, int, HealthLost)
+//
+////AI ----------------------------------------------------------------------------------------------
+//
+//EVENTTYPE(AI_Distracted)
+//EVENTTYPE(AI_Curious)
+//EVENTTYPE(AI_Pursuit)
+//EVENTTYPE(AI_Bunkering)

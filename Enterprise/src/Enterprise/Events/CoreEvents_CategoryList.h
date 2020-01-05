@@ -1,6 +1,9 @@
 /* CoreEvents_CategoryList.h
 	A list of all core Event categories and the types that are in them.  Add to this list to make new
-	category types available in the core engine.
+	Event category types available in the core engine.
+
+	Comments directly above each macro will be visible in the enumeration's IntelliSense tooltip.  You can use
+	this to write a description which will be available to anyone trying to use the category.
 
 	WARNINGS:
 	- Despite your compiler's protests, do NOT define the macros in this file.  They are defined in
@@ -21,12 +24,14 @@
 #endif
 #endif
 
+// Application-related Events.
 EVENTCATEGORY(Application, \
 	TypeIDs::WindowClose, \
 	TypeIDs::WindowMove, \
 	TypeIDs::WindowResize, \
 	TypeIDs::WindowFocus, \
 	TypeIDs::WindowLostFocus)
+// All input Events.
 EVENTCATEGORY(Input, \
 	TypeIDs::KeyDown, \
 	TypeIDs::KeyUp, \
@@ -36,27 +41,31 @@ EVENTCATEGORY(Input, \
 	TypeIDs::MouseScroll, \
 	TypeIDs::MouseDelta, \
 	TypeIDs::MousePosition)
+// Keyboard direct input Events.
 EVENTCATEGORY(Keyboard, \
 	TypeIDs::KeyDown, \
 	TypeIDs::KeyUp)
+// Mouse Events useful when using delta movement.
 EVENTCATEGORY(MouseDelta, \
 	TypeIDs::MouseButtonDown, \
 	TypeIDs::MouseButtonUp, \
 	TypeIDs::MouseScroll, \
 	TypeIDs::MouseDelta)
+// Mouse Events useful when using a cursor.
 EVENTCATEGORY(MouseCursor, \
 	TypeIDs::MouseButtonDown, \
 	TypeIDs::MouseButtonUp, \
 	TypeIDs::MouseScroll, \
 	TypeIDs::MousePosition)
-EVENTCATEGORY(File, \
-	TypeIDs::FileOpenRequest, \
-	TypeIDs::FileOpenComplete, \
-	TypeIDs::FileSaveRequest, \
-	TypeIDs::FileSaveComplete)
-EVENTCATEGORY(Audio, \
-	TypeIDs::PlayAudioAsset, \
-	TypeIDs::PauseAudioAsset, \
-	TypeIDs::StepAudioAsset, \
-	TypeIDs::AudioParameter, \
-	TypeIDs::StopAudioAsset)
+
+//EVENTCATEGORY(File, \
+//	TypeIDs::FileOpenRequest, \
+//	TypeIDs::FileOpenComplete, \
+//	TypeIDs::FileSaveRequest, \
+//	TypeIDs::FileSaveComplete)
+//EVENTCATEGORY(Audio, \
+//	TypeIDs::PlayAudioAsset, \
+//	TypeIDs::PauseAudioAsset, \
+//	TypeIDs::StepAudioAsset, \
+//	TypeIDs::AudioParameter, \
+//	TypeIDs::StopAudioAsset)

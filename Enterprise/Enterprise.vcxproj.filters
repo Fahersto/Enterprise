@@ -54,11 +54,11 @@
     <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h">
       <Filter>Enterprise\Events\Generation</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Windows\WinMain.h">
-      <Filter>Platform\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Events\Generation\Stop.h">
       <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WinMain.h">
+      <Filter>Platform\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
