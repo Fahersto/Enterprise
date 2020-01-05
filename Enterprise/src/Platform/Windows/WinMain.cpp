@@ -5,6 +5,7 @@
 #include "Enterprise/Application.h"
 
 #include "Enterprise/Events/Dispatcher.h"
+#include "Enterprise\Events\CoreEvents.h"
 
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE L"ENTERPRISE PRE-ALPHA"
@@ -108,29 +109,25 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		//game.isFocussed = wParam == TRUE;
 		if (wParam == TRUE)
 		{
-			// TODO: Dispatch
-			//EP_TRACE(Enterprise::Event_WindowFocus());
+			EP_QUICKEVENT(Enterprise::Event::WindowFocus);
 		}
 		else
 		{
 			//iInput.ClearInput();
 
-			// TODO: Dispatch
-			//EP_TRACE(Enterprise::Event_WindowLostFocus());
+			EP_QUICKEVENT(Enterprise::Event::WindowLostFocus);
 		}
 		return 0;
 		break;
 	case WM_CHAR:
-		// TODO: Handle modifiers and dispatch
-		//EP_TRACE(Enterprise::Event_KeyChar(wParam, 0));
+		// TODO: Handle modifiers
+		EP_QUICKEVENT(Enterprise::Event::KeyChar, wParam);
 		return 0;
 		break;
 	case WM_MOUSEMOVE:
 		// Inform Input of the cursor's current location:
 		// iInput.UpdateMousePos(LOWORD(lParam), HIWORD(lParam));
-
-		//EP_TRACE(Enterprise::Event_MousePosition(LOWORD(lParam), HIWORD(lParam)));
-		//Enterprise::Dispatcher::Broadcast(std::make_shared<Enterprise::Event_MousePosition>(LOWORD(lParam), HIWORD(lParam)));
+		EP_QUICKEVENT(Enterprise::Event::MousePosition, LOWORD(lParam), HIWORD(lParam));
 		return 0;
 		break;
 	case WM_INPUT:

@@ -18,6 +18,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Sandbox.cpp" />
-    <ClCompile Include="src\ClientCallbacks.cpp" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,9 @@
     <Filter Include="Enterprise\Events">
       <UniqueIdentifier>{0AC83ECB-76DE-3C61-BF55-C8822BAB0DE9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Events\Generation">
+      <UniqueIdentifier>{05C50B17-F17F-FBC2-9A37-740D86D14553}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
     </Filter>
@@ -30,24 +33,32 @@
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Dispatcher.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Windows\WinMain.h">
-      <Filter>Platform\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Events\CoreEvents.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h" />
-    <ClInclude Include="src\Enterprise\Events\Generation\EndClasses.h" />
-    <ClInclude Include="src\Enterprise\Events\Generation\EndEnums.h" />
-    <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
-    <ClInclude Include="src\Enterprise\Events\CoreEvents_TypeList.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h">
       <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\CoreEvents_TypeList.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Dispatcher.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Generation\StartECM.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Generation\StopAll.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WinMain.h">
+      <Filter>Platform\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

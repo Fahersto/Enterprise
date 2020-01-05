@@ -3,7 +3,7 @@
 
 	WARNINGS:
 	- Do not add a header guard to this file.  It is included in multiple files.
-	- After you've used this file in conjunction with a "_TypeList.h" file, you must include EndClasses.h
+	- After you've used this file in conjunction with a "_TypeList.h" file, you must include StopAll.h
 	  to undefine these definitions.
 */
 

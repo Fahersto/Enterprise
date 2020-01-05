@@ -32,5 +32,6 @@ namespace Enterprise {
 
 	Application::~Application()
 	{
+		Dispatcher::Cleanup();
 	}
 }

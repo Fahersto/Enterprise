@@ -81,7 +81,11 @@ project "Sandbox"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-    defines "EP_SCOPE_CLIENT"
+    defines 
+    {
+        "EP_SCOPE_CLIENT",
+        "CLIENTNAMESPACE=Sandbox" -- This should change from project to project.
+    }
 
     files
     {

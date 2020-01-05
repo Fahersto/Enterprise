@@ -17,23 +17,37 @@ namespace Sandbox::Event
 	#include "Enterprise\Events\Generation\StartEnums.h"
 	namespace TypeIDs {
 		enum {
-			None = Enterprise::Event::TypeIDs::NumOfCoreTypes,
+			_None = Enterprise::Event::TypeIDs::_NumOfCoreTypes,
 			#include "SandboxEvents_TypeList.h"
-			NumOfTypes
+			_NumOfTypes
 		};
 	}
 	namespace CategoryIDs {
 		enum {
-			All = Enterprise::Event::CategoryIDs::NumOfCoreCategories,
+			_All = Enterprise::Event::CategoryIDs::_NumOfCoreCategories,
 			#include "SandboxEvents_CategoryList.h"
-			NumOfCategories
+			_NumOfCategories
 		};
 	}
-	#include "Enterprise\Events\Generation\EndEnums.h"
+	#include "Enterprise\Events\Generation\StopAll.h"
 
 	// The three includes below expand into all the client Event classes.
 	#include "Enterprise\Events\Generation\StartClasses.h"
 	#include "SandboxEvents_TypeList.h"
-	#include "Enterprise\Events\Generation\EndClasses.h"
+	#include "Enterprise\Events\Generation\StopAll.h"
 }
 
+// Tell the engine about the client Event types and categories
+void Enterprise::Dispatcher::GetClientListSizes()
+{
+	m_NumOfEventTypes = Sandbox::Event::TypeIDs::_NumOfTypes;
+	m_NumOfEventCategories = Sandbox::Event::CategoryIDs::_NumOfCategories;
+}
+
+// Populate the client entries of the Event Category Matrix
+void Enterprise::Dispatcher::InitClientECM()
+{
+	#include "Enterprise\Events\Generation\StartECM.h"
+	#include "Events\SandboxEvents_CategoryList.h"
+	#include "Enterprise\Events\Generation\StopAll.h"
+}

@@ -16,22 +16,22 @@ namespace Enterprise::Event
 	#include "Generation\StartEnums.h"
 	namespace TypeIDs {
 		enum {
-			None = 0,
+			_None = 0,
 			#include "CoreEvents_TypeList.h"
-			NumOfCoreTypes
+			_NumOfCoreTypes
 		};
 	}
 	namespace CategoryIDs {
 		enum {
-			All = 0,
+			_All = 0,
 			#include "CoreEvents_CategoryList.h"
-			NumOfCoreCategories
+			_NumOfCoreCategories
 		};
 	}
-	#include "Generation\EndEnums.h"
+	#include "Generation\StopAll.h"
 
 	// The three includes below expand into all the core Event classes.
 	#include "Generation/StartClasses.h"
 	#include "CoreEvents_TypeList.h"
-	#include "Generation\EndClasses.h"
+	#include "Generation\StopAll.h"
 }

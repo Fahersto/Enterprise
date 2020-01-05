@@ -1,4 +1,5 @@
 #pragma once
+#include "EP_PCH.h"
 #include "BaseEvent.h"
 
 /* Dispatcher.h
@@ -21,30 +22,35 @@ namespace Enterprise
 	{
 	public:
 		// Subscription functions
-		inline static void SubscribeToType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback) {
-			callbackLists[typeID].emplace_back(callback);
-		}
+		inline static void SubscribeToType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback) { callbackLists[typeID].emplace_back(callback); }
 		static void SubscribeToCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback);
+		// Unsubscription functions
+		static void UnsubscribeFromType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback);
+		static void UnsubscribeFromCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback);
+
 
 		// Dispatch function
-		inline static void Broadcast(EP_EVENTPTR event) { eventBuffer.emplace_back(event); }
+		inline static void Broadcast(EP_EVENTPTR event) { eventBuffer.emplace_back(event); };
 
 		// Core Calls
 		static void Init();
 		static void Update();
+		static void Cleanup();
+
 	private:
 		// Event buffer (all Event types, in broadcast order)
 		static std::vector<EP_EVENTPTR> eventBuffer;
 
-		// Callback buffer array (Dim 1: TypeID, Dim 2: Callbacks function pointers).  Dynamically allocated.
-		static std::vector<std::function<bool(EP_EVENTPTR)>>* callbackLists;
+		// Callback buffer array (Dim 1: TypeID).  Dynamically allocated.
+		static std::list< std::function<bool(EP_EVENTPTR)>>* callbackLists;
 		
 		// Category map (Dim 1: CategoryID, Dim 2: TypeID).  Dynamically allocated.
 		static std::vector<unsigned int>* EventCategoryMatrix;
 
-		static void InitClientAllocation(); // Gets configuration values used to set up Dispatcher from the client
+		// Allocating both core and client resources
+		static void GetClientListSizes(); // Gets configuration values used to set up Dispatcher from the client
 		static void InitClientECM();
-		static unsigned int m_NumOfEventTypes, m_NumOfEventCategories, m_BufferSize;
+		static unsigned int m_NumOfEventTypes, m_NumOfEventCategories;
 	};
 
 	// Express create and disptach a new Event.
