@@ -14,6 +14,7 @@ bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event::Event> e)
 namespace Enterprise {
 	Application::Application()
 	{
+		EP_TRACE("Application created!");
 		Dispatcher::Init();
 	}
 
@@ -33,5 +34,6 @@ namespace Enterprise {
 	Application::~Application()
 	{
 		Dispatcher::Cleanup();
+		EP_TRACE("Application destroyed.");
 	}
 }

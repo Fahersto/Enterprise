@@ -2,18 +2,17 @@
 #include "Dispatcher.h"
 #include "CoreEvents.h"
 
+#include "Enterprise\Console.h"
+
 namespace Enterprise {
 
 	// RESOURCES =========================================================================================================
 
 	using namespace Event;
 
-	// Readability helpers
-	using callbackPtr = std::function<bool(EP_EVENTPTR)>;
-
 	// Static definitions
 	std::vector<EP_EVENTPTR> Dispatcher::eventBuffer;
-	std::list<callbackPtr>* Dispatcher::callbackLists;
+	std::list<EventCallbackPtr>* Dispatcher::callbackLists;
 	std::vector<unsigned int>* Dispatcher::EventCategoryMatrix;
 	unsigned int Dispatcher::m_NumOfEventTypes = 0, Dispatcher::m_NumOfEventCategories = 0;
 
@@ -25,12 +24,10 @@ namespace Enterprise {
 		// Allocate resources -------------------------------------------------------
 		GetClientListSizes(); //Gets m_NumOfEventTypes and m_NumOfEventCategories
 		eventBuffer.reserve(20); //Allocate Event buffer TODO: Set size from file
-		callbackLists = new std::list<callbackPtr>[m_NumOfEventTypes]; //Create callback lists
+		callbackLists = new std::list<EventCallbackPtr>[m_NumOfEventTypes]; //Create callback lists
 		EventCategoryMatrix = new std::vector<unsigned int>[m_NumOfEventCategories]; //Create ECM
 		for (unsigned int i = 0; i < m_NumOfEventTypes; ++i) 
 		{
-			// (OLD) callbackLists[i].reserve(10); //Allocate callback stack sizes TODO: Set sizes from file
-			
 			switch (i) //Populate the "All" ECM categories while we're here
 			{
 			case TypeIDs::_None:
@@ -80,25 +77,40 @@ namespace Enterprise {
 	}
 
 	// Subscription functions --------------------------------------------------------------------------------------------
-	void Dispatcher::SubscribeToCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback) {
+	void Dispatcher::SubscribeToCategory(unsigned int categoryID, EventCallbackPtr callback) {
 		for (auto eventTypeIterator = EventCategoryMatrix[categoryID].begin();
 			eventTypeIterator != EventCategoryMatrix[categoryID].end();
-			++eventTypeIterator)
+			++eventTypeIterator) 
 		{
-			callbackLists[size_t(*eventTypeIterator)].emplace_back(callback);
-			//TODO: add a warning if a subscriber is already subscribed to this Event type.
+			SubscribeToType(*eventTypeIterator, callback);
+			//TODO: add an error if a subscriber is already subscribed to this Event type.
 		}
 	}
-	void Dispatcher::UnsubscribeFromType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback)
+
+	void Dispatcher::UnsubscribeFromType(unsigned int typeID, EventCallbackPtr callback)
 	{
 		for (auto callbackIterator = callbackLists[typeID].begin();
 			callbackIterator != callbackLists[typeID].end();
 			++callbackIterator)
 		{
-			// Check if the callback provided matches the iterator, and if it does, remove it.
-			// You should be able to break here after removing the callback, since only one instance of a callback is 
-			// allowed per Event type.
-			// Be sure to add a warning if an attempt to unsubscribe is made and the callback isn't registered.
+			// If the callback is a match, remove it.
+			if (*callbackIterator == callback) {
+				callbackLists[typeID].erase(callbackIterator);
+				return;
+			}
+		}
+		// If we haven't returned, the callback wasn't found.
+		// TODO: return stack trace?
+		EP_WARN("Dispatcher: UnsubscribeFromType attempted on a callback which wasn't registered. TypeID: {}", typeID);
+	}
+
+	void Dispatcher::UnsubscribeFromCategory(unsigned int categoryID, EventCallbackPtr callback)
+	{
+		for (auto eventTypeIterator = EventCategoryMatrix[categoryID].begin();
+			eventTypeIterator != EventCategoryMatrix[categoryID].end();
+			++eventTypeIterator) 
+		{
+			UnsubscribeFromType(*eventTypeIterator, callback);
 		}
 	}
 }

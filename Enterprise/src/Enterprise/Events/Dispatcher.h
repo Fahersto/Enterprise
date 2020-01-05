@@ -12,6 +12,8 @@
 	- If a callback returns true, then the event it was handling is blocked from the rest of the callback stack.
 */
 
+typedef bool (*EventCallbackPtr)(EP_EVENTPTR);
+
 namespace Enterprise
 {
 	struct DispatcherInitData {
@@ -22,11 +24,11 @@ namespace Enterprise
 	{
 	public:
 		// Subscription functions
-		inline static void SubscribeToType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback) { callbackLists[typeID].emplace_back(callback); }
-		static void SubscribeToCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback);
+		inline static void SubscribeToType(unsigned int typeID, EventCallbackPtr callback) { callbackLists[typeID].emplace_back(callback); }
+		static void SubscribeToCategory(unsigned int categoryID, EventCallbackPtr callback);
 		// Unsubscription functions
-		static void UnsubscribeFromType(unsigned int typeID, std::function<bool(EP_EVENTPTR)> callback);
-		static void UnsubscribeFromCategory(unsigned int categoryID, std::function<bool(EP_EVENTPTR)> callback);
+		static void UnsubscribeFromType(unsigned int typeID, EventCallbackPtr callback);
+		static void UnsubscribeFromCategory(unsigned int categoryID, EventCallbackPtr callback);
 
 
 		// Dispatch function
@@ -42,7 +44,7 @@ namespace Enterprise
 		static std::vector<EP_EVENTPTR> eventBuffer;
 
 		// Callback buffer array (Dim 1: TypeID).  Dynamically allocated.
-		static std::list< std::function<bool(EP_EVENTPTR)>>* callbackLists;
+		static std::list<EventCallbackPtr>* callbackLists;
 		
 		// Category map (Dim 1: CategoryID, Dim 2: TypeID).  Dynamically allocated.
 		static std::vector<unsigned int>* EventCategoryMatrix;
