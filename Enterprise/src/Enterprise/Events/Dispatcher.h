@@ -16,10 +16,6 @@ typedef bool (*EventCallbackPtr)(EP_EVENTPTR);
 
 namespace Enterprise
 {
-	struct DispatcherInitData {
-		unsigned int NumOfEventTypes, NumOfEventCategories, eventBufferSize;
-	};
-
 	class Dispatcher
 	{
 	public:
