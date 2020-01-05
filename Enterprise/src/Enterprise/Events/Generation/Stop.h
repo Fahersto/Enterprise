@@ -1,4 +1,4 @@
-/* StopAll.h
+/* Stop.h
 	Include this file after using StartEnums.h, StartClasses.h, or StartCategories.h to generate code
 	relating to Event types or categories.  This file will undefine the macros used by those headers,
 	allowing them to be repurposed in other areas of code.

@@ -28,10 +28,10 @@ namespace Enterprise::Event
 			_NumOfCoreCategories
 		};
 	}
-	#include "Generation\StopAll.h"
+	#include "Generation\Stop.h"
 
 	// The three includes below expand into all the core Event classes.
 	#include "Generation/StartClasses.h"
 	#include "CoreEvents_TypeList.h"
-	#include "Generation\StopAll.h"
+	#include "Generation\Stop.h"
 }

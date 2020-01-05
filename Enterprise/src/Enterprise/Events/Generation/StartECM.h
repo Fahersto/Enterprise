@@ -5,7 +5,7 @@
 
 	WARNINGS:
 	- Do not add a header guard to this file.  It is included in multiple files.
-	- After you've used this file in conjunction with a "_CategoryList.h" file, you must include StopAll.h
+	- After you've used this file in conjunction with a "_CategoryList.h" file, you must include Stop.h
 	  to undefine these definitions.  This will allow the macros to be given different definitions elsewhere.
 */
 

@@ -145,7 +145,7 @@
     <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h" />
     <ClInclude Include="src\Enterprise\Events\Generation\StartECM.h" />
     <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
-    <ClInclude Include="src\Enterprise\Events\Generation\StopAll.h" />
+    <ClInclude Include="src\Enterprise\Events\Generation\Stop.h" />
     <ClInclude Include="src\Platform\Windows\WinMain.h" />
   </ItemGroup>
   <ItemGroup>

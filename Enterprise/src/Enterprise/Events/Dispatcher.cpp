@@ -46,7 +46,7 @@ namespace Enterprise {
 		// Core
 		#include "Generation\StartECM.h"
 		#include "CoreEvents_CategoryList.h"
-		#include "Generation\StopAll.h"
+		#include "Generation\Stop.h"
 		// Client
 		InitClientECM();
 	}

@@ -29,12 +29,12 @@ namespace Sandbox::Event
 			_NumOfCategories
 		};
 	}
-	#include "Enterprise\Events\Generation\StopAll.h"
+	#include "Enterprise\Events\Generation\Stop.h"
 
 	// The three includes below expand into all the client Event classes.
 	#include "Enterprise\Events\Generation\StartClasses.h"
 	#include "SandboxEvents_TypeList.h"
-	#include "Enterprise\Events\Generation\StopAll.h"
+	#include "Enterprise\Events\Generation\Stop.h"
 }
 
 // Tell the engine about the client Event types and categories
@@ -49,5 +49,5 @@ void Enterprise::Dispatcher::InitClientECM()
 {
 	#include "Enterprise\Events\Generation\StartECM.h"
 	#include "Events\SandboxEvents_CategoryList.h"
-	#include "Enterprise\Events\Generation\StopAll.h"
+	#include "Enterprise\Events\Generation\Stop.h"
 }

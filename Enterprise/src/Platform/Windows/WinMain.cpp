@@ -121,7 +121,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		break;
 	case WM_CHAR:
 		// TODO: Handle modifiers
-		EP_QUICKEVENT(Enterprise::Event::KeyChar, wParam);
+		EP_QUICKEVENT(Enterprise::Event::KeyChar, char(wParam));
 		return 0;
 		break;
 	case WM_MOUSEMOVE:
