@@ -14,6 +14,13 @@
 	that category.
 */
 
+// Turn on to disable IntelliSense errors while working in this file.
+#if 0
+#ifdef __INTELLISENSE__
+#define EVENTCATEGORY(category, ...)
+#endif
+#endif
+
 EVENTCATEGORY(Application, \
 	TypeIDs::WindowClose, \
 	TypeIDs::WindowMove, \

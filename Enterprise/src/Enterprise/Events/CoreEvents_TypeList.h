@@ -18,6 +18,16 @@
 	must call the macro with the correct number (EVENTTYPE_1 ... EVENTTYPE_3).
 */
 
+// Turn on to disable IntelliSense errors while working in this file.
+#if 0
+#ifdef __INTELLISENSE__
+#define EVENTTYPE(eventtype) 
+#define EVENTTYPE_1(eventtype, var1type, var1name)
+#define EVENTTYPE_2(eventtype, var1type, var1name, var2type, var2name)
+#define EVENTTYPE_3(eventtype, var1type, var1name, var2type, var2name, var3type, var3name)
+#endif
+#endif
+
 // Application events -----------------------------------------------------------
 
 EVENTTYPE(WindowClose)
