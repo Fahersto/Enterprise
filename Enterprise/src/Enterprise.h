@@ -11,13 +11,13 @@
 #include "Core.h"
 
 //Application
-#include "Enterprise/Console.h"
-#include "Enterprise/Application.h"
+#include "Enterprise/Application/Console.h"
+#include "Enterprise/Application/Application.h"
 
 //Event System
-#include "Enterprise\Events\Dispatcher.h"
-#include "Enterprise\Events\CoreEvents.h"
+#include "Enterprise/Events/Dispatcher.h"
+#include "Enterprise/Events/CoreEvents.h"
 
 // -------------------- Entry Point! ------------------
-#include "Enterprise/EntryPoint.h"
+#include "Enterprise/Application/EntryPoint.h"
 // -------------------- Entry Point! ------------------

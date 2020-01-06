@@ -134,9 +134,9 @@
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
-    <ClInclude Include="src\Enterprise\Application.h" />
-    <ClInclude Include="src\Enterprise\Console.h" />
-    <ClInclude Include="src\Enterprise\EntryPoint.h" />
+    <ClInclude Include="src\Enterprise\Application\Application.h" />
+    <ClInclude Include="src\Enterprise\Application\Console.h" />
+    <ClInclude Include="src\Enterprise\Application\EntryPoint.h" />
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h" />
     <ClInclude Include="src\Enterprise\Events\CoreEvents.h" />
     <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h" />
@@ -152,8 +152,8 @@
     <ClCompile Include="src\EP_PCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Application.cpp" />
-    <ClCompile Include="src\Enterprise\Console.cpp" />
+    <ClCompile Include="src\Enterprise\Application\Application.cpp" />
+    <ClCompile Include="src\Enterprise\Application\Console.cpp" />
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp" />
     <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
   </ItemGroup>

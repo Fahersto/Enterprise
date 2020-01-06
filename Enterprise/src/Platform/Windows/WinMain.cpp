@@ -1,11 +1,11 @@
 #include "EP_PCH.h"
 #include "WinMain.h"
 
-#include "Enterprise/Console.h"
-#include "Enterprise/Application.h"
+#include "Enterprise/Application/Console.h"
+#include "Enterprise/Application/Application.h"
 
 #include "Enterprise/Events/Dispatcher.h"
-#include "Enterprise\Events\CoreEvents.h"
+#include "Enterprise/Events/CoreEvents.h"
 
 // TODO: Move window configuration to a .ini or something
 #define WIN_TITLE L"ENTERPRISE PRE-ALPHA"

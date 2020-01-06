@@ -21,15 +21,6 @@
     <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
-    <ClInclude Include="src\Enterprise\Application.h">
-      <Filter>Enterprise</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Console.h">
-      <Filter>Enterprise</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\EntryPoint.h">
-      <Filter>Enterprise</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
@@ -60,20 +51,29 @@
     <ClInclude Include="src\Platform\Windows\WinMain.h">
       <Filter>Platform\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Application.h">
+      <Filter>Enterprise</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Console.h">
+      <Filter>Enterprise</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\EntryPoint.h">
+      <Filter>Enterprise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
-    <ClCompile Include="src\Enterprise\Application.cpp">
-      <Filter>Enterprise</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Enterprise\Console.cpp">
-      <Filter>Enterprise</Filter>
-    </ClCompile>
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Application\Application.cpp">
+      <Filter>Enterprise</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Application\Console.cpp">
+      <Filter>Enterprise</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

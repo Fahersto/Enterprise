@@ -13,7 +13,7 @@
 
 namespace Enterprise::Event
 {
-	#include "Generation\StartEnums.h"
+	#include "Generation/StartEnums.h"
 	namespace TypeIDs {
 		enum {
 			_None = 0,
@@ -28,10 +28,10 @@ namespace Enterprise::Event
 			_NumOfCoreCategories
 		};
 	}
-	#include "Generation\Stop.h"
+	#include "Generation/Stop.h"
 
 	// The three includes below expand into all the core Event classes.
 	#include "Generation/StartClasses.h"
 	#include "CoreEvents_TypeList.h"
-	#include "Generation\Stop.h"
+	#include "Generation/Stop.h"
 }

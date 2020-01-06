@@ -1,6 +1,6 @@
 #include <Enterprise.h>
 
-#include "Events\SandboxEvents.h"
+#include "Events/SandboxEvents.h"
 using namespace Sandbox;
 
 bool OnEvent(EP_EVENTPTR e)

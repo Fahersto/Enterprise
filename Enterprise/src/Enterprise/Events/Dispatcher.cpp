@@ -2,7 +2,7 @@
 #include "Dispatcher.h"
 #include "CoreEvents.h"
 
-#include "Enterprise\Console.h"
+#include "Enterprise/Application/Console.h"
 
 namespace Enterprise {
 
@@ -44,9 +44,9 @@ namespace Enterprise {
 
 		// Populate Event Category Matrix -------------------------------------------
 		// Core
-		#include "Generation\StartECM.h"
+		#include "Generation/StartECM.h"
 		#include "CoreEvents_CategoryList.h"
-		#include "Generation\Stop.h"
+		#include "Generation/Stop.h"
 		// Client
 		InitClientECM();
 	}
