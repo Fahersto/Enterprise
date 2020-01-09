@@ -10,7 +10,10 @@
 // Creates and returns the client Application.  Defined in client.
 extern Enterprise::Application* Enterprise::CreateApplication();
 
-// Include the appropriate Main function.
+// Include the declaration for the appropriate Main function.
 #ifdef EP_PLATFORM_WINDOWS
-#include "Platform/Windows/WinMain.h"
+int WINAPI WinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow);
 #endif

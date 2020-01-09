@@ -137,6 +137,7 @@
     <ClInclude Include="src\Enterprise\Application\Application.h" />
     <ClInclude Include="src\Enterprise\Application\Console.h" />
     <ClInclude Include="src\Enterprise\Application\EntryPoint.h" />
+    <ClInclude Include="src\Enterprise\Application\Window.h" />
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h" />
     <ClInclude Include="src\Enterprise\Events\CoreEvents.h" />
     <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h" />
@@ -146,7 +147,7 @@
     <ClInclude Include="src\Enterprise\Events\Generation\StartECM.h" />
     <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
     <ClInclude Include="src\Enterprise\Events\Generation\Stop.h" />
-    <ClInclude Include="src\Platform\Windows\WinMain.h" />
+    <ClInclude Include="src\Platform\Windows\Win32Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp">
@@ -155,6 +156,7 @@
     <ClCompile Include="src\Enterprise\Application\Application.cpp" />
     <ClCompile Include="src\Enterprise\Application\Console.cpp" />
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp" />
+    <ClCompile Include="src\Platform\Windows\Win32Window.cpp" />
     <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

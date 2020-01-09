@@ -28,7 +28,12 @@
 #endif
 #endif
 
-// Application events -----------------------------------------------------------
+// Application events ---------------------------------------------------------
+
+// Close the program (Handled by Application).
+EVENTTYPE_1(TerminateApplication, int, code)
+
+// Window events --------------------------------------------------------------
 
 // User clicked the close button on the game window.
 EVENTTYPE(WindowClose)
@@ -41,7 +46,7 @@ EVENTTYPE(WindowFocus)
 // The game window has lost focus.
 EVENTTYPE(WindowLostFocus)
 
-// Input events -----------------------------------------------------------------
+// Input events ---------------------------------------------------------------
 // Keyboard
 
 // A key was just pressed.
@@ -64,14 +69,14 @@ EVENTTYPE_2(MouseScroll, int, DeltaX, int, DeltaY)
 // The user has moved the cursor.
 EVENTTYPE_2(MousePosition, int, CursorX, int, CursorY)
 
-// File events ------------------------------------------------------------------
+// File events ----------------------------------------------------------------
 
 //EVENTTYPE(FileOpenRequest)
 //EVENTTYPE(FileOpenComplete)
 //EVENTTYPE(FileSaveRequest)
 //EVENTTYPE(FileSaveComplete)
 
-// Audio events -----------------------------------------------------------------
+// Audio events ---------------------------------------------------------------
 //
 //EVENTTYPE(PlayAudioAsset)
 //EVENTTYPE(PauseAudioAsset)

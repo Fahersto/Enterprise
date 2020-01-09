@@ -13,6 +13,7 @@
 //Application
 #include "Enterprise/Application/Console.h"
 #include "Enterprise/Application/Application.h"
+#include "Enterprise/Application/Window.h"
 
 //Event System
 #include "Enterprise/Events/Dispatcher.h"

@@ -4,17 +4,14 @@
 #include "Console.h"
 #include "Enterprise/Events/Dispatcher.h"
 
-bool OnEvent_BaseApplication(std::shared_ptr<Enterprise::Event::Event> e)
-{
-	EP_TRACE("Application::OnEvent called: {}", *e);
-	return true;
-}
+#include "Window.h"
 
 namespace Enterprise {
 	Application::Application()
 	{
 		EP_TRACE("Application created!");
-		Dispatcher::Init();
+		Event::Dispatcher::Init(std::bind(&Application::OnEvent, this, std::placeholders::_1));
+		EP_TRACE("Dispatcher.Init() called");
 	}
 
 	void Application::Tick()
@@ -23,7 +20,7 @@ namespace Enterprise {
 
 	void Application::Update()
 	{
-		Dispatcher::Update();
+		Event::Dispatcher::Update();
 	}
 
 	void Application::Draw()
@@ -32,7 +29,12 @@ namespace Enterprise {
 
 	Application::~Application()
 	{
-		Dispatcher::Cleanup();
+		Event::Dispatcher::Cleanup();
 		EP_TRACE("Application destroyed.");
+	}
+
+	bool Application::OnEvent(Event::EventPtr e)
+	{
+		return false;
 	}
 }

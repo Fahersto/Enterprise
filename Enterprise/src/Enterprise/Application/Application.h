@@ -13,6 +13,7 @@
 	Dist builds.  The Console is the only portable piece of the engine considered more fundamental than
 	Application.
 */
+#include "Enterprise/Events/CoreEvents.h"
 
 namespace Enterprise
 {
@@ -24,6 +25,8 @@ namespace Enterprise
 		void Update(); // Called at Update Rate (fixed timestep)
 		void Draw(); // Called when rendering (based on framerate settings)
 		virtual ~Application(); // Called at program end
+
+		bool OnEvent(Event::EventPtr e);
 	};
 
 	// Creator/getter for client application.  Defined in Client.

@@ -26,12 +26,15 @@
 
 // Application-related Events.
 EVENTCATEGORY(Application, \
+	TypeIDs::TerminateApplication)
+// Window Events.
+EVENTCATEGORY(Window, \
 	TypeIDs::WindowClose, \
 	TypeIDs::WindowMove, \
 	TypeIDs::WindowResize, \
 	TypeIDs::WindowFocus, \
 	TypeIDs::WindowLostFocus)
-// All input Events.
+// Input Events (all).
 EVENTCATEGORY(Input, \
 	TypeIDs::KeyDown, \
 	TypeIDs::KeyUp, \

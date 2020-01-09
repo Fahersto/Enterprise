@@ -4,29 +4,35 @@
 
 #include "Enterprise/Application/Console.h"
 
-namespace Enterprise {
+namespace Enterprise::Event {
 
 	// RESOURCES =========================================================================================================
 
-	using namespace Event;
+	//using namespace Event;
 
 	// Static definitions
-	std::vector<EP_EVENTPTR> Dispatcher::eventBuffer;
+	std::vector<EventPtr> Dispatcher::eventBuffer;
 	std::list<EventCallbackPtr>* Dispatcher::callbackLists;
+	EventCallbackPtr Dispatcher::applicationCallback;
 	std::vector<unsigned int>* Dispatcher::EventCategoryMatrix;
 	unsigned int Dispatcher::m_NumOfEventTypes = 0, Dispatcher::m_NumOfEventCategories = 0;
 
 	// FUNCTIONS =========================================================================================================
 
 	// Core Calls --------------------------------------------------------------------------------------------------------
-	void Dispatcher::Init()
+	void Dispatcher::Init(EventCallbackPtr BaseAppCallback)
 	{
+		// Store the pointer to Application's event callback
+		applicationCallback = BaseAppCallback;
+
 		// Allocate resources -------------------------------------------------------
 		GetClientListSizes(); //Gets m_NumOfEventTypes and m_NumOfEventCategories
 		eventBuffer.reserve(20); //Allocate Event buffer TODO: Set size from file
 		callbackLists = new std::list<EventCallbackPtr>[m_NumOfEventTypes]; //Create callback lists
 		EventCategoryMatrix = new std::vector<unsigned int>[m_NumOfEventCategories]; //Create ECM
-		for (unsigned int i = 0; i < m_NumOfEventTypes; ++i) 
+
+		// Populate Event Category Matrix -------------------------------------------
+		for (unsigned int i = 0; i < m_NumOfEventTypes; ++i)
 		{
 			switch (i) //Populate the "All" ECM categories while we're here
 			{
@@ -41,8 +47,6 @@ namespace Enterprise {
 						CategoryIDs::_NumOfCoreCategories].emplace_back(i); //_NumOfCoreCategories == Client's _All.
 			}
 		}
-
-		// Populate Event Category Matrix -------------------------------------------
 		// Core
 		#include "Generation/StartECM.h"
 		#include "CoreEvents_CategoryList.h"
@@ -54,7 +58,7 @@ namespace Enterprise {
 	void Dispatcher::Update() // Every update, dispatch the Event buffer, then clear it.
 	{
 		// Event buffer iteration
-		for (auto event_iterator = eventBuffer.begin(); event_iterator != eventBuffer.end(); ++event_iterator) 
+		for (auto event_iterator = eventBuffer.begin(); event_iterator != eventBuffer.end(); ++event_iterator)
 		{
 			// Call all callbacks for the Event's type until it is handled
 			unsigned int callbackListIndex = (*event_iterator)->GetTypeID();
@@ -80,7 +84,7 @@ namespace Enterprise {
 	void Dispatcher::SubscribeToCategory(unsigned int categoryID, EventCallbackPtr callback) {
 		for (auto eventTypeIterator = EventCategoryMatrix[categoryID].begin();
 			eventTypeIterator != EventCategoryMatrix[categoryID].end();
-			++eventTypeIterator) 
+			++eventTypeIterator)
 		{
 			SubscribeToType(*eventTypeIterator, callback);
 			//TODO: add an error if a subscriber is already subscribed to this Event type.
@@ -94,7 +98,7 @@ namespace Enterprise {
 			++callbackIterator)
 		{
 			// If the callback is a match, remove it.
-			if (*callbackIterator == callback) {
+			if ((*callbackIterator).target<bool(*)(EventPtr)>() == callback.target<bool(*)(EventPtr)>()) {
 				callbackLists[typeID].erase(callbackIterator);
 				return;
 			}
@@ -108,9 +112,14 @@ namespace Enterprise {
 	{
 		for (auto eventTypeIterator = EventCategoryMatrix[categoryID].begin();
 			eventTypeIterator != EventCategoryMatrix[categoryID].end();
-			++eventTypeIterator) 
+			++eventTypeIterator)
 		{
 			UnsubscribeFromType(*eventTypeIterator, callback);
 		}
+	}
+
+	void Dispatcher::AppEvent(EventPtr e)
+	{
+		applicationCallback(e);
 	}
 }

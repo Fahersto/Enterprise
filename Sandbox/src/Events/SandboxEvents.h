@@ -38,14 +38,14 @@ namespace Sandbox::Event
 }
 
 // Tell the engine about the client Event types and categories
-void Enterprise::Dispatcher::GetClientListSizes()
+void Enterprise::Event::Dispatcher::GetClientListSizes()
 {
 	m_NumOfEventTypes = Sandbox::Event::TypeIDs::_NumOfTypes;
 	m_NumOfEventCategories = Sandbox::Event::CategoryIDs::_NumOfCategories;
 }
 
 // Populate the client entries of the Event Category Matrix
-void Enterprise::Dispatcher::InitClientECM()
+void Enterprise::Event::Dispatcher::InitClientECM()
 {
 	#include "Enterprise/Events/Generation/StartECM.h"
 	#include "Events/SandboxEvents_CategoryList.h"

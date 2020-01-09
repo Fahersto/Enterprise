@@ -12,9 +12,7 @@
 	- If a callback returns true, then the event it was handling is blocked from the rest of the callback stack.
 */
 
-typedef bool (*EventCallbackPtr)(EP_EVENTPTR);
-
-namespace Enterprise
+namespace Enterprise::Event
 {
 	class Dispatcher
 	{
@@ -22,22 +20,26 @@ namespace Enterprise
 		// Subscription functions
 		inline static void SubscribeToType(unsigned int typeID, EventCallbackPtr callback) { callbackLists[typeID].emplace_back(callback); }
 		static void SubscribeToCategory(unsigned int categoryID, EventCallbackPtr callback);
+
 		// Unsubscription functions
 		static void UnsubscribeFromType(unsigned int typeID, EventCallbackPtr callback);
 		static void UnsubscribeFromCategory(unsigned int categoryID, EventCallbackPtr callback);
 
-
-		// Dispatch function
-		inline static void Broadcast(EP_EVENTPTR event) { eventBuffer.emplace_back(event); };
+		// Dispatch functions
+		static void AppEvent(EventPtr e);
+		inline static void Broadcast(EventPtr e) { eventBuffer.emplace_back(e); };
 
 		// Core Calls
-		static void Init();
+		static void Init(EventCallbackPtr BaseAppCallback);
 		static void Update();
 		static void Cleanup();
 
 	private:
+		// Appliation callback pointer (used to direct dispatch events to the Application)
+		static EventCallbackPtr applicationCallback;
+
 		// Event buffer (all Event types, in broadcast order)
-		static std::vector<EP_EVENTPTR> eventBuffer;
+		static std::vector<EventPtr> eventBuffer;
 
 		// Callback buffer array (Dim 1: TypeID).  Dynamically allocated.
 		static std::list<EventCallbackPtr>* callbackLists;
@@ -52,5 +54,6 @@ namespace Enterprise
 	};
 
 	// Express create and disptach a new Event.
-	#define EP_QUICKEVENT(eType, ...) Enterprise::Dispatcher::Broadcast(Enterprise::Event::CreateEPEvent<eType>(__VA_ARGS__))
+	#define EP_QUICKEVENT(eType, ...) Enterprise::Event::Dispatcher::Broadcast(Enterprise::Event::CreateEPEvent<eType>(__VA_ARGS__))
+	#define EP_APPLICATIONEVENT(eType, ...) Enterprise::Event::Dispatcher::AppEvent(Enterprise::Event::CreateEPEvent<eType>(__VA_ARGS__))
 }

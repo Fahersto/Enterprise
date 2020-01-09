@@ -11,7 +11,7 @@
 
 #ifdef EP_SCOPE_CORE
 #define EVENTCATEGORY(category, ...) \
-	Dispatcher::EventCategoryMatrix[CategoryIDs::category] = std::vector<unsigned int>{__VA_ARGS__};
+	Dispatcher::EventCategoryMatrix[Enterprise::Event::CategoryIDs::category] = std::vector<unsigned int>{__VA_ARGS__};
 #else
 #define EVENTCATEGORY(category, ...) \
 	using namespace CLIENTNAMESPACE::Event; /* This is needed here so that the client category list is in scope */ \

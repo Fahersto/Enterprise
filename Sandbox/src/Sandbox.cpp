@@ -1,13 +1,14 @@
 #include <Enterprise.h>
-
 #include "Events/SandboxEvents.h"
-using namespace Sandbox;
 
-bool OnEvent(EP_EVENTPTR e)
+//using namespace Sandbox;
+Enterprise::Window* gameWindow;
+
+bool OnEvent(Enterprise::Event::EventPtr e)
 {
-	EP_TRACE(e);
 	return false;
 }
+
 
 class SandboxApp : public Enterprise::Application
 {
@@ -17,20 +18,19 @@ public:
 	{
 		//TODO: Conditionalize starting conditions between debug and release builds.
 
-		// Subscribe to all events (except for mouse position events).
-		Enterprise::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent);
-		Enterprise::Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
-		Enterprise::Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
+		//// Subscribe to all events (except for mouse position events).
+		//Enterprise::Event::Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
+		//Enterprise::Event::Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
+		//Enterprise::Event::Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
+
+		gameWindow = Enterprise::Window::Create();
 	}
 
 	//Called at program end
 	~SandboxApp()
 	{
+		delete gameWindow;
 	}
 };
 
-Enterprise::Application* Enterprise::CreateApplication()
-{
-	// Add any game-specific pre-launch code here.
-	return new SandboxApp();
-}
+Enterprise::Application* Enterprise::CreateApplication() { return new SandboxApp(); }

@@ -18,7 +18,10 @@ namespace Enterprise::Event {
 		#endif
 	};
 
-	#define EP_EVENTPTR std::shared_ptr<Enterprise::Event::Event>
+	// Useful pointer types
+	//#define EP_EVENTPTR std::shared_ptr<Enterprise::Event::Event>
+	typedef std::shared_ptr<Enterprise::Event::Event> EventPtr;
+	typedef std::function<bool(EventPtr)> EventCallbackPtr;
 
 	// FUNCTIONS ----------------------------------------------------------------------------------
 
@@ -38,6 +41,6 @@ namespace Enterprise::Event {
 	// Overload the output stream operator for logging purposes
 	#ifdef EP_CONFIG_DEBUG
 	inline std::ostream& operator << (std::ostream& os, const Event& e) { return os << e.ToString(); }
-	inline std::ostream& operator << (std::ostream& os, EP_EVENTPTR e) { return os << e->ToString(); }
+	inline std::ostream& operator << (std::ostream& os, EventPtr e) { return os << e->ToString(); }
 	#endif
 }
