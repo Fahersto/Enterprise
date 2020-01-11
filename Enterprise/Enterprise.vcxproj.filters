@@ -72,9 +72,6 @@
     <ClCompile Include="src\Enterprise\Application\Application.cpp">
       <Filter>Enterprise\Application</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Application\Console.cpp">
-      <Filter>Enterprise\Application</Filter>
-    </ClCompile>
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
     </ClCompile>
@@ -82,6 +79,9 @@
       <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
+      <Filter>Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\Win32Console.cpp">
       <Filter>Platform\Windows</Filter>
     </ClCompile>
   </ItemGroup>

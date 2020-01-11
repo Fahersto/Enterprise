@@ -1,9 +1,18 @@
 #pragma once
+/* Console
+	Console is the class representing the Enterprise debug console.  While it is stripped from the
+	Release and Dist builds, it is the only Entperprise object that operates at a lower level than
+	Application.
 
-// Spdlog includes (should be portable)
+	Currently, the console is only used to output display information.
+*/
+
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/fmt/ostr.h"
+
+// TODO: Include game title in console title via preprocessor
+#define EP_CONSOLE_TITLE L"Enterprise Debug Console"
 
 namespace Enterprise {
 
@@ -19,6 +28,13 @@ namespace Enterprise {
 	private:
 		static std::shared_ptr<spdlog::logger> s_CoreLogger;
 		static std::shared_ptr<spdlog::logger> s_ClientLogger;
+		static void InitLoggers() {
+			spdlog::set_pattern("%6n %^[%T]: %v%$");
+			s_CoreLogger = spdlog::stdout_color_mt("CORE");
+			s_CoreLogger->set_level(spdlog::level::trace);
+			s_ClientLogger = spdlog::stdout_color_mt("CLIENT");
+			s_ClientLogger->set_level(spdlog::level::trace);
+		};
 	};
 }
 
