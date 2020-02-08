@@ -13,25 +13,27 @@ namespace Enterprise {
 		Event::Dispatcher::Init(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 		EP_TRACE("Dispatcher.Init() called");
 	}
-
-	void Application::Tick()
-	{
-	}
-
-	void Application::Update()
-	{
-		Event::Dispatcher::Update();
-	}
-
-	void Application::Draw()
-	{
-	}
-
 	Application::~Application()
 	{
 		Event::Dispatcher::Cleanup();
 		EP_TRACE("Application destroyed.");
 	}
+
+	void Application::SimStep(float deltaTime)
+	{
+	}
+
+	void Application::Update(float deltaTime)
+	{
+		Event::Dispatcher::Update();
+	}
+	void Application::PostUpdate(float deltaTime)
+	{
+	}
+	void Application::Draw(float simInterp)
+	{
+	}
+
 
 	bool Application::OnEvent(Event::EventPtr e)
 	{

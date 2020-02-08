@@ -6,8 +6,8 @@
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
 
-#define UPDATE_SPEED 60
-#define DRAW_SPEED 60
+#define SIMSPEED 50 //Number of SimSteps per second.
+#define MAX_FRAMETIME 0.25 //Max length, in seconds, a frame should take.
 
 // WinMain:
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
@@ -25,14 +25,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	// Create the Application
 	auto app = Enterprise::CreateApplication();
 
-	// Set up timers for Update() and Draw() calls
-	__int64 CurrentTick, LastTick, TickFrequency;
-	__int64 UpdateAccumulator = 0, DrawAccumulator = 0; //TODO: Evaluate if a tick-based accumulator is a problem.
-	QueryPerformanceFrequency((LARGE_INTEGER*)& TickFrequency); //Gets the ticks per second.
-	QueryPerformanceCounter((LARGE_INTEGER*)& CurrentTick); //Gets the system time in ticks
-	LastTick = CurrentTick;
-	__int64 UpdateDeltaInTicks = TickFrequency / UPDATE_SPEED;
-	__int64 DrawDeltaInTicks = TickFrequency / DRAW_SPEED;
+	// Set up timers
+	LARGE_INTEGER QPF, CurrentCount, PreviousCount, SimStep_QPC, MaxFrameTime_QPC, accumulator, FrameTime;
+	accumulator.QuadPart = 0;
+	QueryPerformanceFrequency(&QPF); //Gets the frequency of the HPC.
+	QueryPerformanceCounter(&CurrentCount); //Gets the current count of the HPC.
+	//TODO: Handle if QPC fails.
+	PreviousCount = CurrentCount;
+	SimStep_QPC.QuadPart = QPF.QuadPart * (1.0 / SIMSPEED); //number of counts a SimStep should take.
+	MaxFrameTime_QPC.QuadPart = QPF.QuadPart * MAX_FRAMETIME; //maximum number of counts a frame should take.
 
 	// Main Loop:
 	MSG msg = { 0 };
@@ -46,27 +47,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
-			// Time and trigger Core Calls
+			// Time Core Calls
+			PreviousCount = CurrentCount;
+			QueryPerformanceCounter(&CurrentCount);
+			FrameTime.QuadPart = min((CurrentCount.QuadPart - PreviousCount.QuadPart), MaxFrameTime_QPC.QuadPart);
+			accumulator.QuadPart += FrameTime.QuadPart;
 
-			// Tick
-			app->Tick();
-
-			LastTick = CurrentTick;
-			QueryPerformanceCounter((LARGE_INTEGER*)& CurrentTick);
-			UpdateAccumulator += CurrentTick - LastTick;
-			DrawAccumulator += CurrentTick - LastTick;
-
-			// Update
-			if (UpdateAccumulator >= UpdateDeltaInTicks) {
-				app->Update();
-				UpdateAccumulator -= UpdateDeltaInTicks;
+			while (accumulator.QuadPart >= SimStep_QPC.QuadPart)
+			{
+				app->SimStep(SIMSPEED);
+				accumulator.QuadPart -= SimStep_QPC.QuadPart;
 			}
-			// Draw
-			if (DrawAccumulator >= DrawDeltaInTicks) {
-				app->Draw();// app->Draw(double(UpdateAccumulator / UpdateDeltaInTicks));
-				DrawAccumulator = 0;
-			}
+			//TODO: Sleep thread here if waiting on Vsync
+			app->Update((float)FrameTime.QuadPart / (float)QPF.QuadPart);
+			app->PostUpdate((float)FrameTime.QuadPart / (float)QPF.QuadPart);
+			app->Draw((float)accumulator.QuadPart / (float)SimStep_QPC.QuadPart);
 		}
+
 		//// TODO: Make DestroyWindow a platform-agnostic callback
 		//if (!game.isRunning)
 		//	DestroyWindow(hWnd);

@@ -21,10 +21,13 @@ namespace Enterprise
 	{
 	public:
 		Application(); // Called at program start
-		void Tick(); // Called as frequently as possible
-		void Update(); // Called at Update Rate (fixed timestep)
-		void Draw(); // Called when rendering (based on framerate settings)
 		virtual ~Application(); // Called at program end
+
+		void SimStep(float deltaTime); // Called at SimRate (configurable per title)
+
+		void Update(float deltaTime); // Called at the start of every frame
+		void PostUpdate(float deltaTime); // Called after Update()
+		void Draw(float simInterp); // Called at the end of every frame
 
 		bool OnEvent(Event::EventPtr e);
 	};
