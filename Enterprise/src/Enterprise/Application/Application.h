@@ -29,7 +29,8 @@ namespace Enterprise
 		void PostUpdate(float deltaTime); // Called after Update()
 		void Draw(float simInterp); // Called at the end of every frame
 
-		bool OnEvent(Event::EventPtr e);
+	private:
+		static bool OnEvent_CoreApp(Event::EventPtr e); //Event handler for Engine-side Application.
 	};
 
 	// Creator/getter for client application.  Defined in Client.

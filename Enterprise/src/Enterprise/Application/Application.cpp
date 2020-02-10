@@ -7,11 +7,24 @@
 #include "Window.h"
 
 namespace Enterprise {
+	
+	// EVENT HANDLER ------------------------------------------------------------------------------
+	bool Application::OnEvent_CoreApp(Event::EventPtr e)
+	{
+		EP_TRACE(e);
+		return false;
+	}
+	
+	// CONSTRUCTOR DESTRUCTOR ---------------------------------------------------------------------
 	Application::Application()
 	{
 		EP_TRACE("Application created!");
-		Event::Dispatcher::Init(std::bind(&Application::OnEvent, this, std::placeholders::_1));
+		Event::Dispatcher::Init();
 		EP_TRACE("Dispatcher.Init() called");
+
+		// Temporary: Subscribe to all core events except for mouse events
+		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent_CoreApp);
+		Event::Dispatcher::UnsubscribeFromType(Event::TypeIDs::MousePosition, OnEvent_CoreApp);
 	}
 	Application::~Application()
 	{
@@ -19,6 +32,7 @@ namespace Enterprise {
 		EP_TRACE("Application destroyed.");
 	}
 
+	// CORE CALLS ---------------------------------------------------------------------------------
 	void Application::SimStep(float deltaTime)
 	{
 	}
@@ -32,11 +46,5 @@ namespace Enterprise {
 	}
 	void Application::Draw(float simInterp)
 	{
-	}
-
-
-	bool Application::OnEvent(Event::EventPtr e)
-	{
-		return false;
 	}
 }

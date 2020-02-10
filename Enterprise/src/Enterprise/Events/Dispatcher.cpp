@@ -13,46 +13,47 @@ namespace Enterprise::Event {
 	// Static definitions
 	std::vector<EventPtr> Dispatcher::eventBuffer;
 	std::list<EventCallbackPtr>* Dispatcher::callbackLists;
-	EventCallbackPtr Dispatcher::applicationCallback;
+	//EventCallbackPtr Dispatcher::applicationCallback;
 	std::vector<unsigned int>* Dispatcher::EventCategoryMatrix;
 	unsigned int Dispatcher::m_NumOfEventTypes = 0, Dispatcher::m_NumOfEventCategories = 0;
 
 	// FUNCTIONS =========================================================================================================
 
 	// Core Calls --------------------------------------------------------------------------------------------------------
-	void Dispatcher::Init(EventCallbackPtr BaseAppCallback)
+	void Dispatcher::Init()// EventCallbackPtr BaseAppCallback)
 	{
-		// Store the pointer to Application's event callback
-		applicationCallback = BaseAppCallback;
-
-		// Allocate resources -------------------------------------------------------
-		GetClientListSizes(); //Gets m_NumOfEventTypes and m_NumOfEventCategories
-		eventBuffer.reserve(20); //Allocate Event buffer TODO: Set size from file
-		callbackLists = new std::list<EventCallbackPtr>[m_NumOfEventTypes]; //Create callback lists
+		GetClientListSizes(); // Get m_NumOfEventTypes and m_NumOfEventCategories
 		EventCategoryMatrix = new std::vector<unsigned int>[m_NumOfEventCategories]; //Create ECM
 
-		// Populate Event Category Matrix -------------------------------------------
-		for (unsigned int i = 0; i < m_NumOfEventTypes; ++i)
+		// Loop through all event types and place them in the appropriate "all" category.
+		// We start at i=1 to skip TypeIDs::_None.
+		for (unsigned int i = 1; i < m_NumOfEventTypes; ++i)
 		{
-			switch (i) //Populate the "All" ECM categories while we're here
+			switch (i)
 			{
-			case TypeIDs::_None:
-				break;
+			// TypeIDs::_NumOfCoreTypes == Client's _None.  We skip it.
 			case TypeIDs::_NumOfCoreTypes:
 				break;
 			default:
-				EventCategoryMatrix[
-					i > TypeIDs::_NumOfCoreTypes ?
-						CategoryIDs::_All :
-						CategoryIDs::_NumOfCoreCategories].emplace_back(i); //_NumOfCoreCategories == Client's _All.
+				if (i < TypeIDs::_NumOfCoreTypes)
+					EventCategoryMatrix[CategoryIDs::_All].emplace_back(i);
+				else
+					//_NumOfCoreCategories == Client's _All.
+					EventCategoryMatrix[CategoryIDs::_NumOfCoreCategories].emplace_back(i);
+				break;
 			}
 		}
-		// Core
+		// Populate Core Categories
 		#include "Generation/StartECM.h"
 		#include "CoreEvents_CategoryList.h"
 		#include "Generation/Stop.h"
-		// Client
+		// Populate Client Categories
 		InitClientECM();
+
+		// Allocate event buffer (TODO: Set size from file)
+		eventBuffer.reserve(20);
+		// Allocate callback lists
+		callbackLists = new std::list<EventCallbackPtr>[m_NumOfEventTypes];
 	}
 
 	void Dispatcher::Update() // Every update, dispatch the Event buffer, then clear it.
@@ -98,7 +99,7 @@ namespace Enterprise::Event {
 			++callbackIterator)
 		{
 			// If the callback is a match, remove it.
-			if ((*callbackIterator).target<bool(*)(EventPtr)>() == callback.target<bool(*)(EventPtr)>()) {
+			if ((*callbackIterator) == callback) {
 				callbackLists[typeID].erase(callbackIterator);
 				return;
 			}
@@ -116,10 +117,5 @@ namespace Enterprise::Event {
 		{
 			UnsubscribeFromType(*eventTypeIterator, callback);
 		}
-	}
-
-	void Dispatcher::AppEvent(EventPtr e)
-	{
-		applicationCallback(e);
 	}
 }

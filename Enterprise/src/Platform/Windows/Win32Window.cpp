@@ -95,7 +95,7 @@ namespace Enterprise::Platform {
 		{
 			// If false, the window class failed to register for some reason.
 			//EP_FATAL("A window class failed to register with Windows.  Window title: {}", m_Settings.Title);
-			EP_APPLICATIONEVENT(Event::TerminateApplication, 1);
+			EP_QUICKEVENT(Event::TerminateApplication, 1);
 		}
 
 		// Calculate initial window size.
@@ -121,7 +121,7 @@ namespace Enterprise::Platform {
 		{
 			// If false, the window wasn't created for some reason.
 			//EP_FATAL("An attempt to create a window failed in Windows.  Window title: {}", m_Settings.Title);
-			EP_APPLICATIONEVENT(Event::TerminateApplication, 1);
+			EP_QUICKEVENT(Event::TerminateApplication, 1);
 		}
 		else
 			ShowWindow(hWnd, SW_SHOWNORMAL);					// Tell Windows to display the window. (TODO: Handle alternative start modes)

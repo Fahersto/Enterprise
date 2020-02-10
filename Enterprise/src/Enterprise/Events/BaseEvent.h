@@ -21,7 +21,7 @@ namespace Enterprise::Event {
 	// Useful pointer types
 	//#define EP_EVENTPTR std::shared_ptr<Enterprise::Event::Event>
 	typedef std::shared_ptr<Enterprise::Event::Event> EventPtr;
-	typedef std::function<bool(EventPtr)> EventCallbackPtr;
+	typedef bool(*EventCallbackPtr)(EventPtr);
 
 	// FUNCTIONS ----------------------------------------------------------------------------------
 

@@ -6,6 +6,7 @@ Enterprise::Window* gameWindow;
 
 bool OnEvent(Enterprise::Event::EventPtr e)
 {
+	EP_TRACE(e);
 	return false;
 }
 
@@ -18,10 +19,8 @@ public:
 	{
 		//TODO: Conditionalize starting conditions between debug and release builds.
 
-		//// Subscribe to all events (except for mouse position events).
-		//Enterprise::Event::Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
-		//Enterprise::Event::Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
-		//Enterprise::Event::Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
+		// Temporary: Subscribe to all client events
+		Enterprise::Event::Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
 
 		gameWindow = Enterprise::Window::Create();
 	}

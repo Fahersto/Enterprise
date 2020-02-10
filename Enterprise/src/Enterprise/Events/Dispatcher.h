@@ -26,18 +26,14 @@ namespace Enterprise::Event
 		static void UnsubscribeFromCategory(unsigned int categoryID, EventCallbackPtr callback);
 
 		// Dispatch functions
-		static void AppEvent(EventPtr e);
 		inline static void Broadcast(EventPtr e) { eventBuffer.emplace_back(e); };
 
 		// Core Calls
-		static void Init(EventCallbackPtr BaseAppCallback);
+		static void Init();
 		static void Update();
 		static void Cleanup();
 
 	private:
-		// Appliation callback pointer (used to direct dispatch events to the Application)
-		static EventCallbackPtr applicationCallback;
-
 		// Event buffer (all Event types, in broadcast order)
 		static std::vector<EventPtr> eventBuffer;
 
@@ -55,5 +51,4 @@ namespace Enterprise::Event
 
 	// Express create and disptach a new Event.
 	#define EP_QUICKEVENT(eType, ...) Enterprise::Event::Dispatcher::Broadcast(Enterprise::Event::CreateEPEvent<eType>(__VA_ARGS__))
-	#define EP_APPLICATIONEVENT(eType, ...) Enterprise::Event::Dispatcher::AppEvent(Enterprise::Event::CreateEPEvent<eType>(__VA_ARGS__))
 }
