@@ -6,7 +6,6 @@
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
 
-
 // Windows-specific window create function
 #ifdef EP_PLATFORM_WINDOWS
 namespace Enterprise {
@@ -16,13 +15,18 @@ namespace Enterprise {
 
 namespace Enterprise::Platform {
 
+	int WindowCount = 0;
+
 	// WinProc (Windows window event handler)
 	LRESULT CALLBACK Win32WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 		switch (message)
 		{
-		case WM_DESTROY:
-			// TODO: Dispatch, Handle Are You Sure situations
-			PostQuitMessage(0);
+		case WM_CLOSE:
+			// TODO: Integrate with event system so that games can handle the close button.
+			DestroyWindow(hWnd);
+			WindowCount--;
+			if (WindowCount <= 0)
+				PostQuitMessage(0);
 			return 0;
 			break;
 		case WM_ACTIVATEAPP:
@@ -121,6 +125,8 @@ namespace Enterprise::Platform {
 		}
 		else
 			ShowWindow(hWnd, SW_SHOWNORMAL);					// Tell Windows to display the window. (TODO: Handle alternative start modes)
+	
+		WindowCount++;
 	}
 
 	Win32Window::~Win32Window()
