@@ -85,7 +85,7 @@ namespace Enterprise::Platform {
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);				// Default mouse cursor.
 		wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);	// Fill color when window is redrawn (set to none).
 		wc.lpszMenuName = NULL;									// Menu name (none, because we have no menus).
-		wc.lpszClassName = L"ENTERPRISEWNDCLASS";				// Friendly name for this window class.
+		wc.lpszClassName = L"EP_WNDCLASS";						// Friendly name for this window class.
 		
 		if (!RegisterClassEx(&wc)) // Register the class
 		{
@@ -101,7 +101,7 @@ namespace Enterprise::Platform {
 
 		// Create window.
 		hWnd = CreateWindowEx(NULL,							// We're not using an extended window style
-			L"ENTERPRISEWNDCLASS",
+			L"EP_WNDCLASS",
 			m_Settings.Title.c_str(),						// Window title
 			winStyle,
 			CW_USEDEFAULT,									// X-position of the window (TODO: Set this via command line?)
