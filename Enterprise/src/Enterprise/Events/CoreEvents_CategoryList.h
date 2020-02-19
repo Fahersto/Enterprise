@@ -26,7 +26,7 @@
 
 // Application-related Events.
 EVENTCATEGORY(Application, \
-	TypeIDs::TerminateApplication)
+	TypeIDs::QuitApplication)
 // Window Events.
 EVENTCATEGORY(Window, \
 	TypeIDs::WindowClose, \

@@ -31,7 +31,7 @@
 // Application events ---------------------------------------------------------
 
 // Close the program (Handled by Application).
-EVENTTYPE_1(TerminateApplication, int, code)
+EVENTTYPE_1(QuitApplication, int, code)
 
 // Window events --------------------------------------------------------------
 

@@ -1,7 +1,6 @@
 #include <Enterprise.h>
 #include "Events/SandboxEvents.h"
 
-//using namespace Sandbox;
 Enterprise::Window* gameWindow;
 
 bool OnEvent(Enterprise::Event::EventPtr e)
@@ -15,12 +14,12 @@ class SandboxApp : public Enterprise::Application
 {
 public:
 	//Called before everything else in the application.  Create windows and set up initial game state here.
+	//TODO: Conditionalize starting conditions between debug and release builds.
 	SandboxApp()
 	{
-		//TODO: Conditionalize starting conditions between debug and release builds.
-
 		// Temporary: Subscribe to all client events
-		Enterprise::Event::Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
+		using Enterprise::Event::Dispatcher;
+		Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
 
 		gameWindow = Enterprise::Window::Create();
 	}
