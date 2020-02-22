@@ -7,20 +7,33 @@
 #include "Window.h"
 
 namespace Enterprise {
-	
+
+	Application* Application::m_Instance = nullptr;
+
 	// EVENT HANDLER ------------------------------------------------------------------------------
 	bool Application::OnEvent_CoreApp(Event::EventPtr e)
 	{
 		EP_TRACE(e);
+		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
+			Quit();
 		return false;
+	}
+
+	void Application::Quit()
+	{
+		m_Instance->isRunning = false;
 	}
 	
 	// CONSTRUCTOR DESTRUCTOR ---------------------------------------------------------------------
 	Application::Application()
 	{
-		EP_TRACE("Application created!");
+		if (!m_Instance)
+			m_Instance = this;
+		else
+			EP_ERROR("Application constructor called twice.  Application is intended to be a singleton.");
+
+		EP_TRACE("Application created");
 		Event::Dispatcher::Init();
-		EP_TRACE("Dispatcher.Init() called");
 
 		// Temporary: Subscribe to all core events except for mouse events
 		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent_CoreApp);
@@ -29,22 +42,21 @@ namespace Enterprise {
 	Application::~Application()
 	{
 		Event::Dispatcher::Cleanup();
-		EP_TRACE("Application destroyed.");
+		EP_TRACE("Application destroyed");
 	}
 
 	// CORE CALLS ---------------------------------------------------------------------------------
-	void Application::SimStep(float deltaTime)
+	void Application::SimStep()
 	{
+		//Propogate SimStep so that physics systems can be ticked
 	}
 
-	void Application::Update(float deltaTime)
+	bool Application::FrameStep(float deltaTime, float simPhase)
 	{
 		Event::Dispatcher::Update();
-	}
-	void Application::PostUpdate(float deltaTime)
-	{
-	}
-	void Application::Draw(float simInterp)
-	{
+
+		//Propogate Update, PostUpdate, and Draw through the engine
+
+		return isRunning;
 	}
 }

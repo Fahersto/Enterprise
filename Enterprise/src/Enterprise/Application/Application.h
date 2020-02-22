@@ -20,17 +20,18 @@ namespace Enterprise
 	class Application
 	{
 	public:
-		Application(); // Called at program start
-		virtual ~Application(); // Called at program end
+		Application(); // Extended in children
+		virtual ~Application();
 
-		void SimStep(float deltaTime); // Called at SimRate (configurable per title)
+		void SimStep(); // Called at SimRate (fixed rate, configurable per title)
+		bool FrameStep(float deltaTime, float simPhase); // Called every frame (variable rate)
 
-		void Update(float deltaTime); // Called at the start of every frame
-		void PostUpdate(float deltaTime); // Called after Update()
-		void Draw(float simInterp); // Called at the end of every frame
-
+		static void Quit();
 	private:
-		static bool OnEvent_CoreApp(Event::EventPtr e); //Event handler for Engine-side Application.
+		static Application* m_Instance;
+		bool isRunning = true;
+
+		static bool OnEvent_CoreApp(Event::EventPtr e);
 	};
 
 	// Creator/getter for client application.  Defined in Client.

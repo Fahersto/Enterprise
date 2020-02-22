@@ -2,7 +2,7 @@
 #include "Win32Window.h"
 
 #include "Enterprise/Application/Console.h"
-
+#include "Enterprise/Application/Application.h"
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
 
@@ -26,7 +26,7 @@ namespace Enterprise::Platform {
 			DestroyWindow(hWnd);
 			WindowCount--;
 			if (WindowCount <= 0)
-				PostQuitMessage(0);
+				Application::Quit();
 			return 0;
 			break;
 		case WM_ACTIVATEAPP:

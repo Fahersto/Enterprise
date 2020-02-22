@@ -26,7 +26,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	auto app = Enterprise::CreateApplication();
 
 	// Set up timers
-	LARGE_INTEGER QPF, CurrentCount, PreviousCount, SimStep_QPC, MaxFrameTime_QPC, accumulator, FrameTime;
+	LARGE_INTEGER QPF, CurrentCount, PreviousCount, SimStep_QPC, MaxFrameTime_QPC, accumulator, FrameTime{};
 	accumulator.QuadPart = 0;
 	QueryPerformanceFrequency(&QPF); //Gets the frequency of the HPC.
 	QueryPerformanceCounter(&CurrentCount); //Gets the current count of the HPC.
@@ -37,7 +37,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 	// Main Loop:
 	MSG msg = { 0 };
-	while (WM_QUIT != msg.message)
+	do
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -55,19 +55,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 			while (accumulator.QuadPart >= SimStep_QPC.QuadPart)
 			{
-				app->SimStep(SIMSPEED);
+				app->SimStep();
 				accumulator.QuadPart -= SimStep_QPC.QuadPart;
 			}
-			//TODO: Sleep thread here if waiting on Vsync
-			app->Update((float)FrameTime.QuadPart / (float)QPF.QuadPart);
-			app->PostUpdate((float)FrameTime.QuadPart / (float)QPF.QuadPart);
-			app->Draw((float)accumulator.QuadPart / (float)SimStep_QPC.QuadPart);
-		}
 
-		//// TODO: Make DestroyWindow a platform-agnostic callback
-		//if (!game.isRunning)
-		//	DestroyWindow(hWnd);
-	}
+			//TODO: Sleep until next frame if syncing frames
+		}
+	} while (app->FrameStep((float)FrameTime.QuadPart / (float)QPF.QuadPart, (float)accumulator.QuadPart / (float)SimStep_QPC.QuadPart));
 
 	delete app; // Clean up the Aplication
 
