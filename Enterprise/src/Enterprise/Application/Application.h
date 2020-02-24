@@ -35,5 +35,5 @@ namespace Enterprise
 	};
 
 	// Creator/getter for client application.  Defined in Client.
-	Application* CreateApplication();
+	extern Application* CreateApplication();
 }

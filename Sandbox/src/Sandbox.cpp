@@ -22,8 +22,6 @@ public:
 		Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
 
 		gameWindow = Enterprise::Window::Create();
-
-		EP_ASSERT(1000 == 1);
 	}
 
 	//Called at program end

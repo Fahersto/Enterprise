@@ -18,7 +18,3 @@
 //Event System
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
-
-// -------------------- Entry Point! ------------------
-#include "Enterprise/Application/EntryPoint.h"
-// -------------------- Entry Point! ------------------

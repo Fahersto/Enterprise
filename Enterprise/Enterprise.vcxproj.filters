@@ -35,9 +35,6 @@
     <ClInclude Include="src\Enterprise\Application\Console.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Application\EntryPoint.h">
-      <Filter>Enterprise\Application</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Application\Window.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
