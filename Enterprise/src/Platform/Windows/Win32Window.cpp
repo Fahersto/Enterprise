@@ -91,15 +91,11 @@ namespace Enterprise::Platform {
 		wc.lpszMenuName = NULL;									// Menu name (none, because we have no menus).
 		wc.lpszClassName = L"EP_WNDCLASS";						// Friendly name for this window class.
 		
-		if (!RegisterClassEx(&wc)) // Register the class
-		{
-			// If false, the window class failed to register for some reason.
-			//EP_FATAL("A window class failed to register with Windows.  Window title: {}", m_Settings.Title);
-			EP_QUICKEVENT(Event::QuitApplication, 1);
-		}
+		// Register the class
+		EP_ASSERT(RegisterClassEx(&wc)); // If zero, the window class failed to register for some reason.
 
 		// Calculate initial window size.
-		RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height };
+		RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height }; // TODO: set up dynamic resizing of window
 		DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;	// Window style
 		AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
 
@@ -117,15 +113,8 @@ namespace Enterprise::Platform {
 			hInstance,
 			NULL);											// We don't have multiple windows, NULL
 
-		if (!hWnd)
-		{
-			// If false, the window wasn't created for some reason.
-			//EP_FATAL("An attempt to create a window failed in Windows.  Window title: {}", m_Settings.Title);
-			EP_QUICKEVENT(Event::QuitApplication, 1);
-		}
-		else
-			ShowWindow(hWnd, SW_SHOWNORMAL);					// Tell Windows to display the window. (TODO: Handle alternative start modes)
-	
+		EP_ASSERT(hWnd); // If NULL, the window wasn't created for some reason.
+		ShowWindow(hWnd, SW_SHOWNORMAL); // Tell Windows to display the window.
 		WindowCount++;
 	}
 

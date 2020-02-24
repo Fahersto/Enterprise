@@ -32,9 +32,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		// Set up timers
 		LARGE_INTEGER QPF, CurrentCount, PreviousCount, SimStep_QPC, MaxFrameTime_QPC, accumulator, FrameTime{};
 		accumulator.QuadPart = 0;
-		QueryPerformanceFrequency(&QPF); //Gets the frequency of the HPC.
-		QueryPerformanceCounter(&CurrentCount); //Gets the current count of the HPC.
-		//TODO: Handle if QPC fails.
+		EP_ASSERT(QueryPerformanceFrequency(&QPF)); //Gets the frequency of the HPC.
+		EP_ASSERT(QueryPerformanceCounter(&CurrentCount)); //Gets the current count of the HPC.
 		PreviousCount = CurrentCount;
 		SimStep_QPC.QuadPart = QPF.QuadPart * (1.0 / SIMSPEED); //number of counts a SimStep should take.
 		MaxFrameTime_QPC.QuadPart = QPF.QuadPart * MAX_FRAMETIME; //maximum number of counts a frame should take.
