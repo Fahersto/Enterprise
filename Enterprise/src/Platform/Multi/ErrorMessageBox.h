@@ -6,5 +6,5 @@
 */
 
 namespace Enterprise::Platform {
-	void DisplayErrorDialog(std::wstring& ErrorMessage); //TODO: add a version which accepts std::string
+	void DisplayErrorDialog(std::wstring& ErrorMessage);
 }

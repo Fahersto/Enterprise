@@ -14,7 +14,6 @@ class SandboxApp : public Enterprise::Application
 {
 public:
 	//Called before everything else in the application.  Create windows and set up initial game state here.
-	//TODO: Conditionalize starting conditions between debug and release builds.
 	SandboxApp()
 	{
 		// Temporary: Subscribe to all client events

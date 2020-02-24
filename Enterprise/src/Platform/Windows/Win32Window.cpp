@@ -52,8 +52,8 @@ namespace Enterprise::Platform {
 
 			// Get header
 			LPBYTE lpb = new BYTE[dwSize];
-			if (lpb == NULL) { return 0; } //TODO: Handle this raw input error
 			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)); //Get input data
+			EP_ASSERT(lpb); // If lpb is NULL, there was a problem.
 			RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
 			// TODO: Use raw input data
 			delete[] lpb;

@@ -26,8 +26,7 @@ namespace Enterprise::Event {
 		EventCategoryMatrix = new std::vector<unsigned int>[m_NumOfEventCategories]; //Create ECM
 
 		// Loop through all event types and place them in the appropriate "all" category.
-		// We start at i=1 to skip TypeIDs::_None.
-		for (unsigned int i = 1; i < m_NumOfEventTypes; ++i)
+		for (unsigned int i = 1; i < m_NumOfEventTypes; ++i) // We start at i=1 to skip TypeIDs::_None.
 		{
 			switch (i)
 			{
@@ -105,7 +104,6 @@ namespace Enterprise::Event {
 			}
 		}
 		// If we haven't returned, the callback wasn't found.
-		// TODO: return stack trace?
 		EP_WARN("Dispatcher: UnsubscribeFromType attempted on a callback which wasn't registered. TypeID: {}", typeID);
 	}
 
