@@ -18,6 +18,8 @@
 #include <io.h>
 #include <fcntl.h>
 
+#include <exception>
+
 #ifdef EP_PLATFORM_WINDOWS
 #include <windows.h>
 #include <windowsx.h>

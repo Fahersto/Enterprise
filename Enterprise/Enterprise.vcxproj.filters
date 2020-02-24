@@ -7,6 +7,9 @@
     <Filter Include="Enterprise\Application">
       <UniqueIdentifier>{A9DF3BAF-95D9-6401-7E46-FB116ADFCA6D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Core">
+      <UniqueIdentifier>{FEFEE0C9-6A8A-4E8E-739B-D182DFA5AA8E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Enterprise\Events">
       <UniqueIdentifier>{0AC83ECB-76DE-3C61-BF55-C8822BAB0DE9}</UniqueIdentifier>
     </Filter>
@@ -16,12 +19,14 @@
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform\Multi">
+      <UniqueIdentifier>{24D62594-10A4-199A-F937-8AC0E5A4F5FE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform\Windows">
       <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Core.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application\Application.h">
@@ -63,9 +68,15 @@
     <ClInclude Include="src\Enterprise\Events\Generation\Stop.h">
       <Filter>Enterprise\Events\Generation</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Multi\ErrorMessageBox.h">
+      <Filter>Platform\Multi</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Windows\Win32Window.h">
       <Filter>Platform\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Core\Assert.h" />
+    <ClInclude Include="src\Enterprise\Core\Exceptions.h" />
+    <ClInclude Include="src\Core.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
@@ -75,14 +86,15 @@
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Windows\Win32Console.cpp">
+      <Filter>Platform\Windows</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\Win32Window.cpp">
       <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Platform\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\Win32Console.cpp">
-      <Filter>Platform\Windows</Filter>
-    </ClCompile>
+    <ClCompile Include="src\Platform\Multi\ErrorMessageBox.cpp" />
   </ItemGroup>
 </Project>
