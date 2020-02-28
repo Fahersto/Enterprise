@@ -2,7 +2,9 @@
 #include "Application.h"
 
 #include "Console.h"
+
 #include "Enterprise/Events/Dispatcher.h"
+#include "Enterprise/Time/Time.h"
 
 #include "Window.h"
 
@@ -48,11 +50,18 @@ namespace Enterprise {
 	// CORE CALLS ---------------------------------------------------------------------------------
 	void Application::SimStep()
 	{
-		//Propogate SimStep so that physics systems can be ticked
+		//Time::m_deltaTime = ...?
+		Time::m_simPhase = 1.0f; // or 0.0f?
+
+		//Propogate SimStep here
 	}
 
 	bool Application::FrameStep(float deltaTime, float simPhase)
 	{
+		// Set values in Time system
+		Time::m_deltaTime = deltaTime;
+		Time::m_simPhase = simPhase;
+
 		Event::Dispatcher::Update();
 
 		//Propogate Update, PostUpdate, and Draw through the engine

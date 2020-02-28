@@ -1,10 +1,10 @@
 #pragma once
 
 /* Enterprise.h
-	This header includes all headers needed by the client.  All a client should need to include will be included when
-	including this file.
+	This file includes all of the core engine library headers needed by the client.  It shouldn't be
+	necessary for a client code file to include other headers from the Enterprise engine library.
 	
-	This file should not be included anywhere in Enterprise.  This should only be included externally.
+	This file should not be included anywhere in the engine library.
 */
 
 //Core defines and macros
@@ -18,3 +18,6 @@
 //Event System
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
+
+//Time System
+#include "Enterprise/Time/Time.h"
