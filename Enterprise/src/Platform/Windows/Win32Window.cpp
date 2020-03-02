@@ -1,7 +1,7 @@
 #include "EP_PCH.h"
 #include "Win32Window.h"
 
-#include "Enterprise/Application/Console.h"
+#include "Enterprise/Core/Console.h"
 #include "Enterprise/Application/Application.h"
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"

@@ -8,5 +8,8 @@
 #include "Enterprise/Core/Assert.h"
 #include "Enterprise/Core/Exceptions.h"
 
+// Logging
+#include "Enterprise/Core/Console.h"
+
 // Quickly assemble bit fields
 #define BIT(x) (1 << x)

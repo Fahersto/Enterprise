@@ -16,6 +16,9 @@
     <Filter Include="Enterprise\Events\Generation">
       <UniqueIdentifier>{05C50B17-F17F-FBC2-9A37-740D86D14553}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Time">
+      <UniqueIdentifier>{4437EAC9-B0C2-578E-B9D3-DA8225DEB38E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
     </Filter>
@@ -33,13 +36,13 @@
     <ClInclude Include="src\Enterprise\Application\Application.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Application\Console.h">
-      <Filter>Enterprise\Application</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Application\Window.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Core\Assert.h">
+      <Filter>Enterprise\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Core\Console.h">
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Core\Exceptions.h">
@@ -72,13 +75,15 @@
     <ClInclude Include="src\Enterprise\Events\Generation\Stop.h">
       <Filter>Enterprise\Events\Generation</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Time\Time.h">
+      <Filter>Enterprise\Time</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Multi\ErrorMessageBox.h">
       <Filter>Platform\Multi</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\Win32Window.h">
       <Filter>Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Time\Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
@@ -88,8 +93,14 @@
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
     </ClCompile>
+    <ClCompile Include="src\Enterprise\Time\Time.cpp">
+      <Filter>Enterprise\Time</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Multi\ErrorMessageBox.cpp">
       <Filter>Platform\Multi</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\Time_Win32.cpp">
+      <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\Win32Console.cpp">
       <Filter>Platform\Windows</Filter>
@@ -100,6 +111,5 @@
     <ClCompile Include="src\Platform\Windows\WinMain.cpp">
       <Filter>Platform\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Time\Time.cpp" />
   </ItemGroup>
 </Project>

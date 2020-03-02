@@ -1,8 +1,8 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-#include "Enterprise/Application/Console.h"
 #include "Enterprise/Application/Application.h"
+#include "Enterprise/Time/Time.h"
 
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
@@ -48,23 +48,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			else
-			{
-				// Time Core Calls
-				PreviousCount = CurrentCount;
-				QueryPerformanceCounter(&CurrentCount);
-				FrameTime.QuadPart = min((CurrentCount.QuadPart - PreviousCount.QuadPart), MaxFrameTime_QPC.QuadPart);
-				accumulator.QuadPart += FrameTime.QuadPart;
-
-				while (accumulator.QuadPart >= SimStep_QPC.QuadPart)
-				{
-					app->SimStep();
-					accumulator.QuadPart -= SimStep_QPC.QuadPart;
-				}
-
-				//TODO: Sleep until next frame if syncing frames
-			}
-		} while (app->FrameStep((float)FrameTime.QuadPart / (float)QPF.QuadPart, (float)accumulator.QuadPart / (float)SimStep_QPC.QuadPart));
+		} while (app->Run());
 
 		delete app; // Clean up the Aplication
 

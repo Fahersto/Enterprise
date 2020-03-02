@@ -20,20 +20,23 @@ namespace Enterprise
 	class Application
 	{
 	public:
-		Application(); // Extended in children
+		// Steps the entire engine.  Returns true until application stops running.
+		bool Run();
+
+		// Call this to quit the application at the end of the current frame.
+		static void Quit();
+
+		Application();
 		virtual ~Application();
 
-		void SimStep(); // Called at SimRate (fixed rate, configurable per title)
-		bool FrameStep(float deltaTime, float simPhase); // Called every frame (variable rate)
-
-		static void Quit();
 	private:
+		// Event Handler
+		static bool OnEvent_CoreApp(Event::EventPtr e);
+
 		static Application* m_Instance;
 		bool isRunning = true;
-
-		static bool OnEvent_CoreApp(Event::EventPtr e);
 	};
 
-	// Creator/getter for client application.  Defined in Client.
+	// Creator/getter for client application.  Defined in client.
 	extern Application* CreateApplication();
 }

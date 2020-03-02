@@ -2,7 +2,7 @@
 #include "Dispatcher.h"
 #include "CoreEvents.h"
 
-#include "Enterprise/Application/Console.h"
+#include "Enterprise/Core/Console.h"
 
 namespace Enterprise::Event {
 

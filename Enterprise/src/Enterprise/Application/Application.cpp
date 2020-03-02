@@ -1,71 +1,76 @@
 #include "EP_PCH.h"
+#include "Core.h"
+
+// Application stuff
 #include "Application.h"
+#include "Window.h"
 
-#include "Console.h"
-
+// Systems
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Time/Time.h"
 
-#include "Window.h"
+namespace Enterprise 
+{
+	Application* Application::m_Instance = nullptr; // Singleton instance
 
-namespace Enterprise {
-
-	Application* Application::m_Instance = nullptr;
-
-	// EVENT HANDLER ------------------------------------------------------------------------------
-	bool Application::OnEvent_CoreApp(Event::EventPtr e)
-	{
-		EP_TRACE(e);
-		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
-			Quit();
-		return false;
-	}
-
-	void Application::Quit()
-	{
-		m_Instance->isRunning = false;
-	}
-	
-	// CONSTRUCTOR DESTRUCTOR ---------------------------------------------------------------------
+	// Constructor
 	Application::Application()
 	{
+		// Singleton handling
 		if (!m_Instance)
 			m_Instance = this;
 		else
 			EP_ERROR("Application constructor called twice.  Application is intended to be a singleton.");
 
-		EP_TRACE("Application created");
+		// Initialize Systems
 		Event::Dispatcher::Init();
+		Time::Init();
+		// File::Init();
+		// Network::Init();
+		// Input::Init();
+		// Graphics::Init();
+		// Audio::Init();
+		// ECS::Init();
+		// StateStack::Init();
 
 		// Temporary: Subscribe to all core events except for mouse events
 		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent_CoreApp);
 		Event::Dispatcher::UnsubscribeFromType(Event::TypeIDs::MousePosition, OnEvent_CoreApp);
+		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::QuitApplication, OnEvent_CoreApp); //Uncomment this when removing above two lines
 	}
+
+	// Destructor
 	Application::~Application()
 	{
 		Event::Dispatcher::Cleanup();
-		EP_TRACE("Application destroyed");
 	}
 
-	// CORE CALLS ---------------------------------------------------------------------------------
-	void Application::SimStep()
+	// Run loop
+	bool Application::Run()
 	{
-		//Time::m_deltaTime = ...?
-		Time::m_simPhase = 1.0f; // or 0.0f?
+		while (Time::SimStep())
+		{
+			// SimStep here
+		}
 
-		//Propogate SimStep here
-	}
+		Time::FrameStep_begin();
 
-	bool Application::FrameStep(float deltaTime, float simPhase)
-	{
-		// Set values in Time system
-		Time::m_deltaTime = deltaTime;
-		Time::m_simPhase = simPhase;
-
+		// FrameStep here
 		Event::Dispatcher::Update();
 
-		//Propogate Update, PostUpdate, and Draw through the engine
+		Time::FrameStep_end();
 
 		return isRunning;
 	}
+
+	// Event handler
+	bool Application::OnEvent_CoreApp(Event::EventPtr e)
+	{
+		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
+			Quit();
+		return true;
+	}
+
+	// Quit function
+	void Application::Quit() { m_Instance->isRunning = false; }
 }
