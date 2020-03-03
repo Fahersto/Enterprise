@@ -48,9 +48,9 @@ namespace Enterprise
 	// Run loop
 	bool Application::Run()
 	{
-		while (Time::SimStep())
+		while (Time::PhysFramePending())
 		{
-			// SimStep here
+			// PhysUpdate() here
 		}
 
 		Time::FrameStep_begin();
@@ -66,6 +66,7 @@ namespace Enterprise
 	// Event handler
 	bool Application::OnEvent_CoreApp(Event::EventPtr e)
 	{
+		EP_TRACE(e);
 		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
 			Quit();
 		return true;

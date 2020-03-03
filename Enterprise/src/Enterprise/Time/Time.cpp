@@ -1,24 +1,25 @@
 #include "EP_PCH.h"
 #include "Enterprise/Time/Time.h"
 
-// Length, in game-world seconds, each SimStep() represents.
-#define SIMSTEPLENGTH (5.0f) //TODO: Set in client
-// Longest amount of time we're allowed to call SimSteps() without a FrameStep().
-#define SIMSTEPCAP (6.0f) //TODO: Set in client
+// Length, in game-world seconds, each PhysFrame represents.
+#define PHYSFRAMELENGTH (1.0f / 50.0f) //TODO: Set in client
+// Longest amount of time we're allowed to call PhysFrames between Frames.
+#define PHYSREPEATCAP (3.0f * PHYSFRAMELENGTH) //TODO: Set in client
 
 // Vars for Tick()
 float runningTime = 0.0f, prevTime = 0.0f, tickDeltaReal = 0.0f, tickDeltaScaled = 0.0f;
 // Vars for frame-time getters
-float deltaTime = 0.0f, simPhase = 0.0f;
+float frameDelta = 0.0f, physPhase = 0.0f;
 // Vars for accumulation logic
-float timeScale = 1.0f, deltaTime_Accumulator = 0.0f, simStep_Accumulator = 0.0f, simStepRepeat_Accumulator = 0.0f;
+float timeScale = 1.0f, frameDelta_Accumulator = 0.0f, physFrame_Accumulator = 0.0f, physFrameRepeat_Accumulator = 0.0f;
 
 namespace Enterprise 
 {
 	// Getters ----------------------------------
 	float Time::RunningTime() { return runningTime; }
-	float Time::DeltaTime() { return deltaTime; }
-	float Time::SimPhase() { return simPhase; } //TODO: Prevent use in SimStep().
+	float Time::FrameDelta() { return frameDelta; }
+	float Time::PhysPhase() { return physPhase; } //TODO: Prevent use in PhysUpdate().
+	//float Time::PhysDelta()
 
 	// Setters ----------------------------------
 	void Time::SetTimeScale(float scalar) 
@@ -36,56 +37,56 @@ namespace Enterprise
 		tickDeltaScaled = tickDeltaReal * timeScale; // Convert into game-world time delta based on timeScale
 
 		// Increment accumulators
-		deltaTime_Accumulator += tickDeltaScaled; // Used to track game-seconds between frames
-		simStep_Accumulator += tickDeltaScaled; // Used to time SimStep() call frequency
-		simStepRepeat_Accumulator += tickDeltaReal; // Used to curb SimStep death spirals
+		frameDelta_Accumulator += tickDeltaScaled; // Used to track game-seconds between Frames
+		physFrame_Accumulator += tickDeltaScaled; // Used to time PhysUpdate() call frequency
+		physFrameRepeat_Accumulator += tickDeltaReal; // Used to curb PhysFrame death spirals
 	}
 
-	// Checks the timer for SimStep.  Returns true if SimStep() should be called.
-	bool Time::SimStep()
+	// Checks the timer for PhysFrame.  Returns true if PhysUpdate() should be called.
+	bool Time::PhysFramePending()
 	{
 		Tick();
 
 		// Prevent spiral of death
-		if (simStepRepeat_Accumulator >= SIMSTEPCAP)			
+		if (physFrameRepeat_Accumulator >= PHYSREPEATCAP)
 			return false; // Force a frame to happen.  Time::FrameStep_begin() will handle the excess time.
 
-		// Check for SimStep
-		if (simStep_Accumulator >= SIMSTEPLENGTH) 
+		// Check if it's time for a PhysFrame
+		if (physFrame_Accumulator >= PHYSFRAMELENGTH)
 		{
-			simStep_Accumulator -= SIMSTEPLENGTH;
+			physFrame_Accumulator -= PHYSFRAMELENGTH;
 			return true;
 		}
 		else
 			return false;
 	}
 
-	// Updates DeltaTime, DeltaTime_Real, and SimPhase for next frame.
+	// Updates DeltaTime, DeltaTime_Real, and PhysPhase for next frame.
 	void Time::FrameStep_begin()
 	{
 		Tick();
 
 		// Update deltaTime for this frame
-		deltaTime = deltaTime_Accumulator;
-		deltaTime_Accumulator = 0.0f;
+		frameDelta = frameDelta_Accumulator;
+		frameDelta_Accumulator = 0.0f;
 
-		// Calculate simPhase for this frame
-		simPhase = simStep_Accumulator / SIMSTEPLENGTH;
+		// Calculate physPhase for this frame
+		physPhase = physFrame_Accumulator / PHYSFRAMELENGTH;
 
 		// Handle when physics frames lagging too far behind
-		if (simPhase >= 1.0)
+		if (physPhase >= 1.0)
 		{
-			// Dump simStep_accumulator's unprocessed game time to catch up to real time.
-			deltaTime -= simStep_Accumulator;
-			deltaTime_Accumulator -= simStep_Accumulator;
-			simStep_Accumulator = 0.0f;
-			simPhase = 0.0f;
+			// Drop physFrame_Accumulator's unprocessed game time to catch up to real time.
+			frameDelta -= physFrame_Accumulator;
+			frameDelta_Accumulator -= physFrame_Accumulator;
+			physFrame_Accumulator = 0.0f;
+			physPhase = 0.0f;
 		}
 	}
 
 	void Time::FrameStep_end()
 	{
 		//TODO: Find a way to reset the repeat accumulator in one of the other functions.
-		simStepRepeat_Accumulator = 0.0f;
+		physFrameRepeat_Accumulator = 0.0f;
 	}
 }

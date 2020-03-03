@@ -2,13 +2,12 @@
 #include "Core.h"
 
 #include "Enterprise/Application/Application.h"
+
+// Systems
+#include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Time/Time.h"
 
-#include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
-
-#define SIMSPEED 50 //Number of SimSteps per second.
-#define MAX_FRAMETIME 0.25 //Max length, in seconds, a frame should take.
 
 Enterprise::Application* app = nullptr;
 
@@ -29,15 +28,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		// Create the Application
 		app = Enterprise::CreateApplication();
 
-		// Set up timers
-		LARGE_INTEGER QPF, CurrentCount, PreviousCount, SimStep_QPC, MaxFrameTime_QPC, accumulator, FrameTime{};
-		accumulator.QuadPart = 0;
-		EP_ASSERT(QueryPerformanceFrequency(&QPF)); //Gets the frequency of the HPC.
-		EP_ASSERT(QueryPerformanceCounter(&CurrentCount)); //Gets the current count of the HPC.
-		PreviousCount = CurrentCount;
-		SimStep_QPC.QuadPart = QPF.QuadPart * (1.0 / SIMSPEED); //number of counts a SimStep should take.
-		MaxFrameTime_QPC.QuadPart = QPF.QuadPart * MAX_FRAMETIME; //maximum number of counts a frame should take.
-
 		// Main Loop:
 		MSG msg = { 0 };
 		do
@@ -48,7 +38,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		} while (app->Run());
+		} 
+		while (app->Run());
 
 		delete app; // Clean up the Aplication
 
