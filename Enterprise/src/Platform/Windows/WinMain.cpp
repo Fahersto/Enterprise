@@ -18,12 +18,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_ int nCmdShow)
 {
 	try {
-		// Create Console
-		#ifdef EP_CONFIG_DEBUG
-		Enterprise::Console::Init();
-		#endif
-
-		// TODO: Handle command line arguments here
+		// TODO: Handle command line arguments
 
 		// Create the Application
 		app = Enterprise::CreateApplication();
@@ -41,21 +36,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		} 
 		while (app->Run());
 
-		delete app; // Clean up the Aplication
-
-		#ifdef EP_CONFIG_DEBUG
-		Enterprise::Console::Cleanup(); // Close the debug console
-		#endif
-
+		delete app;
 		return EXIT_SUCCESS;
 	}
-	catch (Enterprise::Exceptions::AssertFailed & e)
+	catch (Enterprise::Exceptions::AssertFailed & e) // If AssertFailed is thrown, Exit in disgrace.
 	{
-		// If AssertFailed is thrown, Exit in disgrace.
-		delete app; //TODO: Evaluate potential memory leak if exception is thrown during application constructor.
-		#ifdef EP_CONFIG_DEBUG
-		Enterprise::Console::Cleanup(); // Close the debug console
-		#endif
+		delete app; // TODO: Handle potential memory leak if exception is thrown during application constructor.
 		exit(EXIT_FAILURE);
 	}
 }

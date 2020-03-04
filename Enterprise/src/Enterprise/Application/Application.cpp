@@ -22,6 +22,11 @@ namespace Enterprise
 		else
 			EP_ERROR("Application constructor called twice.  Application is intended to be a singleton.");
 
+		// Create Console
+		#ifdef EP_CONFIG_DEBUG
+		Enterprise::Console::Init();
+		#endif
+
 		// Initialize Systems
 		Event::Dispatcher::Init();
 		Time::Init();
@@ -43,6 +48,11 @@ namespace Enterprise
 	Application::~Application()
 	{
 		Event::Dispatcher::Cleanup();
+
+		// Clean up the console
+		#ifdef EP_CONFIG_DEBUG
+		Enterprise::Console::Cleanup();
+		#endif
 	}
 
 	// Run loop
@@ -66,7 +76,10 @@ namespace Enterprise
 	// Event handler
 	bool Application::OnEvent_CoreApp(Event::EventPtr e)
 	{
+		// Temporary: Log all events.
 		EP_TRACE(e);
+
+		// Default behavior: if the client doesn't handle WindowClose events, they quit the application.
 		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
 			Quit();
 		return true;
