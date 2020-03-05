@@ -13,18 +13,18 @@ namespace Enterprise
 	public:
 		// Getters ------------------------------
 
-		// Returns the number of real-world seconds that have elapsed since application start.  Updated every frame and every physics frame.
+		// Returns the number of real-world seconds that have elapsed since application start.  Updated every Time::Tick().
 		inline static float RunningTime();
-		// Returns the number of game-world seconds that have passed since the last frame.  Affected by timeScale.
+		// In Update(), returns the number of game-time seconds that have passed since the previous frame.  In PhysUpdate(), returns fixed timestep size.
 		inline static float FrameDelta();
-		// Returns a value in the range [0,1) reflecting the current progress through the PhysFrame timer.  Used to smooth rendering of physics-based motion.
+		// Returns a value in the range [0,1) indicating progress through current physics frame.
 		inline static float PhysPhase();
 
 		// Setters ------------------------------
 
 		// Sets the rate of in-game time flow.  Useful for bullet-time effects.
 		inline static void SetTimeScale(float scalar);
-		//static void LerpTimeScale(float targetScalar, float lerpTime);
+		//inline static void SetTimeScale(float scalar, float lerpTime);
 
 		// TODO: Add timer functions
 
@@ -35,10 +35,10 @@ namespace Enterprise
 		// Returns real-world time in seconds since Time::Init().  Defined per platform.
 		static float GetRawTime();
 		
-		// Updates internal time storage and fills accumulators.  Called before every frame and physics frame.
+		// Updates internal time storage and fills accumulators.  Called before every FrameStep() and PhysFrameStep().
 		static void Tick();
 
-		// Returns true if it is time to process a new physics frame.
+		// Returns true if it is time to process a new physics frame, and resets timer if it is.
 		static bool PhysFramePending();
 		// Updates time values for use in Update(), PostUpdate(), and Draw().
 		static void FrameStep_begin();
