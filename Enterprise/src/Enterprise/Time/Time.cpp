@@ -6,12 +6,17 @@
 // Longest amount of time we're allowed to call PhysFrames between Frames.
 #define PHYSREPEATCAP (3.0f * PHYSFRAMELENGTH) //TODO: Set in client
 
-// Vars for Tick()
-float runningTime = 0.0f, prevTime = 0.0f, tickDeltaReal = 0.0f, tickDeltaScaled = 0.0f;
-// Vars for frame-time getters
-float frameDelta = 0.0f, physPhase = 1.0f;
-// Vars for accumulation logic
-float timeScale = 1.0f, frameAccumulator = 0.0f, physFrameAccumulator = PHYSFRAMELENGTH, physFrameRepeatAccumulator = 0.0f;
+// Tick vars
+float runningTime = 0.0f; // Time, in real seconds, since the application started.
+float prevTime = 0.0f; // The previous value of runningTime.
+float timeScale = 1.0f; // The current conversion rate betwee real seconds and game seconds.
+float tickDeltaReal = 0.0f; // The amount of real seconds that have passed since the previous Tick().
+float tickDeltaScaled = 0.0f; // The amount of game-time seconds that have passed since the previous Tick().
+// Accumulators
+float frameAccumulator = 0.0f; float physFrameAccumulator = PHYSFRAMELENGTH; float physFrameRepeatAccumulator = 0.0f;
+// Exposed vars
+float frameDelta = 0.0f;  // The number of game-time seconds being simulated this frame or physics frame.
+float physPhase = 1.0f; // A value in [0,1) representing progress through the current physics frame.
 
 namespace Enterprise 
 {
@@ -26,33 +31,42 @@ namespace Enterprise
 		EP_ASSERT(scalar >= 0.0f); //Time::SetTimeScale() called with negative parameter.  Scalar cannot be negative.  Set timeScale to 0.0f.
 		timeScale = scalar;
 	}
+	// ------------------------------------------
 
-	// Core Calls -------------------------------
 	void Time::Tick()
 	{
 		prevTime = runningTime;
 		runningTime = GetRawTime();
-		tickDeltaReal = runningTime - prevTime; // Calculate real-time delta since previous Time::Tick()
-		tickDeltaScaled = tickDeltaReal * timeScale; // Convert into game-time delta based on timeScale
+		tickDeltaReal = runningTime - prevTime;
+		tickDeltaScaled = tickDeltaReal * timeScale;
 
 		// Increment accumulators
-		frameAccumulator += tickDeltaScaled; // Used to track game-seconds between frames TODO: move descriptions above variable declarations
-		physFrameAccumulator += tickDeltaScaled; // Used to time PhysUpdate() call frequency
-		physFrameRepeatAccumulator += tickDeltaReal; // Used to curb PhysFrame death spirals
+		frameAccumulator += tickDeltaScaled;
+		physFrameAccumulator += tickDeltaScaled;
+		physFrameRepeatAccumulator += tickDeltaReal;
 
 		// Perhaps here is the time to increment timers?
 	}
 
-	// Checks the timer for PhysFrame.  Returns true if PhysUpdate() should be called.
 	bool Time::PhysFramePending()
 	{
 		Tick();
 
-		// Prevent spiral of death
+		// Abort death spirals
 		if (physFrameRepeatAccumulator >= PHYSREPEATCAP)
-			return false; // Force a frame to happen.  Time::FrameStep_begin() will handle the excess time.
+		{			
+			// Dump remaining time from accumulators
+			frameAccumulator -= (physFrameAccumulator - PHYSFRAMELENGTH);
+			physFrameAccumulator = PHYSFRAMELENGTH;
+			physPhase = 1.0f;
+			
+			// Move to a new general frame
+			return false;
+			
+			// The repeat accumulator is reset at the end of each general frame, not here.
+		}
 
-		// Check if it's time for a PhysFrame
+		// Check if it's time for a physics frame
 		if (physFrameAccumulator >= PHYSFRAMELENGTH)
 		{
 			physFrameAccumulator -= PHYSFRAMELENGTH;
@@ -68,27 +82,18 @@ namespace Enterprise
 	{
 		Tick();
 
-		// Update deltaTime for this frame
+		// Update exposed values
 		frameDelta = frameAccumulator;
-		frameAccumulator = 0.0f;
+		physPhase = physFrameAccumulator / PHYSFRAMELENGTH;
 
-		// If we start a frame with a physics frame pending, it means we just aborted a physics death spiral.
-		if (physFrameAccumulator > PHYSFRAMELENGTH)
-		{
-			// Drop physFrame_Accumulator's unprocessed time so the frame doesn't process it.
-			frameDelta -= physFrameAccumulator;
-			// Prime a PhysFrame to immediately follow this frame
-			physFrameAccumulator = PHYSFRAMELENGTH;
-			// Set physics-time "now" to be the same as frame-time "now"
-			physPhase = 1.0f;
-		}
-		else
-			physPhase = physFrameAccumulator / PHYSFRAMELENGTH;
+		// Reset accumulator
+		frameAccumulator = 0.0f;
 	}
 
 	void Time::FrameStep_end()
 	{
-		//TODO: Find a way to reset the repeat accumulator in one of the other functions.
+		/* physFrameRepeatAccumulator is reset at the end of the frame to ensure that 
+			a super long frame doesn't itself start a death spiral. */
 		physFrameRepeatAccumulator = 0.0f;
 	}
 }
