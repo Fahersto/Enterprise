@@ -12,8 +12,10 @@ float prevTime = 0.0f; // The previous value of runningTime.
 float timeScale = 1.0f; // The current conversion rate betwee real seconds and game seconds.
 float tickDeltaReal = 0.0f; // The amount of real seconds that have passed since the previous Tick().
 float tickDeltaScaled = 0.0f; // The amount of game-time seconds that have passed since the previous Tick().
+
 // Accumulators
 float frameAccumulator = 0.0f; float physFrameAccumulator = PHYSFRAMELENGTH; float physFrameRepeatAccumulator = 0.0f;
+
 // Exposed vars
 float frameDelta = 0.0f;  // The number of game-time seconds being simulated this frame or physics frame.
 float physPhase = 1.0f; // A value in [0,1) representing progress through the current physics frame.
@@ -48,7 +50,7 @@ namespace Enterprise
 		// Perhaps here is the time to increment timers?
 	}
 
-	bool Time::PhysFramePending()
+	bool Time::PhysFrame()
 	{
 		Tick();
 
@@ -78,7 +80,7 @@ namespace Enterprise
 	}
 
 	// Steps Time for a new frame
-	void Time::FrameStep_begin()
+	void Time::FrameStart()
 	{
 		Tick();
 
@@ -90,10 +92,10 @@ namespace Enterprise
 		frameAccumulator = 0.0f;
 	}
 
-	void Time::FrameStep_end()
+	void Time::FrameEnd()
 	{
 		/* physFrameRepeatAccumulator is reset at the end of the frame to ensure that 
-			a super long frame doesn't itself start a death spiral. */
+			a super long frame doesn't itself cause a death spiral. */
 		physFrameRepeatAccumulator = 0.0f;
 	}
 }

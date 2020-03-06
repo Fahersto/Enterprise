@@ -58,17 +58,18 @@ namespace Enterprise
 	// Run loop
 	bool Application::Run()
 	{
-		while (Time::PhysFramePending())
+		while (Time::PhysFrame())
 		{
-			// PhysUpdate() here
+			// Physics frame here
 		}
 
-		Time::FrameStep_begin();
+		Time::FrameStart();
 
-		// FrameStep here
+		// General frame here
+
 		Event::Dispatcher::Update();
 
-		Time::FrameStep_end();
+		Time::FrameEnd();
 
 		return isRunning;
 	}

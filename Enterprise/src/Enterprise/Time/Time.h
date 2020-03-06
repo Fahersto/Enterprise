@@ -13,11 +13,11 @@ namespace Enterprise
 	public:
 		// Getters ------------------------------
 
-		// Returns the number of real-world seconds that have elapsed since application start.  Updated every Time::Tick().
+		// Gets the number of real-world seconds that have elapsed since application start.  Updated every frame and physframe.
 		inline static float RunningTime();
-		// In Update(), returns the number of game-time seconds that have passed since the previous frame.  In PhysUpdate(), returns fixed timestep size.
+		// Gets the number of game-time seconds this frame represents.  In PhysUpdate(), gets fixed timestep.
 		inline static float FrameDelta();
-		// Returns a value in the range [0,1) indicating progress through current physics frame.
+		// Returns a value in the range [0,1] indicating progress through current physics frame.
 		inline static float PhysPhase();
 
 		// Setters ------------------------------
@@ -35,14 +35,14 @@ namespace Enterprise
 		// Returns real-world time in seconds since Time::Init().  Defined per platform.
 		static float GetRawTime();
 		
-		// Updates internal time storage and fills accumulators.  Called before every FrameStep() and PhysFrameStep().
+		// Updates internal time storage and fills accumulators.  Called at the start of each frame and physics frame.
 		static void Tick();
 
-		// Returns true if it is time to process a new physics frame, and resets timer if it is.
-		static bool PhysFramePending();
-		// Updates time values for use in Update(), PostUpdate(), and Draw().
-		static void FrameStep_begin();
+		// Updates time values for use in a new physics frame.  Returns true when one is pending.
+		static bool PhysFrame();
+		// Updates time values for use in a new frame.
+		static void FrameStart();
 		// Resets clock for PhysFrame repeat check (prevents spiral of death).
-		static void FrameStep_end();
+		static void FrameEnd();
 	};
 }
