@@ -25,7 +25,7 @@ namespace Enterprise
 	// Getters ----------------------------------
 	float Time::RunningTime() { return runningTime; }
 	float Time::FrameDelta() { return frameDelta; }
-	float Time::PhysPhase() { return physPhase; } //TODO: Prevent use in PhysUpdate().
+	float Time::PhysPhase() { EP_ASSERT(physPhase > 0.0f); return physPhase; }
 
 	// Setters ----------------------------------
 	void Time::SetTimeScale(float scalar)
@@ -73,6 +73,7 @@ namespace Enterprise
 		{
 			physFrameAccumulator -= PHYSFRAMELENGTH;
 			frameDelta = PHYSFRAMELENGTH;
+			physPhase = -1.0f; // Triggers assertion if physics code calls FrameDelta().
 			return true;
 		}
 		else

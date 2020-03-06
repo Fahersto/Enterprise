@@ -11,19 +11,19 @@ namespace Enterprise
 	class Time
 	{
 	public:
-		// Getters ------------------------------
+		// Getters ------------------------------  TODO: Why can't these be inline?
 
 		// Gets the number of real-world seconds that have elapsed since application start.  Updated every frame and physframe.
-		inline static float RunningTime();
+		static float RunningTime();
 		// Gets the number of game-time seconds this frame represents.  In PhysUpdate(), gets fixed timestep.
-		inline static float FrameDelta();
+		static float FrameDelta();
 		// Returns a value in the range [0,1] indicating progress through current physics frame.
-		inline static float PhysPhase();
+		static float PhysPhase();
 
 		// Setters ------------------------------
 
 		// Sets the rate of in-game time flow.  Useful for bullet-time effects.
-		inline static void SetTimeScale(float scalar);
+		static void SetTimeScale(float scalar);
 		//inline static void SetTimeScale(float scalar, float lerpTime);
 
 		// TODO: Add timer functions
