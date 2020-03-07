@@ -12,11 +12,13 @@ namespace Enterprise
 	public:
 		// Getters ------------------------------  TODO: Why can't these be inline?
 
-		// Gets the number of real-world seconds that have elapsed since application start.  Updated every frame and physframe.
+		// Gets the number of real-world seconds that have elapsed since application start.  Current to the top of each frame.
 		static float RunningTime();
-		// Gets the number of game-time seconds this frame represents.  In PhysUpdate(), gets fixed timestep.
+		// Gets the number of game-time seconds this frame or physics frame represents.  For physics frames, this is a constant.
 		static float FrameDelta();
-		// Returns a value in the range [0,1] indicating progress through current physics frame.
+		// Gets the number of real seconds this frame or physics frame represents.  This does not reflect the current time scale.
+		static float RealDelta();
+		// Returns a value in the range [0,1] specifying progress through the current physics frame.  Do not use in PhysUpdate().
 		static float PhysPhase();
 
 		// Setters ------------------------------

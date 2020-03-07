@@ -14,17 +14,21 @@ float tickDeltaReal = 0.0f; // The amount of real seconds that have passed since
 float tickDeltaScaled = 0.0f; // The amount of game-time seconds that have passed since the previous Tick().
 
 // Accumulators
-float frameAccumulator = 0.0f; float physFrameAccumulator = PHYSFRAMELENGTH; float physFrameRepeatAccumulator = 0.0f;
+float frameAccumulator = 0.0f; float frameAccumulator_real = 0.0f;
+float physFrameAccumulator = PHYSFRAMELENGTH; float physFrameAccumulator_real = 0.0f;
+float physFrameRepeatAccumulator = 0.0f;
 
 // Exposed vars
-float frameDelta = 0.0f;  // The number of game-time seconds being simulated this frame or physics frame.
+float frameDelta = 0.0f;  // The number of in-game seconds being simulated this frame or physics frame.
+float realDelta = 0.0f; // The number of real seconds the current frame or physics frame represents.
 float physPhase = 1.0f; // A value in [0,1) representing progress through the current physics frame.
 
 namespace Enterprise 
 {
 	// Getters ----------------------------------
 	float Time::RunningTime() { return runningTime; }
-	float Time::FrameDelta() { return frameDelta; }
+	float Time::FrameDelta() { return frameDelta; } // Should this be Time::GameDelta?
+	float Time::RealDelta() { return realDelta; }
 	float Time::PhysPhase() { EP_ASSERT(physPhase > 0.0f); return physPhase; }
 
 	// Setters ----------------------------------
@@ -44,7 +48,9 @@ namespace Enterprise
 
 		// Increment accumulators
 		frameAccumulator += tickDeltaScaled;
+		frameAccumulator_real += tickDeltaReal;
 		physFrameAccumulator += tickDeltaScaled;
+		physFrameAccumulator_real += tickDeltaReal;
 		physFrameRepeatAccumulator += tickDeltaReal;
 
 		// Perhaps here is the time to increment timers?
@@ -70,35 +76,41 @@ namespace Enterprise
 			// physFrameRepeatAccumulator is reset at the end of each general frame.
 		}
 
-		// Check if it's time for a physics frame
+		// Check the PhysFrame timer
 		if (physFrameAccumulator >= PHYSFRAMELENGTH)
 		{
-			physFrameAccumulator -= PHYSFRAMELENGTH;
+			// Update exposed values
 			frameDelta = PHYSFRAMELENGTH;
-			physPhase = -1.0f; // Triggers assertion if physics code calls FrameDelta().
+			realDelta = physFrameAccumulator_real;
+			physPhase = -1.0f; // Triggers assertion if physics code calls PhysPhase().
+
+			// Reset accumulators
+			physFrameAccumulator -= PHYSFRAMELENGTH;
+			physFrameAccumulator_real = 0.0f;
+
+			// Trigger PhysFrame
 			return true;
 		}
 		else
 			return false;
 	}
 
-	// Steps Time for a new frame
 	void Time::FrameStart()
 	{
 		Tick();
 
 		// Update exposed values
 		frameDelta = frameAccumulator;
+		realDelta = frameAccumulator_real;
 		physPhase = physFrameAccumulator / PHYSFRAMELENGTH;
 
 		// Reset accumulator
 		frameAccumulator = 0.0f;
+		frameAccumulator_real = 0.0f;
 	}
 
 	void Time::FrameEnd()
 	{
-		/* physFrameRepeatAccumulator is reset at the end of the frame to ensure that 
-			a super long frame doesn't itself cause a death spiral. */
 		physFrameRepeatAccumulator = 0.0f;
 	}
 }
