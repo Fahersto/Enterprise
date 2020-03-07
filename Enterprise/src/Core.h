@@ -5,7 +5,7 @@
 */
 
 // Error handling
-#include "Enterprise/Core/Assert.h"
+#include "Enterprise/Core/Assertions.h"
 #include "Enterprise/Core/Exceptions.h"
 
 // Logging

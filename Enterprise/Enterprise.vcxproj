@@ -137,7 +137,7 @@
     <ClInclude Include="src\Enterprise\Application\Application.h" />
     <ClInclude Include="src\Enterprise\Application\Win32\Window_Win32.h" />
     <ClInclude Include="src\Enterprise\Application\Window.h" />
-    <ClInclude Include="src\Enterprise\Core\Assert.h" />
+    <ClInclude Include="src\Enterprise\Core\Assertions.h" />
     <ClInclude Include="src\Enterprise\Core\Console.h" />
     <ClInclude Include="src\Enterprise\Core\ErrorMessageBox.h" />
     <ClInclude Include="src\Enterprise\Core\Exceptions.h" />
