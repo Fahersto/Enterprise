@@ -135,9 +135,11 @@
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application\Application.h" />
+    <ClInclude Include="src\Enterprise\Application\Win32\Window_Win32.h" />
     <ClInclude Include="src\Enterprise\Application\Window.h" />
     <ClInclude Include="src\Enterprise\Core\Assert.h" />
     <ClInclude Include="src\Enterprise\Core\Console.h" />
+    <ClInclude Include="src\Enterprise\Core\ErrorMessageBox.h" />
     <ClInclude Include="src\Enterprise\Core\Exceptions.h" />
     <ClInclude Include="src\Enterprise\Events\BaseEvent.h" />
     <ClInclude Include="src\Enterprise\Events\CoreEvents.h" />
@@ -149,21 +151,19 @@
     <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h" />
     <ClInclude Include="src\Enterprise\Events\Generation\Stop.h" />
     <ClInclude Include="src\Enterprise\Time\Time.h" />
-    <ClInclude Include="src\Platform\Multi\ErrorMessageBox.h" />
-    <ClInclude Include="src\Platform\Windows\Win32Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Application\Application.cpp" />
+    <ClCompile Include="src\Enterprise\Application\Win32\Window_Win32.cpp" />
+    <ClCompile Include="src\Enterprise\Core\Win32\Console_Win32.cpp" />
+    <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp" />
+    <ClCompile Include="src\Enterprise\Core\Win32\Main_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp" />
     <ClCompile Include="src\Enterprise\Time\Time.cpp" />
-    <ClCompile Include="src\Platform\Multi\ErrorMessageBox.cpp" />
-    <ClCompile Include="src\Platform\Windows\Time_Win32.cpp" />
-    <ClCompile Include="src\Platform\Windows\Win32Console.cpp" />
-    <ClCompile Include="src\Platform\Windows\Win32Window.cpp" />
-    <ClCompile Include="src\Platform\Windows\WinMain.cpp" />
+    <ClCompile Include="src\Enterprise\Time\Win32\Time_Win32.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

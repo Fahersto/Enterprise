@@ -1,13 +1,6 @@
 #include "EP_PCH.h"
 #include "Core.h"
-
 #include "Enterprise/Application/Application.h"
-
-// Systems
-#include "Enterprise/Events/Dispatcher.h"
-#include "Enterprise/Time/Time.h"
-
-#include "Enterprise/Events/CoreEvents.h"
 
 Enterprise::Application* app = nullptr;
 

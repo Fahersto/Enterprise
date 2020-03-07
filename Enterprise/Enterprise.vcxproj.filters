@@ -7,8 +7,14 @@
     <Filter Include="Enterprise\Application">
       <UniqueIdentifier>{A9DF3BAF-95D9-6401-7E46-FB116ADFCA6D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Application\Win32">
+      <UniqueIdentifier>{4B729D2F-372D-8DDB-E0E4-0526CC7ED76B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Enterprise\Core">
       <UniqueIdentifier>{FEFEE0C9-6A8A-4E8E-739B-D182DFA5AA8E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Enterprise\Core\Win32">
+      <UniqueIdentifier>{60FD73CE-CC69-2FC9-955D-C72601895131}</UniqueIdentifier>
     </Filter>
     <Filter Include="Enterprise\Events">
       <UniqueIdentifier>{0AC83ECB-76DE-3C61-BF55-C8822BAB0DE9}</UniqueIdentifier>
@@ -19,14 +25,8 @@
     <Filter Include="Enterprise\Time">
       <UniqueIdentifier>{4437EAC9-B0C2-578E-B9D3-DA8225DEB38E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform">
-      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Platform\Multi">
-      <UniqueIdentifier>{24D62594-10A4-199A-F937-8AC0E5A4F5FE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Platform\Windows">
-      <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
+    <Filter Include="Enterprise\Time\Win32">
+      <UniqueIdentifier>{26D2F3BA-923E-AFB5-5B32-4713C75DD11D}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +36,9 @@
     <ClInclude Include="src\Enterprise\Application\Application.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Win32\Window_Win32.h">
+      <Filter>Enterprise\Application\Win32</Filter>
+    </ClInclude>
     <ClInclude Include="src\Enterprise\Application\Window.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
@@ -43,6 +46,9 @@
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Core\Console.h">
+      <Filter>Enterprise\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Core\ErrorMessageBox.h">
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Core\Exceptions.h">
@@ -78,17 +84,23 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Multi\ErrorMessageBox.h">
-      <Filter>Platform\Multi</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Windows\Win32Window.h">
-      <Filter>Platform\Windows</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
     <ClCompile Include="src\Enterprise\Application\Application.cpp">
       <Filter>Enterprise\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Application\Win32\Window_Win32.cpp">
+      <Filter>Enterprise\Application\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Core\Win32\Console_Win32.cpp">
+      <Filter>Enterprise\Core\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp">
+      <Filter>Enterprise\Core\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Core\Win32\Main_Win32.cpp">
+      <Filter>Enterprise\Core\Win32</Filter>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
@@ -96,20 +108,8 @@
     <ClCompile Include="src\Enterprise\Time\Time.cpp">
       <Filter>Enterprise\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Multi\ErrorMessageBox.cpp">
-      <Filter>Platform\Multi</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\Time_Win32.cpp">
-      <Filter>Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\Win32Console.cpp">
-      <Filter>Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\Win32Window.cpp">
-      <Filter>Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WinMain.cpp">
-      <Filter>Platform\Windows</Filter>
+    <ClCompile Include="src\Enterprise\Time\Win32\Time_Win32.cpp">
+      <Filter>Enterprise\Time\Win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

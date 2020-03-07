@@ -1,6 +1,6 @@
 #pragma once
 #include "EP_PCH.h"
-#include "Platform/Multi/ErrorMessageBox.h"
+#include "Enterprise/Core/ErrorMessageBox.h"
 
 /* Assert.h
 	This header contains the Enterprise assert macros (EP_ASSERT).  It is included everywhere via Core.h inclusion.
