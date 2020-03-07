@@ -37,11 +37,7 @@ namespace Enterprise
 		// StateStack::Init();
 
 		// Event subscriptions
-		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::QuitApplication, OnEvent_CoreApp);
-		
-		// Temporary: Subscribe to all core events except for mouse events
-		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent_CoreApp);
-		Event::Dispatcher::UnsubscribeFromType(Event::TypeIDs::MousePosition, OnEvent_CoreApp);
+		Event::Dispatcher::SubscribeToType(Event::TypeIDs::WindowClose, OnEvent_CoreApp);
 	}
 
 	// Destructor
@@ -58,29 +54,26 @@ namespace Enterprise
 	// Run loop
 	bool Application::Run()
 	{
+		// Physics frame
 		while (Time::PhysFrame())
 		{
-			// Physics frame here
+			// ...
 		}
 
+		// Frame
 		Time::FrameStart();
-
-		// General frame here
-
 		Event::Dispatcher::Update();
-
+		// ...
 		Time::FrameEnd();
 
+		// Back to main function
 		return isRunning;
 	}
 
 	// Event handler
 	bool Application::OnEvent_CoreApp(Event::EventPtr e)
 	{
-		// Temporary: Log all events.
-		EP_TRACE(e);
-
-		// Default behavior: if the client doesn't handle WindowClose events, they quit the application.
+		// By default, WindowClose events quit the application.
 		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
 			Quit();
 		return true;

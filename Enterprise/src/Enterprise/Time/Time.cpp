@@ -56,7 +56,9 @@ namespace Enterprise
 
 		// Abort death spirals
 		if (physFrameRepeatAccumulator >= PHYSREPEATCAP)
-		{			
+		{
+			// TODO: log death spiral handling when profiling
+
 			// Dump remaining time from accumulators
 			frameAccumulator -= (physFrameAccumulator - PHYSFRAMELENGTH);
 			physFrameAccumulator = PHYSFRAMELENGTH;
@@ -65,7 +67,7 @@ namespace Enterprise
 			// Move to a new general frame
 			return false;
 			
-			// The repeat accumulator is reset at the end of each general frame, not here.
+			// physFrameRepeatAccumulator is reset at the end of each general frame.
 		}
 
 		// Check if it's time for a physics frame

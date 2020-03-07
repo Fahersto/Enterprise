@@ -7,10 +7,10 @@
 // Error handling
 #include "Enterprise/Core/Assertions.h"
 #include "Enterprise/Core/Exceptions.h"
-#include "Enterprise/Core/ErrorMessageBox.h"
 
-// Logging
+// Logging / Reporting
 #include "Enterprise/Core/Console.h"
+#include "Enterprise/Core/ErrorMessageBox.h"
 
 // Quickly assemble bit fields
 #define BIT(x) (1 << x)

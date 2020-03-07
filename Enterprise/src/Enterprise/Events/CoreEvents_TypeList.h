@@ -28,11 +28,6 @@
 #endif
 #endif
 
-// Application events ---------------------------------------------------------
-
-// Close the program (Handled by Application).
-EVENTTYPE_1(QuitApplication, int, code)
-
 // Window events --------------------------------------------------------------
 
 // User clicked the close button on the game window.

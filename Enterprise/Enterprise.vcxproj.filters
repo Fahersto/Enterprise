@@ -99,9 +99,6 @@
     <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp">
       <Filter>Enterprise\Core\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Core\Win32\Main_Win32.cpp">
-      <Filter>Enterprise\Core\Win32</Filter>
-    </ClCompile>
     <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
       <Filter>Enterprise\Events</Filter>
     </ClCompile>
@@ -110,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="src\Enterprise\Time\Win32\Time_Win32.cpp">
       <Filter>Enterprise\Time\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Application\Win32\Main_Win32.cpp">
+      <Filter>Enterprise\Core\Win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

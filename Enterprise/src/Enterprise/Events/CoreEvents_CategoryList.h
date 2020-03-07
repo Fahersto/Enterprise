@@ -24,9 +24,6 @@
 #endif
 #endif
 
-// Application-related Events.
-EVENTCATEGORY(Application, \
-	TypeIDs::QuitApplication)
 // Window Events.
 EVENTCATEGORY(Window, \
 	TypeIDs::WindowClose, \

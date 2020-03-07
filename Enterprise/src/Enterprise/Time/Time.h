@@ -2,12 +2,11 @@
 #include "Core.h"
 #include "Enterprise/Application/Application.h"
 
-/* Time.h
-	Enterprise's Time system.  Use Time to track frame deltas, set timers, and measure performance.
-*/
-
 namespace Enterprise 
 {
+	/* Time
+		Enterprise's Time system.  Use Time to track frame deltas, set timers, and measure performance.
+	*/
 	class Time
 	{
 	public:
@@ -29,20 +28,21 @@ namespace Enterprise
 		// TODO: Add timer functions
 
 	private:
+		// Needed for Application to advance time
 		friend class Application;
+
 		// Initializes timing functions.  Defined per platform.
 		static void Init();
-		// Returns real-world time in seconds since Time::Init().  Defined per platform.
-		static float GetRawTime();
-		
 		// Updates internal time storage and fills accumulators.  Called at the start of each frame and physics frame.
 		static void Tick();
+		// Returns real-world time in seconds since Time::Init().  Defined per platform.
+		static float GetRawTime();
 
 		// Updates time values for use in a new physics frame.  Returns true when one is pending.
 		static bool PhysFrame();
 		// Updates time values for use in a new frame.
 		static void FrameStart();
-		// Resets clock for PhysFrame repeat check (prevents spiral of death).
+		// Resets clock for PhysFrame repeat check (prevents spiral of death).  Call at the end of the frame.
 		static void FrameEnd();
 	};
 }
