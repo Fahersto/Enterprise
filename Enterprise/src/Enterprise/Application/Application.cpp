@@ -11,16 +11,14 @@
 
 namespace Enterprise 
 {
-	Application* Application::m_Instance = nullptr; // Singleton instance
+	Application* Application::m_Instance = nullptr;
 
 	// Constructor
 	Application::Application()
 	{
 		// Singleton handling
-		if (!m_Instance)
-			m_Instance = this;
-		else
-			EP_ERROR("Application constructor called twice.  Application is intended to be a singleton.");
+		EP_ASSERT(!m_Instance); // Error: Applications are singletons.
+		m_Instance = this;
 
 		// Create Console
 		#ifdef EP_CONFIG_DEBUG
@@ -38,10 +36,12 @@ namespace Enterprise
 		// ECS::Init();
 		// StateStack::Init();
 
+		// Event subscriptions
+		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::QuitApplication, OnEvent_CoreApp);
+		
 		// Temporary: Subscribe to all core events except for mouse events
 		Event::Dispatcher::SubscribeToCategory(Event::CategoryIDs::_All, OnEvent_CoreApp);
 		Event::Dispatcher::UnsubscribeFromType(Event::TypeIDs::MousePosition, OnEvent_CoreApp);
-		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::QuitApplication, OnEvent_CoreApp); //Uncomment this when removing above two lines
 	}
 
 	// Destructor

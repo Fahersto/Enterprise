@@ -23,10 +23,8 @@ namespace Enterprise
 		// Steps the entire engine.  Returns true until application stops running.
 		bool Run();
 
-		// Call this to quit the application at the end of the current frame.
+		// Calling this quits the application at the end of the current frame.
 		static void Quit();
-
-		Application();
 		virtual ~Application();
 
 	private:
@@ -35,6 +33,9 @@ namespace Enterprise
 
 		static Application* m_Instance;
 		bool isRunning = true;
+		
+	protected:
+		Application();
 	};
 
 	// Creator/getter for client application.  Defined in client.

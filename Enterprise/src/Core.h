@@ -7,6 +7,7 @@
 // Error handling
 #include "Enterprise/Core/Assertions.h"
 #include "Enterprise/Core/Exceptions.h"
+#include "Enterprise/Core/ErrorMessageBox.h"
 
 // Logging
 #include "Enterprise/Core/Console.h"

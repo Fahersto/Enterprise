@@ -1,50 +1,53 @@
 #include "EP_PCH.h"
+#include "Core.h"
 #include "Window_Win32.h"
 
-#include "Enterprise/Core/Console.h"
 #include "Enterprise/Application/Application.h"
 #include "Enterprise/Events/Dispatcher.h"
 #include "Enterprise/Events/CoreEvents.h"
 
-// Windows-specific window create function
-#ifdef EP_PLATFORM_WINDOWS
-namespace Enterprise {
-	Window* Window::Create(const WindowSettings& settings) { return new Platform::Win32Window(settings); }
-}
-#endif
+namespace Enterprise
+{
+	// Windows-specific window create function ----------------------------------------------------
+	#ifdef EP_PLATFORM_WINDOWS
+	Window* Window::m_Instance = nullptr; //Must be instantiated here to avoid multiple definitions
+	Window* Window::Create(const WindowSettings& settings) 
+	{
+		EP_ASSERT(!m_Instance); // Don't create multiple windows
+		m_Instance = new Window_Win32(settings);
+		return m_Instance;
+	}
+	#endif
 
-namespace Enterprise::Platform {
-
-	int WindowCount = 0;
-
-	// WinProc (Windows window event handler)
-	LRESULT CALLBACK Win32WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	// Win32 message handler ----------------------------------------------------------------------
+	LRESULT CALLBACK WinProc_Win32(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 		switch (message)
 		{
+		// Clicked the close button
 		case WM_CLOSE:
-			// TODO: Integrate with event system so that games can handle the close button.
-			DestroyWindow(hWnd);
-			WindowCount--;
-			if (WindowCount <= 0)
-				Application::Quit();
+			EP_QUICKEVENT(Event::WindowClose);
 			return 0;
 			break;
+		// Gained or lost focus
 		case WM_ACTIVATEAPP:
 			if (wParam == TRUE)
-				EP_QUICKEVENT(Enterprise::Event::WindowFocus);
+				EP_QUICKEVENT(Event::WindowFocus);
 			else
-				EP_QUICKEVENT(Enterprise::Event::WindowLostFocus);
+				EP_QUICKEVENT(Event::WindowLostFocus);
 			return 0;
 			break;
+		// Text entry
 		case WM_CHAR:
 			// TODO: Handle modifier keys
-			EP_QUICKEVENT(Enterprise::Event::KeyChar, char(wParam));
+			EP_QUICKEVENT(Event::KeyChar, char(wParam));
 			return 0;
 			break;
+		// Mouse cursor position change
 		case WM_MOUSEMOVE:
-			EP_QUICKEVENT(Enterprise::Event::MousePosition, LOWORD(lParam), HIWORD(lParam));
+			EP_QUICKEVENT(Event::MousePosition, LOWORD(lParam), HIWORD(lParam));
 			return 0;
 			break;
+		// Raw input (Mouse delta, keyboard state changes)
 		case WM_INPUT:
 		{
 			UINT dwSize = 0; // Stores size of header
@@ -60,17 +63,18 @@ namespace Enterprise::Platform {
 			// TODO: investigate whether this would be faster on the stack.
 
 			return 0;
+			break;
 		}
-		break;
+		// Everything else
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam); // pass unhandled events to default winproc
+			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;
 		}
 		return 0;
 	}
 
-	Win32Window::Win32Window(const WindowSettings& settings)
-		: m_Settings(settings)
+	// Constructor --------------------------------------------------------------------------------
+	Window_Win32::Window_Win32(const WindowSettings& settings) : Window(settings)
 	{
 		// Get handle to the application (Note, this might* pose problems for multithreading).
 		HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -83,7 +87,7 @@ namespace Enterprise::Platform {
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;						// Note: DirectX overrides redraw styles.
 		wc.hInstance = hInstance;
-		wc.lpfnWndProc = Win32WinProc;							// Sets WindowProc() to receive Windows messages
+		wc.lpfnWndProc = WinProc_Win32;							// Sets WindowProc() to receive Windows messages
 		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);				// TODO: Set up an icon
 		wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);			// TODO: Set up a small icon
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);				// Default mouse cursor.
@@ -95,7 +99,7 @@ namespace Enterprise::Platform {
 		EP_ASSERT(RegisterClassEx(&wc)); // If zero, the window class failed to register for some reason.
 
 		// Calculate initial window size.
-		RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height }; // TODO: set up dynamic resizing of window
+		RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height };
 		DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;	// Window style
 		AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
 
@@ -115,11 +119,11 @@ namespace Enterprise::Platform {
 
 		EP_ASSERT(hWnd); // If NULL, the window wasn't created for some reason.
 		ShowWindow(hWnd, SW_SHOWNORMAL); // Tell Windows to display the window.
-		WindowCount++;
 	}
 
-	Win32Window::~Win32Window()
+	// Destructor ---------------------------------------------------------------------------------
+	Window_Win32::~Window_Win32()
 	{
-		// Cleanup your shit!!!
+		DestroyWindow(hWnd);
 	}
 }

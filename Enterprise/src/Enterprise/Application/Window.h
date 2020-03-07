@@ -1,41 +1,53 @@
 #pragma once
-
-/* Window
-	The class that represents the game window.  While there will generally only be one window per game,
-	it is possible to create multiple windows in a single application.  The code to create a Window is
-	called in the client application.
-*/
-
 #include "EP_PCH.h"
 #include "Core.h"
 
-//#include "Enterprise/Events/Dispatcher.h"
-
-namespace Enterprise {
+namespace Enterprise
+{
+	/* WindowSettings
+		Struct containing the game window's properties.
+	*/
 	struct WindowSettings
 	{
 		std::wstring Title;
 		unsigned int Width;
 		unsigned int Height;
-
 		// TODO: Add window icon support
-		WindowSettings(const std::wstring& title = L"Enterprise",
+		// TODO: Add full-screen support
+		// TODO: Add V-sync support
+
+		WindowSettings(
+			const std::wstring& title = L"Enterprise",
 			unsigned int width = 1280,
 			unsigned int height = 720)
-			: Title(title), Width(width), Height(height) {}
+			: Title(title), Width(width), Height(height) 
+		{}
 	};
-	
+
+	/* Window
+		The class that represents the game window.  It is created in the client application's constructor.
+	*/
 	class Window
 	{
 	public:
+		// Setters ------------------------------------------------------------------
+		//virtual void SetWindowSettings(WindowSettings & newSettings); TODO: Add ability to update window settings
 
-		// TODO: Add fullscreen, vsync support here
+		// Getters ------------------------------------------------------------------
+		// Gets the width, in pixels, of the game window's viewing area.
+		static unsigned int GetWidth() { return m_Instance->m_Settings.Width; };
+		// Gets the height, in pixels, of the game window's viewing area.
+		static unsigned int GetHeight() { return m_Instance->m_Settings.Height; };
 
-		virtual unsigned int GetWidth() = 0;
-		virtual unsigned int GetHeight() = 0;
-
+		// Creates the game window.
+		static Window* Create(const WindowSettings& attributes = WindowSettings());
+		// Destroys the game window.
+		static void Destroy() { EP_ASSERT(m_Instance); delete m_Instance; };
 		virtual ~Window() {}
 
-		static Window* Create(const WindowSettings& attributes = WindowSettings());
+	protected:
+		static Window* m_Instance; // The singleton instance.
+		WindowSettings m_Settings; // The window properties.
+		Window(const WindowSettings& settings) : m_Settings(settings) {}; // Marked protected for singleton purposes
 	};
 }

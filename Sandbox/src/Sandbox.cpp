@@ -1,8 +1,6 @@
 #include <Enterprise.h>
 #include "Events/SandboxEvents.h"
 
-Enterprise::Window* gameWindow;
-
 bool OnEvent(Enterprise::Event::EventPtr e)
 {
 	EP_TRACE(e);
@@ -20,13 +18,13 @@ public:
 		using Enterprise::Event::Dispatcher;
 		Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
 
-		gameWindow = Enterprise::Window::Create();
+		Enterprise::Window::Create();
 	}
 
 	//Called at program end
 	~SandboxApp()
 	{
-		delete gameWindow;
+		Enterprise::Window::Destroy();
 	}
 };
 
