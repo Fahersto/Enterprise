@@ -136,6 +136,7 @@
     <ClInclude Include="src\Events\SandboxEvents_TypeList.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>
   <ItemGroup>

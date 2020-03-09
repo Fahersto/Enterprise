@@ -1,12 +1,9 @@
 #include "EP_PCH.h"
 #include "Enterprise/Time/Time.h"
 
-// Length, in game-world seconds, each PhysFrame represents.
-#define PHYSFRAMELENGTH (1.0f / 50.0f) //TODO: Set in client
-// Longest amount of time we're allowed to call PhysFrames between Frames.
-#define PHYSREPEATCAP (3.0f * PHYSFRAMELENGTH) //TODO: Set in client
+using namespace Enterprise::Constants;
 
-// Tick vars
+// Tick() vars
 float runningTime = 0.0f; // Time, in real seconds, since the application started.
 float prevTime = 0.0f; // The previous value of runningTime.
 float timeScale = 1.0f; // The current conversion rate betwee real seconds and game seconds.
@@ -15,7 +12,7 @@ float tickDeltaScaled = 0.0f; // The amount of game-time seconds that have passe
 
 // Accumulators
 float frameAccumulator = 0.0f; float frameAccumulator_real = 0.0f;
-float physFrameAccumulator = PHYSFRAMELENGTH; float physFrameAccumulator_real = 0.0f;
+float physFrameAccumulator = physframelength; float physFrameAccumulator_real = 0.0f;
 float physFrameRepeatAccumulator = 0.0f;
 
 // Exposed vars
@@ -61,13 +58,13 @@ namespace Enterprise
 		Tick();
 
 		// Abort death spirals
-		if (physFrameRepeatAccumulator >= PHYSREPEATCAP)
+		if (physFrameRepeatAccumulator >= physframerepeatcap)
 		{
 			// TODO: log death spiral handling when profiling
 
 			// Dump remaining time from accumulators
-			frameAccumulator -= (physFrameAccumulator - PHYSFRAMELENGTH);
-			physFrameAccumulator = PHYSFRAMELENGTH;
+			frameAccumulator -= (physFrameAccumulator - physframelength);
+			physFrameAccumulator = physframelength;
 			physPhase = 1.0f;
 			
 			// Move to a new general frame
@@ -77,15 +74,15 @@ namespace Enterprise
 		}
 
 		// Check the PhysFrame timer
-		if (physFrameAccumulator >= PHYSFRAMELENGTH)
+		if (physFrameAccumulator >= physframelength)
 		{
 			// Update exposed values
-			frameDelta = PHYSFRAMELENGTH;
+			frameDelta = physframelength;
 			realDelta = physFrameAccumulator_real;
 			physPhase = -1.0f; // Triggers assertion if physics code calls PhysPhase().
 
 			// Reset accumulators
-			physFrameAccumulator -= PHYSFRAMELENGTH;
+			physFrameAccumulator -= physframelength;
 			physFrameAccumulator_real = 0.0f;
 
 			// Trigger PhysFrame
@@ -102,7 +99,7 @@ namespace Enterprise
 		// Update exposed values
 		frameDelta = frameAccumulator;
 		realDelta = frameAccumulator_real;
-		physPhase = physFrameAccumulator / PHYSFRAMELENGTH;
+		physPhase = physFrameAccumulator / physframelength;
 
 		// Reset accumulator
 		frameAccumulator = 0.0f;

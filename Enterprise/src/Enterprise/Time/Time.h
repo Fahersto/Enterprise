@@ -7,6 +7,12 @@ namespace Enterprise
 	/* Time
 		Enterprise's Time system.  Use Time to track frame deltas, set timers, and measure performance.
 	*/
+	namespace Constants
+	{
+		extern const float physframelength; // Length, in game-seconds, of the physics timestep.
+		extern const float physframerepeatcap; // The longest amount of real seconds back-to-back physics calculations are allowed to take.
+	}
+
 	class Time
 	{
 	public:
