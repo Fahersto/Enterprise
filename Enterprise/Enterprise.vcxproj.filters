@@ -51,38 +51,38 @@
     <ClInclude Include="src\Enterprise\Core\Exceptions.h">
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\BaseEvent.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\CoreEvents.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\CoreEvents_CategoryList.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\CoreEvents_TypeList.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Dispatcher.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Generation\StartClasses.h">
-      <Filter>Enterprise\Events\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Generation\StartECM.h">
-      <Filter>Enterprise\Events\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Generation\StartEnums.h">
-      <Filter>Enterprise\Events\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\Generation\Stop.h">
-      <Filter>Enterprise\Events\Generation</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Core\Assertions.h">
       <Filter>Enterprise\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartClasses.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartECM.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartEnums.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\Generation\Stop.h">
+      <Filter>Enterprise\Events\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\Dispatcher.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_TypeList.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_CategoryList.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\BaseEvent.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents.h">
+      <Filter>Enterprise\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -99,9 +99,6 @@
     <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp">
       <Filter>Enterprise\Core\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="src\Enterprise\Events\Dispatcher.cpp">
-      <Filter>Enterprise\Events</Filter>
-    </ClCompile>
     <ClCompile Include="src\Enterprise\Time\Time.cpp">
       <Filter>Enterprise\Time</Filter>
     </ClCompile>
@@ -110,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="src\Enterprise\Application\Win32\Main_Win32.cpp">
       <Filter>Enterprise\Core\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Events\OLD\Dispatcher.cpp">
+      <Filter>Enterprise\Events</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
