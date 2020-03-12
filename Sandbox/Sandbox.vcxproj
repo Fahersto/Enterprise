@@ -131,9 +131,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\SandboxEvents.h" />
-    <ClInclude Include="src\Events\SandboxEvents_CategoryList.h" />
-    <ClInclude Include="src\Events\SandboxEvents_TypeList.h" />
+    <ClInclude Include="src\Events\OLD\SandboxEvents.h" />
+    <ClInclude Include="src\Events\OLD\SandboxEvents_CategoryList.h" />
+    <ClInclude Include="src\Events\OLD\SandboxEvents_TypeList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Constants.cpp" />
@@ -147,4 +147,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project> 

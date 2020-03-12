@@ -4,20 +4,23 @@
     <Filter Include="Events">
       <UniqueIdentifier>{3A8963B1-262B-8E87-0FE6-A1DBFB2615D8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Events\OLD">
+      <UniqueIdentifier>{28B6345E-146E-76AB-7D75-4F07694C119C}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\SandboxEvents.h">
-      <Filter>Events</Filter>
+    <ClInclude Include="src\Events\OLD\SandboxEvents.h">
+      <Filter>Events\OLD</Filter>
     </ClInclude>
-    <ClInclude Include="src\Events\SandboxEvents_CategoryList.h">
-      <Filter>Events</Filter>
+    <ClInclude Include="src\Events\OLD\SandboxEvents_CategoryList.h">
+      <Filter>Events\OLD</Filter>
     </ClInclude>
-    <ClInclude Include="src\Events\SandboxEvents_TypeList.h">
-      <Filter>Events</Filter>
+    <ClInclude Include="src\Events\OLD\SandboxEvents_TypeList.h">
+      <Filter>Events\OLD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Sandbox.cpp" />
     <ClCompile Include="src\Constants.cpp" />
+    <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>
 </Project>

@@ -3,8 +3,8 @@
 #include "Window_Win32.h"
 
 #include "Enterprise/Application/Application.h"
-#include "Enterprise/Events/Dispatcher.h"
-#include "Enterprise/Events/CoreEvents.h"
+#include "Enterprise/Events/OLD/Dispatcher.h"
+#include "Enterprise/Events/OLD/CoreEvents.h"
 
 namespace Enterprise
 {

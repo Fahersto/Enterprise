@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Enterprise/Events/BaseEvent.h"
+#include "Enterprise/Events/OLD/BaseEvent.h"
 
 /* SandboxEvents.h
 	This header contains definitions for all client Event classes, as well as the CategoryID and TypeID
@@ -14,7 +14,7 @@
 namespace Sandbox::Event
 {
 	// Generate the enums for all client Event types and categories.
-	#include "Enterprise/Events/Generation/StartEnums.h"
+	#include "Enterprise/Events/OLD/Generation/StartEnums.h"
 	namespace TypeIDs {
 		enum {
 			_None = Enterprise::Event::TypeIDs::_NumOfCoreTypes,
@@ -29,12 +29,12 @@ namespace Sandbox::Event
 			_NumOfCategories
 		};
 	}
-	#include "Enterprise/Events/Generation/Stop.h"
+	#include "Enterprise/Events/OLD/Generation/Stop.h"
 
 	// The three includes below expand into all the client Event classes.
-	#include "Enterprise/Events/Generation/StartClasses.h"
+	#include "Enterprise/Events/OLD/Generation/StartClasses.h"
 	#include "SandboxEvents_TypeList.h"
-	#include "Enterprise/Events/Generation/Stop.h"
+	#include "Enterprise/Events/OLD/Generation/Stop.h"
 }
 
 // Tell the engine about the client Event types and categories
@@ -47,7 +47,7 @@ void Enterprise::Event::Dispatcher::GetClientListSizes()
 // Populate the client entries of the Event Category Matrix
 void Enterprise::Event::Dispatcher::InitClientECM()
 {
-	#include "Enterprise/Events/Generation/StartECM.h"
-	#include "Events/SandboxEvents_CategoryList.h"
-	#include "Enterprise/Events/Generation/Stop.h"
+	#include "Enterprise/Events/OLD/Generation/StartECM.h"
+	#include "Events/OLD/SandboxEvents_CategoryList.h"
+	#include "Enterprise/Events/OLD/Generation/Stop.h"
 }

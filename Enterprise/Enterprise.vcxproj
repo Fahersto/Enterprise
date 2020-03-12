@@ -157,10 +157,10 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Application\Application.cpp" />
+    <ClCompile Include="src\Enterprise\Application\Win32\Main_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Application\Win32\Window_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Core\Win32\Console_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp" />
-    <ClCompile Include="src\Enterprise\Application\Win32\Main_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Events\OLD\Dispatcher.cpp" />
     <ClCompile Include="src\Enterprise\Time\Time.cpp" />
     <ClCompile Include="src\Enterprise\Time\Win32\Time_Win32.cpp" />
