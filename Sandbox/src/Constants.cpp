@@ -1,4 +1,3 @@
-#include "EP_PCH.h"
 #include <Enterprise.h>
 
 // Time constants

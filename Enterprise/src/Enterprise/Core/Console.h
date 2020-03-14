@@ -45,7 +45,7 @@ namespace Enterprise {
 	#define EP_INFO(...)	::Enterprise::Console::GetCoreLogger()->info(__VA_ARGS__)
 	#define EP_WARN(...)	::Enterprise::Console::GetCoreLogger()->warn(__VA_ARGS__)
 	#define EP_ERROR(...)	::Enterprise::Console::GetCoreLogger()->error(__VA_ARGS__)
-	#define EP_FATAL(...)	::Enterprise::Console::GetCoreLogger()->critical(__VA_ARGS__)
+	#define EP_FATAL(...)	::Enterprise::Console::GetCoreLogger()->critical(__VA_ARGS__) //TODO: Make error dialog appear in release builds
 	#elif EP_SCOPE_CLIENT // Client
 	#define EP_TRACE(...)	::Enterprise::Console::GetClientLogger()->trace(__VA_ARGS__)
 	#define EP_DEBUG(...)	::Enterprise::Console::GetClientLogger()->debug(__VA_ARGS__)

@@ -1,0 +1,3 @@
+// Event definition helper macros (included because of missing ";" punctuators)
+#define EP_EVENTCATEGORY(name) const EventCategory name = Enterprise::Events::RegisterCategory(#name)
+#define EP_EVENTTYPE(name, categories) const EventType name = Enterprise::Events::RegisterType(categories, #name)

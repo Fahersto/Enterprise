@@ -57,6 +57,12 @@
     <ClInclude Include="src\Enterprise\Core\Exceptions.h">
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\EventClasses.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\Events.h">
+      <Filter>Enterprise\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\Enterprise\Events\OLD\BaseEvent.h">
       <Filter>Enterprise\Events\OLD</Filter>
     </ClInclude>
@@ -87,6 +93,7 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Events\CoreEvents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
@@ -104,6 +111,9 @@
     </ClCompile>
     <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp">
       <Filter>Enterprise\Core\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Enterprise\Events\Events.cpp">
+      <Filter>Enterprise\Events</Filter>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Events\OLD\Dispatcher.cpp">
       <Filter>Enterprise\Events\OLD</Filter>
