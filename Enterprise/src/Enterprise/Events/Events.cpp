@@ -1,6 +1,7 @@
 #include "EP_PCH.h"
 #include "Events.h"
-#include "Enterprise/Application/Application.h"
+
+#include "Enterprise/Application/Application.h" //needed for Application::Quit(). (GET RID OF THIS!)
 
 // Singletons -------------------------------------------------------------------------------------
 // Note: these MUST be singletons, as they are invoked during static initialization.
@@ -76,7 +77,7 @@ namespace Enterprise
 		catch (std::out_of_range) //Only expected to be thrown by _categoryMap.at() failing
 		{
 			EP_FATAL("Fatal error: Event::RegisterType() was passed an undefined EventCategory.");
-			Application::Quit();
+			Application::Quit(); // TODO: This situation won't do at all, since this is called during static initialization.
 		}
 
 		// Add debug name to _typeStringNames

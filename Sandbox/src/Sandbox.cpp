@@ -1,6 +1,5 @@
 #include <Enterprise.h>
 #include "Events/OLD/SandboxEvents.h"
-#include "Enterprise/Events/Events.h"
 
 bool OnEvent(Enterprise::Event::EventPtr e)
 {
@@ -23,16 +22,6 @@ public:
 		Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
 
 		Enterprise::Window::Create(); // TODO: Assert when no window is created.
-
-		EP_EVENTCATEGORY(Poo);
-		EP_EVENTCATEGORY(Poop);
-		EP_EVENTCATEGORY(Pooop);
-		EP_EVENTCATEGORY(Poooop);
-
-		EP_EVENTTYPE(Test, Poo);
-		EP_EVENTTYPE(Test2, Poop);
-		EP_EVENTTYPE(Test3, Poo | Poop);
-		EP_EVENTTYPE(Test4, Poooop | Poop);
 	}
 
 	//Called at program end

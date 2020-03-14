@@ -9,14 +9,14 @@ typedef unsigned int EventType; // An Enterprise event type.
 // Type and Category Registration Macros
 #ifdef EP_CONFIG_DEBUG // -----------------------
 // Define a new Enterprise event category.
-#define EP_EVENTCATEGORY(name) const EventCategory name = Enterprise::Events::RegisterCategory(#name)
+#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(#name); }
 // Define a new Enterprise event type.
-#define EP_EVENTTYPE(name, categories) const EventType name = Enterprise::Events::RegisterType(categories, #name)
+#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(categories, #name); }
 #else // ----------------------------------------
 // Define a new Enterprise event category.
-#define EP_EVENTCATEGORY(name) const EventCategory name = Enterprise::Events::RegisterCategory()
+#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(); }
 // Define a new Enterprise event type.
-#define EP_EVENTTYPE(name, categories) const EventType name = Enterprise::Events::RegisterType(categories)
+#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(categories); }
 #endif // ---------------------------------------
 
 namespace Enterprise

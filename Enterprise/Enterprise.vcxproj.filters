@@ -57,12 +57,6 @@
     <ClInclude Include="src\Enterprise\Core\Exceptions.h">
       <Filter>Enterprise\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\CoreEvents.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\EventClasses.h">
-      <Filter>Enterprise\Events</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Events\Events.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
@@ -96,6 +90,8 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Events.h" />
+    <ClInclude Include="src\Enterprise\Input\Events.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
