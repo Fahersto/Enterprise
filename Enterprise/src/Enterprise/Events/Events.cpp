@@ -2,42 +2,40 @@
 #include "Events.h"
 #include "Enterprise/Application/Application.h"
 
-/* !!! The following global variables must be singletons, because they are invoked during static initialization !!! */
+// Singletons -------------------------------------------------------------------------------------
+// Note: these MUST be singletons, as they are invoked during static initialization.
 
-// Map associating EventCategorys to vectors of associated EventTypes.
-std::map<EventCategory, std::vector<EventType>>& _categoryMap() 
-{
+// std::map associating EventCategorys to vectors of associated EventTypes.
+std::map<EventCategory, std::vector<EventType>>& _categoryMap() {
 	static auto instance = new std::map<EventCategory, std::vector<EventType>>();
 	return *instance;
 }
 // Current number of registered categories.
-unsigned int& _categoryCount()
-{
+unsigned int& _categoryCount() {
 	static auto count = new unsigned int(0);
 	return *count;
 }
-
 #ifdef EP_CONFIG_DEBUG
 // Map associating EventCategorys to their string names.
-std::map<EventCategory, const char*>& _categoryDebugNames()
-{
+std::map<EventCategory, const char*>& _categoryDebugNames() {
 	static auto instance = new std::map<EventCategory, const char*>();
 	return *instance;
 }
 // Index-aligned vector associating EventTypes with their string names.
-std::vector<const char*>& _typeDebugNames()
-{
+std::vector<const char*>& _typeDebugNames() {
 	static auto instance = new std::vector<const char*>();
 	return *instance;
 }
 #endif
 
-namespace Enterprise::Events
+namespace Enterprise
 {
-	#ifdef EP_CONFIG_DEBUG
-	EventCategory RegisterCategory(const char* debugName)
+	// Registration functions ------------------------------------------------------------------------
+
+	#ifndef EP_CONFIG_DEBUG
+	EventCategory Events::RegisterCategory()
 	#else
-	EventCategory RegisterCategory()
+	EventCategory Events::RegisterCategory(const char* debugName)
 	#endif
 	{
 		// Generate bit field for this category
@@ -56,10 +54,10 @@ namespace Enterprise::Events
 		return returnVal;
 	}
 
-	#ifdef EP_CONFIG_DEBUG
-	EventType RegisterType(EventCategory categories, const char* debugName)
+	#ifndef EP_CONFIG_DEBUG
+	EventType Events::RegisterType(EventCategory categories)
 	#else
-	EventType RegisterType(EventCategory categories)
+	EventType Events::RegisterType(EventCategory categories, const char* debugName)
 	#endif
 	{
 		// Generate ID for this type
@@ -88,4 +86,27 @@ namespace Enterprise::Events
 
 		return returnVal;
 	}
+
+	// Debug string getters --------------------------------------------------------------------------
+	#ifdef EP_CONFIG_DEBUG
+	const char* Events::GetCategoryDebugName(EventCategory category)
+	{
+		// TODO: Handle combinations of categories
+		try { return _categoryDebugNames().at(category); }
+		catch (std::out_of_range)
+		{
+			EP_ERROR("Error: Events::getCategoryDebugName() passed unregistered EventCategory.");
+			return "MISSING_CATEGORY_NAME";
+		}
+	}
+	const char* Events::GetTypeDebugName(EventType type)
+	{
+		try { return _typeDebugNames().at(type); }
+		catch (std::out_of_range)
+		{
+			EP_ERROR("Error: Events::getTypeDebugName() passed unregistered EventType.");
+			return "MISSING_TYPE_NAME";
+		}
+	}
+	#endif
 }

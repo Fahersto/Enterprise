@@ -47,7 +47,7 @@ project "Enterprise"
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
-        "E:/Software Projects/_Libraries/boost_1_72_0"
+        "E:/Software/_Libraries/boost_1_72_0"
     }
  
     filter "system:windows"
@@ -97,6 +97,7 @@ project "Sandbox"
     {
         "Enterprise/src",
         "Enterprise/vendor/spdlog/include",
+        "E:/Software/_Libraries/boost_1_72_0"
     }
 
     links
