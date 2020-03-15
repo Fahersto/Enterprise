@@ -90,8 +90,8 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Application\Events.h" />
-    <ClInclude Include="src\Enterprise\Input\Events.h" />
+    <ClInclude Include="src\Enterprise\Input\InputEvents.h" />
+    <ClInclude Include="src\Enterprise\Application\ApplicationEvents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />

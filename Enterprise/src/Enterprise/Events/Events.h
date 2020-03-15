@@ -108,7 +108,19 @@ namespace Enterprise
 	};
 }
 
+// ------------------------------------------------------------------------------------------------
+// Global stuff
+
 typedef std::shared_ptr<Enterprise::Events::Event> EventPtr; // A smart pointer to an instance of an Event.
+
+// Extract data from an Enterprise EventPtr.
+template <typename T>
+T& GetEventData(EventPtr e) 
+{
+	auto converted = std::dynamic_pointer_cast<Enterprise::Events::DataEvent<T>>(e);
+	if (converted)
+		return converted->Data();
+}
 
 #ifdef EP_CONFIG_DEBUG
 // Directly log EventPtrs

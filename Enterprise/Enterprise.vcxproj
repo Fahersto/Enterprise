@@ -132,8 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Core.h" />
-    <ClInclude Include="src\Enterprise\Application\Events.h" />
-    <ClInclude Include="src\Enterprise\Input\Events.h" />
+    <ClInclude Include="src\Enterprise\Application\ApplicationEvents.h" />
+    <ClInclude Include="src\Enterprise\Input\InputEvents.h" />
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application\Application.h" />
