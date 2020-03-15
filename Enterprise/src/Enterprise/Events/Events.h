@@ -3,7 +3,20 @@
 #include "Core.h"
 
 // Types
-typedef unsigned long long int EventCategory; // Bit field representing Enterprise event category associations TODO: move away from bitfields
+struct EventCategory //A category, or combination of categories, for Enterprise events.
+{
+	std::vector <unsigned int> m_IDs; //List of event category IDs represented by this EventCategory object.
+	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); }
+
+	//Return an EventCategory containing all of the IDs of both EventCategory objects.
+	EventCategory operator | (const EventCategory& other) const
+	{
+		EventCategory returnVal(*this);
+		for (auto it = other.m_IDs.begin(); it != other.m_IDs.end(); ++it)
+			returnVal.m_IDs.emplace_back(*it);
+		return returnVal;
+	}
+};
 typedef unsigned int EventType; // An Enterprise event type.
 
 // Type and Category Registration Macros
@@ -86,7 +99,7 @@ namespace Enterprise
 		static EventType RegisterType(EventCategory categories, const char* debugName);
 
 		// Returns the string name of the provided EventCategory.
-		static const char* GetCategoryDebugName(EventCategory category);
+		static std::string GetCategoryDebugNames(EventCategory category);
 		// Returns the string name of the provided EventType.
 		static const char* GetTypeDebugName(EventType type);
 
@@ -125,8 +138,8 @@ T& GetEventData(EventPtr e)
 #ifdef EP_CONFIG_DEBUG
 // Directly log EventPtrs
 inline std::ostream& operator << (std::ostream& os, EventPtr e) { return os << e->ToString(); }
-//// Directly log EventCategorys
-//inline std::ostream& operator << (std::ostream& os, EventCategory category) { return os << Enterprise::Events::GetCategoryDebugName(category); }
+// Directly log EventCategorys
+inline std::ostream& operator << (std::ostream& os, EventCategory category) { return os << Enterprise::Events::GetCategoryDebugNames(category); }
 //// Directly log EventTypes
 //inline std::ostream& operator << (std::ostream& os, EventType type) { return os << Enterprise::Events::GetTypeDebugName(type); }
 #endif

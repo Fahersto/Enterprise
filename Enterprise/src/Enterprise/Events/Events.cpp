@@ -1,25 +1,18 @@
 #include "EP_PCH.h"
 #include "Events.h"
 
-#include "Enterprise/Application/Application.h" //needed for Application::Quit(). (GET RID OF THIS!)
-
 // Singletons -------------------------------------------------------------------------------------
 // Note: these MUST be singletons, as they are invoked during static initialization.
 
-// std::map associating EventCategorys to vectors of associated EventTypes.
-std::map<EventCategory, std::vector<EventType>>& _categoryMap() {
-	static auto instance = new std::map<EventCategory, std::vector<EventType>>();
+// Vector associating EventCategorys to vectors of EventTypes.
+std::vector<std::vector<EventType>>& _categoryMap() {
+	static auto instance = new std::vector<std::vector<EventType>>();
 	return *instance;
 }
-// Current number of registered categories.
-unsigned int& _categoryCount() {
-	static auto count = new unsigned int(0);
-	return *count;
-}
 #ifdef EP_CONFIG_DEBUG
-// Map associating EventCategorys to their string names.
-std::map<EventCategory, const char*>& _categoryDebugNames() {
-	static auto instance = new std::map<EventCategory, const char*>();
+// Index-aligned vector associating EventCategorys to their string names.
+std::vector<const char*>& _categoryDebugNames() {
+	static auto instance = new std::vector<const char*>();
 	return *instance;
 }
 // Index-aligned vector associating EventTypes with their string names.
@@ -31,7 +24,7 @@ std::vector<const char*>& _typeDebugNames() {
 
 namespace Enterprise
 {
-	// Registration functions ------------------------------------------------------------------------
+	// Registration functions ---------------------------------------------------------------------
 
 	#ifndef EP_CONFIG_DEBUG
 	EventCategory Events::RegisterCategory()
@@ -39,17 +32,16 @@ namespace Enterprise
 	EventCategory Events::RegisterCategory(const char* debugName)
 	#endif
 	{
-		// Generate bit field for this category
-		EventCategory returnVal = BIT(_categoryCount()++); // TODO: Disallow duplicate entries.
-		EP_ASSERT(_categoryCount() < 64); //Limit is 64 bits for bit fields.
+		// Generate ID for this category
+		static unsigned int count = 0;
+		EventCategory returnVal = count++;
 
-		// Add category to _categoryMap
-		auto result = _categoryMap().try_emplace(returnVal, std::vector<EventType>());
-		EP_ASSERT(result.second); //If this is false, emplace failed.
+		// Add empty category to _categoryMap
+		_categoryMap().emplace_back(std::vector<EventType>());
 
-		// Add debug name to _categoryStringNames
+		// Add debug name to _categoryDebugNames
 		#ifdef EP_CONFIG_DEBUG
-		_categoryDebugNames().emplace(returnVal, debugName);
+		_categoryDebugNames().emplace_back(debugName);
 		#endif
 
 		return returnVal;
@@ -66,21 +58,10 @@ namespace Enterprise
 		EventType returnVal = count++;
 
 		// Add type to appropriate _categoryMap categories
-		try
-		{
-			for (unsigned long long i = 0; i < _categoryCount(); ++i)
-			{
-				if (categories & BIT(i))
-					_categoryMap().at(BIT(i)).emplace_back(returnVal);
-			}
-		}
-		catch (std::out_of_range) //Only expected to be thrown by _categoryMap.at() failing
-		{
-			EP_FATAL("Fatal error: Event::RegisterType() was passed an undefined EventCategory.");
-			Application::Quit(); // TODO: This situation won't do at all, since this is called during static initialization.
-		}
+		for (auto it = categories.m_IDs.begin(); it != categories.m_IDs.end(); ++it)
+			_categoryMap().at(*it).emplace_back(returnVal);
 
-		// Add debug name to _typeStringNames
+		// Add debug name to _typeDebugNames
 		#ifdef EP_CONFIG_DEBUG
 		_typeDebugNames().emplace_back(debugName);
 		#endif
@@ -88,18 +69,20 @@ namespace Enterprise
 		return returnVal;
 	}
 
-	// Debug string getters --------------------------------------------------------------------------
+	// Debug string getters -----------------------------------------------------------------------
 	#ifdef EP_CONFIG_DEBUG
-	const char* Events::GetCategoryDebugName(EventCategory category)
+	std::string Events::GetCategoryDebugNames(EventCategory category)
 	{
-		// TODO: Handle combinations of categories
-		try { return _categoryDebugNames().at(category); }
-		catch (std::out_of_range)
-		{
-			EP_ERROR("Error: Events::getCategoryDebugName() passed unregistered EventCategory.");
-			return "MISSING_CATEGORY_NAME";
-		}
+		std::stringstream ss;
+
+		auto it = category.m_IDs.begin(); //first
+		ss << _categoryDebugNames().at(*it);
+		for (++it; it != category.m_IDs.end(); ++it) //second through last
+			ss << ", " << _categoryDebugNames().at(*it);
+
+		return ss.str();
 	}
+
 	const char* Events::GetTypeDebugName(EventType type)
 	{
 		try { return _typeDebugNames().at(type); }
