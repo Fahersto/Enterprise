@@ -50,7 +50,7 @@ namespace Enterprise
 	#ifndef EP_CONFIG_DEBUG
 	EventType Events::RegisterType(EventCategory categories)
 	#else
-	EventType Events::RegisterType(EventCategory categories, const char* debugName)
+	EventType Events::RegisterType(const char* debugName, EventCategory categories)
 	#endif
 	{
 		// Generate ID for this type
@@ -73,19 +73,24 @@ namespace Enterprise
 	#ifdef EP_CONFIG_DEBUG
 	std::string Events::GetCategoryDebugNames(EventCategory category)
 	{
-		std::stringstream ss;
+		if (category.m_IDs.empty())
+			return "None";
+		else
+		{
+			std::stringstream ss;
 
-		auto it = category.m_IDs.begin(); //first
-		ss << _categoryDebugNames().at(*it);
-		for (++it; it != category.m_IDs.end(); ++it) //second through last
-			ss << ", " << _categoryDebugNames().at(*it);
+			auto it = category.m_IDs.begin(); //first
+			ss << _categoryDebugNames().at(*it);
+			for (++it; it != category.m_IDs.end(); ++it) //second through last
+				ss << ", " << _categoryDebugNames().at(*it);
 
-		return ss.str();
+			return ss.str();
+		}
 	}
 
 	const char* Events::GetTypeDebugName(EventType type)
 	{
-		try { return _typeDebugNames().at(type); }
+		try { return _typeDebugNames().at(type.m_ID); }
 		catch (std::out_of_range)
 		{
 			EP_ERROR("Error: Events::getTypeDebugName() passed unregistered EventType.");

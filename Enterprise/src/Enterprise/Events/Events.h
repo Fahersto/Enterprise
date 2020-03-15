@@ -6,7 +6,10 @@
 struct EventCategory //A category, or combination of categories, for Enterprise events.
 {
 	std::vector <unsigned int> m_IDs; //List of event category IDs represented by this EventCategory object.
-	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); }
+	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); } //Standard constructor
+
+	//Gets an empty EventCategory object.
+	static EventCategory None() { return EventCategory(); } 
 
 	//Return an EventCategory containing all of the IDs of both EventCategory objects.
 	EventCategory operator | (const EventCategory& other) const
@@ -16,15 +19,21 @@ struct EventCategory //A category, or combination of categories, for Enterprise 
 			returnVal.m_IDs.emplace_back(*it);
 		return returnVal;
 	}
+private:
+	EventCategory() {} //A parameter-less constructor represents a null EventCategory.
 };
-typedef unsigned int EventType; // An Enterprise event type.
+struct EventType  //An Enterprise event type.
+{
+	unsigned int m_ID;
+	EventType(unsigned int ID) : m_ID(ID) {}
+};
 
 // Type and Category Registration Macros
 #ifdef EP_CONFIG_DEBUG // -----------------------
 // Define a new Enterprise event category.
 #define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(#name); }
 // Define a new Enterprise event type.
-#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(categories, #name); }
+#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(#name, categories); }
 #else // ----------------------------------------
 // Define a new Enterprise event category.
 #define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(); }
@@ -90,26 +99,30 @@ namespace Enterprise
 		};
 
 		// ----------------------------------------------------------------------------------------
-		// EventType and EventCategory Registration and Logging functions
+
+		// Type registration functions
 
 		#ifdef EP_CONFIG_DEBUG
 		// Registers a new event category, and returns its associated bitfield.
 		static EventCategory RegisterCategory(const char* debugName);
 		// Registers a new event type, and returns its associated ID.
-		static EventType RegisterType(EventCategory categories, const char* debugName);
-
-		// Returns the string name of the provided EventCategory.
-		static std::string GetCategoryDebugNames(EventCategory category);
-		// Returns the string name of the provided EventType.
-		static const char* GetTypeDebugName(EventType type);
-
+		static EventType RegisterType(const char* debugName, EventCategory categories = EventCategory::None());
 		#else
 		// Registers a new event category, and returns its associated bitfield.
 		static EventCategory RegisterCategory();
 		// Registers a new event type, and returns its associated ID.
-		static EventType RegisterType(EventCategory categories);
-
+		static EventType RegisterType(EventCategory categories = EventCategory::None());
 		#endif
+
+		// Debug name lookup
+
+		#ifdef EP_CONFIG_DEBUG
+		// Returns the string name of the provided EventCategory.
+		static std::string GetCategoryDebugNames(EventCategory category);
+		// Returns the string name of the provided EventType.
+		static const char* GetTypeDebugName(EventType type);
+		#endif
+
 
 		// ----------------------------------------------------------------------------------------
 		// Event callback registrastion functions
@@ -121,25 +134,19 @@ namespace Enterprise
 	};
 }
 
-// ------------------------------------------------------------------------------------------------
-// Global stuff
-
-typedef std::shared_ptr<Enterprise::Events::Event> EventPtr; // A smart pointer to an instance of an Event.
+// EventPtr typedef
+typedef std::shared_ptr<Enterprise::Events::Event> EventPtr; // A smart pointer to an instance of an Enterprise event.
 
 // Extract data from an Enterprise EventPtr.
 template <typename T>
-T& GetEventData(EventPtr e) 
-{
-	auto converted = std::dynamic_pointer_cast<Enterprise::Events::DataEvent<T>>(e);
-	if (converted)
-		return converted->Data();
+T& GetEventData(EventPtr e) {
+	EP_ASSERT(auto converted = std::dynamic_pointer_cast<Enterprise::Events::DataEvent<T>>(e));
+	return converted->Data();
 }
 
+// Logging helpers
 #ifdef EP_CONFIG_DEBUG
-// Directly log EventPtrs
 inline std::ostream& operator << (std::ostream& os, EventPtr e) { return os << e->ToString(); }
-// Directly log EventCategorys
 inline std::ostream& operator << (std::ostream& os, EventCategory category) { return os << Enterprise::Events::GetCategoryDebugNames(category); }
-//// Directly log EventTypes
-//inline std::ostream& operator << (std::ostream& os, EventType type) { return os << Enterprise::Events::GetTypeDebugName(type); }
+inline std::ostream& operator << (std::ostream& os, EventType type) { return os << Enterprise::Events::GetTypeDebugName(type); }
 #endif
