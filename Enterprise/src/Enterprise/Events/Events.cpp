@@ -4,15 +4,15 @@
 // Singletons =========================================================================================================
 // Note: these MUST be singletons, as they are invoked during static initialization!
 
-// Vector associating category IDs to vectors of EventTypes.
-std::vector<std::vector<EventType>>& _categoryMap() {
-	static auto instance = new std::vector<std::vector<EventType>>();
-	return *instance;
-}
 // Lists of callback pointers, index-aligned to event type ID.
 std::vector<std::vector<Enterprise::Events::EventCallbackPtr>>& Enterprise::Events::_callbackPtrs()
 {
 	static auto instance = new std::vector<std::vector<Enterprise::Events::EventCallbackPtr>>();
+	return *instance;
+}
+// Vector associating category IDs to vectors of EventTypes.
+std::vector<std::vector<EventType>>& _categoryMap() {
+	static auto instance = new std::vector<std::vector<EventType>>();
 	return *instance;
 }
 // Index-aligned vector associating category IDs to their string names.

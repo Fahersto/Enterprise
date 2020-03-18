@@ -3,10 +3,10 @@
 #include "Core.h"
 
 /* Events
-	Events is the Enterprise event system.  It is included in all client project code files via <Enterprise.h>.
+	Events is the Enterprise event system.  It is included as part of <Enterprise.h>.
 
 	To access its members, invoke Enterprise::Events.  To declare new event types or event categories, use the macros
-	EP_EVENTTYPE() and EP_EVENTCATEGORY().
+	EP_EVENTTYPE() and EP_EVENTCATEGORY().  Invoke these macros in the global namespace.
 */
 
 // Types ==============================================================================================================
@@ -91,7 +91,7 @@ namespace Enterprise
 
 			DataEvent(EventType type, T data) : m_data(data), Event(type) {}
 		private:
-			T m_data; // This Event's data payload.
+			T m_data; // This DataEvent's payload.
 		};
 
 		// ============================================================================================================
@@ -102,6 +102,8 @@ namespace Enterprise
 		static EventCategory NewCategory(const char* debugName);
 		// Registers a new event type, and returns an EventType struct containing the associated ID.
 		static EventType NewType(const char* debugName, EventCategory categories = EventCategory::None());
+
+		// ----------------------------------------------------------------------------------------
 
 		// Debug name getters
 
@@ -148,6 +150,7 @@ namespace Enterprise
 					break;
 			}
 		}
+
 	private:
 		static std::vector<std::vector<EventCallbackPtr>>& _callbackPtrs(); // Singleton vector of callback pointer lists.
 	};
