@@ -2,53 +2,54 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-// Types ==============================================================================================================
-struct EventCategory //A category, or combination of categories, for Enterprise events.
-{
-	std::vector <unsigned int> m_IDs; //List of event category IDs represented by this EventCategory object.
-	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); } //Standard constructor
+// TODO: Move as many of these definitions into Events.cpp as possible.
 
+// Types ==============================================================================================================
+
+struct EventCategory //Struct representing one or more Enterprise event categories.
+{
+	//Gets a vector of IDs for the categories this object represents.
+	std::vector<unsigned int>& IDs() { return m_IDs; };
 	//Gets an empty EventCategory object.
 	static EventCategory None() { return EventCategory(); }
 
-	//Return an EventCategory containing all of the IDs of both EventCategory objects.
-	EventCategory operator | (const EventCategory& other) const
-	{
+	//Bitwise OR for combining EventCategory objects.
+	EventCategory operator | (const EventCategory& other) const	{
+		// TODO: disallow duplicates.
 		EventCategory returnVal(*this);
 		for (auto it = other.m_IDs.begin(); it != other.m_IDs.end(); ++it)
 			returnVal.m_IDs.emplace_back(*it);
 		return returnVal;
 	}
+
+	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); }
 private:
-	EventCategory() {} //An empty EventCategory indicates no category assignment to a type.
+	std::vector <unsigned int> m_IDs; //List of category IDs represented by this EventCategory object.
+	EventCategory() {} //An empty EventCategory indicates a lack of category assignments.
 };
-struct EventType  //An Enterprise event type.
+
+struct EventType  //Struct representing a type of Enterprise event.
 {
-public:
-	EventType(unsigned int ID) : m_ID(ID) {}
+	//Gets the ID for this EventType.
 	unsigned int ID() { return m_ID; }
-	friend bool operator == (const EventType& left, const EventType& right);
+	EventType(unsigned int ID) : m_ID(ID) {}
 private:
-	unsigned int m_ID;
+	unsigned int m_ID; //The ID for this event type.
+	friend bool operator == (const EventType& left, const EventType& right);
 };
 bool operator == (const EventType& left, const EventType& right);
 
 // Static Type and Category Registration Macros =======================================================================
-#ifdef EP_CONFIG_DEBUG // -----------------------
-// Define a new Enterprise event category.
-#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(#name); }
-// Define a new Enterprise event type.
-#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(#name, categories); }
-#else // ----------------------------------------
-// Define a new Enterprise event category.
-#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::RegisterCategory(); }
-// Define a new Enterprise event type.
-#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::RegisterType(categories); }
-#endif // ---------------------------------------
 
-// System classes =====================================================================================================
+// Define a new Enterprise event category.
+#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::NewCategory(#name); }
+// Define a new Enterprise event type.
+#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::NewType(#name, categories); }
+
+
 namespace Enterprise
 {
+	// ================================================================================================================
 	/* Events
 		The Enterprise events system.
 	*/
@@ -64,19 +65,15 @@ namespace Enterprise
 			// Returns this Event's EventType.
 			inline const EventType GetType() { return m_type; }
 
-			#ifdef EP_CONFIG_DEBUG
 			// Returns this Event's type as a string.
 			const char* DebugName() { return GetTypeDebugName(m_type); }
 			// Returns a full description of this Event as a string.
 			virtual std::string ToString() { return DebugName(); }
-			#endif
 
 			Event(EventType type) : m_type(type) {}
 			virtual ~Event() {}
-
 		private:
 			EventType m_type; // This Event's type.
-
 		};
 
 		// ----------------------------------------------------------------------------------------
@@ -87,48 +84,36 @@ namespace Enterprise
 		class DataEvent : public Event
 		{
 		public:
-			#ifdef EP_CONFIG_DEBUG
+			T& Data() { return m_data; }
+
+			// Returns a description of this Event and its payload as a string.
 			std::string ToString()
 			{
 				std::stringstream ss;
 				ss << DebugName() << ": " << m_data; //TODO: Ensure this works for containers
 				return ss.str();
 			}
-			#endif
-			T& Data() { return m_data; }
 
 			DataEvent(EventType type, T data) : m_data(data), Event(type) {}
-
 		private:
-			T m_data; // This Event's payload.
-
+			T m_data; // This Event's data payload.
 		};
 
 		// ----------------------------------------------------------------------------------------
+		// Type declaration functions
 
-		// Type registration functions
+		// Registers a new event category, and returns an EventCategory struct containing the associated ID.
+		static EventCategory NewCategory(const char* debugName);
+		// Registers a new event type, and returns an EventType struct containing the associated ID.
+		static EventType NewType(const char* debugName, EventCategory categories = EventCategory::None());
+		
+		// ----------------------------------------------------------------------------------------
+		// Debug string getters
 
-		#ifndef EP_CONFIG_DEBUG
-		// Registers a new event category, and returns its associated bitfield.
-		static EventCategory RegisterCategory();
-		// Registers a new event type, and returns its associated ID.
-		static EventType RegisterType(EventCategory categories = EventCategory::None());
-		#else
-		// Registers a new event category, and returns its associated bitfield.
-		static EventCategory RegisterCategory(const char* debugName);
-		// Registers a new event type, and returns its associated ID.
-		static EventType RegisterType(const char* debugName, EventCategory categories = EventCategory::None());
-		#endif
-
-		// Debug name lookup
-
-		#ifdef EP_CONFIG_DEBUG
-		// Returns the string name of the provided EventCategory.
+		// Gets the comma-separated string names of the categories represented by an EventCategory object.
 		static std::string GetCategoryDebugNames(EventCategory category);
-		// Returns the string name of the provided EventType.
+		// Gets the string name of the event type represented by an EventType object.
 		static const char* GetTypeDebugName(EventType type);
-		#endif
-
 
 		// ----------------------------------------------------------------------------------------
 		// Event broadcast and callback functions
@@ -137,13 +122,13 @@ namespace Enterprise
 		typedef std::shared_ptr<Event> EventPtr; // A smart pointer to an instance of an Enterprise event.
 		typedef bool(*EventCallbackPtr)(EventPtr); // A pointer to a callback function.
 
-		// Register a function to be called when a particular type of event occurs.
+		// Register a callback function for a particular event type.
 		static void SubscribeToType(EventType type, EventCallbackPtr callback);
-		// Register a function to be called when an event belonging to a particular category occurs.
-		static void SubscribeToCategories(EventCategory category, EventCallbackPtr callback);
+		// Register a callback function for all event types in one or more categories.
+		static void SubscribeToCategories(EventCategory categories, EventCallbackPtr callback);
 
-		// Broadcast an event.  It will be dispatched to subscribers in order of priority.
-		static void Broadcast(EventType type) 
+		// Dispatch an event.  It will be dispatched to subscribers in order of priority until one marks it as handled.
+		static void Dispatch(EventType type)
 		{
 			// Generate the event
 			EventPtr e = std::make_shared<Event>(type);
@@ -156,7 +141,7 @@ namespace Enterprise
 		}
 		// Broadcast an event with a data payload.  It will be dispatched to subscribers in order of priority.
 		template <typename T>
-		static void Broadcast(EventType type, T data)
+		static void Dispatch(EventType type, T data)
 		{
 			// Generate the event
 			EventPtr e = std::make_shared<DataEvent<T>>(type, data);
@@ -168,7 +153,7 @@ namespace Enterprise
 			}
 		}
 	private:
-		// (Singleton) Vector of callback pointer lists.  Index-aligned to registered EventType underlying values.
+		// (Singleton) Vector of callback pointer lists.  Index-aligned to IDs of registered event types.
 		static std::vector<std::vector<EventCallbackPtr>>& _callbackPtrs();
 	};
 }
