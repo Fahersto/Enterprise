@@ -85,7 +85,7 @@ namespace Enterprise
 			std::string ToString()
 			{
 				std::stringstream ss;
-				ss << DebugName() << ": " << m_data; //TODO: Ensure this works for containers
+				ss << DebugName() << ": " << m_data;
 				return ss.str();
 			}
 

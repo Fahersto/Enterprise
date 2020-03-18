@@ -11,6 +11,7 @@
 // Logging / Reporting
 #include "Enterprise/Core/Console.h"
 #include "Enterprise/Core/ErrorMessageBox.h"
+#include "prettyprint.hpp"
 
 // Quickly assemble bit fields
 #define BIT(x) (1 << x)

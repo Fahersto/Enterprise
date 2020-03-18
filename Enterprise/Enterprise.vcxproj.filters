@@ -25,6 +25,9 @@
     <Filter Include="Enterprise\Events\OLD\Generation">
       <UniqueIdentifier>{33290CEF-1F7A-F730-48DE-E5F2348E8A9A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Enterprise\Input">
+      <UniqueIdentifier>{65DF6C06-51D8-8B58-7A0A-71DD66626B64}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Enterprise\Time">
       <UniqueIdentifier>{4437EAC9-B0C2-578E-B9D3-DA8225DEB38E}</UniqueIdentifier>
     </Filter>
@@ -37,6 +40,9 @@
     <ClInclude Include="src\EP_PCH.h" />
     <ClInclude Include="src\Enterprise.h" />
     <ClInclude Include="src\Enterprise\Application\Application.h">
+      <Filter>Enterprise\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\ApplicationEvents.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Application\Win32\Window_Win32.h">
@@ -87,11 +93,12 @@
     <ClInclude Include="src\Enterprise\Events\OLD\Generation\Stop.h">
       <Filter>Enterprise\Events\OLD\Generation</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Input\InputEvents.h">
+      <Filter>Enterprise\Input</Filter>
+    </ClInclude>
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Input\InputEvents.h" />
-    <ClInclude Include="src\Enterprise\Application\ApplicationEvents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />

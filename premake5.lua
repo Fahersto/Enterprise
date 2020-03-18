@@ -47,6 +47,7 @@ project "Enterprise"
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
+        "%{prj.name}/vendor/cxx-prettyprint",
         "E:/Software/_Libraries/boost_1_72_0"
     }
  
@@ -97,6 +98,7 @@ project "Sandbox"
     {
         "Enterprise/src",
         "Enterprise/vendor/spdlog/include",
+        "Enterprise/vendor/cxx-prettyprint",
         "E:/Software/_Libraries/boost_1_72_0"
     }
 
