@@ -1,10 +1,12 @@
 #pragma once
 #include "Enterprise/Events/Events.h"
 
-EP_EVENTCATEGORY(WindowAll); //All window events.
+// Categories
+EP_EVENTCATEGORY(AllWindow); //All window events.
 
-EP_EVENTTYPE(WindowClose, EventCategories::WindowAll); //User clicked the close button on the game window.
-EP_EVENTTYPE(WindowMove, EventCategories::WindowAll); //User has dragged the window to a new location.
-EP_EVENTTYPE(WindowResize, EventCategories::WindowAll); //User has resized the window.
-EP_EVENTTYPE(WindowFocus, EventCategories::WindowAll); //The game window has gained focus.
-EP_EVENTTYPE(WindowLostFocus, EventCategories::WindowAll); //The game window has lost focus.
+// Window Events
+EP_EVENTTYPE(WindowClose, EventCategories::AllWindow);		//The user has clicked the close button on the game window.
+EP_EVENTTYPE(WindowMove, EventCategories::AllWindow);		//The user has dragged the window to a new location. | std::pair<int, int>(x, y)
+EP_EVENTTYPE(WindowResize, EventCategories::AllWindow);		//The user has resized the window. | std::pair<int, int>(width, height)
+EP_EVENTTYPE(WindowFocus, EventCategories::AllWindow);		//The game window has gained focus.
+EP_EVENTTYPE(WindowLostFocus, EventCategories::AllWindow);	//The game window has lost focus.
