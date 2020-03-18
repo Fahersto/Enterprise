@@ -2,7 +2,7 @@
 #include "Events.h"
 
 // Singletons =========================================================================================================
-// Note: these MUST be singletons, as they are invoked during static initialization.
+// Note: these MUST be singletons, as they are invoked during static initialization!
 
 // Vector associating category IDs to vectors of EventTypes.
 std::vector<std::vector<EventType>>& _categoryMap() {
@@ -27,13 +27,32 @@ std::vector<const char*>& _typeDebugNames() {
 }
 
 
+// EventCategory OR operator
+EventCategory EventCategory::operator|(const EventCategory& other) const
+{
+	EventCategory returnVal(*this);
+	// For every ID in other...
+	for (auto otherit = other.m_IDs.begin(); otherit != other.m_IDs.end(); ++otherit)
+	{
+		// ...check that there are no matching IDs in this EventCategory.
+		for (auto thisit = m_IDs.begin(); thisit != m_IDs.end(); ++thisit)
+		{
+			if ((*otherit) == (*thisit))
+				goto NextOther;
+		}
+		returnVal.m_IDs.emplace_back(*otherit);
+		NextOther: ;
+	}
+	return returnVal;
+}
+
 // EventType comparison operator
 bool operator == (const EventType& left, const EventType& right) { return left.m_ID == right.m_ID; }
 
 
 namespace Enterprise
 {
-	// Static Type and Category Registration =============================================================================
+	// Event Type and Category Registration ===========================================================================
 
 	EventCategory Events::NewCategory(const char* debugName)
 	{

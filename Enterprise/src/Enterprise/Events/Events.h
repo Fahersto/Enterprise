@@ -2,7 +2,12 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-// TODO: Move as many of these definitions into Events.cpp as possible.
+/* Events
+	Events is the Enterprise event system.  It is included in all client project code files via <Enterprise.h>.
+
+	To access its members, invoke Enterprise::Events.  To declare new event types or event categories, use the macros
+	EP_EVENTTYPE() and EP_EVENTCATEGORY().
+*/
 
 // Types ==============================================================================================================
 
@@ -14,13 +19,7 @@ struct EventCategory //Struct representing one or more Enterprise event categori
 	static EventCategory None() { return EventCategory(); }
 
 	//Bitwise OR for combining EventCategory objects.
-	EventCategory operator | (const EventCategory& other) const	{
-		// TODO: disallow duplicates.
-		EventCategory returnVal(*this);
-		for (auto it = other.m_IDs.begin(); it != other.m_IDs.end(); ++it)
-			returnVal.m_IDs.emplace_back(*it);
-		return returnVal;
-	}
+	EventCategory operator | (const EventCategory& other) const;
 
 	EventCategory(unsigned int ID) { m_IDs.emplace_back(ID); }
 private:
@@ -39,7 +38,8 @@ private:
 };
 bool operator == (const EventType& left, const EventType& right);
 
-// Static Type and Category Registration Macros =======================================================================
+
+// Static Type and Category Registration Macros ---------------------------------------------------
 
 // Define a new Enterprise event category.
 #define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::NewCategory(#name); }
@@ -47,18 +47,15 @@ bool operator == (const EventType& left, const EventType& right);
 #define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::NewType(#name, categories); }
 
 
+// ====================================================================================================================
+
 namespace Enterprise
-{
-	// ================================================================================================================
-	/* Events
-		The Enterprise events system.
-	*/
+{	
+	/* The Enterprise event system. */
 	class Events {
 	public:
 		// ----------------------------------------------------------------------------------------
-		/* Event
-			An Enterprise event.
-		*/
+		/* An Enterprise event. */
 		class Event : std::enable_shared_from_this<Event>
 		{
 		public:
@@ -77,9 +74,7 @@ namespace Enterprise
 		};
 
 		// ----------------------------------------------------------------------------------------
-		/* DataEvent
-			An Enterprise event that contains data.
-		*/
+		/* An Enterprise event containing a data payload. */
 		template <typename T>
 		class DataEvent : public Event
 		{
@@ -99,16 +94,16 @@ namespace Enterprise
 			T m_data; // This Event's data payload.
 		};
 
-		// ----------------------------------------------------------------------------------------
-		// Type declaration functions
+		// ============================================================================================================
+
+		// New event type and category registration
 
 		// Registers a new event category, and returns an EventCategory struct containing the associated ID.
 		static EventCategory NewCategory(const char* debugName);
 		// Registers a new event type, and returns an EventType struct containing the associated ID.
 		static EventType NewType(const char* debugName, EventCategory categories = EventCategory::None());
-		
-		// ----------------------------------------------------------------------------------------
-		// Debug string getters
+
+		// Debug name getters
 
 		// Gets the comma-separated string names of the categories represented by an EventCategory object.
 		static std::string GetCategoryDebugNames(EventCategory category);
@@ -116,6 +111,7 @@ namespace Enterprise
 		static const char* GetTypeDebugName(EventType type);
 
 		// ----------------------------------------------------------------------------------------
+
 		// Event broadcast and callback functions
 
 		// Typedefs
@@ -127,7 +123,7 @@ namespace Enterprise
 		// Register a callback function for all event types in one or more categories.
 		static void SubscribeToCategories(EventCategory categories, EventCallbackPtr callback);
 
-		// Dispatch an event.  It will be dispatched to subscribers in order of priority until one marks it as handled.
+		// Dispatch an event.  It will be dispatched to its subscribers in order of priority.
 		static void Dispatch(EventType type)
 		{
 			// Generate the event
@@ -139,7 +135,7 @@ namespace Enterprise
 					break;
 			}
 		}
-		// Broadcast an event with a data payload.  It will be dispatched to subscribers in order of priority.
+		// Dispatch an event with a data payload.  It will be dispatched to its subscribers in order of priority.
 		template <typename T>
 		static void Dispatch(EventType type, T data)
 		{
@@ -153,8 +149,7 @@ namespace Enterprise
 			}
 		}
 	private:
-		// (Singleton) Vector of callback pointer lists.  Index-aligned to IDs of registered event types.
-		static std::vector<std::vector<EventCallbackPtr>>& _callbackPtrs();
+		static std::vector<std::vector<EventCallbackPtr>>& _callbackPtrs(); // Singleton vector of callback pointer lists.
 	};
 }
 
