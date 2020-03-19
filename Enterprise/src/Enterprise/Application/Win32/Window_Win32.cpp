@@ -3,8 +3,9 @@
 #include "Window_Win32.h"
 
 #include "Enterprise/Application/Application.h"
-#include "Enterprise/Events/OLD/Dispatcher.h"
-#include "Enterprise/Events/OLD/CoreEvents.h"
+#include "Enterprise/Application/ApplicationEvents.h"
+#include "Enterprise/Input/InputEvents.h"
+
 
 namespace Enterprise
 {
@@ -25,26 +26,26 @@ namespace Enterprise
 		{
 		// Clicked the close button
 		case WM_CLOSE:
-			EP_QUICKEVENT(Event::WindowClose);
+			Events::Dispatch(EventTypes::WindowClose);
 			return 0;
 			break;
 		// Gained or lost focus
 		case WM_ACTIVATEAPP:
 			if (wParam == TRUE)
-				EP_QUICKEVENT(Event::WindowFocus);
+				Events::Dispatch(EventTypes::WindowFocus);
 			else
-				EP_QUICKEVENT(Event::WindowLostFocus);
+				Events::Dispatch(EventTypes::WindowLostFocus);
 			return 0;
 			break;
 		// Text entry
 		case WM_CHAR:
 			// TODO: Handle modifier keys
-			EP_QUICKEVENT(Event::KeyChar, char(wParam));
+			Events::Dispatch(EventTypes::KeyChar, char(wParam));
 			return 0;
 			break;
 		// Mouse cursor position change
 		case WM_MOUSEMOVE:
-			EP_QUICKEVENT(Event::MousePosition, LOWORD(lParam), HIWORD(lParam));
+			Events::Dispatch(EventTypes::MousePosition, std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
 			return 0;
 			break;
 		// Raw input (Mouse delta, keyboard state changes)

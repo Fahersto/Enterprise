@@ -7,6 +7,7 @@
 
 // Systems
 #include "Enterprise/Events/OLD/Dispatcher.h"
+#include "Enterprise/Application/ApplicationEvents.h"
 #include "Enterprise/Time/Time.h"
 
 namespace Enterprise 
@@ -37,7 +38,8 @@ namespace Enterprise
 		// StateStack::Init();
 
 		// Event subscriptions
-		Event::Dispatcher::SubscribeToType(Event::TypeIDs::WindowClose, OnEvent_CoreApp);
+		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::WindowClose, OnEvent_CoreApp);
+		Events::SubscribeToType(EventTypes::WindowClose, OnEvent_CoreApp);
 	}
 
 	// Destructor
@@ -71,10 +73,10 @@ namespace Enterprise
 	}
 
 	// Event handler
-	bool Application::OnEvent_CoreApp(Event::EventPtr e)
+	bool Application::OnEvent_CoreApp(Events::EventPtr e)
 	{
 		// By default, WindowClose events quit the application.
-		if (e->GetTypeID() == Event::TypeIDs::WindowClose)
+		if (e->GetType() == EventTypes::WindowClose)
 			Quit();
 		return true;
 	}

@@ -1,5 +1,6 @@
 #pragma once
 #include "Enterprise/Events/OLD/CoreEvents.h"
+#include "Enterprise/Events/Events.h"
 
 namespace Enterprise
 {
@@ -19,7 +20,7 @@ namespace Enterprise
 
 	private:
 		// Event Handler
-		static bool OnEvent_CoreApp(Event::EventPtr e);
+		static bool OnEvent_CoreApp(Events::EventPtr e);
 
 		static Application* m_Instance;
 		bool isRunning = true;

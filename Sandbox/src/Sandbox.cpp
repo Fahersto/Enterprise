@@ -1,7 +1,9 @@
 #include <Enterprise.h>
 #include "Events/OLD/SandboxEvents.h"
+#include "Enterprise/Input/InputEvents.h"
+#include "Enterprise/Application/ApplicationEvents.h"
 
-bool OnEvent(Enterprise::Event::EventPtr e)
+bool OnEvent(Enterprise::Events::EventPtr e)
 {
 	// Temporary: trace all events.
 	EP_TRACE(e);
@@ -16,10 +18,27 @@ public:
 	SandboxApp()
 	{
 		// Temporary: Subscribe to all events except mouse move.
-		using Enterprise::Event::Dispatcher;
-		Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
-		Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
-		Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
+		//using Enterprise::Event::Dispatcher;
+		//Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
+		//Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
+		//Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
+
+		using Enterprise::Events;
+		Events::SubscribeToType(EventTypes::KeyChar, OnEvent);
+		Events::SubscribeToType(EventTypes::KeyDown, OnEvent);
+		Events::SubscribeToType(EventTypes::KeyUp, OnEvent);
+		
+		Events::SubscribeToType(EventTypes::MouseButtonDown, OnEvent);
+		Events::SubscribeToType(EventTypes::MouseButtonUp, OnEvent);
+		Events::SubscribeToType(EventTypes::MouseDelta, OnEvent);
+		//Events::SubscribeToType(EventTypes::MousePosition, OnEvent);
+		Events::SubscribeToType(EventTypes::MouseScroll, OnEvent);
+		
+		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
+		Events::SubscribeToType(EventTypes::WindowFocus, OnEvent);
+		Events::SubscribeToType(EventTypes::WindowLostFocus, OnEvent);
+		Events::SubscribeToType(EventTypes::WindowMove, OnEvent);
+		Events::SubscribeToType(EventTypes::WindowResize, OnEvent);
 
 		Enterprise::Window::Create(); // TODO: Assert when no window is created.
 	}
