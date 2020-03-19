@@ -3,6 +3,7 @@
 
 namespace Enterprise
 {
+	/* The entry point for an Enterprise game Project. */
 	class Game
 	{
 	public:
@@ -10,3 +11,5 @@ namespace Enterprise
 		static void Cleanup();
 	};
 }
+
+// TODO: add descriptions for functions

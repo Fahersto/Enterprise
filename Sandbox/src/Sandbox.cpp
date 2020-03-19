@@ -1,5 +1,5 @@
 #include <Enterprise.h>
-using Enterprise::Game;
+#include "Enterprise/Application/Game.h"
 
 #include "Enterprise/Input/InputEvents.h"
 #include "Enterprise/Application/ApplicationEvents.h"
@@ -11,10 +11,9 @@ bool OnEvent(Enterprise::Events::EventPtr e)
 	return false;
 }
 
-void Game::Init()
+void Enterprise::Game::Init()
 {
 	// Temporary: subscribe to all event types (except mouse position).
-	using Enterprise::Events;
 	Events::SubscribeToType(EventTypes::KeyChar, OnEvent);
 	Events::SubscribeToType(EventTypes::KeyDown, OnEvent);
 	Events::SubscribeToType(EventTypes::KeyUp, OnEvent);
@@ -31,10 +30,10 @@ void Game::Init()
 	Events::SubscribeToType(EventTypes::WindowMove, OnEvent);
 	Events::SubscribeToType(EventTypes::WindowResize, OnEvent);
 
-	Enterprise::Window::Create(); // TODO: Assert when no window is created.
+	Window::Create(); // TODO: Assert when no window is created.
 }
 
-void Game::Cleanup()
+void Enterprise::Game::Cleanup()
 {
 	Window::Destroy();
 }
