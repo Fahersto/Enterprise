@@ -11,7 +11,7 @@
 // Logging / Reporting
 #include "Enterprise/Core/Console.h"
 #include "Enterprise/Core/ErrorMessageBox.h"
-#include "prettyprint.hpp"
+#include "prettyprint.hpp" // This library allows direct printing of the contents of STL containers.
 
 // Quickly assemble bit fields
 #define BIT(x) (1 << x)

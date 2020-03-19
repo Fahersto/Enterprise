@@ -1,5 +1,5 @@
 #include <Enterprise.h>
-#include "Events/OLD/SandboxEvents.h"
+
 #include "Enterprise/Input/InputEvents.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
@@ -17,12 +17,7 @@ public:
 	//Called before everything else in the application.  Create windows and set up initial game state here.
 	SandboxApp()
 	{
-		// Temporary: Subscribe to all events except mouse move.
-		//using Enterprise::Event::Dispatcher;
-		//Dispatcher::SubscribeToCategory(Enterprise::Event::CategoryIDs::_All, OnEvent);
-		//Dispatcher::UnsubscribeFromType(Enterprise::Event::TypeIDs::MousePosition, OnEvent);
-		//Dispatcher::SubscribeToCategory(Sandbox::Event::CategoryIDs::_All, OnEvent);
-
+		// Temporary: subscribe to all event types (except mouse position).
 		using Enterprise::Events;
 		Events::SubscribeToType(EventTypes::KeyChar, OnEvent);
 		Events::SubscribeToType(EventTypes::KeyDown, OnEvent);

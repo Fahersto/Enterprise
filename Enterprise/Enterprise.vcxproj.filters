@@ -66,33 +66,6 @@
     <ClInclude Include="src\Enterprise\Events\Events.h">
       <Filter>Enterprise\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\BaseEvent.h">
-      <Filter>Enterprise\Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents.h">
-      <Filter>Enterprise\Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_CategoryList.h">
-      <Filter>Enterprise\Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_TypeList.h">
-      <Filter>Enterprise\Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\Dispatcher.h">
-      <Filter>Enterprise\Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartClasses.h">
-      <Filter>Enterprise\Events\OLD\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartECM.h">
-      <Filter>Enterprise\Events\OLD\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartEnums.h">
-      <Filter>Enterprise\Events\OLD\Generation</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\Stop.h">
-      <Filter>Enterprise\Events\OLD\Generation</Filter>
-    </ClInclude>
     <ClInclude Include="src\Enterprise\Input\InputEvents.h">
       <Filter>Enterprise\Input</Filter>
     </ClInclude>
@@ -119,9 +92,6 @@
     </ClCompile>
     <ClCompile Include="src\Enterprise\Events\Events.cpp">
       <Filter>Enterprise\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Enterprise\Events\OLD\Dispatcher.cpp">
-      <Filter>Enterprise\Events\OLD</Filter>
     </ClCompile>
     <ClCompile Include="src\Enterprise\Time\Time.cpp">
       <Filter>Enterprise\Time</Filter>

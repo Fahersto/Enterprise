@@ -143,15 +143,6 @@
     <ClInclude Include="src\Enterprise\Core\ErrorMessageBox.h" />
     <ClInclude Include="src\Enterprise\Core\Exceptions.h" />
     <ClInclude Include="src\Enterprise\Events\Events.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\BaseEvent.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_CategoryList.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\CoreEvents_TypeList.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\Dispatcher.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartClasses.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartECM.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\StartEnums.h" />
-    <ClInclude Include="src\Enterprise\Events\OLD\Generation\Stop.h" />
     <ClInclude Include="src\Enterprise\Input\InputEvents.h" />
     <ClInclude Include="src\Enterprise\Time\Time.h" />
   </ItemGroup>
@@ -165,7 +156,6 @@
     <ClCompile Include="src\Enterprise\Core\Win32\Console_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Core\Win32\ErrorMessageBox_Win32.cpp" />
     <ClCompile Include="src\Enterprise\Events\Events.cpp" />
-    <ClCompile Include="src\Enterprise\Events\OLD\Dispatcher.cpp" />
     <ClCompile Include="src\Enterprise\Time\Time.cpp" />
     <ClCompile Include="src\Enterprise\Time\Win32\Time_Win32.cpp" />
   </ItemGroup>

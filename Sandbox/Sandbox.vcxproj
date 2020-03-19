@@ -131,11 +131,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\OLD\SandboxEvents.h" />
-    <ClInclude Include="src\Events\OLD\SandboxEvents_CategoryList.h" />
-    <ClInclude Include="src\Events\OLD\SandboxEvents_TypeList.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>

@@ -9,17 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Events\OLD\SandboxEvents.h">
-      <Filter>Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Events\OLD\SandboxEvents_CategoryList.h">
-      <Filter>Events\OLD</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Events\OLD\SandboxEvents_TypeList.h">
-      <Filter>Events\OLD</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\Sandbox.cpp" />
   </ItemGroup>

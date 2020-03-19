@@ -4,10 +4,9 @@
 // Application stuff
 #include "Application.h"
 #include "Window.h"
+#include "Enterprise/Application/ApplicationEvents.h"
 
 // Systems
-#include "Enterprise/Events/OLD/Dispatcher.h"
-#include "Enterprise/Application/ApplicationEvents.h"
 #include "Enterprise/Time/Time.h"
 
 namespace Enterprise 
@@ -27,7 +26,6 @@ namespace Enterprise
 		#endif
 
 		// Initialize Systems
-		Event::Dispatcher::Init();
 		Time::Init();
 		// File::Init();
 		// Network::Init();
@@ -38,15 +36,12 @@ namespace Enterprise
 		// StateStack::Init();
 
 		// Event subscriptions
-		//Event::Dispatcher::SubscribeToType(Event::TypeIDs::WindowClose, OnEvent_CoreApp);
 		Events::SubscribeToType(EventTypes::WindowClose, OnEvent_CoreApp);
 	}
 
 	// Destructor
 	Application::~Application()
 	{
-		Event::Dispatcher::Cleanup();
-
 		// Clean up the console
 		#ifdef EP_CONFIG_DEBUG
 		Enterprise::Console::Cleanup();
@@ -64,7 +59,6 @@ namespace Enterprise
 
 		// Frame
 		Time::FrameStart();
-		Event::Dispatcher::Update();
 		// ...
 		Time::FrameEnd();
 
@@ -75,7 +69,7 @@ namespace Enterprise
 	// Event handler
 	bool Application::OnEvent_CoreApp(Events::EventPtr e)
 	{
-		// By default, WindowClose events quit the application.
+		// This behavior can be overridden by handling WindowClose events elsewhere.
 		if (e->GetType() == EventTypes::WindowClose)
 			Quit();
 		return true;

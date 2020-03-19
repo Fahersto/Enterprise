@@ -1,5 +1,4 @@
 #pragma once
-#include "Enterprise/Events/OLD/CoreEvents.h"
 #include "Enterprise/Events/Events.h"
 
 namespace Enterprise
