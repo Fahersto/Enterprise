@@ -10,18 +10,11 @@
 // Systems
 #include "Enterprise/Time/Time.h"
 
-bool _isRunning = true;
 Enterprise::Game _game;
 
 namespace Enterprise 
 {
-	bool OnEvent(Events::EventPtr e)
-	{
-		// This behavior can be overridden by handling WindowClose events elsewhere.
-		if (e->GetType() == EventTypes::WindowClose)
-			Application::Quit();
-		return true;
-	}
+	bool Application::_isRunning = true;
 
 	Application::Application()
 	{
@@ -29,8 +22,6 @@ namespace Enterprise
 		#ifdef EP_CONFIG_DEBUG
 		Enterprise::Console::Init();
 		#endif
-
-		_game.Init();
 
 		// Initialize Systems
 		Time::Init();
@@ -44,6 +35,8 @@ namespace Enterprise
 
 		// Event subscriptions
 		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
+
+		_game.Init();
 	}
 
 	Application::~Application()
@@ -74,6 +67,13 @@ namespace Enterprise
 		return _isRunning;
 	}
 
-	// Quit function
 	void Application::Quit() { _isRunning = false; }
+
+	bool Application::OnEvent(Enterprise::Events::EventPtr e)
+	{
+		// This behavior can be overridden by handling WindowClose events elsewhere.
+		if (e->GetType() == EventTypes::WindowClose)
+			Enterprise::Application::Quit();
+		return true;
+	}
 }

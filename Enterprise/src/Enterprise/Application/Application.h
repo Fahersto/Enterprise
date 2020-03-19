@@ -4,11 +4,11 @@
 namespace Enterprise
 {
 	/* Application
-		The heart of the Enterprise application.  This class initializes and operates all of Enterprise's systems. */
+		The heart of an Enterprise application.  This class instantiates and manages all of Enterprise's systems. */
 	class Application
 	{
 	public:
-		// Step the game engine.  Returns true until application stops running.
+		// Steps the game engine.  Returns true until application stops running.  Should only be called in the main function.
 		bool Run();
 
 		// Quit the application at the end of the current frame.
@@ -17,6 +17,9 @@ namespace Enterprise
 		Application();
 		~Application();
 	private:
-
+		// Return value of Run().
+		static bool _isRunning;
+		// The application event handler.  This is a private function to 
+		static bool OnEvent(Events::EventPtr e);
 	};
 }
