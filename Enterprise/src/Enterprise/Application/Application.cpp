@@ -3,27 +3,34 @@
 
 // Application stuff
 #include "Application.h"
+#include "Game.h"
 #include "Window.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
 // Systems
 #include "Enterprise/Time/Time.h"
 
+bool _isRunning = true;
+Enterprise::Game _game;
+
 namespace Enterprise 
 {
-	Application* Application::m_Instance = nullptr;
+	bool OnEvent(Events::EventPtr e)
+	{
+		// This behavior can be overridden by handling WindowClose events elsewhere.
+		if (e->GetType() == EventTypes::WindowClose)
+			Application::Quit();
+		return true;
+	}
 
-	// Constructor
 	Application::Application()
 	{
-		// Singleton handling
-		EP_ASSERT(!m_Instance); // Error: Applications are singletons.
-		m_Instance = this;
-
 		// Create Console
 		#ifdef EP_CONFIG_DEBUG
 		Enterprise::Console::Init();
 		#endif
+
+		_game.Init();
 
 		// Initialize Systems
 		Time::Init();
@@ -36,19 +43,20 @@ namespace Enterprise
 		// StateStack::Init();
 
 		// Event subscriptions
-		Events::SubscribeToType(EventTypes::WindowClose, OnEvent_CoreApp);
+		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
 	}
 
-	// Destructor
 	Application::~Application()
 	{
+		_game.Cleanup();
+
 		// Clean up the console
 		#ifdef EP_CONFIG_DEBUG
 		Enterprise::Console::Cleanup();
 		#endif
 	}
 
-	// Run loop
+	// Main loop
 	bool Application::Run()
 	{
 		// Physics frame
@@ -63,18 +71,9 @@ namespace Enterprise
 		Time::FrameEnd();
 
 		// Back to main function
-		return isRunning;
-	}
-
-	// Event handler
-	bool Application::OnEvent_CoreApp(Events::EventPtr e)
-	{
-		// This behavior can be overridden by handling WindowClose events elsewhere.
-		if (e->GetType() == EventTypes::WindowClose)
-			Quit();
-		return true;
+		return _isRunning;
 	}
 
 	// Quit function
-	void Application::Quit() { m_Instance->isRunning = false; }
+	void Application::Quit() { _isRunning = false; }
 }

@@ -12,6 +12,7 @@
 
 //Application
 #include "Enterprise/Application/Application.h"
+#include "Enterprise/Application/Game.h"
 #include "Enterprise/Application/Window.h"
 
 //Systems

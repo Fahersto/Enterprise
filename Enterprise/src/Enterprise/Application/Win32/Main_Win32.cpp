@@ -2,8 +2,6 @@
 #include "Core.h"
 #include "Enterprise/Application/Application.h"
 
-Enterprise::Application* app = nullptr;
-
 // WinMain:
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -14,7 +12,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		// TODO: Handle command line arguments
 
 		// Create the Application
-		app = Enterprise::CreateApplication();
+		Enterprise::Application app;
 
 		// Main Loop:
 		MSG msg = { 0 };
@@ -27,14 +25,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				DispatchMessage(&msg);
 			}
 		} 
-		while (app->Run());
+		while (app.Run());
 
-		delete app;
 		return EXIT_SUCCESS;
 	}
-	catch (Enterprise::Exceptions::AssertFailed & e) // If AssertFailed is thrown, Exit in disgrace.
+	catch (Enterprise::Exceptions::AssertFailed & e)
 	{
-		delete app; // TODO: Handle potential memory leak if exception is thrown during application constructor.
 		exit(EXIT_FAILURE);
 	}
 }

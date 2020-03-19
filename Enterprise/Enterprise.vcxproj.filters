@@ -72,6 +72,7 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Game.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />
