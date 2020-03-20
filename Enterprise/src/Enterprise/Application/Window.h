@@ -4,32 +4,29 @@
 
 namespace Enterprise
 {
-	/* WindowSettings
-		Struct containing the game window's properties.
-	*/
-	struct WindowSettings
-	{
-		std::wstring Title;
-		unsigned int Width;
-		unsigned int Height;
-		// TODO: Add window icon support
-		// TODO: Add full-screen support
-		// TODO: Add V-sync support
-
-		WindowSettings(
-			const std::wstring& title = L"Enterprise",
-			unsigned int width = 1280,
-			unsigned int height = 720)
-			: Title(title), Width(width), Height(height) 
-		{}
-	};
-
 	/* Window
-		The class that represents the game window.  It is created in the client application's constructor.
+		The class that represents the game window.  It is created in Game::Init() and destroyed in Game::Cleanup().
 	*/
 	class Window
 	{
 	public:
+		/* Struct containing the game window's properties. */
+		struct WindowSettings
+		{
+			std::wstring Title;
+			unsigned int Width;
+			unsigned int Height;
+			// TODO: Add window icon support
+			// TODO: Add full-screen support
+			// TODO: Add V-sync support
+
+			WindowSettings(
+				const std::wstring& title = L"Enterprise",
+				unsigned int width = 1280,
+				unsigned int height = 720)
+				: Title(title), Width(width), Height(height) {}
+		};
+
 		// Setters ------------------------------------------------------------------
 		//virtual void SetWindowSettings(WindowSettings & newSettings); TODO: Add ability to update window settings
 
