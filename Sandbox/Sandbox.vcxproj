@@ -78,8 +78,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>EP_SCOPE_CLIENT;CLIENTNAMESPACE=Sandbox;EP_PLATFORM_WINDOWS;EP_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EP_SCOPE_CLIENT;EP_PLATFORM_WINDOWS;EP_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -94,8 +94,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>EP_SCOPE_CLIENT;CLIENTNAMESPACE=Sandbox;EP_PLATFORM_WINDOWS;EP_CONFIG_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EP_SCOPE_CLIENT;EP_PLATFORM_WINDOWS;EP_CONFIG_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -114,8 +114,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>EP_SCOPE_CLIENT;CLIENTNAMESPACE=Sandbox;EP_PLATFORM_WINDOWS;EP_CONFIG_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;..\..\..\_Libraries\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EP_SCOPE_CLIENT;EP_PLATFORM_WINDOWS;EP_CONFIG_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Enterprise\src;..\Enterprise\vendor\spdlog\include;..\Enterprise\vendor\cxx-prettyprint;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>

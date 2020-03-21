@@ -1,8 +1,7 @@
 #pragma once
 
 /* Enterprise.h
-	This file includes all of the core engine library headers needed by the client.  It shouldn't be
-	necessary for a client code file to include other headers from the Enterprise engine library.
+	This file includes all of the core engine library headers needed by the client.
 	
 	This file should not be included anywhere in the engine library.
 */

@@ -19,12 +19,6 @@
     <Filter Include="Enterprise\Events">
       <UniqueIdentifier>{0AC83ECB-76DE-3C61-BF55-C8822BAB0DE9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Enterprise\Events\OLD">
-      <UniqueIdentifier>{F8DC325E-6449-EE58-2D3D-86B6996810C1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Enterprise\Events\OLD\Generation">
-      <UniqueIdentifier>{33290CEF-1F7A-F730-48DE-E5F2348E8A9A}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Enterprise\Input">
       <UniqueIdentifier>{65DF6C06-51D8-8B58-7A0A-71DD66626B64}</UniqueIdentifier>
     </Filter>
@@ -43,6 +37,9 @@
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Application\ApplicationEvents.h">
+      <Filter>Enterprise\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Enterprise\Application\Game.h">
       <Filter>Enterprise\Application</Filter>
     </ClInclude>
     <ClInclude Include="src\Enterprise\Application\Win32\Window_Win32.h">
@@ -72,7 +69,6 @@
     <ClInclude Include="src\Enterprise\Time\Time.h">
       <Filter>Enterprise\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Enterprise\Application\Game.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EP_PCH.cpp" />

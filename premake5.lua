@@ -1,16 +1,16 @@
 --[[
-    Enterprise_dev premake5.lua
-    Run a script in the same folder as this file to generate the project files for Enterprise engine development.  The
-    following scripts are available as .bat (Windows) and bash (MacOS) files for easy execution.
+    Enterprise Engine Development Premake Script
+
+    To use this script, run the command for your platform from this folder location.
 
     Windows (Visual Studio):
     vendor/bin/premake/premake5.exe vs2019
 
-    MacOS (XCode):
+    MacOS (XCode, to be implemented with macOS support):
     vendor/bin/premake/premake5.exe xcode4
 ]]
 
-workspace "Enterprise_dev"
+workspace "Enterprise_Dev"
     architecture "x64"
     configurations
     {
@@ -35,6 +35,7 @@ project "Enterprise"
     pchheader "EP_PCH.h"
     pchsource "Enterprise/src/EP_PCH.cpp"
 
+    -- Used to write library code which behaves differently in client
     defines "EP_SCOPE_CORE"
 
     files
@@ -47,8 +48,7 @@ project "Enterprise"
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
-        "%{prj.name}/vendor/cxx-prettyprint",
-        "E:/Software/_Libraries/boost_1_72_0"
+        "%{prj.name}/vendor/cxx-prettyprint"
     }
  
     filter "system:windows"
@@ -57,6 +57,7 @@ project "Enterprise"
         systemversion "latest"
         defines "EP_PLATFORM_WINDOWS"
 
+    -- To be implemented with macOS support
     -- filter "system:macosx"
     --     ???
     --     defines "EP_PLATFORM_MACOS"
@@ -79,14 +80,12 @@ project "Sandbox"
     kind "WindowedApp"
     language "C++"
 
+    -- Build locations
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-    defines 
-    {
-        "EP_SCOPE_CLIENT",
-        "CLIENTNAMESPACE=Sandbox" -- This should change from project to project.
-    }
+    -- Used to write library code which behaves differently in client
+    defines "EP_SCOPE_CLIENT"
 
     files
     {
@@ -98,14 +97,10 @@ project "Sandbox"
     {
         "Enterprise/src",
         "Enterprise/vendor/spdlog/include",
-        "Enterprise/vendor/cxx-prettyprint",
-        "E:/Software/_Libraries/boost_1_72_0"
+        "Enterprise/vendor/cxx-prettyprint"
     }
 
-    links
-    {
-        "Enterprise"
-    }
+    links "Enterprise"
  
     filter "system:windows"
         cppdialect "C++17"
@@ -113,6 +108,7 @@ project "Sandbox"
         systemversion "latest"
         defines "EP_PLATFORM_WINDOWS"
 
+    -- To be implemented with macOS support
     -- filter "system:macosx"
     --     ???
     --     defines "EP_PLATFORM_MACOS"
