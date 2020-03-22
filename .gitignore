@@ -1,6 +1,6 @@
 # Build Folders
-bin/
-bin-int/
+/bin/
+/bin-int/
 
 # Visual Studio Files
 .vs/
