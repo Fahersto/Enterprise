@@ -1,13 +1,7 @@
 --[[
     Enterprise Engine Development Premake Script
-
-    To use this script, run the command for your platform from this folder location.
-
-    Windows (Visual Studio):
-    vendor/bin/premake/premake5.exe vs2019
-
-    MacOS (XCode, to be implemented with macOS support):
-    vendor/bin/premake/premake5.exe xcode4
+    Utilized by Premake to generate project and solution files.
+    To generate projects and solutions, run the appropriate script in _Scripts.
 ]]
 
 workspace "Enterprise_Dev"
