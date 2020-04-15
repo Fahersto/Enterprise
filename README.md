@@ -7,45 +7,47 @@ Enterprise is a "pet project" game engine I'm developing in C++ in my free time.
 * To push my C++ knowledge, and my programming skills overall.
 * To practice integrating audio middleware, such as FMOD and Wwise.
 * To serve as a testbed for developing new technologies or game ideas.
-* (Eventually) I'll probably use it to push out a few indie games, too.
 
-This project is still in its early stages (I only started working on it in December 2019), but it's now at a point where I figured I'd open it up for people to see.  A person can download and build the current version of Enterprise to see what I've done, or to get ideas for their own projects.  And while I certainly don't expect it, other developers can contribute to the project as well.
+This project is still in its early stages (I only started working on it at the end of December 2019), but it's at a point now where I figured I'd make my efforts public. Feel free to clone the project to see what I've done, and if you're so inclined, you are welcome to contribute as well.
 
 ## Getting started
 Use Git to clone the repository:
 
 `git clone --recurse-submodules https://github.com/theMartzSound/Enterprise.git`
 
-Note that this repository makes use of submodules, so don't forget to use `--recurse-submodules`.  If you do forget, your local repository will be missing files, and Enterprise will fail to build.
+This repository makes use of Git submodules, so don't forget to use `--recurse-submodules`.  If you don't do this, you'll be missing files and Enterprise will fail to build.
 
-To build a solution for Visual Studio 2019, run "pm_Win32_VS2019.bat" in the _Scripts folder.  You should then be able to compile immediately.  Older versions of Visual Studio have not been tested and are not supported.  MacOS and Xcode support have not yet been added.
+To build a solution for Visual Studio 2019, run "pm_Win32_VS2019.bat" in the _Scripts folder.  You should then be able to compile immediately.
+* Older versions of Visual Studio have not been tested and are presently unsupported.
+* macOS and Xcode support have not yet been added.
 
 ## Current State of Development
-So far, I have developed Enterprise's low-level framework.  The framework consists of an entry point, a logging system, creation of a game window, custom assertions and exceptions, and a place to add new systems.  It's being developed with portability in mind, though for now, it is only for Windows.
+So far, I have developed Enterprise's framework as well as two of its core systems. The framework contains an entry point, a logging system, basic game window handling, custom assertions and exceptions, and a place to add systems. The development of the core systems is ongoing.
+
+Enterprise is being developed with portability in mind, though for now, it is only for Windows.
 
 ### The Plan
 
-Enterprise's basic systems are the current focus of development.  I'm developing these in pretty much the order you see below:
+With the framework largely done, Enterprise's core systems are the focus of development. The systems are the following:
 
-1. Time System (Done)
-2. Event System (Done (mostly))
-3. File System (In Development)
+1. Time (done)
+2. Events (done (mostly))
+3. File (up next)
 4. Input
 5. Graphics
 6. Audio
 7. ECS
-8. StateStack
+8. StateStack (probably going to be renamed a few times)
 
-Once the systems are done, then technically, Enterprise will be a fully-featured game engine.  However, even after the systems themselves are fully-featured, there are still a few other objectives to shoot for:
+### Extras
+Once the core systems are finished, then technically, Enterprise will be, too. However, there are some goals I'd like to eventually meet, even if they aren't a high priority:
 
 * An installation package generator
 * Viewers/editors for asset creation
-* Support for macOS and developement in Xcode
+* Support for macOS and development in Xcode
 * Support for web players
-* A network system
+* A networking system
 * Online store integration (Steam, etc.)
-
-These goals are "nice to haves", but if Enterprise is ever used on a commercial project, they'd certainly help.
 
 ## Libraries Used
 * Premake: <https://premake.github.io/>
