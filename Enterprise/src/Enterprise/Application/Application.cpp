@@ -10,8 +10,6 @@
 // Systems
 #include "Enterprise/Time/Time.h"
 
-Enterprise::Game _game;
-
 namespace Enterprise 
 {
 	bool Application::_isRunning = true;
@@ -36,12 +34,12 @@ namespace Enterprise
 		// Event subscriptions
 		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
 
-		_game.Init();
+		Game::Init();
 	}
 
 	Application::~Application()
 	{
-		_game.Cleanup();
+		Game::Cleanup();
 
 		// Clean up the console
 		#ifdef EP_CONFIG_DEBUG
