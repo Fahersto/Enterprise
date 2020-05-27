@@ -1,4 +1,4 @@
-![Enterprise Engine](_Resources/Branding/EPLogo_BlackCaptioned.png)
+![Enterprise Engine](_resources/Branding/EPLogo_BlackCaptioned.png)
 
 # Enterprise Engine
 Enterprise is a "pet project" game engine I'm developing in C++ in my free time. I'm building it for these reasons:
@@ -17,7 +17,7 @@ Use Git to clone the repository:
 
 This repository makes use of Git submodules, so don't forget to use `--recurse-submodules`.  If you don't do this, you'll be missing files and Enterprise will fail to build.
 
-To build a solution for Visual Studio 2019, run "pm_Win32_VS2019.bat" in the _Scripts folder.  You should then be able to compile immediately.
+To build a solution for Visual Studio 2019, run "pm_Win32_VS2019.bat" in the "_scripts" folder.  You should then be able to compile immediately.
 * Older versions of Visual Studio have not been tested and are presently unsupported.
 * macOS and Xcode support have not yet been added.
 

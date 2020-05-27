@@ -20,7 +20,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		MSG msg = { 0 };
 		do
 		{
-			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
 				// Dispatch any Windows Messages
 				TranslateMessage(&msg);

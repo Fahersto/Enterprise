@@ -1,8 +1,10 @@
 --[[
     Enterprise Engine Development Premake Script
     Utilized by Premake to generate project and solution files.
-    To generate projects and solutions, run the appropriate script in scripts/.
+    To generate projects and solutions, run the appropriate script in "_scripts".
 ]]
+
+local EP_ProjectName = "Sandbox" -- This string will be the name of your Enterprise project.
 
 workspace "Enterprise_Dev"
     language "C++"
@@ -49,16 +51,16 @@ workspace "Enterprise_Dev"
 
     filter {}
 
-    startproject "Sandbox"
+    startproject (EP_ProjectName)
 
 project "Enterprise" -- =============================================
-    location "Enterprise"
+    location "%{prj.name}"
     kind "StaticLib"
     defines "EP_SCOPE_CORE"
 
     sysincludedirs {
-        "Enterprise/vendor/spdlog/include",
-        "Enterprise/vendor/cxx-prettyprint"
+        "Enterprise/_vendor/spdlog/include",
+        "Enterprise/_vendor/cxx-prettyprint"
     }
     pchheader "EP_PCH.h"
     pchsource "Enterprise/src/EP_PCH.cpp"
@@ -69,27 +71,25 @@ project "Enterprise" -- =============================================
 
     filter {}
 
-project "Sandbox" -- ================================================
-    location "Sandbox"
+project (EP_ProjectName) -- =========================================
+    location (EP_ProjectName)
     kind "WindowedApp"
     defines "EP_SCOPE_CLIENT"
 
     links "Enterprise"
     sysincludedirs {
         "Enterprise/src",
-        "Enterprise/vendor/spdlog/include",
-        "Enterprise/vendor/cxx-prettyprint"
+        "Enterprise/_vendor/spdlog/include",
+        "Enterprise/_vendor/cxx-prettyprint"
     }
-    files "_Resources/**"
-    removefiles "**.DS_Store" -- macOS hidden files
-
-    -- By moving resources into /src, premake will put the whole thing at the project level.
-    vpaths {["src/_Resources/*"] = "_Resources/**"}
+    files (EP_ProjectName .. "/_resources/**")
+    removefiles "**.DS_Store" -- Exclude macOS hidden files
+    vpaths { ["src/Resources/*"] = (EP_ProjectName .. "/_resources/**") } -- Nesting "_resources" makes "src" the top level.
 
     filter "system:macosx"
         xcodebuildsettings {
-            ["INFOPLIST_FILE"] = "../_Resources/macOS/Info.plist",
-            ["CODE_SIGN_ENTITLEMENTS"] = "../_Resources/macOS/Enterprise.entitlements"
+            ["INFOPLIST_FILE"] = "../_resources/macOS/Info.plist",
+            ["CODE_SIGN_ENTITLEMENTS"] = "../_resources/macOS/Enterprise.entitlements"
             -- ["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon" -- Pending an icon build system.
         }
     filter {}
