@@ -1,6 +1,6 @@
 #pragma once
 #include "EP_PCH.h"
-#include "Enterprise/Core/ErrorMessageBox.h"
+#include "ErrorMessageBox.h"
 
 /* Assert.h
 	This header contains the Enterprise assert macros (EP_ASSERT).  It is included everywhere via Core.h inclusion.
@@ -10,12 +10,21 @@
 	- In Distribution, the assertion is stripped out.  The code wrapped in EP_ASSERT is stil called.
 */
 
+// TODO: Investigate conditionalizing this depending on whether debugger is attached.
+#ifdef EP_PLATFORM_WINDOWS
+#define EP_DEBUGBREAK __debugbreak()
+#elif defined EP_PLATFORM_MACOS
+#include <csignal>
+#define EP_DEBUGBREAK raise(SIGSTOP)
+#endif
+
+
 #ifdef EP_CONFIG_DEBUG
 // Break on line, log to console, then terminate.
 #define EP_ASSERT(condition) do { \
 	if(!(condition)) { \
 		EP_FATAL("Assertion failed: {}\n{} on line {}", #condition, __FILE__, __LINE__);\
-		__debugbreak(); /*TODO: Replace with portable break function*/\
+		EP_DEBUGBREAK;\
 		throw Enterprise::Exceptions::AssertFailed();\
 	}\
 } while(0)

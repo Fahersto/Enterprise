@@ -6,6 +6,7 @@
 #include "Enterprise/Application/ApplicationEvents.h"
 #include "Enterprise/Input/InputEvents.h"
 
+#ifdef EP_PLATFORM_WINDOWS
 
 namespace Enterprise
 {
@@ -128,3 +129,5 @@ namespace Enterprise
 		DestroyWindow(hWnd);
 	}
 }
+
+#endif

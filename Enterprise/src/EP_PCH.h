@@ -16,7 +16,6 @@
 #include <map>
 
 #include <stdio.h>
-#include <io.h>
 #include <fcntl.h>
 
 #include <exception>

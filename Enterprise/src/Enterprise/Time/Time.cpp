@@ -1,5 +1,5 @@
 #include "EP_PCH.h"
-#include "Enterprise/Time/Time.h"
+#include "Time.h"
 
 using namespace Enterprise::Constants;
 

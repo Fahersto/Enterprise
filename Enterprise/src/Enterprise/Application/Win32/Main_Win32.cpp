@@ -2,6 +2,8 @@
 #include "Core.h"
 #include "Enterprise/Application/Application.h"
 
+#ifdef EP_PLATFORM_WINDOWS
+
 // WinMain:
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -34,3 +36,5 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		exit(EXIT_FAILURE);
 	}
 }
+
+#endif

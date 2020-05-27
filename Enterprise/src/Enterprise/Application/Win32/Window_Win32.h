@@ -1,6 +1,8 @@
 #pragma once
 #include "Enterprise/Application/Window.h"
 
+#ifdef EP_PLATFORM_WINDOWS
+
 namespace Enterprise {
 
 	class Window_Win32 : public Window {
@@ -12,3 +14,5 @@ namespace Enterprise {
 		HWND hWnd; // Win32 Window handle
 	};
 }
+
+#endif

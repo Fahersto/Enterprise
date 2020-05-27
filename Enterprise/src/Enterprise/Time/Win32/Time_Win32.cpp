@@ -1,4 +1,3 @@
-#pragma once
 #include "EP_PCH.h"
 #include "Core.h"
 #include "Enterprise/Time/Time.h"
