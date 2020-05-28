@@ -88,8 +88,8 @@ project (EP_ProjectName) -- =========================================
 
     filter "system:macosx"
         xcodebuildsettings {
-            ["INFOPLIST_FILE"] = "../_resources/macOS/Info.plist",
-            ["CODE_SIGN_ENTITLEMENTS"] = "../_resources/macOS/Enterprise.entitlements"
+            ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
+            ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements"
             -- ["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon" -- Pending an icon build system.
         }
     filter {}
