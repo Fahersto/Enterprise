@@ -66,7 +66,6 @@ project "Enterprise" -- =============================================
     pchsource "Enterprise/src/EP_PCH.cpp"
  
     filter "system:macosx"
-        links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
         pchheader "src/EP_PCH.h" -- For some reason this has to be relative to the project
 
     filter {}
@@ -87,6 +86,7 @@ project (EP_ProjectName) -- =========================================
     vpaths { ["src/Resources/*"] = (EP_ProjectName .. "/_resources/**") } -- Nesting "_resources" makes "src" the top level.
 
     filter "system:macosx"
+        links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
         xcodebuildsettings {
             ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
             ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements"
