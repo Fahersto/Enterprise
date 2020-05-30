@@ -12,7 +12,7 @@
 
 #ifdef _WIN32
 #define EP_DEBUGBREAK __debugbreak()
-#elif defined EP_PLATFORM_MACOS
+#elif defined(__APPLE__) && defined(__MACH__)
 #define EP_DEBUGBREAK raise(SIGTRAP)
 #endif
 
