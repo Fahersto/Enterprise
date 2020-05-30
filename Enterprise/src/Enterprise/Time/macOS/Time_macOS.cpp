@@ -1,6 +1,6 @@
+#include "EP_PCH.h"
 #ifdef EP_PLATFORM_MACOS
 
-#include "EP_PCH.h"
 #include "Core.h"
 #include "Enterprise/Time/Time.h"
 

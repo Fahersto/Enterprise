@@ -1,6 +1,6 @@
+#include "EP_PCH.h"
 #ifdef EP_PLATFORM_WINDOWS
 
-#include "EP_PCH.h"
 #include "Core.h"
 #include "Enterprise/Time/Time.h"
 
@@ -22,7 +22,7 @@ void Enterprise::Time::Init()
 float Enterprise::Time::GetRawTime()
 {
 	QueryPerformanceCounter(&_currentCount);
-	return float((_currentCount.QuadPart - _startCount.QuadPart) * _tickPeriod;
+	return float((_currentCount.QuadPart - _startCount.QuadPart) * _tickPeriod);
 }
 
 #endif

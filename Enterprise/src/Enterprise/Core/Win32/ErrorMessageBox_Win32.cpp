@@ -1,6 +1,6 @@
+#include "EP_PCH.h"
 #ifdef EP_PLATFORM_WINDOWS
 
-#include "EP_PCH.h"
 #include "Enterprise/Core/ErrorMessageBox.h"
 
 void Enterprise::Platform::DisplayErrorDialog(std::wstring& ErrorMessage)

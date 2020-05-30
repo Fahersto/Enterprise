@@ -1,8 +1,8 @@
+#include "EP_PCH.h"
 #ifdef EP_PLATFORM_WINDOWS
 
-#include "EP_PCH.h"
 #include "Core.h"
-#include "Window.h"
+#include "Enterprise/Application/Window.h"
 
 #include "Enterprise/Application/Application.h"
 #include "Enterprise/Application/ApplicationEvents.h"
@@ -11,6 +11,8 @@
 
 // Win32 message handler ----------------------------------------------------------------------
 LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    using Enterprise::Events;
+
     switch (message)
     {
         case WM_CLOSE: // Clicked the close button
@@ -33,33 +35,33 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             Events::Dispatch(EventTypes::MousePosition, std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
             break;
             
-        case WM_INPUT: // Raw input API
-            
-            // Get size of header.  Needed for actually getting header.
-            UINT dwSize = 0;
-            GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
-            
-            // Get header
-            LPBYTE lpb = new BYTE[dwSize]; // TODO: Move this to the stack.
-            GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
-            EP_ASSERT(lpb); // If lpb is NULL, there was a problem.
-            RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
-            delete[] lpb;
-            
-            // TODO: Use raw input data
-            break;
-            
-        default: // Pass unhandled messages back to the base procedure
-            return DefWindowProc(hWnd, message, wParam, lParam);
-            break;
-    }
-    return 0;
+		case WM_INPUT: // Raw input API
+		{
+			// Get size of header.  Needed for actually getting header.
+			UINT dwSize = 0;
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+
+			// Get header
+			LPBYTE lpb = new BYTE[dwSize]; // TODO: Move this to the stack.
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+			EP_ASSERT(lpb); // If lpb is NULL, there was a problem.
+			RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
+			delete[] lpb;
+
+			// TODO: Use raw input data
+			break;
+		}
+		default: // Pass unhandled messages back to the base procedure
+			return DefWindowProc(hWnd, message, wParam, lParam);
+			break;
+	}
+	return 0;
 }
     
 
 // Window class -----------------------------------------------------------------------------------
 
-class Win32_Window : public Window
+class Win32_Window : public Enterprise::Window
 {
 public:
     Win32_Window(const WindowSettings& settings) : Window(settings)
