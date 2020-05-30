@@ -1,5 +1,5 @@
 #include "EP_PCH.h"
-#ifdef EP_PLATFORM_WINDOWS
+#ifdef _WIN32
 
 #include "Core.h"
 #include "Enterprise/Core/Console.h"

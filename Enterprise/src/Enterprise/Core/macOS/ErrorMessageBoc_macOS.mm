@@ -1,6 +1,6 @@
-#ifdef EP_PLATFORM_MACOS
-
 #include "EP_PCH.h"
+#if defined(__APPLE__) && defined(__MACH__)
+
 #include "Enterprise/Core/ErrorMessageBox.h"
 
 void Enterprise::Platform::DisplayErrorDialog(std::wstring& ErrorMessage)

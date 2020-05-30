@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
+#include "EP_PCH.h"
+#if defined(__APPLE__) && defined(__MACH__)
 
 #include "Enterprise/Events/Events.h"
 #include "Enterprise/Application/Application.h"
@@ -88,3 +88,5 @@ int main(int argc, const char * argv[]) {
     }
     return 0;
 }
+
+#endif

@@ -10,7 +10,7 @@
 	- In Distribution, the assertion is stripped out.  The code wrapped in EP_ASSERT is stil called.
 */
 
-#ifdef EP_PLATFORM_WINDOWS
+#ifdef _WIN32
 #define EP_DEBUGBREAK __debugbreak()
 #elif defined EP_PLATFORM_MACOS
 #define EP_DEBUGBREAK raise(SIGTRAP)

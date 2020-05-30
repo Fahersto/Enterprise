@@ -33,21 +33,21 @@ workspace "Enterprise_Dev"
         "%{prj.name}/src/**.c",
         "%{prj.name}/src/**.hpp",
         "%{prj.name}/src/**.cpp",
+
+        -- Obj-C source
+        "%{prj.name}/src/**.m",
+        "%{prj.name}/src/**.mm",
     }
+    filter { "system:windows", "files:**.m or files:**.mm" }
+        buildaction "None"  -- Don't build Obj-C files in MSVC
+    filter {}
 
     filter "system:windows"
-        defines "EP_PLATFORM_WINDOWS"
         systemversion "latest"
         staticruntime "On"
 
     filter "system:macosx"
-        defines "EP_PLATFORM_MACOS"
         systemversion "10.15"
-        files {
-            -- Obj-C source
-            "%{prj.name}/src/**.m",
-            "%{prj.name}/src/**.mm",
-        }
 
     filter {}
 

@@ -1,5 +1,5 @@
 #include "EP_PCH.h"
-#ifdef EP_PLATFORM_MACOS
+#if defined(__APPLE__) && defined(__MACH__)
 
 #include "Core.h"
 #include "Enterprise/Time/Time.h"

@@ -22,13 +22,13 @@
 #include <exception>
 #include <csignal>
 
-#ifdef EP_PLATFORM_WINDOWS
+#ifdef _WIN32
     #include <windows.h>
     #include <windowsx.h>
     #include <Xinput.h>
 #endif
 
-#ifdef EP_PLATFORM_MACOS
+#if defined(__APPLE__) && defined(__MACH__)
     #ifdef __OBJC__
         #import <Foundation/Foundation.h>
         #import <Cocoa/Cocoa.h>
