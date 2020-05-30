@@ -33,6 +33,7 @@ namespace Enterprise
 
 		// Event subscriptions
 		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
+        Events::SubscribeToType(EventTypes::QuitRequested, OnEvent);
 
 		Game::Init();
 	}
@@ -67,10 +68,15 @@ namespace Enterprise
 
 	void Application::Quit() { _isRunning = false; }
 
-	bool Application::OnEvent(Enterprise::Events::EventPtr e)
-	{
-		// This behavior can be overridden by handling WindowClose events elsewhere.
-		if (e->GetType() == EventTypes::WindowClose)
+
+    // Developers can override these events by handling them elsewhere.
+    bool Application::OnEvent(Enterprise::Events::EventPtr e)
+    {
+        if (e->GetType() == EventTypes::WindowClose)
+            // By default, closing the window is treated as a request to quit.
+            Enterprise::Events::Dispatch(EventTypes::QuitRequested);
+        else if (e->GetType() == EventTypes::QuitRequested)
+            // By default, selecting Quit from the macOS dock or app menu quits the program.
 			Enterprise::Application::Quit();
 		return true;
 	}

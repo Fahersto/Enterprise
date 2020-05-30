@@ -1,9 +1,8 @@
+#ifdef EP_PLATFORM_WINDOWS
+
 #include "EP_PCH.h"
 #include "Core.h"
-
 #include "Enterprise/Core/Console.h"
-
-#ifdef EP_PLATFORM_WINDOWS
 
 // Static definitions
 std::shared_ptr<spdlog::logger> Enterprise::Console::s_CoreLogger;
@@ -11,13 +10,10 @@ std::shared_ptr<spdlog::logger> Enterprise::Console::s_ClientLogger;
 
 void Enterprise::Console::Init()
 {
-	// Windows
 	EP_ASSERT(AllocConsole());
-	//HANDLE h_ConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTitle(EP_CONSOLE_TITLE);
 
-	// spllog
-	InitLoggers();
+	InitLoggers(); // spdlog
 }
 
 void Enterprise::Console::Cleanup() {

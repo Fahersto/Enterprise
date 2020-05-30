@@ -89,7 +89,7 @@ project (EP_ProjectName) -- =========================================
         links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
         xcodebuildsettings {
             ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
-            ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements"
+            -- ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements" -- This should probably be added per project.
             -- ["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon" -- Pending an icon build system.
         }
     filter {}

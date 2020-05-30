@@ -10,14 +10,11 @@
 	- In Distribution, the assertion is stripped out.  The code wrapped in EP_ASSERT is stil called.
 */
 
-// TODO: Investigate conditionalizing this depending on whether debugger is attached.
 #ifdef EP_PLATFORM_WINDOWS
 #define EP_DEBUGBREAK __debugbreak()
 #elif defined EP_PLATFORM_MACOS
-#include <csignal>
-#define EP_DEBUGBREAK raise(SIGSTOP)
+#define EP_DEBUGBREAK raise(SIGTRAP)
 #endif
-
 
 #ifdef EP_CONFIG_DEBUG
 // Break on line, log to console, then terminate.
@@ -29,25 +26,25 @@
 	}\
 } while(0)
 
-#elif EP_CONFIG_RELEASE
 // Generate error pop-up (halting thread), then terminate.
+#elif EP_CONFIG_RELEASE
 #ifdef EP_SCOPE_CORE
 #define EP_ASSERT(condition) do { \
 	if(!(condition)) { \
 		std::wstringstream messagestream; \
 		messagestream << "Assertion failed in Core: " << #condition << "\n" << __FILE__ << " on line " << __LINE__ << "\n\n\
 The Enterprise engine library has encountered a condition that should never occur.  It has terminated the application.";\
-		Enterprise::Platform::DisplayErrorDialog(messagestream.str());\
+		Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str());\
 		throw Enterprise::Exceptions::AssertFailed();\
 	} \
 } while(0)
-#else
+#elif EP_SCOPE_CLIENT
 #define EP_ASSERT(condition) do { \
 	if(!(condition)) { \
 		std::wstringstream messagestream; \
 		messagestream << "Assertion failed in Client: " << #condition << "\n" << __FILE__ << " on line " << __LINE__ << "\n\n\
 This Enterprise application has encountered a condition that should never occur.  It has terminated itself.";\
-		Enterprise::Platform::DisplayErrorDialog(messagestream.str());\
+		Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str());\
 		throw Enterprise::Exceptions::AssertFailed();\
 	} \
 } while(0)

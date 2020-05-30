@@ -1,8 +1,9 @@
+#ifdef EP_PLATFORM_WINDOWS
+
 #include "EP_PCH.h"
 #include "Core.h"
 #include "Enterprise/Application/Application.h"
 
-#ifdef EP_PLATFORM_WINDOWS
 
 // WinMain:
 int WINAPI WinMain(_In_ HINSTANCE hInstance,

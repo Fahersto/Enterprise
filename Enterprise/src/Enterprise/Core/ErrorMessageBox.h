@@ -7,4 +7,5 @@
 
 namespace Enterprise::Platform {
 	void DisplayErrorDialog(std::wstring& ErrorMessage);
+    void DisplayErrorDialog(const wchar_t* ErrorMessage);
 }

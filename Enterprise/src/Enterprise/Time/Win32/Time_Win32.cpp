@@ -1,25 +1,28 @@
+#ifdef EP_PLATFORM_WINDOWS
+
 #include "EP_PCH.h"
 #include "Core.h"
 #include "Enterprise/Time/Time.h"
 
-/* Time_Win32
-	Windows-specific Time functions.
-*/
-#ifdef EP_PLATFORM_WINDOWS
-
-LARGE_INTEGER QPF, StartCount, CurrentCount{};
+LARGE_INTEGER _startCount, _currentCount = {};
+double _tickPeriod = {};
 
 void Enterprise::Time::Init() 
 {
-	// Initialize QPC
-	EP_ASSERT(QueryPerformanceFrequency(&QPF));
-	EP_ASSERT(QueryPerformanceCounter(&StartCount));
-	CurrentCount = StartCount;
+    // Calculate the tick length in seconds
+    LARGE_INTEGER QPF;
+    EP_ASSERT(QueryPerformanceFrequency(&QPF));
+    _tickPeriod = 1.0 / QPF.QuadPart;
+
+    // Track what time the program started
+	EP_ASSERT(QueryPerformanceCounter(&_startCount));
+	_currentCount = _startCount;
 }
 
 float Enterprise::Time::GetRawTime()
 {
-	QueryPerformanceCounter(&CurrentCount);
-	return float(CurrentCount.QuadPart - StartCount.QuadPart) / float(QPF.QuadPart);
+	QueryPerformanceCounter(&_currentCount);
+	return float((_currentCount.QuadPart - _startCount.QuadPart) * _tickPeriod;
 }
+
 #endif

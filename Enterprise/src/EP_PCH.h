@@ -11,6 +11,7 @@
 #include <list>
 
 #include <string>
+#include <wchar.h>
 #include <sstream>
 #include <functional>
 #include <map>
@@ -19,9 +20,19 @@
 #include <fcntl.h>
 
 #include <exception>
+#include <csignal>
 
 #ifdef EP_PLATFORM_WINDOWS
-#include <windows.h>
-#include <windowsx.h>
-#include <Xinput.h>
+    #include <windows.h>
+    #include <windowsx.h>
+    #include <Xinput.h>
+#endif
+
+#ifdef EP_PLATFORM_MACOS
+    #ifdef __OBJC__
+        #import <Foundation/Foundation.h>
+        #import <Cocoa/Cocoa.h>
+        #import <AppKit/AppKit.h>
+    #endif
+#include <mach/mach_time.h>
 #endif

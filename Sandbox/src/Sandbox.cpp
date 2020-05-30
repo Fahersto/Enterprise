@@ -1,13 +1,14 @@
 #include <Enterprise.h>
-#include "Enterprise/Application/Game.h"
+#include <Enterprise/Application/Game.h>
 
-#include "Enterprise/Input/InputEvents.h"
-#include "Enterprise/Application/ApplicationEvents.h"
+#include <Enterprise/Input/InputEvents.h>
+#include <Enterprise/Application/ApplicationEvents.h>
+
 
 bool OnEvent(Enterprise::Events::EventPtr e)
 {
 	// Temporary: trace all events.
-	EP_TRACE(e);
+    EP_TRACE(e->ToString()); // TODO: ostream operator not called on macOS.
 	return false;
 }
 
@@ -24,7 +25,6 @@ void Enterprise::Game::Init()
 	//Events::SubscribeToType(EventTypes::MousePosition, OnEvent);
 	Events::SubscribeToType(EventTypes::MouseScroll, OnEvent);
 
-	Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
 	Events::SubscribeToType(EventTypes::WindowFocus, OnEvent);
 	Events::SubscribeToType(EventTypes::WindowLostFocus, OnEvent);
 	Events::SubscribeToType(EventTypes::WindowMove, OnEvent);
