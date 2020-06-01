@@ -32,6 +32,9 @@ void Enterprise::Game::Init()
 
 	Window::Create(); // TODO: Assert when no window is created.
     
+    Events::Event e = EventTypes::KeyChar;
+    Events::Dispatch(e);
+    
     Events::Dispatch(EventTypes::KeyChar, std::tuple<char, float, int, const char*>('a', 1.5, 10, "poo"));
 }
 

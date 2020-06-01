@@ -59,7 +59,7 @@ Events::EventCategory Events::EventCategory::operator|(const Events::EventCatego
 #ifdef EP_CONFIG_DEBUG
 const char* Events::GetTypeDebugName(EventType type)
 {
-    try { return _typeDebugNames().at(type.ID()); }
+    try { return _typeDebugNames().at(type); }
     catch (std::out_of_range)
     {
         EP_ERROR("Error: Events::GetTypeDebugName() passed unregistered event type ID.");
@@ -131,7 +131,7 @@ Events::EventCategory Events::NewCategory()
 void Events::SubscribeToType(EventType type, EventCallbackPtr callback)
 {
     // For every callback already registered for this type...
-    for (auto it = _callbackPtrs().at(type.ID()).begin(); it != _callbackPtrs().at(type.ID()).end(); ++it)
+    for (auto it = _callbackPtrs().at(type).begin(); it != _callbackPtrs().at(type).end(); ++it)
     {
         // ...check that it isn't the callback we're trying to register.
         if ((*it) == callback)
@@ -143,7 +143,7 @@ void Events::SubscribeToType(EventType type, EventCallbackPtr callback)
     }
     
     // If the callback hasn't already been registered for this type, register it.
-    _callbackPtrs().at(type.ID()).emplace_back(callback);
+    _callbackPtrs().at(type).emplace_back(callback);
     
 }
 void Events::SubscribeToCategories(EventCategory category, EventCallbackPtr callback)

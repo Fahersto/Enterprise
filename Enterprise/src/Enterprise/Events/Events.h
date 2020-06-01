@@ -10,18 +10,9 @@ class Events
 {
 public:
     
-    // Struct representing an event type.
-    struct EventType
-    {
-    public:
-        EventType(unsigned int ID) : m_ID(ID) {}
-        unsigned int ID() { return m_ID; }
-    private:
-        unsigned int m_ID;
-        friend inline bool operator == (const EventType& left, const EventType& right) {
-            return left.m_ID == right.m_ID;
-        }
-    };
+    // Identifies an event type.
+    typedef unsigned int EventType;
+    
     #ifdef EP_CONFIG_DEBUG
     static const char* GetTypeDebugName(EventType type);
     #endif
@@ -34,7 +25,7 @@ public:
         EventCategory(unsigned int ID) : m_ID(ID) {}
         unsigned int ID() { return m_ID; }
         
-        std::vector <unsigned int> TypeIDs; // List of the integer IDs of the types in this category.
+        std::vector <EventType> TypeIDs; // Vector of the types in this category.
         EventCategory operator | (const EventCategory& other) const; // Combine categories.
     private:
         unsigned int m_ID;
@@ -115,18 +106,18 @@ public:
     
     // Dispatch functions
     
-//    //Dispatch a pre-made event.
-//    void Dispatch(Event& e)
-//    {
-//        // Call each registered callback until one returns true
-//        for (auto callbackit = _callbackPtrs().at(e.GetType).ID().rbegin();
-//                  callbackit != _callbackPtrs().at(type.ID()).rend();
-//                  ++callbackit)
-//        {
-//            if ((*callbackit)(e))
-//                break;
-//        }
-//    }
+    //Dispatch a pre-made event.
+    static void Dispatch(Event& e)
+    {
+        // Call each registered callback until one returns true
+        for (auto callbackit = _callbackPtrs().at(e.GetType()).rbegin();
+             callbackit != _callbackPtrs().at(e.GetType()).rend();
+                  ++callbackit)
+        {
+            if ((*callbackit)(e))
+                break;
+        }
+    }
     
     // Dispatch a new event of the given type.
     static void Dispatch(EventType type)
@@ -135,8 +126,8 @@ public:
         Events::Event e = type;
         
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(type.ID()).rbegin();
-                  callbackit != _callbackPtrs().at(type.ID()).rend();
+        for (auto callbackit = _callbackPtrs().at(type).rbegin();
+                  callbackit != _callbackPtrs().at(type).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
@@ -153,8 +144,8 @@ public:
         Events::DataEvent<T> e = {type, data};
         
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(type.ID()).rbegin();
-                  callbackit != _callbackPtrs().at(type.ID()).rend();
+        for (auto callbackit = _callbackPtrs().at(type).rbegin();
+                  callbackit != _callbackPtrs().at(type).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
@@ -172,10 +163,7 @@ private:
 // Overloading these operators allows for easy event logging.
 // TODO: This is broken on macOS.
 #ifdef EP_CONFIG_DEBUG
-inline std::ostream& operator << (std::ostream& os, Enterprise::Events::EventType type) {
-    return os << Enterprise::Events::GetTypeDebugName(type);
-}
-inline std::ostream& operator << (std::ostream& os, Enterprise::Events::Event e) { return os << e.ToString(); }
+inline std::ostream& operator << (std::ostream& os, Enterprise::Events::Event& e) { return os << e.ToString(); }
 #endif
 
 
