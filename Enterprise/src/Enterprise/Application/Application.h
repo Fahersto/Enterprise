@@ -20,6 +20,6 @@ namespace Enterprise
 		// Return value of Run().
 		static bool _isRunning;
 		// The application event handler.  This is a private function to 
-		static bool OnEvent(Events::EventPtr e);
+		static bool OnEvent(Events::Event& e);
 	};
 }

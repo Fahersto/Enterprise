@@ -41,8 +41,8 @@ tweaks to the default "Sandbox" scheme:
 * In **Run -> Arguments -> Environmental Variables**, set `OS_ACTIVITY_MODE = disable`.  This disables
   OS-level logging.
 
-In order to test in the Release or Dist configurations, you will either need to set up schemes for them.
-The default scheme builds using the Debug configuration.
+In order to test in the Release or Dist configurations, you will either need to set up additional schemes or 
+change the build configuration of the default one.  By default, the Sandbox scheme builds the Debug configuration.
 
 ## Current State of Development
 So far, I have developed Enterprise's framework as well as two of its core systems. The framework contains 

@@ -70,12 +70,12 @@ namespace Enterprise
 
 
     // Developers can override these events by handling them elsewhere.
-    bool Application::OnEvent(Enterprise::Events::EventPtr e)
+    bool Application::OnEvent(Events::Event& e)
     {
-        if (e->GetType() == EventTypes::WindowClose)
+        if (e.GetType() == EventTypes::WindowClose)
             // By default, closing the window is treated as a request to quit.
             Enterprise::Events::Dispatch(EventTypes::QuitRequested);
-        else if (e->GetType() == EventTypes::QuitRequested)
+        else if (e.GetType() == EventTypes::QuitRequested)
             // By default, selecting Quit from the macOS dock or app menu quits the program.
 			Enterprise::Application::Quit();
 		return true;
