@@ -5,10 +5,10 @@
 #include <Enterprise/Application/ApplicationEvents.h>
 
 
-bool OnEvent(Enterprise::Events::EventPtr e)
+bool OnEvent(Enterprise::Events::Event& e)
 {
 	// Temporary: trace all events.
-    EP_TRACE(e->ToString()); // TODO: ostream operator not called on macOS.
+    EP_TRACE(e.ToString());
 	return false;
 }
 
@@ -31,6 +31,8 @@ void Enterprise::Game::Init()
 	Events::SubscribeToType(EventTypes::WindowResize, OnEvent);
 
 	Window::Create(); // TODO: Assert when no window is created.
+    
+    Events::Dispatch(EventTypes::KeyChar, std::tuple<char, float, int, const char*>('a', 1.5, 10, "poo"));
 }
 
 void Enterprise::Game::Cleanup()
