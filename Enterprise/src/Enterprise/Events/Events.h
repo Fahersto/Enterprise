@@ -11,8 +11,7 @@ class Events
 public:
     
     // Identifies an event type.
-    typedef unsigned int EventType;
-    
+    typedef unsigned int EventType;    
     #ifdef EP_CONFIG_DEBUG
     static const char* GetTypeDebugName(EventType type);
     #endif
@@ -170,8 +169,8 @@ inline std::ostream& operator << (std::ostream& os, Enterprise::Events::Event& e
 // Extract data from an Enterprise event.
 template <typename T>
 T& GetEventData(Enterprise::Events::Event& e) {
-    auto converted = std::dynamic_pointer_cast<Enterprise::Events::DataEvent<T>>(e);
-    EP_ASSERT(converted);
+    Enterprise::Events::DataEvent<T>* converted = dynamic_cast<Enterprise::Events::DataEvent<T>*>(&e);
+    EP_ASSERT(converted); //TODO: Add helpful message here.
     return converted->Data();
 }
 
