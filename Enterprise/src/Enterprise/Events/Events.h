@@ -159,13 +159,6 @@ private:
 }
 
 
-// Overloading these operators allows for easy event logging.
-// TODO: This is broken on macOS.
-#ifdef EP_CONFIG_DEBUG
-inline std::ostream& operator << (std::ostream& os, Enterprise::Events::Event& e) { return os << e.ToString(); }
-#endif
-
-
 // Extract data from an Enterprise event.
 template <typename T>
 T& GetEventData(Enterprise::Events::Event& e) {
