@@ -17,5 +17,3 @@ EP_EVENTTYPE(MouseButtonUp,		EventCategories::MouseDelta); // | EventCategories:
 EP_EVENTTYPE(MouseScroll,		EventCategories::MouseDelta); // | EventCategories::MousePointer); //The user has used the scroll wheel. | std::pair<int, int>(vertical delta, horizontal delta)
 EP_EVENTTYPE(MouseDelta,		EventCategories::MouseDelta); //The user has moved the mouse. | std::pair<int, int>(delta x, delta y)
 EP_EVENTTYPE(MousePosition,		EventCategories::MousePointer); //The user has moved the pointer. | std::pair<int, int>(position x, position y)
-
-// Gamepad

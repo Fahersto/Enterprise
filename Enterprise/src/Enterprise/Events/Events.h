@@ -168,7 +168,29 @@ T& GetEventData(Enterprise::Events::Event& e) {
 }
 
 
+// -----------------------------------------------------------------------------------------
+
+
 // Declare a new Enterprise event type.
 #define EP_EVENTTYPE(name, ...) namespace EventTypes { extern const Enterprise::Events::EventType name; }
 // Declare a new Enterprise event category.
 #define EP_EVENTCATEGORY(name) namespace EventCategories { extern const Enterprise::Events::EventCategory name; }
+
+
+#ifdef EP_CONFIG_DEBUG
+// Define an Enterprise event type.
+#define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                        = Enterprise::Events::NewType( #name , __VA_ARGS__ );
+// Define an Enterprise event category.
+#define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
+                                                            = Enterprise::Events::NewCategory( #name );
+
+#else
+// Define an Enterprise event type.
+#define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                        = Enterprise::Events::NewType( __VA_ARGS__ );
+// Define an Enterprise event category.
+#define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
+                                                                = Enterprise::Events::NewCategory();
+
+#endif
