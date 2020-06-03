@@ -136,8 +136,8 @@ void Events::SubscribeToType(EventType type, EventCallbackPtr callback)
         // ...check that it isn't the callback we're trying to register.
         if ((*it) == callback)
         {
-//            EP_WARN("Events: SubscribeToType was called with a previously registered callback/type combination.  "
-//                    "Type: {}", type);
+            EP_WARN("Events: SubscribeToType was called with a previously registered callback/type combination.  "
+                    "\nType: {} \nFile: {} \nLine: {}", GetTypeDebugName(type), __FILE__, __LINE__);
             return; //TODO: Make this warning, and/or this check, optional.
         }
     }
