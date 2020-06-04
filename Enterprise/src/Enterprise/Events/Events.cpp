@@ -8,13 +8,10 @@ namespace Enterprise
 {
 // Note: The following vectors MUST be singletons, as they are invoked during static initialization!
 
-
-// Vector associating category IDs to vectors of EventTypes.
 std::vector<std::vector<Events::EventType>>& Events::_categoryMap() {
 	static auto instance = new std::vector<std::vector<Events::EventType>>();
 	return *instance;
 }
-// Lists of callback pointers, index-aligned to event type ID.
 std::vector<std::vector<Events::EventCallbackPtr>>& Events::_callbackPtrs() {
 	static auto instance = new std::vector<std::vector<Events::EventCallbackPtr>>();
 	return *instance;
@@ -23,12 +20,12 @@ std::vector<std::vector<Events::EventCallbackPtr>>& Events::_callbackPtrs() {
 
 #ifdef EP_CONFIG_DEBUG
 
-// Index-aligned vector associating category IDs to their string names.
+/// Gets index-aligned vector associating category IDs to their string names.
 std::vector<const char*>& _categoryDebugNames() {
     static auto instance = new std::vector<const char*>();
     return *instance;
 }
-// Index-aligned vector associating event type IDs with their string names.
+/// Gets index-aligned vector associating event type IDs with their string names.
 std::vector<const char*>& _typeDebugNames() {
     static auto instance = new std::vector<const char*>();
     return *instance;

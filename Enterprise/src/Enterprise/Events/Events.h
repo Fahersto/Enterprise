@@ -10,37 +10,37 @@ class Events
 {
 public:
 
-    // Identifies an event category.
+    /// Identifies an event category.
     typedef unsigned int EventCategory;
 
-    // Identifies an event type.
+    /// Identifies an event type.
     typedef unsigned int EventType;
 
     #ifdef EP_CONFIG_DEBUG
-        // Debug only: Gets the name of an EventCategory as a string.
+        /// Debug only: Gets the name of an EventCategory as a string.
         static const char* GetCategoryDebugName(EventCategory type);
 
-        // Debug only: Gets the name of an EventType as a string.
+        /// Debug only: Gets the name of an EventType as a string.
         static const char* GetTypeDebugName(EventType type);
     #endif
     
-    // An Enterprise event.
+    /// An Enterprise event.
     class Event
     {
     public:
         Event(EventType type) : m_type(type) {}
         virtual ~Event() {}
 
-        // Get this Event's EventType.
+        /// Get this Event's EventType.
         inline const EventType Type() { return m_type; }
 
         #ifdef EP_CONFIG_DEBUG
-        // Debug only: Express this Event as a string.
+        /// Debug only: Express this Event as a string.
         virtual std::string DebugString() { return _debugName(); }
         #endif
         
     private:
-        EventType m_type; // This Event's type.
+        EventType m_type; /// This Event's type.
     protected:
         #ifdef EP_CONFIG_DEBUG
         inline const char* _debugName() { return GetTypeDebugName(m_type); }
@@ -48,17 +48,17 @@ public:
     };
     
     
-    // An Enterprise event with a data payload.
+    /// An Enterprise event with a data payload.
     template <typename T>
     class DataEvent : public Event
     {
     public:
         DataEvent(EventType type, T data) : m_data(data), Event(type) {}
-        // Get this DataEvent's data payload.
+        /// Get this DataEvent's data payload.
         T& Data() { return m_data; }
 
         #ifdef EP_CONFIG_DEBUG
-        // Debug only: Express this Event as a string.
+        /// Debug only: Express this Event as a string.
         std::string DebugString()
         {
             std::stringstream ss;
@@ -71,7 +71,7 @@ public:
         T m_data; // This DataEvent's payload.
     };
     
-    // A pointer to an event callback function.
+    /// A pointer to an event callback function.
     typedef bool(*EventCallbackPtr)(Event&);
     
     
@@ -82,13 +82,13 @@ public:
     
     #ifdef EP_CONFIG_DEBUG
 
-        // Register a new event category.
+        /// Register a new event category.
         static EventCategory NewCategory(const char* debugName);
 
-        // Register a new event type.
+        /// Register a new event type.
         static EventType NewType(const char* debugName);
 
-        // Register a new event type and put it in one or more categories.
+        /// Register a new event type and put it in one or more categories.
 		template<typename... Categories, typename = 
                 std::enable_if_t<std::conjunction_v<std::is_same<EventCategory, Categories>...>>>
         static EventType NewType(const char* debugName, Categories ... categories)
@@ -100,13 +100,13 @@ public:
 
     #else
 
-        // Register a new event category.
+        /// Register a new event category.
         static EventCategory NewCategory();
 
-        // Register a new event type.
+        /// Register a new event type.
         static EventType NewType();
 
-        // Register a new event type and put it in one or more categories.
+        /// Register a new event type and put it in one or more categories.
         template<typename... Categories, typename =
                 std::enable_if_t<std::conjunction_v<std::is_same<EventCategory, Categories>...>>>
         static EventType NewType(Categories ... categories)
@@ -121,16 +121,16 @@ public:
     
     // Subscription functions
     
-    // Register a callback function for all event types in a category.
+    /// Register a callback function for all event types in a category.
     static void SubscribeToCategory(EventCategory category, EventCallbackPtr callback);
 
-    // Register a callback function for a particular event type.
+    /// Register a callback function for a particular event type.
     static void SubscribeToType(EventType type, EventCallbackPtr callback);
     
     
     // Dispatch functions
     
-    //Dispatch a pre-made event.
+    /// Dispatch a pre-made event.
     static void Dispatch(Event& e)
     {
         // Call each registered callback until one returns true
@@ -143,7 +143,7 @@ public:
         }
     }
     
-    // Dispatch a new event of the given type.
+    /// Dispatch a new event of the given type.
     static void Dispatch(EventType type)
     {
         // Generate the event
@@ -160,7 +160,7 @@ public:
     }
 
 
-    // Dispatch a new event with a data payload.
+    /// Dispatch a new event with a data payload.
     template <typename T>
     static void Dispatch(EventType type, T data)
     {
@@ -178,14 +178,16 @@ public:
     }
     
 private:
+    /// Gets vector associating category IDs to vectors of EventTypes.
     static std::vector<std::vector<Events::EventType>>& _categoryMap();
+    /// Gets vector callback lists, index-aligned to event type ID.
     static std::vector<std::vector<Events::EventCallbackPtr>>& _callbackPtrs();
 };
 
 }
 
 
-// Extract data from an Enterprise event.
+/// Extract data from an Enterprise event.
 template <typename T>
 T& GetEventData(Enterprise::Events::Event& e) {
     Enterprise::Events::DataEvent<T>* converted = dynamic_cast<Enterprise::Events::DataEvent<T>*>(&e);
