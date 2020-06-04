@@ -9,27 +9,20 @@ namespace Enterprise
 class Events
 {
 public:
-    
+
+    // Identifies an event category.
+    typedef unsigned int EventCategory;
+
     // Identifies an event type.
-    typedef unsigned int EventType;    
+    typedef unsigned int EventType;
+
     #ifdef EP_CONFIG_DEBUG
-    static const char* GetTypeDebugName(EventType type);
+        // Debug only: Gets the name of an EventCategory as a string.
+        static const char* GetCategoryDebugName(EventCategory type);
+
+        // Debug only: Gets the name of an EventType as a string.
+        static const char* GetTypeDebugName(EventType type);
     #endif
-    
-    
-    // Struct representing an event category.
-    struct EventCategory
-    {
-    public:
-        EventCategory(unsigned int ID) : m_ID(ID) {}
-        unsigned int ID() { return m_ID; }
-        
-        std::vector <EventType> TypeIDs; // Vector of the types in this category.
-        EventCategory operator | (const EventCategory& other) const; // Combine categories.
-    private:
-        unsigned int m_ID;
-    };
-    
     
     // An Enterprise event.
     class Event
@@ -37,15 +30,21 @@ public:
     public:
         Event(EventType type) : m_type(type) {}
         virtual ~Event() {}
-        inline const EventType GetType() { return m_type; }
-        
+
+        // Get this Event's EventType.
+        inline const EventType Type() { return m_type; }
+
         #ifdef EP_CONFIG_DEBUG
-        inline const char* DebugName() { return GetTypeDebugName(m_type); }
-        virtual std::string ToString() { return DebugName(); }
+        // Debug only: Express this Event as a string.
+        virtual std::string DebugString() { return _debugName(); }
         #endif
         
     private:
         EventType m_type; // This Event's type.
+    protected:
+        #ifdef EP_CONFIG_DEBUG
+        inline const char* _debugName() { return GetTypeDebugName(m_type); }
+        #endif
     };
     
     
@@ -54,20 +53,22 @@ public:
     class DataEvent : public Event
     {
     public:
+        DataEvent(EventType type, T data) : m_data(data), Event(type) {}
+        // Get this DataEvent's data payload.
         T& Data() { return m_data; }
-        
+
         #ifdef EP_CONFIG_DEBUG
-        std::string ToString()
+        // Debug only: Express this Event as a string.
+        std::string DebugString()
         {
             std::stringstream ss;
-            ss << DebugName() << ": " << m_data;
+            ss << _debugName() << ": " << m_data;
             return ss.str();
         }
         #endif
         
-        DataEvent(EventType type, T data) : m_data(data), Event(type) {}
     private:
-        T m_data; // The payload
+        T m_data; // This DataEvent's payload.
     };
     
     // A pointer to an event callback function.
@@ -76,31 +77,55 @@ public:
     
     // ----------------------------------------------------------------------------------------
     
+
     // Type/category definition functions
     
     #ifdef EP_CONFIG_DEBUG
-        // Establish a new event type.
-        static EventType NewType(const char* debugName);
-        // Establish a new event type and put it in a category.
-        static EventType NewType(const char* debugName, EventCategory category);
-        // Establish a new event category.
+
+        // Register a new event category.
         static EventCategory NewCategory(const char* debugName);
+
+        // Register a new event type.
+        static EventType NewType(const char* debugName);
+
+        // Register a new event type and put it in one or more categories.
+		template<typename... Categories, typename = 
+                std::enable_if_t<std::conjunction_v<std::is_same<EventCategory, Categories>...>>>
+        static EventType NewType(const char* debugName, Categories ... categories)
+        {
+            EventType returnVal = NewType(debugName);
+            ((_categoryMap().at(categories).emplace_back(returnVal)), ...);
+            return returnVal;
+        };
+
     #else
-        // Establish a new event type.
-        static EventType NewType();
-        // Establish a new event type and put it in a category.
-        static EventType NewType(EventCategory category);
-        // Establish a new event category.
+
+        // Register a new event category.
         static EventCategory NewCategory();
+
+        // Register a new event type.
+        static EventType NewType();
+
+        // Register a new event type and put it in one or more categories.
+        template<typename... Categories, typename =
+                std::enable_if_t<std::conjunction_v<std::is_same<EventCategory, Categories>...>>>
+        static EventType NewType(Categories ... categories)
+        {
+            EventType returnVal = NewType();
+            ((_categoryMap().at(categories).emplace_back(returnVal)), ...);
+            return returnVal;
+        };
+
     #endif
     
     
     // Subscription functions
     
+    // Register a callback function for all event types in a category.
+    static void SubscribeToCategory(EventCategory category, EventCallbackPtr callback);
+
     // Register a callback function for a particular event type.
     static void SubscribeToType(EventType type, EventCallbackPtr callback);
-    // Register a callback function for all event types in a category.
-    static void SubscribeToCategories(EventCategory category, EventCallbackPtr callback);
     
     
     // Dispatch functions
@@ -109,8 +134,8 @@ public:
     static void Dispatch(Event& e)
     {
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(e.GetType()).rbegin();
-             callbackit != _callbackPtrs().at(e.GetType()).rend();
+        for (auto callbackit = _callbackPtrs().at(e.Type()).rbegin();
+             callbackit != _callbackPtrs().at(e.Type()).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
@@ -153,6 +178,7 @@ public:
     }
     
 private:
+    static std::vector<std::vector<Events::EventType>>& _categoryMap();
     static std::vector<std::vector<Events::EventCallbackPtr>>& _callbackPtrs();
 };
 
@@ -171,26 +197,28 @@ T& GetEventData(Enterprise::Events::Event& e) {
 // -----------------------------------------------------------------------------------------
 
 
-// Declare a new Enterprise event type.
-#define EP_EVENTTYPE(name, ...) namespace EventTypes { extern const Enterprise::Events::EventType name; }
 // Declare a new Enterprise event category.
 #define EP_EVENTCATEGORY(name) namespace EventCategories { extern const Enterprise::Events::EventCategory name; }
+// Declare a new Enterprise event type.
+#define EP_EVENTTYPE(name, ...) namespace EventTypes { extern const Enterprise::Events::EventType name; }
 
 
 #ifdef EP_CONFIG_DEBUG
-// Define an Enterprise event type.
-#define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
-                                                        = Enterprise::Events::NewType( #name , __VA_ARGS__ );
-// Define an Enterprise event category.
-#define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                            = Enterprise::Events::NewCategory( #name );
+
+    // Define an Enterprise event category.
+    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
+                                                                = Enterprise::Events::NewCategory( #name );
+    // Define an Enterprise event type.
+    #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                            = Enterprise::Events::NewType( #name , __VA_ARGS__ );
 
 #else
-// Define an Enterprise event type.
-#define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
-                                                        = Enterprise::Events::NewType( __VA_ARGS__ );
-// Define an Enterprise event category.
-#define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                                = Enterprise::Events::NewCategory();
+
+    // Define an Enterprise event category.
+    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
+                                                                    = Enterprise::Events::NewCategory();
+    // Define an Enterprise event type.
+    #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                            = Enterprise::Events::NewType( __VA_ARGS__ );
 
 #endif
