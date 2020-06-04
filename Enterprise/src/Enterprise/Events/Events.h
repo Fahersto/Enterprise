@@ -209,18 +209,24 @@ T& GetEventData(Enterprise::Events::Event& e) {
 
     // Define an Enterprise event category.
     #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                                = Enterprise::Events::NewCategory( #name );
+                                                                = Enterprise::Events::NewCategory( #name )
     // Define an Enterprise event type.
-    #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
-                                                = Enterprise::Events::NewType( #name __VA_OPT__(,) __VA_ARGS__ );
+    #ifdef _WIN32
+        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                = Enterprise::Events::NewType( #name , __VA_ARGS__ )
+    #elif defined(__APPLE__) && defined(__MACH__)
+        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+                                                = Enterprise::Events::NewType( #name __VA_OPT__(,) __VA_ARGS__ )
+    #endif
+    // TODO: When MSVC fixes __VA_OPT__ in C++20, use it for all platforms.
 
 #else
 
     // Define an Enterprise event category.
     #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                                    = Enterprise::Events::NewCategory();
+                                                                    = Enterprise::Events::NewCategory()
     // Define an Enterprise event type.
     #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
-                                                            = Enterprise::Events::NewType( __VA_ARGS__ );
+                                                            = Enterprise::Events::NewType( __VA_ARGS__ )
 
 #endif
