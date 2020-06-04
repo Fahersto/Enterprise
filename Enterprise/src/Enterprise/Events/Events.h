@@ -210,7 +210,7 @@ T& GetEventData(Enterprise::Events::Event& e) {
                                                                 = Enterprise::Events::NewCategory( #name );
     // Define an Enterprise event type.
     #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
-                                                            = Enterprise::Events::NewType( #name , __VA_ARGS__ );
+                                                = Enterprise::Events::NewType( #name __VA_OPT__(,) __VA_ARGS__ );
 
 #else
 

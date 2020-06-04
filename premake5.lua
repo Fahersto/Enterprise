@@ -8,7 +8,7 @@ local EP_ProjectName = "Sandbox" -- This string will be the name of your Enterpr
 
 workspace "Enterprise_Dev"
     language "C++"
-    cppdialect "C++17"
+    -- cppdialect "C++20"
     architecture "x86_64"
 
     configurations { "Debug", "Release", "Dist" }
@@ -23,7 +23,7 @@ workspace "Enterprise_Dev"
         optimize "On"
     filter {}
 
-    local configurationName = "%{cfg.buildcfg}-%{cfg.system}" -- -%{cfg.architecture}"
+    local configurationName = "%{cfg.buildcfg}-%{cfg.system}"
     includedirs "%{prj.name}/src"
     targetdir ("bin/" .. configurationName .. "/%{prj.name}")
     objdir ("bin-int/" .. configurationName .. "/%{prj.name}")
@@ -44,10 +44,12 @@ workspace "Enterprise_Dev"
 
     filter "system:windows"
         systemversion "latest"
+        buildoptions{ "/std:c++latest" }
         staticruntime "On"
 
     filter "system:macosx"
         systemversion "10.15"
+        buildoptions{ "-std=c++2a" }
 
     filter {}
 
