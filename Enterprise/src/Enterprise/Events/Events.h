@@ -11,10 +11,25 @@ class Events
 public:
 
     /// Identifies an event category.
-    typedef unsigned int EventCategory;
+    struct EventCategory
+    {
+        friend class Events;
+        //operator == (const EventCategory& other) { return this->m_ID == other.m_ID; }
+        friend bool operator == (const EventCategory& left, const EventCategory& right);
+        explicit EventCategory(unsigned int ID) : m_ID(ID) {}
+    private:
+        unsigned int m_ID;
+    };
 
     /// Identifies an event type.
-    typedef unsigned int EventType;
+    struct EventType
+    {
+        friend class Events;
+        friend bool operator == (const EventType& left, const EventType& right);
+        explicit EventType(unsigned int ID) : m_ID(ID) {}
+    private:
+        unsigned int m_ID;
+    };
 
     #ifdef EP_CONFIG_DEBUG
         /// Debug only: Gets the name of an EventCategory as a string.
@@ -94,7 +109,7 @@ public:
         static EventType NewType(const char* debugName, Categories ... categories)
         {
             EventType returnVal = NewType(debugName);
-            ((_categoryMap().at(categories).emplace_back(returnVal)), ...);
+            ((_categoryMap().at(static_cast<EventCategory>(categories).m_ID).emplace_back(returnVal)), ...);
             return returnVal;
         };
 
@@ -112,7 +127,7 @@ public:
         static EventType NewType(Categories ... categories)
         {
             EventType returnVal = NewType();
-            ((_categoryMap().at(categories).emplace_back(returnVal)), ...);
+            ((_categoryMap().at(static_cast<EventCategory>(categories).m_ID).emplace_back(returnVal)), ...);
             return returnVal;
         };
 
@@ -134,8 +149,8 @@ public:
     static void Dispatch(Event& e)
     {
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(e.Type()).rbegin();
-             callbackit != _callbackPtrs().at(e.Type()).rend();
+        for (auto callbackit = _callbackPtrs().at(e.Type().m_ID).rbegin();
+             callbackit != _callbackPtrs().at(e.Type().m_ID).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
@@ -150,8 +165,8 @@ public:
         Events::Event e = type;
         
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(type).rbegin();
-                  callbackit != _callbackPtrs().at(type).rend();
+        for (auto callbackit = _callbackPtrs().at(type.m_ID).rbegin();
+                  callbackit != _callbackPtrs().at(type.m_ID).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
@@ -168,8 +183,8 @@ public:
         Events::DataEvent<T> e = {type, data};
         
         // Call each registered callback until one returns true
-        for (auto callbackit = _callbackPtrs().at(type).rbegin();
-                  callbackit != _callbackPtrs().at(type).rend();
+        for (auto callbackit = _callbackPtrs().at(type.m_ID).rbegin();
+                  callbackit != _callbackPtrs().at(type.m_ID).rend();
                   ++callbackit)
         {
             if ((*callbackit)(e))
