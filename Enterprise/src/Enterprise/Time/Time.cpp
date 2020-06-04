@@ -1,40 +1,50 @@
 #include "EP_PCH.h"
 #include "Time.h"
 
-using namespace Enterprise::Constants;
-
 // Tick() vars
-float runningTime = 0.0f; // Time, in real seconds, since the application started.
-float prevTime = 0.0f; // The previous value of runningTime.
-float timeScale = 1.0f; // The current conversion rate betwee real seconds and game seconds.
-float tickDeltaReal = 0.0f; // The amount of real seconds that have passed since the previous Tick().
-float tickDeltaScaled = 0.0f; // The amount of game-time seconds that have passed since the previous Tick().
+
+/// Time, in real seconds, since the application started.
+float runningTime = 0.0f;
+/// The previous value of runningTime.
+float prevTime = 0.0f;
+/// The current conversion rate between real seconds and game seconds.
+float timeScale = 1.0f;
+/// The number of real seconds that have passed since last Tick().
+float tickDeltaReal = 0.0f;
+/// The amount of game-time seconds that have passed since last Tick().
+float tickDeltaScaled = 0.0f;
+
 
 // Accumulators
+
 float frameAccumulator = 0.0f; float frameAccumulator_real = 0.0f;
-float physFrameAccumulator = physframelength; float physFrameAccumulator_real = 0.0f;
+float physFrameAccumulator = Enterprise::Constants::physframelength; float physFrameAccumulator_real = 0.0f;
 float physFrameRepeatAccumulator = 0.0f;
 
-// Exposed vars
-float frameDelta = 0.0f;  // The number of in-game seconds being simulated this frame or physics frame.
-float realDelta = 0.0f; // The number of real seconds the current frame or physics frame represents.
-float physPhase = 1.0f; // A value in [0,1) representing progress through the current physics frame.
 
-namespace Enterprise 
+// Exposed vars
+
+/// The number of game-seconds being simulated this frame or physics frame.
+float frameDelta = 0.0f;
+/// The number of real seconds the current frame or physics frame represents.
+float realDelta = 0.0f;
+/// A value in [0,1) representing the current progress through the physics frame.
+float physPhase = 1.0f;
+
+namespace Enterprise
 {
-	// Getters ----------------------------------
 	float Time::RunningTime() { return runningTime; }
 	float Time::FrameDelta() { return frameDelta; } // Should this be Time::GameDelta?
 	float Time::RealDelta() { return realDelta; }
 	float Time::PhysPhase() { EP_ASSERT(physPhase > 0.0f); return physPhase; }
-
-	// Setters ----------------------------------
-	void Time::SetTimeScale(float scalar)
+	
+    void Time::SetTimeScale(float scalar)
 	{
 		EP_ASSERT(scalar >= 0.0f); //Time::SetTimeScale() called with negative parameter.  Scalar cannot be negative.  Set timeScale to 0.0f.
 		timeScale = scalar;
 	}
-	// ------------------------------------------
+
+    // ------------------------------------------------------------------
 
 	void Time::Tick()
 	{
@@ -58,13 +68,14 @@ namespace Enterprise
 		Tick();
 
 		// Abort death spirals
-		if (physFrameRepeatAccumulator >= physframerepeatcap)
+		if (physFrameRepeatAccumulator >= Constants::physframerepeatcap)
 		{
-			// TODO: log death spiral handling when profiling
+            EP_WARN("Time: Physics frames were skipped to abort a death spiral.  "
+                    "Accumulator: {}, Cap: {}", physFrameRepeatAccumulator, Constants::physframerepeatcap);
 
 			// Dump remaining time from accumulators
-			frameAccumulator -= (physFrameAccumulator - physframelength);
-			physFrameAccumulator = physframelength;
+			frameAccumulator -= (physFrameAccumulator - Constants::physframelength);
+			physFrameAccumulator = Constants::physframelength;
 			physPhase = 1.0f;
 			
 			// Move to a new general frame
@@ -74,15 +85,15 @@ namespace Enterprise
 		}
 
 		// Check the PhysFrame timer
-		if (physFrameAccumulator >= physframelength)
+		if (physFrameAccumulator >= Constants::physframelength)
 		{
 			// Update exposed values
-			frameDelta = physframelength;
+			frameDelta = Constants::physframelength;
 			realDelta = physFrameAccumulator_real;
 			physPhase = -1.0f; // Triggers assertion if physics code calls PhysPhase().
 
 			// Reset accumulators
-			physFrameAccumulator -= physframelength;
+			physFrameAccumulator -= Constants::physframelength;
 			physFrameAccumulator_real = 0.0f;
 
 			// Trigger PhysFrame
@@ -99,7 +110,7 @@ namespace Enterprise
 		// Update exposed values
 		frameDelta = frameAccumulator;
 		realDelta = frameAccumulator_real;
-		physPhase = physFrameAccumulator / physframelength;
+		physPhase = physFrameAccumulator / Constants::physframelength;
 
 		// Reset accumulator
 		frameAccumulator = 0.0f;
