@@ -57,7 +57,7 @@ With the framework largely done, Enterprise's core systems are the focus of deve
 the following:
 
 1. Time (done)
-2. Events (done (mostly))
+2. Events (done)
 3. File (up next)
 4. Input
 5. Graphics

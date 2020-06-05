@@ -5,23 +5,22 @@
 namespace Enterprise
 {
 
-/* The Enterprise event system. */
+/// The Enterprise event system.
 class Events
 {
 public:
 
-    /// Identifies an event category.
+    /// Identifier for an Enterprise event category.
     struct EventCategory
     {
         friend class Events;
-        //operator == (const EventCategory& other) { return this->m_ID == other.m_ID; }
         friend bool operator == (const EventCategory& left, const EventCategory& right);
         explicit EventCategory(unsigned int ID) : m_ID(ID) {}
     private:
         unsigned int m_ID;
     };
 
-    /// Identifies an event type.
+    /// Identifier for an Enterprise event type.
     struct EventType
     {
         friend class Events;
@@ -46,16 +45,16 @@ public:
         Event(EventType type) : m_type(type) {}
         virtual ~Event() {}
 
-        /// Get this Event's EventType.
+        /// Gets this event's EventType.
         inline const EventType Type() { return m_type; }
 
         #ifdef EP_CONFIG_DEBUG
-        /// Debug only: Express this Event as a string.
+        /// Debug only: Express this event with a string.
         virtual std::string DebugString() { return _debugName(); }
         #endif
         
     private:
-        EventType m_type; /// This Event's type.
+        EventType m_type; // This Event's type.
     protected:
         #ifdef EP_CONFIG_DEBUG
         inline const char* _debugName() { return GetTypeDebugName(m_type); }
@@ -69,11 +68,11 @@ public:
     {
     public:
         DataEvent(EventType type, T data) : m_data(data), Event(type) {}
-        /// Get this DataEvent's data payload.
+        /// Gets this event's data payload.
         T& Data() { return m_data; }
 
         #ifdef EP_CONFIG_DEBUG
-        /// Debug only: Express this Event as a string.
+        /// Debug only: Express this event as a string.
         std::string DebugString()
         {
             std::stringstream ss;
@@ -202,9 +201,10 @@ private:
 }
 
 
-/// Extract data from an Enterprise event.
+/// Extract a data payload from an Enterprise event.
 template <typename T>
 T& GetEventData(Enterprise::Events::Event& e) {
+    // TODO: Find a way to check this at compile time
     Enterprise::Events::DataEvent<T>* converted = dynamic_cast<Enterprise::Events::DataEvent<T>*>(&e);
     EP_ASSERT(converted); //TODO: Add helpful message here.
     return converted->Data();
@@ -214,23 +214,17 @@ T& GetEventData(Enterprise::Events::Event& e) {
 // -----------------------------------------------------------------------------------------
 
 
-// Declare a new Enterprise event category.
-#define EP_EVENTCATEGORY(name) namespace EventCategories { extern const Enterprise::Events::EventCategory name; }
-// Declare a new Enterprise event type.
-#define EP_EVENTTYPE(name, ...) namespace EventTypes { extern const Enterprise::Events::EventType name; }
-
-
 #ifdef EP_CONFIG_DEBUG
 
     // Define an Enterprise event category.
-    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                                = Enterprise::Events::NewCategory( #name )
+    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory name \
+                                                = Enterprise::Events::NewCategory( #name )
     // Define an Enterprise event type.
     #ifdef _WIN32
-        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType name \
                                                 = Enterprise::Events::NewType( #name , __VA_ARGS__ )
     #elif defined(__APPLE__) && defined(__MACH__)
-        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+        #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType name \
                                                 = Enterprise::Events::NewType( #name __VA_OPT__(,) __VA_ARGS__ )
     #endif
     // TODO: When MSVC fixes __VA_OPT__ in C++20, use it for all platforms.
@@ -238,10 +232,10 @@ T& GetEventData(Enterprise::Events::Event& e) {
 #else
 
     // Define an Enterprise event category.
-    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory EventCategories:: name \
-                                                                    = Enterprise::Events::NewCategory()
+    #define EP_EVENTCATEGORY_DEF(name) const Enterprise::Events::EventCategory name \
+                                                            = Enterprise::Events::NewCategory()
     // Define an Enterprise event type.
-    #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType EventTypes:: name \
+    #define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType name \
                                                             = Enterprise::Events::NewType( __VA_ARGS__ )
 
 #endif
