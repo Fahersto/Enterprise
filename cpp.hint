@@ -1,5 +1,4 @@
 // Hint file to resolve IntelliSense warnings surrounding specific macros.  Visual Studio specific.
 
 // Enterprise/Events/Events.h
-#define EP_EVENTCATEGORY(name) namespace EventCategories { const EventCategory name = Enterprise::Events::NewCategory(#name); }
-#define EP_EVENTTYPE(name, categories) namespace EventTypes { const EventType name = Enterprise::Events::NewType(#name, categories); }
+#define EP_EVENTTYPE_DEF(name, ...) const Enterprise::Events::EventType name = Enterprise::Events::NewType( #name , __VA_ARGS__ )
