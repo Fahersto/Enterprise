@@ -7,7 +7,7 @@
 #include "Enterprise/Events/Events.h"
 #include "Enterprise/Application/Application.h"
 #include "Enterprise/Application/ApplicationEvents.h"
-//#include "Enterprise/Input/InputEvents.h"
+#include "Enterprise/Input/InputEvents.h"
 
 
 // Window messages -------------------------------------------------------------------------------
@@ -17,11 +17,25 @@
 @implementation macOSWindowDelegate
 
 // The user has clicked the close button.
-- (BOOL)windowShouldClose:(NSWindow*)sender
-{
+- (BOOL)windowShouldClose:(NSWindow*)sender {
     Enterprise::Events::Dispatch(EventTypes::WindowClose);
     return NO; /// Window is closed automatically if the program terminates.  We don't do it here.
 }
+
+// The user has moved the window.
+- (void)windowDidMove:(NSNotification *)notification {
+    // TODO: Set up consistent coordinate system across platforms
+    Events::Dispatch(EventTypes::WindowMove, std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
+}
+
+// Window focus changed
+- (void)windowDidBecomeKey:(NSNotification *)notification {
+    Events::Dispatch(EventTypes::WindowFocus);
+}
+- (void)windowDidResignKey:(NSNotification *)notification {
+    Events::Dispatch(EventTypes::WindowLostFocus);
+}
+
 
 @end
 
@@ -41,7 +55,9 @@ public:
             style |= NSWindowStyleMaskMiniaturizable;
             
             // Allocate window
-            _windowReference = [[macOSWindowDelegate alloc] initWithContentRect:NSMakeRect(0, 0, 1080, 720)
+            _windowReference = [[macOSWindowDelegate alloc] initWithContentRect:NSMakeRect(0, 0,
+                                                                                           settings.Width,
+                                                                                           settings.Height)
                                                                       styleMask:style
                                                                         backing:NSBackingStoreBuffered
                                                                           defer:NO];
@@ -51,8 +67,8 @@ public:
             
             // Set window properties
             NSString* convertedTitle = [[NSString alloc] initWithBytes:settings.Title.data()
-                                                       length:settings.Title.size() * sizeof(wchar_t)
-                                                     encoding:NSUTF32LittleEndianStringEncoding];
+                                                                length:settings.Title.size() * sizeof(wchar_t)
+                                                              encoding:NSUTF32LittleEndianStringEncoding];
             
             [_windowReference setTitle: convertedTitle];
             [_windowReference setDelegate: _windowReference];
