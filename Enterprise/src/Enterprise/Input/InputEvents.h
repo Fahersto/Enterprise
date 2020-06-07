@@ -20,24 +20,24 @@ namespace EventTypes
 
 // Keyboard
 
-/// The user has pressed a key. | int(keycode)
+/// The user has pressed a key. | int keycode
 extern const Events::EventType KeyDown;
-/// The user has released a key. | int(keycode)
+/// The user has released a key. | int keycode
 extern const Events::EventType KeyUp;
-/// A character was just entered with the keyboard. | char(ASCII character)
+/// A character was just entered with the keyboard. | char asciiLetter
 extern const Events::EventType KeyChar;
 
 // Mouse
 
-/// The user has clicked a mouse button. | int(button ID)
+/// The user has clicked a mouse button. | int buttonID
 extern const Events::EventType MouseButtonDown;
-/// The user has released a mouse button. | int(button ID)
+/// The user has released a mouse button. | int buttonID
 extern const Events::EventType MouseButtonUp;
-/// The user has used the scroll wheel. | std::pair<int, int>(vertical delta, horizontal delta)
+/// The user has used the scroll wheel. | std::pair(int vertical, int horizontal)
 extern const Events::EventType MouseScroll;
-/// The user has moved the mouse. | std::pair<int, int>(delta x, delta y)
+/// The user has moved the mouse. | std::pair(int deltaX, int deltaY)
 extern const Events::EventType MouseDelta;
-/// The user has moved the pointer. | std::pair<int, int>(position x, position y)
+/// The user has moved the pointer. | std::pair(int posX, int posY)
 extern const Events::EventType MousePosition;
 
 }

@@ -4,20 +4,23 @@
 #include "Core.h"
 #include "Enterprise/Core/Console.h"
 
-// Static definitions
-std::shared_ptr<spdlog::logger> Enterprise::Console::s_CoreLogger;
-std::shared_ptr<spdlog::logger> Enterprise::Console::s_ClientLogger;
+namespace Enterprise
+{
 
-void Enterprise::Console::Init()
+// Static definitions
+std::shared_ptr<spdlog::logger> Console::s_CoreLogger;
+std::shared_ptr<spdlog::logger> Console::s_ClientLogger;
+
+void Console::Init()
 {
 	EP_ASSERT(AllocConsole());
-	SetConsoleTitle(EP_CONSOLE_TITLE);
+	SetConsoleTitle(L"Enterprise Debug Console");
 
-	InitLoggers(); // spdlog
+	InitSpdlog();
 }
 
-void Enterprise::Console::Cleanup() {
-	
+void Console::Cleanup() {
+
 	// Display final message
 	HANDLE h_ConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD CharsWritten;
@@ -32,6 +35,8 @@ void Enterprise::Console::Cleanup() {
 	DWORD CharsRead;
 	FlushConsoleInputBuffer(h_ConsoleIn); //Prevents prior keypresses from closing the console
 	ReadConsole(h_ConsoleIn, &InputBuffer, 1, &CharsRead, 0);
+}
+
 }
 
 #endif

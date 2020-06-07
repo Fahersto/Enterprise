@@ -5,7 +5,12 @@
 #include "Enterprise/Application/Application.h"
 
 
-// WinMain:
+/// The application entry point in Win32 builds.
+/// @param hInstance Handle to the application instance.
+/// @param hPrevInstance (unused) Legacy item from 16-bit Windows.  Do not use.
+/// @param lpCmdLine This application's command-line arguments (Unicode string).
+/// @param nCmdShow Flag indicating Window's preference for how the window should display.
+/// @return Application exit code.
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPSTR lpCmdLine,
@@ -32,10 +37,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 		return EXIT_SUCCESS;
 	}
-	catch (Enterprise::Exceptions::AssertFailed & e)
-	{
-		exit(EXIT_FAILURE);
-	}
+	catch (Enterprise::Exceptions::AssertFailed& e) { exit(EXIT_FAILURE); }
 }
 
 #endif

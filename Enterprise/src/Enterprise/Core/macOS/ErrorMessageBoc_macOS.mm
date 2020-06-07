@@ -3,12 +3,15 @@
 
 #include "Enterprise/Core/ErrorMessageBox.h"
 
-void Enterprise::Platform::DisplayErrorDialog(std::wstring& ErrorMessage)
+namespace Enterprise::Platform
+{
+
+void DisplayErrorDialog(std::wstring& ErrorMessage)
 {
     DisplayErrorDialog(ErrorMessage.c_str());
 }
 
-void Enterprise::Platform::DisplayErrorDialog(const wchar_t* ErrorMessage)
+void DisplayErrorDialog(const wchar_t* ErrorMessage)
 {
     @autoreleasepool {
         NSString* convertedErrorMessage = [[NSString alloc] initWithBytes:ErrorMessage
@@ -21,6 +24,8 @@ void Enterprise::Platform::DisplayErrorDialog(const wchar_t* ErrorMessage)
         [errorBox setAlertStyle:NSAlertStyleCritical];
         [errorBox runModal];
     }
+}
+
 }
 
 #endif

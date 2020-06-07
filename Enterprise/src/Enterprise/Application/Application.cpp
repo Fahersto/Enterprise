@@ -36,6 +36,10 @@ namespace Enterprise
         Events::SubscribeToType(EventTypes::QuitRequested, OnEvent);
 
 		Game::Init();
+
+		// TODO: Assert if no window is created.
+
+		//EP_ASSERT(false);
 	}
 
 	Application::~Application()
@@ -69,7 +73,6 @@ namespace Enterprise
 	void Application::Quit() { _isRunning = false; }
 
 
-    // Developers can override these events by handling them elsewhere.
     bool Application::OnEvent(Events::Event& e)
     {
         if (e.Type() == EventTypes::WindowClose)

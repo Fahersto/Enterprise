@@ -4,15 +4,20 @@
 #include "Core.h"
 #include "Enterprise/Core/Console.h"
 
-// Static definitions
-std::shared_ptr<spdlog::logger> Enterprise::Console::s_CoreLogger;
-std::shared_ptr<spdlog::logger> Enterprise::Console::s_ClientLogger;
-
-void Enterprise::Console::Init()
+namespace Enterprise
 {
-    InitLoggers();  // spdlog
+
+// Static definitions
+std::shared_ptr<spdlog::logger> Console::s_CoreLogger;
+std::shared_ptr<spdlog::logger> Console::s_ClientLogger;
+
+void Console::Init()
+{
+    InitSpdlog();  // spdlog
 }
 
-void Enterprise::Console::Cleanup() {}
+void Console::Cleanup() {}
+
+}
 
 #endif

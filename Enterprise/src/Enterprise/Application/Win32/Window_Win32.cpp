@@ -9,7 +9,12 @@
 #include "Enterprise/Input/InputEvents.h"
 
 
-// Win32 message handler ----------------------------------------------------------------------
+/// The Win32 window procedure function.  Handles window events.
+/// @param hWnd The window handle.
+/// @param message The messaege identifier.
+/// @param wParam The word parameter value.
+/// @param lParam The long parameter value.
+/// @return The LRESULT response to the message.
 LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     using Enterprise::Events;
 
@@ -27,7 +32,6 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             break;
             
         case WM_CHAR: // Text entry
-            // TODO: Handle modifier keys
             Events::Dispatch(EventTypes::KeyChar, char(wParam));
             break;
             
@@ -37,7 +41,7 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             
 		case WM_INPUT: // Raw input API
 		{
-			// Get size of header.  Needed for actually getting header.
+			// Get size of header.  Needed to get header.
 			UINT dwSize = 0;
 			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
 
@@ -59,56 +63,60 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 }
     
 
-// Window class -----------------------------------------------------------------------------------
-
+/// The Windows implementation of the game window.
+/// @remarks This class derives from the generic Window class and represents the game window on the Windows platform.
+///          Each platform has its own version of this.
 class Win32_Window : public Enterprise::Window
 {
 public:
+
+    /// Sets up and displays the Win32 game window.
+    /// @param settings A struct reference containing the desired window configuration.
     Win32_Window(const WindowSettings& settings) : Window(settings)
     {
         // Get handle to the application (Note, this might* pose problems for multithreading).
         HINSTANCE hInstance = GetModuleHandle(NULL);
         
         // Window Class Info
-        WNDCLASSEX wc;                                            // Window Class info
+        WNDCLASSEX wc;                                          // Window Class info
         ZeroMemory(&wc, sizeof(WNDCLASSEX));                    // Clear the WC for use
-        wc.cbClsExtra = 0;                                        // Extra bits (unused).
-        wc.cbWndExtra = 0;                                        // Extra bits (unused).
+        wc.cbClsExtra = 0;                                      // Extra bits (unused).
+        wc.cbWndExtra = 0;                                      // Extra bits (unused).
         wc.cbSize = sizeof(WNDCLASSEX);
-        wc.style = CS_HREDRAW | CS_VREDRAW;                        // Note: DirectX overrides redraw styles.
+        wc.style = CS_HREDRAW | CS_VREDRAW;                     // Note: DirectX overrides redraw styles.
         wc.hInstance = hInstance;
-        wc.lpfnWndProc = Win32_WinProc;                            // Sets WindowProc() to receive Windows messages
-        wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);                // TODO: Set up an icon
-        wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);            // TODO: Set up a small icon
-        wc.hCursor = LoadCursor(NULL, IDC_ARROW);                // Default mouse cursor.
-        wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);    // Fill color when window is redrawn (set to none).
-        wc.lpszMenuName = NULL;                                    // Menu name (none, because we have no menus).
-        wc.lpszClassName = L"EP_WNDCLASS";                        // Friendly name for this window class.
+        wc.lpfnWndProc = Win32_WinProc;                         // Sets WindowProc() to receive Windows messages
+        wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);             // TODO: Set up an icon
+        wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);           // TODO: Set up a small icon
+        wc.hCursor = LoadCursor(NULL, IDC_ARROW);               // Default mouse cursor.
+        wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);  // Fill color when window is redrawn (set to none).
+        wc.lpszMenuName = NULL;                                 // Menu name (none, because we have no menus).
+        wc.lpszClassName = L"EP_WNDCLASS";                      // Friendly name for this window class.
         
         // Register the class
-        EP_ASSERT(RegisterClassEx(&wc)); // If zero, the window class failed to register for some reason.
-        
+        EP_ASSERT(RegisterClassEx(&wc)); //TODO: Add assertion message here
+
         // Calculate initial window size.
         RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height };
         DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;    // Window style
         AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
         
         // Create window.
-        hWnd = CreateWindowEx(NULL,                            // We're not using an extended window style
+        hWnd = CreateWindowEx(NULL,                             // We're not using an extended window style
                               L"EP_WNDCLASS",
-                              m_Settings.Title.c_str(),                        // Window title
+                              m_Settings.Title.c_str(),         // Window title
                               winStyle,
-                              CW_USEDEFAULT,                                    // X-position of the window
-                              CW_USEDEFAULT,                                    // Y-position of the window
-                              wr.right - wr.left,                                // Width of the window
-                              wr.bottom - wr.top,                                // Height of the window
-                              NULL,                                            // We have no parent window, NULL
-                              NULL,                                            // We aren't using menus, NULL
+                              CW_USEDEFAULT,                    // X-position of the window
+                              CW_USEDEFAULT,                    // Y-position of the window
+                              wr.right - wr.left,               // Width of the window
+                              wr.bottom - wr.top,               // Height of the window
+                              NULL,                             // We have no parent window, NULL
+                              NULL,                             // We aren't using menus, NULL
                               hInstance,
-                              NULL);                                            // We don't have multiple windows, NULL
+                              NULL);                            // We don't have multiple windows, NULL
         
-        EP_ASSERT(hWnd); // If NULL, the window wasn't created for some reason.
-        ShowWindow(hWnd, SW_SHOWNORMAL); // Tell Windows to display the window.
+        EP_ASSERT(hWnd); //TODO: Add assertion message
+        ShowWindow(hWnd, SW_SHOWNORMAL);
     }
     
     virtual ~Win32_Window() override
@@ -117,12 +125,17 @@ public:
     }
     
 private:
-    HWND hWnd; // Win32 Window handle
+    HWND hWnd; // Handle to the Win32 window.
 };
 
-// Windows-specific create function --------------------------------------------------------------
+
 namespace Enterprise {
     Window* Window::m_Instance = nullptr;
+
+    /// The Windows platform implementation of the window creation function.
+    /// @param settings A struct reference containing the desired window configuration.
+    /// @return Generic poointer to the game window object.
+    /// @note @cm_Instance is deleted in the generic function @cWindow::Destroy()
     Window* Window::Create(const WindowSettings& settings)
     {
         EP_ASSERT(!m_Instance); // Don't create multiple windows

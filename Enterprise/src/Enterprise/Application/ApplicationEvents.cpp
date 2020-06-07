@@ -3,21 +3,20 @@
 
 namespace EventCategories
 {
-EP_EVENTCATEGORY_DEF(Application);
-EP_EVENTCATEGORY_DEF(AllWindow);
+EP_EVENTCATEGORY_DEF(Window);
 }
 
 namespace EventTypes
 {
 
 // Application Events
-EP_EVENTTYPE_DEF(QuitRequested,     EventCategories::Application);
+EP_EVENTTYPE_DEF(QuitRequested);
 
 // Window Events
-EP_EVENTTYPE_DEF(WindowClose,       EventCategories::AllWindow);
-EP_EVENTTYPE_DEF(WindowMove,        EventCategories::AllWindow);
-EP_EVENTTYPE_DEF(WindowResize,      EventCategories::AllWindow);
-EP_EVENTTYPE_DEF(WindowFocus,       EventCategories::AllWindow);
-EP_EVENTTYPE_DEF(WindowLostFocus,   EventCategories::AllWindow);
+EP_EVENTTYPE_DEF(WindowClose,       EventCategories::Window);
+EP_EVENTTYPE_DEF(WindowMove,        EventCategories::Window);
+EP_EVENTTYPE_DEF(WindowResize,      EventCategories::Window);
+EP_EVENTTYPE_DEF(WindowFocus,       EventCategories::Window);
+EP_EVENTTYPE_DEF(WindowLostFocus,   EventCategories::Window);
 
 }

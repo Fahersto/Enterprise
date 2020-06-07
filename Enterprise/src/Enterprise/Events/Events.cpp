@@ -20,19 +20,20 @@ std::vector<std::vector<Events::EventCallbackPtr>>& Events::_callbackPtrs() {
 
 #ifdef EP_CONFIG_DEBUG
 
-/// Gets index-aligned vector associating category IDs to their string names.
+/// (Debug only) Gets index-aligned vector associating category IDs to their string names.
+/// @return Vector of string names, index-aligned to the integer IDs of their associated event categories.
 std::vector<const char*>& _categoryDebugNames() {
     static auto instance = new std::vector<const char*>();
     return *instance;
 }
-/// Gets index-aligned vector associating event type IDs with their string names.
+/// (Debug only) Gets index-aligned vector associating event type IDs with their string names.
+/// @return Vector of string names, index-aligned to the integer IDs of their associated event types.
 std::vector<const char*>& _typeDebugNames() {
     static auto instance = new std::vector<const char*>();
     return *instance;
 }
 
 
-// Get the stringname of an EventCategory.
 const char* Events::GetCategoryDebugName(EventCategory type)
 {
     try { return _categoryDebugNames().at(type.m_ID); }
@@ -42,7 +43,6 @@ const char* Events::GetCategoryDebugName(EventCategory type)
         return "MISSING CATEGORY NAME";
     }
 }
-// Get the stringname of an EventType.
 const char* Events::GetTypeDebugName(EventType type)
 {
     try { return _typeDebugNames().at(type.m_ID); }

@@ -1,10 +1,9 @@
 #pragma once
 
-/* Enterprise.h
-	This file includes all of the core engine library headers needed by the client.
-	
-	This file should not be included anywhere in the engine library.
-*/
+// Enterprise.h
+// This file includes the files which will be needed throughout an Enterprise project.
+// It's a good idea to include this in every source file in the client project.
+// TODO: Review the purpose and usefulness of this.
 
 //Core defines and macros
 #include "Core.h"

@@ -1,18 +1,21 @@
 #pragma once
-/* EP_PCH.h
-	This is the precompiled header file for the entire Enterprise engine.  Include all boilerplate headers here.
-*/
+
+// EP_PCH.h
+// Enterprise's precompiled header.
+
+#include <iostream>
+#include <fstream>
 
 #include <memory>
 #include <array>
-#include <iostream>
-#include <fstream>
 #include <tuple>
 #include <list>
 
 #include <string>
 #include <wchar.h>
 #include <sstream>
+#include "prettyprint.hpp"
+
 #include <functional>
 #include <map>
 

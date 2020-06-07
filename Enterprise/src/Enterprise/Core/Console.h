@@ -1,64 +1,126 @@
 #pragma once
-/* Console
-	Console is the class representing the Enterprise debug console.  While it is stripped from the
-	Release and Dist builds, it is the only Entperprise object that operates at a lower level than
-	Application.
-
-	Currently, the console is only used to output display information.
-*/
-
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/fmt/ostr.h"
 
-#define EP_CONSOLE_TITLE L"Enterprise Debug Console"
+namespace Enterprise 
+{
 
-namespace Enterprise {
+/// @brief	The Enterprise debug console.
+/// @details	Use this class to log debug messages during runtime.
+/// @note		This version of the console may be depreciated outright after a conventional drop-down
+///				developer's console is implemented.
+class Console
+{
+public:
 
-	class Console
+	/// Logs a message to the debug console.
+	/// @tparam ...Args Types of the format string arguments.
+	/// @param fmt Format string.  Use curly brackets to specify replacement fields.
+	/// @param ...args Format string arguments.
+	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,
+	///				or EP_FATAL to log to the console.  This ensures that the logging code is properly stripped from
+	///				Release and Dist builds.
+	template<typename... Args>
+	inline static void Log(spdlog::level::level_enum level, spdlog::string_view_t fmt, const Args&... args) 
 	{
-	public:
-		static void Init();
-		static void Cleanup();
+		#ifndef EP_CONFIG_DEBUG
+		// Log should not be called in Release or Dist builds.
+		// Ensure you're using EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR, or EP_FATAL to log to the console.
+		EP_ASSERT(false);
+		#endif
 
-		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
-	
-	private:
-		static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		static std::shared_ptr<spdlog::logger> s_ClientLogger;
-		static void InitLoggers() {
-			spdlog::set_pattern("%6n %^[%T]: %v%$");
-			s_CoreLogger = spdlog::stdout_color_mt("CORE");
-			s_CoreLogger->set_level(spdlog::level::trace);
-			s_ClientLogger = spdlog::stdout_color_mt("CLIENT");
-			s_ClientLogger->set_level(spdlog::level::trace);
-		};
+		#ifdef EP_SCOPE_CORE
+		s_CoreLogger->log(level, fmt, args...);
+		#elif EP_SCOPE_CLIENT
+		s_ClientLogger->log(level, fmt, args...);
+		#endif
+	}
+	/// Logs a message to the debug console.
+	/// @tparam T Type of the message argument.
+	/// @param msg A loggable object reference.
+	/// @pre @p msg must have overloaded the \<\< operator for output streams.
+	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,
+	///				or EP_FATAL to log to the console.  This ensures that the logging code is properly stripped from
+	///				Release and Dist builds.
+	template<typename T>
+	inline static void Log(spdlog::level::level_enum level, const T& msg) 
+	{
+		#ifndef EP_CONFIG_DEBUG
+		// Log should not be called in Release or Dist builds.
+		// Ensure you're using EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR, or EP_FATAL to log to the console.
+		EP_ASSERT(false);
+		#endif
+
+		#ifdef EP_SCOPE_CORE
+		s_CoreLogger->log(level, msg);
+		#elif EP_SCOPE_CLIENT
+		s_ClientLogger->log(level, msg);
+		#endif
+	}
+
+private:
+	// Needed for access to Init() and Cleanup().
+	friend class Application;
+
+	/// The spdlog logger object used in the engine library.
+	static std::shared_ptr<spdlog::logger> s_CoreLogger;
+	/// The spdlog logger object used in the client application.
+	static std::shared_ptr<spdlog::logger> s_ClientLogger;
+
+	/// Sets up the debug console.
+	/// @note This is defined per platform.
+	static void Init();
+
+	/// Cleans up the debug console.
+	/// @note This is defined per platform.
+	static void Cleanup();
+
+	/// Initializes the spdlog logger objects.
+	static void InitSpdlog() 
+	{
+		spdlog::set_pattern("%6n %^[%T]: %v%$");
+		s_CoreLogger = spdlog::stdout_color_mt("CORE");
+		s_CoreLogger->set_level(spdlog::level::trace);
+		s_ClientLogger = spdlog::stdout_color_mt("CLIENT");
+		s_ClientLogger->set_level(spdlog::level::trace);
 	};
+};
+
 }
 
 // Logging Macros
+
 #ifdef EP_CONFIG_DEBUG
-	#ifdef EP_SCOPE_CORE // Core
-	#define EP_TRACE(...)	::Enterprise::Console::GetCoreLogger()->trace(__VA_ARGS__)
-	#define EP_DEBUG(...)	::Enterprise::Console::GetCoreLogger()->debug(__VA_ARGS__)
-	#define EP_INFO(...)	::Enterprise::Console::GetCoreLogger()->info(__VA_ARGS__)
-	#define EP_WARN(...)	::Enterprise::Console::GetCoreLogger()->warn(__VA_ARGS__)
-	#define EP_ERROR(...)	::Enterprise::Console::GetCoreLogger()->error(__VA_ARGS__)
-	#define EP_FATAL(...)	::Enterprise::Console::GetCoreLogger()->critical(__VA_ARGS__) //TODO: Make error dialog appear in release builds
-	#elif EP_SCOPE_CLIENT // Client
-	#define EP_TRACE(...)	::Enterprise::Console::GetClientLogger()->trace(__VA_ARGS__)
-	#define EP_DEBUG(...)	::Enterprise::Console::GetClientLogger()->debug(__VA_ARGS__)
-	#define EP_INFO(...)	::Enterprise::Console::GetClientLogger()->info(__VA_ARGS__)
-	#define EP_WARN(...)	::Enterprise::Console::GetClientLogger()->warn(__VA_ARGS__)
-	#define EP_ERROR(...)	::Enterprise::Console::GetClientLogger()->error(__VA_ARGS__)
-	#define EP_FATAL(...)	::Enterprise::Console::GetClientLogger()->critical(__VA_ARGS__)
-	#endif
+
+	/// Logs a message to the debug console at the lowest logging level.
+	#define EP_TRACE(...)	Enterprise::Console::Log(spdlog::level::level_enum::trace, __VA_ARGS__)
+	/// Logs a message to the debug console.
+	#define EP_DEBUG(...)	Enterprise::Console::Log(spdlog::level::level_enum::debug, __VA_ARGS__)
+	/// Logs an informational message to the debug console.
+	#define EP_INFO(...)	Enterprise::Console::Log(spdlog::level::level_enum::info, __VA_ARGS__)
+	/// Logs a warning to the debug console.
+	#define EP_WARN(...)	Enterprise::Console::Log(spdlog::level::level_enum::warn, __VA_ARGS__)
+	/// Logs a non-fatal error message to the debug console.
+	#define EP_ERROR(...)	Enterprise::Console::Log(spdlog::level::level_enum::err, __VA_ARGS__)
+	/// Logs a fatal error message to the debug console.
+	#define EP_FATAL(...)	Enterprise::Console::Log(spdlog::level::level_enum::critical, __VA_ARGS__)
+
+	// TODO: Make error & fatal dialog appear in release builds
+
 #else // Strip from release builds
+
+	/// Logs a message to the debug console at the lowest logging level.
 	#define EP_TRACE(...)
+	/// Logs a message to the debug console.
 	#define EP_DEBUG(...)
+	/// Logs an informational message to the debug console.
 	#define EP_INFO(...)
+	/// Logs a warning to the debug console.
 	#define EP_WARN(...)
+	/// Logs a non-fatal error message to the debug console.
 	#define EP_ERROR(...)
+	/// Logs a fatal error message to the debug console.
 	#define EP_FATAL(...)
+
 #endif

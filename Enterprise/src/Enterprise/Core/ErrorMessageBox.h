@@ -1,11 +1,14 @@
 #pragma once
 
-/* ErrorMessageBox.h
-	Contains a function which generates an error message pop-up.
-	The correct platform code is selected by the preprocessor.
-*/
+namespace Enterprise::Platform
+{
 
-namespace Enterprise::Platform {
-	void DisplayErrorDialog(std::wstring& ErrorMessage);
-    void DisplayErrorDialog(const wchar_t* ErrorMessage);
+/// Display a modal error pop-up.
+/// @param ErrorMessage The error message.
+void DisplayErrorDialog(std::wstring& ErrorMessage);
+
+/// Display a modal error pop-up.
+/// @param ErrorMessage The error message.
+void DisplayErrorDialog(const wchar_t* ErrorMessage);
+
 }
