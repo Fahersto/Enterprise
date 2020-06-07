@@ -9,5 +9,7 @@
 #include "Enterprise/Core/ErrorMessageBox.h"
 
 
+// Helpful macros
+
 // Quickly assemble bit fields
 #define BIT(x) (1 << x)

@@ -6,8 +6,8 @@
 namespace Enterprise 
 {
 
-/// @brief	The Enterprise debug console.
-/// @details	Use this class to log debug messages during runtime.
+/// The Enterprise debug console.
+/// @details Use this class to log debug messages during runtime.
 /// @note		This version of the console may be depreciated outright after a conventional drop-down
 ///				developer's console is implemented.
 class Console

@@ -32,15 +32,16 @@ public:
 	static float FrameDelta();
 
 	/// Gets the number of real-world seconds that have passed since the last frame.
-	/// @return		The number of real seconds that have passed since the last frame.
+	/// @return The number of real seconds that have passed since the last frame.
 	/// @note		This value does not stretch if you've applied a time scale factor.
 	/// @remarks	This value is useful for stepping things which should not be affected by bullet-time
 	///				effects, such as UI elements.
 	static float RealDelta();
 	
-	/// Gets an interpolation value representing this frame's progress through the physics frame.
-	/// @return		A value in the range [0.0, 1.0], where 0.0 represents the start of the physics
-	///				frame and 1.0 represents the end of it.
+	/// Gets an interpolation value representing this frame's position through the current physics frame.
+	/// @return A value in the range [0.0, 1.0], where 0.0 represents the start of the physics frame and
+	/// 1.0 represents the end of it.
+	///
 	/// @remarks	This value can be used to smooth the motion of physics objects when being rendered.
 	///				When a physics frame is finished calculating, physics objects will be simulated
 	///				slightly into the future.  PhysPhase can be used to simulate the position of physics
@@ -50,8 +51,8 @@ public:
 	// Setters ------------------------------
 
 	/// Sets the rate of in-game time flow.  Useful for bullet-time effects.
-	/// @param scalar	The factor to apply to the flow of game time.
-	/// @pre			@p scalar cannot be negative.
+	/// @param scalar The factor to apply to the flow of game time.
+	/// @pre @p scalar cannot be negative.
 	static void SetTimeScale(float scalar);
 
 	// TODO: Add a lerping version of SetTimeScale.
@@ -60,7 +61,6 @@ public:
 	// TODO: Add timer functions
 
 private:
-	// Needed for Application to advance time
 	friend class Application;
 
 	/// Initializes timing functions.

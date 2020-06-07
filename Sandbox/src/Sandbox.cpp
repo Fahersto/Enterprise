@@ -1,43 +1,50 @@
 #include <Enterprise.h>
-#include <Enterprise/Application/Game.h>
+
+using Enterprise::Game;
+using Enterprise::Window;
+
+using Enterprise::Events;
 #include <Enterprise/Input/InputEvents.h>
 #include <Enterprise/Application/ApplicationEvents.h>
 
-using Enterprise::Events;
 
-bool OnEvent(Events::Event& e)
+bool onKeyCharEvent(Events::Event& e)
 {
 	// Example: Unpack a single variable
-	if (e.Type() == EventTypes::KeyChar)
-	{
-		char letter = Events::Unpack<char>(e);
-		EP_DEBUG("This is a letter: {}", letter);
-	}
+	char letter = Events::Unpack<char>(e);
 
-	// Example: Unpack a tuple using structured bindings (C++17)
-	else if (e.Type() == EventTypes::MousePosition)
-	{
-		auto [x, y] = Events::Unpack<std::pair<int, int>>(e);
-		EP_DEBUG("Unpacked MousePosition: x = {}, y = {}", x, y);
-	}
+	EP_TRACE("KeyChar event handled!  Value: {}", letter);
+	return true; // Marks this event as handled, blocking it.
+}
 
-	// Example: log event.  Note that all logging code is stripped from non-debug configurations.
-	EP_TRACE(e.DebugString());
+bool onMousePositionEvent(Events::Event& e)
+{
+	// Example: Unpack a tuple using structured bindings
+	auto [x, y] = Events::Unpack<std::pair<int, int>>(e);
 
-	return false;
+	EP_TRACE("MousePosition event handled!  Values: x = {}, y = {}", x, y);
+	return false; // Allows event to continue propogating down the callback list.
+}
+
+bool onWindowEvents(Events::Event& e)
+{
+	// Example: Directly log events
+	EP_DEBUG("Generic event handled: {}", e.DebugString());
+
+	return false; // Try changing this to true, then closing the window!
 }
 
 
-void Enterprise::Game::Init()
+void Game::Init()
 {
-	Events::SubscribeToCategory(EventCategories::Window, OnEvent);
-	Events::SubscribeToType(EventTypes::KeyChar, OnEvent);
-	Events::SubscribeToType(EventTypes::MousePosition, OnEvent);
+	Events::SubscribeToCategory(EventCategories::Window, onWindowEvents);
+	Events::SubscribeToType(EventTypes::KeyChar, onKeyCharEvent);
+	Events::SubscribeToType(EventTypes::MousePosition, onMousePositionEvent);
 
 	Window::Create(Window::WindowSettings(500, 500, L"Test Window Title"));
 }
 
-void Enterprise::Game::Cleanup()
+void Game::Cleanup()
 {
 	Window::Destroy();
 }
