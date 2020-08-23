@@ -58,8 +58,8 @@ the following:
 
 1. Time (done)
 2. Events (done)
-3. File (up next)
-4. Input
+3. File (on hold)
+4. Input (up next)
 5. Graphics
 6. Audio
 7. ECS
@@ -79,3 +79,4 @@ goals I'd like to eventually meet, even if they aren't a high priority:
 * Premake: <https://premake.github.io/>
 * Spdlog: <https://github.com/gabime/spdlog>
 * Cxx-prettyprint: <http://louisdx.github.io/cxx-prettyprint/>
+* Hot Constants: <https://github.com/theOtherMichael/HotConsts>
