@@ -8,9 +8,9 @@ namespace Enterprise
 namespace Constants
 {
 /// Length, in game-seconds, of the physics timestep.
-extern const float PhysFrameLength;
+HCEX(float, PhysFrameLength);
 /// The maximum number of real seconds back-to-back physics frames are allowed to take.
-extern const float PhysFrameRepeatCap;
+HCEX(float, PhysFrameRepeatCap);
 }
 
 

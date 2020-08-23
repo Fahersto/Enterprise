@@ -25,6 +25,8 @@
 #include <exception>
 #include <csignal>
 
+#include <HotConsts/HotConsts.h>
+
 #ifdef _WIN32
     #include <windows.h>
     #include <windowsx.h>
