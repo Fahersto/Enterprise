@@ -16,10 +16,43 @@ void Console::Init()
 	EP_ASSERT(AllocConsole());
 	SetConsoleTitle(L"Enterprise Debug Console");
 
+	long lStdHandle;
+	int hConHandle;
+	FILE* fp;
+
+	// Redirect STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	EP_ASSERT(hConHandle != -1);
+	fp = _fdopen(hConHandle, "w");
+	EP_ASSERT(fp);
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+
+	// Redirect STDIN to the console
+	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	EP_ASSERT(hConHandle != -1);
+	fp = _fdopen(hConHandle, "r");
+	EP_ASSERT(fp);
+	freopen_s(&fp, "CONOUT$", "r", stdout);
+
+	// Redirect STDERR to the console
+	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	EP_ASSERT(hConHandle != -1);
+	fp = _fdopen(hConHandle, "w");
+	EP_ASSERT(fp);
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+
 	InitSpdlog();
 }
 
 void Console::Cleanup() {
+
+	spdlog::shutdown();
 
 	// Display final message
 	HANDLE h_ConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);

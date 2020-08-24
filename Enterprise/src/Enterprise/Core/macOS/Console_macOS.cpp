@@ -16,7 +16,10 @@ void Console::Init()
     InitSpdlog();  // spdlog
 }
 
-void Console::Cleanup() {}
+void Console::Cleanup()
+{
+    spdlog::shutdown();
+}
 
 }
 
