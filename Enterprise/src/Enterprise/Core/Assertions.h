@@ -35,7 +35,7 @@
 
 
 
-#elif EP_CONFIG_RELEASE // Generate modal error pop-up then terminate.
+#elif EP_CONFIG_DEV // Generate modal error pop-up then terminate.
 
 
 #ifdef EP_SCOPE_CORE

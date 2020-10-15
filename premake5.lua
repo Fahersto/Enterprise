@@ -11,13 +11,14 @@ local configurationName = "%{cfg.buildcfg}-%{cfg.system}"
 
 workspace "Enterprise_Dev"
     startproject (EP_ProjectName)
-    configurations { "Debug", "Release", "Dist" }
+    configurations { "Debug", "Dev", "Dist" }
     platforms { "x64" }
 
 -- Vendor library projects
 group "Dependencies"
     include "Enterprise/_vendor/HotConsts/pm_library.lua" -- Hot Constants!
     configmap {
+        ["Dev"] = "Release",
         ["Dist"] = "Release",
         ["x64"] = "Static64"
     }
@@ -48,8 +49,8 @@ project "Enterprise"
     filter "configurations:Debug"
         defines { "EP_CONFIG_DEBUG", "HOTCONSTS_DEBUG" }
         symbols "On"
-    filter "configurations:Release"
-        defines { "EP_CONFIG_RELEASE", "HOTCONSTS_DEBUG" }
+    filter "configurations:Dev"
+        defines { "EP_CONFIG_DEV", "HOTCONSTS_DEBUG" }
         optimize "On"
     filter "configurations:Dist"
         defines "EP_CONFIG_DIST"
@@ -120,8 +121,8 @@ project (EP_ProjectName)
     filter "configurations:Debug"
         defines { "EP_CONFIG_DEBUG", "HOTCONSTS_DEBUG" }
         symbols "On"
-    filter "configurations:Release"
-        defines { "EP_CONFIG_RELEASE", "HOTCONSTS_DEBUG" }
+    filter "configurations:Dev"
+        defines { "EP_CONFIG_DEV", "HOTCONSTS_DEBUG" }
         optimize "On"
     filter "configurations:Dist"
         defines "EP_CONFIG_DIST"
