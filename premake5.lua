@@ -29,15 +29,14 @@ project "Enterprise"
     location "%{prj.name}"
     links "HotConsts"
     language "C++"
+    cppdialect "C++17"
 
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
-        buildoptions{ "/std:c++latest" } -- C++20 Draft
         staticruntime "On"
     filter "system:macosx"
         systemversion "10.15"
-        buildoptions{ "-std=c++2a" } -- C++20 Draft
     filter {}
 
     -- Build locations
@@ -95,15 +94,14 @@ project (EP_ProjectName)
     location (EP_ProjectName)
     links "Enterprise"
     language "C++"
+    cppdialect "C++17"
 
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
-        buildoptions{ "/std:c++latest" } -- C++20 Draft
         staticruntime "On"
     filter "system:macosx"
         systemversion "10.15"
-        buildoptions{ "-std=c++2a" } -- C++20 Draft
         links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
         xcodebuildsettings {
             ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
