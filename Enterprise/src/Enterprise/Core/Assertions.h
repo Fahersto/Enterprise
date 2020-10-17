@@ -75,7 +75,6 @@
 				throw Enterprise::Exceptions::AssertFailed(); \
 			}
 	#endif
-
 #endif
 
 
@@ -88,6 +87,19 @@
 	#define EP_VERIFY(expression)					EP_ASSERT_IMPL(expression, "")
 	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dist builds.
 	#define EP_VERIFYF(expression, message)			EP_ASSERT_IMPL(expression, message)
+
+	/// Assert that a code path is never reached.
+	#define EP_ASSERT_NOENTRY() 					EP_ASSERTF(false, "Call to EP_ASSERT_NOENTRY().")
+	/// Assert that a code path is only executed once.
+	#define EP_ASSERT_NOREENTRY() \
+	{ \
+		static bool s_linereached##__LINE__ = false; \
+		EP_ASSERTF(!s_linereached##__LINE__, "Second call to EP_ASSERT_NOREENTRY()."); \
+		s_linereached##__LINE__ = true; \
+	}
+	/// Execute code in assertion scenarios.  Stripped out of Dist builds.
+	/// @warning Do not call code with side-effects in this code block, as it is stripped from distribution builds.
+	#define EP_ASSERT_CODE(code)					do { code; } while ( false );
 #else
 	/// Assert that the expression is true.  Stripped out of Dist builds.
 	#define EP_ASSERT(expression)
@@ -97,6 +109,14 @@
 	#define EP_VERIFY(expression)					expression
 	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dist builds.
 	#define EP_VERIFYF(expression, message)			expression
+
+	/// Assert that a code path is never reached.
+	#define EP_ASSERT_NOENTRY()
+	/// Assert that a code path is only executed once.
+	#define EP_ASSERT_NOREENTRY()
+	/// Execute code in assertion scenarios.  Stripped out of Dist builds.
+	/// @warning Do not call code with side-effects in this code block, as it is stripped from distribution builds.
+	#define EP_ASSERT_CODE(code)
 #endif
 
 
