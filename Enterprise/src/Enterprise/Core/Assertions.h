@@ -2,78 +2,120 @@
 #include "EP_PCH.h"
 #include "ErrorMessageBox.h"
 
-/* Assert.h
-	This header contains the Enterprise assert macros (EP_ASSERT).  It is included everywhere via Core.h inclusion.
-	The intended use of EP_ASSERT is to catch situations which should NEVER occur in distribution builds.
-	- In Debug, a breakpoint is triggered in the debugger, the failure is logged, and the application quits.
-	- In Release, an error message dialog appears with the source code location of the failed assertion.
-	- In Distribution, the assertion is stripped out.  The code wrapped in EP_ASSERT is still called.
+/* Assertions.h
+	Enterprise's assertion macros.  This file is included in Core.h.
+
+	There are two main kinds of assertions: EP_ASSERT and EP_VERIFY.  EP_ASSERTs
+	are stripped out of Dist builds completely, while EP_VERIFYs evaluate to just
+	the test expression in Dist builds.
+
+	Versions of the macros appended with "F" allow you to pass a message as a
+	second parameter.
+
+	Versions of the macros appended with "_SLOW" are stripped from both Dev and
+	Dist builds.
+
+	When an assertion fails, an error message is logged and, if a debugger is 
+	attached, a breakboint is triggered.  In Dev builds, a modal pop-up is
+	generated as well.
 */
 
 
 #ifdef _WIN32
-/// Triggers a breakpoint in the debugger.
-#define EP_DEBUGBREAK() __debugbreak()
+/// Portably triggers a breakpoint in the debugger.
+#define EP_DEBUGBREAK() (__nop(), __debugbreak())
 #elif defined(__APPLE__) && defined(__MACH__)
-/// Triggers a breakpoint in the debugger.
-#define EP_DEBUGBREAK() raise(SIGTRAP)
+/// Portably triggers a breakpoint in the debugger.
+#define EP_DEBUGBREAK() __asm__("int $3")
 #endif
 
 
-#ifdef EP_CONFIG_DEBUG // Log to the console, break on the assertion line, then terminate.
+#ifdef EP_CONFIG_DEBUG
+	#define EP_ASSERTIONS_ENABLED
+	#define EP_SLOWASSERTIONS_ENABLED
 
-
-/// Assert that the given condition is true.
-#define EP_ASSERT(condition) \
-	do { \
-		if(!(condition)) { \
-			EP_FATAL("Assertion failed!\nExpression: {}\nFile: {}\nLine: {}", #condition, __FILE__, __LINE__); \
+	#define EP_ASSERT_IMPL(expression, message) \
+		if (expression) { } \
+		else \
+		{ \
+			EP_FATAL("Assertion failed!  {}\nExpression: {}\nFile: {}\nLine: {}", \
+				message, #expression, __FILE__, __LINE__); \
 			EP_DEBUGBREAK(); \
 			throw Enterprise::Exceptions::AssertFailed(); \
-		}\
-	} while(0)
+		}
+#elif EP_CONFIG_DEV
+	#define EP_ASSERTIONS_ENABLED
 
-
-
-#elif EP_CONFIG_DEV // Generate modal error pop-up then terminate.
-
-
-#ifdef EP_SCOPE_CORE
-/// Assert that the given condition is true.
-#define EP_ASSERT(condition) \
-	do { \
-		if(!(condition)) { \
-			std::wstringstream messagestream; \
-			messagestream << "Core assertion failed!\nExpression: " << #condition << "\nFile: " << __FILE__ << \
-				"\nLine: " << __LINE__ << "\n\nThe Enterprise engine library has encountered a condition that " \
-				"should never occur.  It has terminated the application."; \
-			Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
-			throw Enterprise::Exceptions::AssertFailed(); \
-		} \
-	} while(0)
-
-#elif EP_SCOPE_CLIENT
-/// Assert that the given condition is true.
-#define EP_ASSERT(condition) \
-	do { \
-		if(!(condition)) { \
-			std::wstringstream messagestream; \
-			messagestream << "Client assertion failed!\nExpression: " << #condition << "\nFile: " << __FILE__ << \
-				"\nLine: " << __LINE__ << "\n\nThis Enterprise application has encountered a condition that " \
-				"should never occur.  It has terminated itself."; \
-			Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
-			throw Enterprise::Exceptions::AssertFailed(); \
-		} \
-	} while(0)
+	#ifdef EP_SCOPE_CORE
+		#define EP_ASSERT_IMPL(expression, message) \
+			if (expression) { } \
+			else \
+			{ \
+				std::wstringstream messagestream; \
+				messagestream << "Assertion failed!  " << message << \
+					"\nExpression: " << #expression << "\nFile: " << __FILE__ << "\nLine: " << __LINE__ << \
+					"\n\nThe Enterprise engine library has encountered a condition that " \
+					"should never occur.  It has terminated the application."; \
+				Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
+				EP_DEBUGBREAK(); \
+				throw Enterprise::Exceptions::AssertFailed(); \
+			}
+	#else
+		#define EP_ASSERT_IMPL(expression, message) \
+			if (expression) { } \
+			else \
+			{ \
+				std::wstringstream messagestream; \
+				messagestream << "Assertion failed!  " << message << \
+					"\nExpression: " << #expression << "\nFile: " << __FILE__ << "\nLine: " << __LINE__ << \
+					"\n\nThis Enterprise application has encountered a condition that " \
+					"should never occur.  It has terminated itself."; \
+				Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
+				EP_DEBUGBREAK(); \
+				throw Enterprise::Exceptions::AssertFailed(); \
+			}
+	#endif
 
 #endif
 
 
-#elif EP_CONFIG_DIST // Strip the assertion from distribution builds, but still evaluate the expression.
+#ifdef EP_ASSERTIONS_ENABLED
+	/// Assert that the expression is true.  Stripped out of Dist builds.
+	#define EP_ASSERT(expression)					EP_ASSERT_IMPL(expression, "")
+	/// Assert that the expression is true, and print a debug message.  Stripped out of Dist builds.
+	#define EP_ASSERTF(expression, message)			EP_ASSERT_IMPL(expression, message)
+	/// Assert that the expression is true.  Evaluates to just the expression in Dist builds.
+	#define EP_VERIFY(expression)					EP_ASSERT_IMPL(expression, "")
+	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dist builds.
+	#define EP_VERIFYF(expression, message)			EP_ASSERT_IMPL(expression, message)
+#else
+	/// Assert that the expression is true.  Stripped out of Dist builds.
+	#define EP_ASSERT(expression)
+	/// Assert that the expression is true, and print a debug message.  Stripped out of Dist builds.
+	#define EP_ASSERTF(expression, message)
+	/// Assert that the expression is true.  Evaluates to just the expression in Dist builds.
+	#define EP_VERIFY(expression)					expression
+	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dist builds.
+	#define EP_VERIFYF(expression, message)			expression
+#endif
 
 
-/// Assert that the given condition is true.
-#define EP_ASSERT(condition) condition
-
-
+#ifdef EP_SLOWASSERTIONS_ENABLED
+	/// Assert that the expression is true.  Stripped out of Dev and Dist builds.
+	#define EP_ASSERT_SLOW(expression)				EP_ASSERT_IMPL(expression, "")
+	/// Assert that the expression is true, and print a debug message.  Stripped out of Dev and Dist builds.
+	#define EP_ASSERTF_SLOW(expression, message)	EP_ASSERT_IMPL(expression, message)
+	/// Assert that the expression is true.  Evaluates to just the expression in Dev and Dist builds.
+	#define EP_VERIFY_SLOW(expression)				EP_ASSERT_IMPL(expression, "")
+	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dev and Dist builds.
+	#define EP_VERIFYF_SLOW(expression, message)	EP_ASSERT_IMPL(expression, message)
+#else
+	/// Assert that the expression is true.  Stripped out of Dev and Dist builds.
+	#define EP_ASSERT_SLOW(expression)	
+	/// Assert that the expression is true, and print a debug message.  Stripped out of Dev and Dist builds.
+	#define EP_ASSERTF_SLOW(expression, message)
+	/// Assert that the expression is true.  Evaluates to just the expression in Dev and Dist builds.
+	#define EP_VERIFY_SLOW(expression)				expression
+	/// Assert that the expression is true, and print a debug message.  Evaluates to just the expression in Dev and Dist builds.
+	#define EP_VERIFYF_SLOW(expression, message)	expression
 #endif

@@ -43,12 +43,14 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		{
 			// Get size of header.  Needed to get header.
 			UINT dwSize = 0;
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+            EP_VERIFYF_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)) != UINT(-1),
+                "GetRawInputData() failure getting pData buffer size in WM_INPUT event.");
 
 			// Get header
 			LPBYTE lpb = new BYTE[dwSize]; // TODO: Move this to the stack.
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
-			EP_ASSERT(lpb); // If lpb is NULL, there was a problem.
+			EP_VERIFYF_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != UINT(-1),
+                            "GetRawInputData() failure getting RAWINPUTHEADER in WM_INPUT event.");
+			EP_ASSERTF_SLOW(lpb, "GetRawInputData() set pData to NULL in WM_INPUT event.");
 			RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
 			delete[] lpb;
 
@@ -94,7 +96,7 @@ public:
         wc.lpszClassName = L"EP_WNDCLASS";                      // Friendly name for this window class.
         
         // Register the class
-        EP_ASSERT(RegisterClassEx(&wc)); //TODO: Add assertion message here
+        EP_VERIFY(RegisterClassEx(&wc)); //TODO: Use EP_ASSERT_CODE here to call GetLastError().
 
         // Calculate initial window size.
         RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height };
@@ -115,7 +117,7 @@ public:
                               hInstance,
                               NULL);                            // We don't have multiple windows, NULL
         
-        EP_ASSERT(hWnd); //TODO: Add assertion message
+        EP_ASSERT(hWnd); //TODO: Use EP_ASSERT_CODE here to use GetLastError().
         ShowWindow(hWnd, SW_SHOWNORMAL);
     }
     
@@ -138,7 +140,7 @@ namespace Enterprise {
     /// @note @cm_Instance is deleted in the generic function @cWindow::Destroy()
     Window* Window::Create(const WindowSettings& settings)
     {
-        EP_ASSERT(!m_Instance); // Don't create multiple windows
+        EP_ASSERTF(!m_Instance, "Test"); // Don't create multiple windows
         m_Instance = new Win32_Window(settings);
         return m_Instance;
     }

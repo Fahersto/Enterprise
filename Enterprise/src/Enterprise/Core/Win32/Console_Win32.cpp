@@ -13,7 +13,7 @@ std::shared_ptr<spdlog::logger> Console::s_ClientLogger;
 
 void Console::Init()
 {
-	EP_ASSERT(AllocConsole());
+	EP_VERIFY(AllocConsole());
 	SetConsoleTitle(L"Enterprise Debug Console");
 
 	long lStdHandle;

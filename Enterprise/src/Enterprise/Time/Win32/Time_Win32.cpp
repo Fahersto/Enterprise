@@ -11,11 +11,11 @@ void Enterprise::Time::Init()
 {
     // Calculate the tick length in seconds
     LARGE_INTEGER QPF;
-    EP_ASSERT(QueryPerformanceFrequency(&QPF));
+    QueryPerformanceFrequency(&QPF);
     _tickPeriod = 1.0 / QPF.QuadPart;
 
     // Track what time the program started
-	EP_ASSERT(QueryPerformanceCounter(&_startCount));
+	QueryPerformanceCounter(&_startCount);
 	_currentCount = _startCount;
 }
 

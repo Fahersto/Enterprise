@@ -11,7 +11,7 @@ void Enterprise::Time::Init()
 {
     // Calculate the tick length in seconds
     mach_timebase_info_data_t timebase = { 0 };
-    EP_ASSERT(mach_timebase_info(&timebase) == KERN_SUCCESS);
+    EP_VERIFY(mach_timebase_info(&timebase) == KERN_SUCCESS);
     _tickPeriod = 1e-9 * (double)timebase.numer / (double)timebase.denom;
 
     // Track what time the program started

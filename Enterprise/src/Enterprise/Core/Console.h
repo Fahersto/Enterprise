@@ -20,12 +20,12 @@ public:
 	/// @param ...args Format string arguments.
 	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,
 	///				or EP_FATAL to log to the console.  This ensures that the logging code is properly stripped from
-	///				Release and Dist builds.
+	///				Dev and Dist builds.
 	template<typename... Args>
 	inline static void Log(spdlog::level::level_enum level, spdlog::string_view_t fmt, const Args&... args) 
 	{
 		#ifndef EP_CONFIG_DEBUG
-		// Log should not be called in Release or Dist builds.
+		// Log should not be called in Dev or Dist builds.
 		// Ensure you're using EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR, or EP_FATAL to log to the console.
 		EP_ASSERT(false);
 		#endif
@@ -42,12 +42,12 @@ public:
 	/// @pre @p msg must have overloaded the \<\< operator for output streams.
 	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,
 	///				or EP_FATAL to log to the console.  This ensures that the logging code is properly stripped from
-	///				Release and Dist builds.
+	///				Dev and Dist builds.
 	template<typename T>
 	inline static void Log(spdlog::level::level_enum level, const T& msg) 
 	{
 		#ifndef EP_CONFIG_DEBUG
-		// Log should not be called in Release or Dist builds.
+		// Log should not be called in Dev or Dist builds.
 		// Ensure you're using EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR, or EP_FATAL to log to the console.
 		EP_ASSERT(false);
 		#endif
@@ -106,9 +106,7 @@ private:
 	/// Logs a fatal error message to the debug console.
 	#define EP_FATAL(...)	Enterprise::Console::Log(spdlog::level::level_enum::critical, __VA_ARGS__)
 
-	// TODO: Make error & fatal dialog appear in release builds
-
-#else // Strip from release builds
+#else // Strip from Dev and Dist builds
 
 	/// Logs a message to the debug console at the lowest logging level.
 	#define EP_TRACE(...)
