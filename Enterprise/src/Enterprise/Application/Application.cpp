@@ -16,6 +16,8 @@ namespace Enterprise
 
 	Application::Application()
 	{
+		EP_ASSERT_NOREENTRY(); // Disallow creating a second Application.
+
 		// Create Console
 		#ifdef EP_CONFIG_DEBUG
 		Enterprise::Console::Init();

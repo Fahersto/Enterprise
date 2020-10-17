@@ -9,12 +9,12 @@ namespace Enterprise
 	public:
 		// Steps the game engine.  Returns true until application stops running.  Should only be called in the main function.
 
-		/// Steps the game engine.
+		/// Steps the entire Enterprise engine.  Called continuously by the main loop.
 		/// @return Boolean indicating whether the main loop should continue.
-		/// @note The Run function's return value is best used as the condition for the platform-specific main loop.
+		/// @note The Run function's return value is used as the condition for the platform-specific main loop.
 		bool Run();
 
-		/// Quits the application successfully at the end of the current frame.
+		/// Quit the application at the end of the current frame.
 		static void Quit();
 
 		/// Sets up the core systems of the application.
