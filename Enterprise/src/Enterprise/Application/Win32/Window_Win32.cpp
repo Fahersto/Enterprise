@@ -140,7 +140,7 @@ namespace Enterprise {
     /// @note @cm_Instance is deleted in the generic function @cWindow::Destroy()
     Window* Window::Create(const WindowSettings& settings)
     {
-        EP_ASSERTF(!m_Instance, "Test"); // Don't create multiple windows
+        EP_ASSERT(!m_Instance); // Don't create multiple windows
         m_Instance = new Win32_Window(settings);
         return m_Instance;
     }
