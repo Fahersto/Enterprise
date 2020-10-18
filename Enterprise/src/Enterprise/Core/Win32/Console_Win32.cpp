@@ -16,13 +16,13 @@ void Console::Init()
 	EP_VERIFY(AllocConsole());
 	SetConsoleTitle(L"Enterprise Debug Console");
 
-	long lStdHandle;
+	intptr_t lStdHandle;
 	int hConHandle;
 	FILE* fp;
 
 	// Redirect STDOUT to the console
-	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
-	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	lStdHandle = (intptr_t)GetStdHandle(STD_OUTPUT_HANDLE);
+	EP_ASSERT(lStdHandle != (intptr_t)INVALID_HANDLE_VALUE);
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	EP_ASSERT(hConHandle != -1);
 	fp = _fdopen(hConHandle, "w");
@@ -30,8 +30,8 @@ void Console::Init()
 	freopen_s(&fp, "CONOUT$", "w", stdout);
 
 	// Redirect STDIN to the console
-	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
-	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	lStdHandle = (intptr_t)GetStdHandle(STD_INPUT_HANDLE);
+	EP_ASSERT(lStdHandle != (intptr_t)INVALID_HANDLE_VALUE);
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	EP_ASSERT(hConHandle != -1);
 	fp = _fdopen(hConHandle, "r");
@@ -39,8 +39,8 @@ void Console::Init()
 	freopen_s(&fp, "CONOUT$", "r", stdout);
 
 	// Redirect STDERR to the console
-	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
-	EP_ASSERT(lStdHandle != (long)INVALID_HANDLE_VALUE);
+	lStdHandle = (intptr_t)GetStdHandle(STD_ERROR_HANDLE);
+	EP_ASSERT(lStdHandle != (intptr_t)INVALID_HANDLE_VALUE);
 	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
 	EP_ASSERT(hConHandle != -1);
 	fp = _fdopen(hConHandle, "w");
