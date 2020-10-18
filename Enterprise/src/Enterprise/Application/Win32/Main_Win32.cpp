@@ -37,7 +37,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 		return EXIT_SUCCESS;
 	}
-	catch (Enterprise::Exceptions::AssertFailed& e) { exit(EXIT_FAILURE); }
+	catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 }
 
 #endif
