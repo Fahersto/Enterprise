@@ -43,13 +43,13 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		{
 			// Get size of header.  Needed to get header.
 			UINT dwSize = 0;
-            EP_VERIFYF_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)) != UINT(-1),
-                "GetRawInputData() failure getting pData buffer size in WM_INPUT event.");
+            EP_VERIFYF_NEQ_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)), UINT(-1),
+								"GetRawInputData() failure getting pData buffer size in WM_INPUT event.");
 
 			// Get header
 			LPBYTE lpb = new BYTE[dwSize]; // TODO: Move this to the stack.
-			EP_VERIFYF_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != UINT(-1),
-                            "GetRawInputData() failure getting RAWINPUTHEADER in WM_INPUT event.");
+			EP_VERIFYF_NEQ_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)), UINT(-1),
+								"GetRawInputData() failure getting RAWINPUTHEADER in WM_INPUT event.");
 			EP_ASSERTF_SLOW(lpb, "GetRawInputData() set pData to NULL in WM_INPUT event.");
 			RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
 			delete[] lpb;
