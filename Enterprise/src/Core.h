@@ -7,6 +7,7 @@
 #include "Enterprise/Core/Assertions.h"
 #include "Enterprise/Core/Console.h"
 #include "Enterprise/Core/ErrorMessageBox.h"
+#include "Enterprise/Core/HashNames.h"
 
 
 // Helpful macros
