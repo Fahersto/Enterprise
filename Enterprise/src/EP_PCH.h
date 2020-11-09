@@ -10,6 +10,7 @@
 #include <array>
 #include <tuple>
 #include <list>
+#include <algorithm>
 
 #include <string>
 #include <wchar.h>

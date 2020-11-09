@@ -9,8 +9,18 @@
 #include "Enterprise/Core/ErrorMessageBox.h"
 #include "Enterprise/Core/HashNames.h"
 
-
-// Helpful macros
-
 // Quickly assemble bit fields
-#define BIT(x) (1 << x)
+#define BIT(x) (1ull << (x))
+
+/// Quickly identify if all of a group of types are the same.
+template<typename T, typename... Rest>
+struct is_all_same : std::false_type {};
+/// Quickly identify if all of a group of types are the same.
+template<typename T, typename First>
+struct is_all_same<T, First> : std::is_same<T, First> {};
+/// Quickly identify if all of a group of types are the same.
+template<typename T, typename First, typename... Rest>
+struct is_all_same<T, First, Rest...> : 
+	std::integral_constant<bool, 
+		std::is_same<T, First>::value &&
+		is_all_same<T, Rest...>::value> {};

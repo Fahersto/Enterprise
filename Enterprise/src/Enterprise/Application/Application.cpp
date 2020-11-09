@@ -9,6 +9,7 @@
 
 // Systems
 #include "Enterprise/Time/Time.h"
+#include "Enterprise/Input/Input.h"
 
 namespace Enterprise 
 {
@@ -27,7 +28,7 @@ namespace Enterprise
 		Time::Init();
 		// File::Init();
 		// Network::Init();
-		// Input::Init();
+		Input::Init();
 		// Graphics::Init();
 		// Audio::Init();
 		// ECS::Init();
@@ -65,6 +66,7 @@ namespace Enterprise
 
 		// Frame
 		Time::FrameStart();
+		Input::Update();
 		// ...
 		Time::FrameEnd();
 
@@ -73,7 +75,6 @@ namespace Enterprise
 	}
 
 	void Application::Quit() { _isRunning = false; }
-
 
     bool Application::OnEvent(Events::Event& e)
     {

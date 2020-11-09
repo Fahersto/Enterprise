@@ -17,7 +17,7 @@
 #include "Enterprise/Events/Events.h"
 #include "Enterprise/Time/Time.h"
 // #include "Enterprise/File/File.h"
-// #include "Enterprise/Input/Input.h"
+#include "Enterprise/Input/Input.h"
 // #include "Enterprise/Graphics/Graphics.h"
 // #include "Enterprise/Audio/Audio.h"
 // #include "Enterprise/ECS/ECS.h"

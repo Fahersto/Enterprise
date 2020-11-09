@@ -12,6 +12,8 @@ extern const Events::EventCategory DirectKeyboard;
 extern const Events::EventCategory MouseDelta;
 /// Mouse input events used in pointer-based control.
 extern const Events::EventCategory MousePointer;
+/// Controller wake/disconnect events.
+extern const Events::EventCategory Connectivity;
 
 }
 
@@ -40,5 +42,9 @@ extern const Events::EventType MouseDelta;
 /// The user has moved the pointer. | std::pair(int posX, int posY)
 extern const Events::EventType MousePosition;
 
-}
+/// An unassigned controller has connected or has detected input. | ControllerID controller
+extern const Events::EventType ControllerWake;
+/// A player's assigned controller has been disconnected. | PlayerID player
+extern const Events::EventType ControllerDisconnect;
 
+}

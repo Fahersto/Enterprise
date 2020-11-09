@@ -6,6 +6,7 @@ namespace EventCategories
 EP_EVENTCATEGORY_DEF(DirectKeyboard);
 EP_EVENTCATEGORY_DEF(MouseDelta);
 EP_EVENTCATEGORY_DEF(MousePointer);
+EP_EVENTCATEGORY_DEF(Connectivity);
 }
 
 namespace EventTypes
@@ -22,5 +23,9 @@ EP_EVENTTYPE_DEF(MouseButtonUp,     EventCategories::MouseDelta,    EventCategor
 EP_EVENTTYPE_DEF(MouseScroll,       EventCategories::MouseDelta,    EventCategories::MousePointer);
 EP_EVENTTYPE_DEF(MouseDelta,        EventCategories::MouseDelta);
 EP_EVENTTYPE_DEF(MousePosition,                                     EventCategories::MousePointer);
+
+// Connectivity
+EP_EVENTTYPE_DEF(ControllerWake,		EventCategories::Connectivity);
+EP_EVENTTYPE_DEF(ControllerDisconnect,	EventCategories::Connectivity);
 
 }

@@ -28,6 +28,10 @@ and build it.
 At present, only Visual Studio 2019 (Windows) and Xcode 11 (macOS) have been tested.  I have no plans to 
 add support for other compilers or platforms.
 
+### For Visual Studio Users
+
+Ensure you have installed the Windows 10 SDK.  It can be installed in the optional components of the Visual Studio 2019 Installer, or as a direct download [here](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/).
+
 ### For Xcode Users
 
 Enterprise uses [Premake](https://premake.github.io/) to generate project files.  At present, Premake does 
@@ -40,9 +44,6 @@ tweaks to the default "Sandbox" scheme:
   text.
 * In **Run -> Arguments -> Environmental Variables**, set `OS_ACTIVITY_MODE = disable`.  This disables
   OS-level logging.
-
-In order to test in the Release or Dist configurations, you will either need to set up additional schemes or 
-change the build configuration of the default one.  By default, the Sandbox scheme builds the Debug configuration.
 
 ## Current State of Development
 So far, I have developed Enterprise's framework as well as two of its core systems. The framework contains 
@@ -79,4 +80,5 @@ goals I'd like to eventually meet, even if they aren't a high priority:
 * Premake: <https://premake.github.io/>
 * Spdlog: <https://github.com/gabime/spdlog>
 * Cxx-prettyprint: <http://louisdx.github.io/cxx-prettyprint/>
+* SpookyHash (modified): <http://burtleburtle.net/bob/hash/spooky.html>
 * Hot Constants: <https://github.com/theOtherMichael/HotConsts>
