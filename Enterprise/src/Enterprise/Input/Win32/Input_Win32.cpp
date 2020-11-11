@@ -95,36 +95,43 @@ void Enterprise::Input::GetRawInput()
 
             // Buttons
             {
-                uint16_t convertedbuttons = 0;
+                // Ensure that the XInput bit masks have the expected relationship to the ControlID enum values
+                static_assert(XINPUT_GAMEPAD_DPAD_UP        == BIT(uint16_t(ControlID::GP_Dpad_Up)));
+                static_assert(XINPUT_GAMEPAD_DPAD_DOWN      == BIT(uint16_t(ControlID::GP_Dpad_Down)));
+                static_assert(XINPUT_GAMEPAD_DPAD_LEFT      == BIT(uint16_t(ControlID::GP_Dpad_Left)));
+                static_assert(XINPUT_GAMEPAD_DPAD_RIGHT     == BIT(uint16_t(ControlID::GP_Dpad_Right)));
+                static_assert(XINPUT_GAMEPAD_START          == BIT(uint16_t(ControlID::GP_Menu)));
+                static_assert(XINPUT_GAMEPAD_BACK           == BIT(uint16_t(ControlID::GP_Options)));
+                static_assert(XINPUT_GAMEPAD_LEFT_THUMB     == BIT(uint16_t(ControlID::GP_LStick_Click)));
+                static_assert(XINPUT_GAMEPAD_RIGHT_THUMB    == BIT(uint16_t(ControlID::GP_RStick_Click)));
+                static_assert(XINPUT_GAMEPAD_LEFT_SHOULDER  == BIT(uint16_t(ControlID::GP_LShoulder)));
+                static_assert(XINPUT_GAMEPAD_RIGHT_SHOULDER == BIT(uint16_t(ControlID::GP_RShoulder)));
+                static_assert(XINPUT_GAMEPAD_A              == BIT(uint16_t(ControlID::GP_FaceButton_Down) + 2));
+                static_assert(XINPUT_GAMEPAD_B              == BIT(uint16_t(ControlID::GP_FaceButton_Right) + 2));
+                static_assert(XINPUT_GAMEPAD_X              == BIT(uint16_t(ControlID::GP_FaceButton_Left) + 2));
+                static_assert(XINPUT_GAMEPAD_Y              == BIT(uint16_t(ControlID::GP_FaceButton_Up) + 2));
 
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Dpad_Up));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Dpad_Down));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Dpad_Left));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Dpad_Right));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_START)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Menu));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_Options));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_LStick_Click));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_RStick_Click));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_LShoulder));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_RShoulder));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_A)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_FaceButton_Down));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_B)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_FaceButton_Right));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_X)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_FaceButton_Left));
-                if (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y)
-                    convertedbuttons |= BIT(uint16_t(ControlID::GP_FaceButton_Up));
+                uint16_t convertedbuttons = state.Gamepad.wButtons &
+                    (
+                        XINPUT_GAMEPAD_DPAD_UP |
+                        XINPUT_GAMEPAD_DPAD_DOWN |
+                        XINPUT_GAMEPAD_DPAD_LEFT |
+                        XINPUT_GAMEPAD_DPAD_RIGHT |
+                        XINPUT_GAMEPAD_START |
+                        XINPUT_GAMEPAD_BACK |
+                        XINPUT_GAMEPAD_LEFT_THUMB |
+                        XINPUT_GAMEPAD_RIGHT_THUMB |
+                        XINPUT_GAMEPAD_LEFT_SHOULDER |
+                        XINPUT_GAMEPAD_RIGHT_SHOULDER
+                    );
+
+                convertedbuttons |= (state.Gamepad.wButtons &
+                    (
+                        XINPUT_GAMEPAD_A |
+                        XINPUT_GAMEPAD_B |
+                        XINPUT_GAMEPAD_X |
+                        XINPUT_GAMEPAD_Y
+                    )) >> 2;
 
                 gpBuffer[xinputToGamepadID[i]].buttons[currentBuffer] = convertedbuttons;
             }
