@@ -13,3 +13,8 @@ constexpr uint64_t operator ""_HN(const char* string, size_t len)
 /// @param stringname The string to convert.
 /// @return The string's associated HashName.
 HashName HN(std::string stringname);
+
+/// Returns the string associated with a HashName.
+/// @param hashname The HashName to look up.
+/// @return The HashName's associated string.
+std::string SN(HashName hashname);

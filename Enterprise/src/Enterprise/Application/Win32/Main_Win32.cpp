@@ -38,6 +38,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		return EXIT_SUCCESS;
 	}
 	catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
+	catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
 }
 
 #endif

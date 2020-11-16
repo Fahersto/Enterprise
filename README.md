@@ -58,9 +58,9 @@ With the framework largely done, Enterprise's core systems are the focus of deve
 the following:
 
 1. Time (done)
-2. Events (done)
-3. File (on hold)
-4. Input (up next)
+2. Events (done*)
+3. File (in progress)
+4. Input (in progress)
 5. Graphics
 6. Audio
 7. ECS

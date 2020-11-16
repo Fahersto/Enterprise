@@ -39,7 +39,7 @@ public:
 	/// Load an input context from an INI file.
 	/// @param filename Name of the INI file containing the context.
 	/// @param contextname Name of the context.
-	static void LoadContextFromFile(std::string filename, std::string contextname);
+	static void LoadContextsFromFile(std::string filename);
 
 	/// Bind a callback function to an Action for all players.
 	/// @param contextName The hashed name of the input context to which this Action belongs.
@@ -88,6 +88,11 @@ public:
 		for (int i = 0; i < sizeof...(HashPack); i++)
 		{
 			BindingStack.back().ActionOrAxes[i] = axesNames[i];
+			if (!AxisMap.count(std::pair(contextName, axesNames[i])))
+			{
+				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings."
+						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
+			}
 		}
 	}
 	/// Bind a callback function to one or more Axes for all players.
@@ -118,6 +123,11 @@ public:
 		for (int i = 0; i < sizeof...(HashPack); i++)
 		{
 			BindingStack.back().ActionOrAxes[i] = axesNames[i];
+			if (!AxisMap.count(std::pair(contextName, axesNames[i])))
+			{
+				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings."
+						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
+			}
 		}
 	}
 
@@ -186,6 +196,19 @@ private:
 		bool bBlocking;
 	};
 
+	struct ActionMapping
+	{
+		Enterprise::ControlID controlID;
+		float threshold;
+		bool isDownAction;
+	};
+	struct AxisMapping
+	{
+		Enterprise::ControlID controlID;
+		float scale;
+	};
+	static std::map <std::pair<HashName, HashName>, std::vector<ActionMapping>> ActionMap;
+	static std::map <std::pair<HashName, HashName>, std::vector<AxisMapping>> AxisMap;
 	static std::vector<Binding> BindingStack;
 
 	static void GetRawInput();

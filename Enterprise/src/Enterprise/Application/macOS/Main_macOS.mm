@@ -68,6 +68,7 @@
             while (app.Run()); // Run the app
         }
         catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
+        catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
         
         /// Note: [terminate:] never returns.  App's destructor is called when leaving the try block.
         [NSApp terminate:self];
