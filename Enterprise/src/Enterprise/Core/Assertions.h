@@ -114,17 +114,17 @@
 	/// Assert that an expression is true, and log an error message if it's not.  The expression is stripped out of Dist builds.
 	#define EP_ASSERTF(expression, message)
 	/// Assert that an expression is true.  Evaluates to just the expression in Dist builds.
-	#define EP_VERIFY(expression)										expression
+	#define EP_VERIFY(expression)										expression;
 	/// Assert that an expression is true, and log an error message if it's not.  Evaluates to just the expression in Dist builds.
-	#define EP_VERIFYF(expression, message)								expression
+	#define EP_VERIFYF(expression, message)								expression;
 	/// Assert that an expression is equal to something.  Evaluates to just the first expression in Dist builds.
-	#define EP_VERIFY_EQ(expression, compareexpr)						expression
+	#define EP_VERIFY_EQ(expression, compareexpr)						expression;
 	/// Assert that an expression is equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dist builds.
-	#define EP_VERIFYF_EQ(expression, compareexpr, message)				expression
+	#define EP_VERIFYF_EQ(expression, compareexpr, message)				expression;
 	/// Assert that an expression is not equal to something.  Evaluates to just the first expression in Dist builds.
-	#define EP_VERIFY_NEQ(expression, compareexpr)						expression
+	#define EP_VERIFY_NEQ(expression, compareexpr)						expression;
 	/// Assert that an expression is not equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dist builds.
-	#define EP_VERIFYF_NEQ(expression, compareexpr, message)			expression
+	#define EP_VERIFYF_NEQ(expression, compareexpr, message)			expression;
 
 	/// Assert that a code path is never reached.
 	#define EP_ASSERT_NOENTRY()
@@ -159,15 +159,15 @@
 	/// Assert that an expression is true, and log an error message if it's not.  The expression is stripped out of Dev and Dist builds.
 	#define EP_ASSERTF_SLOW(expression, message)
 	/// Assert that an expression is true.  Evaluates to just the expression in Dev and Dist builds.
-	#define EP_VERIFY_SLOW(expression)									expression
+	#define EP_VERIFY_SLOW(expression)									expression;
 	/// Assert that an expression is true, and log an error message if it's not.  Evaluates to just the expression in Dev and Dist builds.
-	#define EP_VERIFYF_SLOW(expression, message)						expression
+	#define EP_VERIFYF_SLOW(expression, message)						expression;
 	/// Assert that an expression is equal to something.  Evaluates to just the first expression in Dev and Dist builds.
-	#define EP_VERIFY_EQ_SLOW(expression, compareexpr)					expression
+	#define EP_VERIFY_EQ_SLOW(expression, compareexpr)					expression;
 	/// Assert that an expression is equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dev and Dist builds.
-	#define EP_VERIFYF_EQ_SLOW(expression, compareexpr, message)		expression
+	#define EP_VERIFYF_EQ_SLOW(expression, compareexpr, message)		expression;
 	/// Assert that an expression is not equal to something.  Evaluates to just the first expression in Dev and Dist builds.
-	#define EP_VERIFY_NEQ_SLOW(expression, compareexpr)					expression
+	#define EP_VERIFY_NEQ_SLOW(expression, compareexpr)					expression;
 	/// Assert that an expression is not equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dev and Dist builds.
-	#define EP_VERIFYF_NEQ_SLOW(expression, compareexpr, message)		expression
+	#define EP_VERIFYF_NEQ_SLOW(expression, compareexpr, message)		expression;
 #endif
