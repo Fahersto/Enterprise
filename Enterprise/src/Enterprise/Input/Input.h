@@ -88,9 +88,11 @@ public:
 		for (int i = 0; i < sizeof...(HashPack); i++)
 		{
 			BindingStack.back().ActionOrAxes[i] = axesNames[i];
-			if (!AxisMap.count(std::pair(contextName, axesNames[i])))
+
+			if (AxisMap[contextName][axesNames[i]].size() == 0)
 			{
-				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings."
+				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings "
+						 "and will not reflect player input."
 						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
 			}
 		}
@@ -122,12 +124,14 @@ public:
 		std::array<HashName, sizeof...(HashPack)> axesNames{ axisName... };
 		for (int i = 0; i < sizeof...(HashPack); i++)
 		{
-			BindingStack.back().ActionOrAxes[i] = axesNames[i];
-			if (!AxisMap.count(std::pair(contextName, axesNames[i])))
+			if (AxisMap[contextName][axesNames[i]].size() == 0)
 			{
-				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings."
+				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings "
+						 "and will not reflect player input."
 						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
 			}
+
+			BindingStack.back().ActionOrAxes[i] = axesNames[i];
 		}
 	}
 
@@ -207,8 +211,8 @@ private:
 		Enterprise::ControlID controlID;
 		float scale;
 	};
-	static std::map <std::pair<HashName, HashName>, std::vector<ActionMapping>> ActionMap;
-	static std::map <std::pair<HashName, HashName>, std::vector<AxisMapping>> AxisMap;
+	static std::unordered_map<HashName, std::unordered_map<HashName, std::vector<ActionMapping>>> ActionMap;
+	static std::unordered_map<HashName, std::unordered_map<HashName, std::vector<AxisMapping>>> AxisMap;
 	static std::vector<Binding> BindingStack;
 
 	static void GetRawInput();

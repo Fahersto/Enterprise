@@ -21,8 +21,8 @@ static std::vector<Input::ControllerID> ControllerForPlayer;
 static std::vector<bool> isPlayerInputBlocked;
 
 
-std::map <std::pair<HashName, HashName>, std::vector<Input::ActionMapping>> Input::ActionMap;
-std::map <std::pair<HashName, HashName>, std::vector<Input::AxisMapping>> Input::AxisMap;
+std::unordered_map<HashName, std::unordered_map<HashName, std::vector<Input::ActionMapping>>> Input::ActionMap;
+std::unordered_map<HashName, std::unordered_map<HashName, std::vector<Input::AxisMapping>>> Input::AxisMap;
 std::vector<Input::Binding> Input::BindingStack;
 
 
@@ -316,7 +316,7 @@ void Input::LoadContextsFromFile(std::string filename)
 						dir_converted.first &&
 						threshold_converted.first)
 					{
-						ActionMap[std::pair(contextName, HN(map[HN("name")]))].emplace_back
+						ActionMap[contextName][HN(map[HN("name")])].emplace_back
 						(
 							ActionMapping
 							{
@@ -359,7 +359,7 @@ void Input::LoadContextsFromFile(std::string filename)
 					if (control_converted.first &&
 						scale_converted.first)
 					{
-						AxisMap[std::pair(contextName, HN(map[HN("name")]))].emplace_back
+						AxisMap[contextName][HN(map[HN("name")])].emplace_back
 						(
 							AxisMapping
 							{
@@ -400,10 +400,10 @@ void Input::BindAction(void(*callbackPtr)(PlayerID player),
 					   HashName contextName,
 					   HashName actionName)
 {
-	if (!ActionMap.count(std::pair(contextName, actionName)))
+	if (ActionMap[contextName][actionName].size() == 0)
 	{
-		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings.  "
-				"Context Name: {}", SN(actionName), SN(contextName));
+		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
+				 "and will never trigger.  Context Name: {}", SN(actionName), SN(contextName));
 	}
 
 	BindingStack.emplace_back(
@@ -419,10 +419,10 @@ void Input::BindActionForPlayerID(void(*callbackPtr)(PlayerID player),
 								HashName contextName,
 								HashName actionName)
 {
-	if (!ActionMap.count(std::pair(contextName, actionName)))
+	if (ActionMap[contextName][actionName].size() == 0)
 	{
-		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings.  "
-				"Context Name: {}", SN(actionName), SN(contextName));
+		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
+				 "and will never trigger.  Context Name: {}", SN(actionName), SN(contextName));
 	}
 
 	BindingStack.emplace_back(
@@ -602,8 +602,8 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 		{
 			bool isActionTriggered = false;
 
-			for (auto mappingIt = ActionMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[0])].begin();
-				 mappingIt != ActionMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[0])].end();
+			for (auto mappingIt = ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].begin();
+				 mappingIt != ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].end();
 				 ++mappingIt)
 			{
 				if (mappingIt->controlID > ControlID::_EndOfGPAxes)
@@ -697,8 +697,8 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 		{
 			for (int axisID = 0; axisID < bindingIt->NumOfAxes; axisID++)
 			{
-				for (auto mappingIt = AxisMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[axisID])].begin();
-					 mappingIt != AxisMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[axisID])].end();
+				for (auto mappingIt = AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].begin();
+					 mappingIt != AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].end();
 					 ++mappingIt)
 				{
 					// At this point, we're iterating through every mappingIt in an axis, then puting it in out axes.
@@ -768,8 +768,8 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 		{
 			bool isActionTriggered = false;
 
-			for (auto mappingIt = ActionMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[0])].begin();
-				 mappingIt != ActionMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[0])].end();
+			for (auto mappingIt = ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].begin();
+				 mappingIt != ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].end();
 				 ++mappingIt)
 			{
 				if (mappingIt->controlID < ControlID::_EndOfGPAxes)
@@ -846,8 +846,8 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 		{
 			for (int axisID = 0; axisID < bindingIt->NumOfAxes; axisID++)
 			{
-				for (auto mappingIt = AxisMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[axisID])].begin();
-					 mappingIt != AxisMap[std::pair(bindingIt->ContextName, bindingIt->ActionOrAxes[axisID])].end();
+				for (auto mappingIt = AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].begin();
+					 mappingIt != AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].end();
 					 ++mappingIt)
 				{
 					if (mappingIt->controlID < ControlID::_EndOfGPAxes)

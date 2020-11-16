@@ -174,7 +174,7 @@ public:
 		// A list of the HashNames for all sections represented by this INIReader.
 		std::vector<HashName> m_sections;
 		// Associates a section/key HashName combination with the vector of all values as strings.
-		std::map<std::pair<HashName, HashName>, std::vector<std::string>> m_data;
+		std::unordered_map<HashName, std::unordered_map<HashName, std::vector<std::string>>> m_data;
 		// The internally stored error/status code from the loading of the file.
 		ErrorCode m_errorcode;
 		// The virtual path to the file this reader represents.

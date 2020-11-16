@@ -497,7 +497,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 							{
 								// The delimiter was the last character on the line.
 								// This may have been intentional, so we add an empty string to the map.
-								m_data[std::pair(section, key)].emplace_back(std::string());
+								m_data[section][key].emplace_back(std::string());
 							}
 							else
 							{
@@ -506,13 +506,13 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 								{
 									// The delimiter was the last thing on the line.
 									// This may have been intentional, so we add an empty string to the map.
-									m_data[std::pair(section, key)].emplace_back(std::string());
+									m_data[section][key].emplace_back(std::string());
 								}
 								else if (line.at(pos) == ';')
 								{
 									// A semicolon immediately follows the delimiter.
 									// This may have been intentional, so we add an empty string to the map.
-									m_data[std::pair(section, key)].emplace_back(std::string());
+									m_data[section][key].emplace_back(std::string());
 								}
 								else if (line.at(pos) == '\"')
 								{
@@ -532,12 +532,12 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 										if (pos3 == std::string::npos)
 										{
 											// Good: no characters after quotes.
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos + 1, pos2 - pos - 1));
+											m_data[section][key].emplace_back(line.substr(pos + 1, pos2 - pos - 1));
 										}
 										else if (line.at(pos3) == ';')
 										{
 											// Good: only a comment after the quotes
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos + 1, pos2 - pos - 1));
+											m_data[section][key].emplace_back(line.substr(pos + 1, pos2 - pos - 1));
 										}
 										else
 										{
@@ -590,12 +590,12 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 										if (pos3 == std::string::npos)
 										{
 											// Good: no characters after ')'
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 + 1 - pos));
+											m_data[section][key].emplace_back(line.substr(pos, pos2 + 1 - pos));
 										}
 										else if (line.at(pos3) == ';')
 										{
 											// Good: only a comment after ')'
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 + 1 - pos));
+											m_data[section][key].emplace_back(line.substr(pos, pos2 + 1 - pos));
 										}
 										else
 										{
@@ -613,12 +613,12 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 									if (pos2 == std::string::npos)
 									{
 										// All good!  No characters follow the value.
-										m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 - pos));
+										m_data[section][key].emplace_back(line.substr(pos, pos2 - pos));
 									}
 									else if (line.at(pos2) == ';')
 									{
 										// All good!  Semicolon cuts off remaining characters after value.
-										m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 - pos));
+										m_data[section][key].emplace_back(line.substr(pos, pos2 - pos));
 									}
 									else
 									{
@@ -626,12 +626,12 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 										if (pos3 == std::string::npos)
 										{
 											// All good!  All whitespace after the value.
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 - pos));
+											m_data[section][key].emplace_back(line.substr(pos, pos2 - pos));
 										}
 										else if (line.at(pos3) == ';')
 										{
 											// All good!  Only comments after the value.
-											m_data[std::pair(section, key)].emplace_back(line.substr(pos, pos2 - pos));
+											m_data[section][key].emplace_back(line.substr(pos, pos2 - pos));
 										}
 										else
 										{
@@ -668,47 +668,42 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 
 std::pair<bool, bool> File::INIReader::GetBool(HashName section, HashName key, bool defaultVal)
 {
-	if (m_data.count(std::pair(section, key)))
+	if (m_data[section][key].size() == 0)
 	{
-		if (m_data[std::pair(section, key)].size() > 1)
-		{
-			EP_WARN("File System: INIReader::GetBool() called on a key with multiple values.  "
-					"Only the first value was returned.");
-		}
-		return INIStringToBool(m_data[std::pair(section, key)].front());
-	}
-	else
-	{
-		EP_WARN("File System: Expected INI key missing during file parse.  Default value returned."
-				"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		EP_WARN("File System: INIReader::GetBool() called on a key not present in the INI file.  "
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 		return std::pair(false, defaultVal);
 	}
+
+	if (m_data[section][key].size() > 1)
+	{
+		EP_WARN("File System: INIReader::GetBool() called on a key with multiple values.  "
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+
+	return INIStringToBool(m_data[section][key].front());
 }
 
 
 std::pair<bool, std::vector<bool>> File::INIReader::GetMultiBool(HashName section, HashName key)
 {
 	std::pair<bool, std::vector<bool>> returnVal;
+	returnVal.first = true;
 
-	if (m_data.count(std::pair(section, key)))
+	std::pair<bool, bool> converted;
+	for (std::string& strIt : m_data[section][key])
 	{
-		returnVal.first = true;
-
-		std::pair<bool, bool> converted;
-		for (std::string& strIt : m_data[std::pair(section, key)])
+		converted = INIStringToBool(strIt);
+		if (converted.first)
 		{
-			converted = INIStringToBool(strIt);
-			if (converted.first)
-			{
-				returnVal.second.push_back(converted.second);
-			}
-			else
-			{
-				EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-				returnVal.first = false;
-				continue;
-			}
+			returnVal.second.push_back(converted.second);
+		}
+		else
+		{
+			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
+					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+			returnVal.first = false;
+			continue;
 		}
 	}
 
@@ -718,47 +713,42 @@ std::pair<bool, std::vector<bool>> File::INIReader::GetMultiBool(HashName sectio
 
 std::pair<bool, int> File::INIReader::GetInt(HashName section, HashName key, int defaultVal)
 {
-	if (m_data.count(std::pair(section, key)))
+	if (m_data[section][key].size() == 0)
 	{
-		if (m_data[std::pair(section, key)].size() > 1)
-		{
-			EP_WARN("File System: INIReader::GetInt() called on a key with multiple values.  "
-					"Only the first value was returned.");
-		}
-		return INIStringToInt(m_data[std::pair(section, key)].front());
-	}
-	else
-	{
-		EP_WARN("File System: Expected INI key missing during file parse.  Default value returned."
-				"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		EP_WARN("File System: INIReader::GetInt() called on a key not present in the INI file.  "
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 		return std::pair(false, defaultVal);
 	}
+
+	if (m_data[section][key].size() > 1)
+	{
+		EP_WARN("File System: INIReader::GetInt() called on a key with multiple values.  "
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+
+	return INIStringToInt(m_data[section][key].front());
 }
 
 
 std::pair<bool, std::vector<int>> File::INIReader::GetMultiInt(HashName section, HashName key)
 {
 	std::pair<bool, std::vector<int>> returnVal;
+	returnVal.first = true;
 
-	if (m_data.count(std::pair(section, key)))
+	std::pair<bool, int> converted;
+	for (std::string& strIt : m_data[section][key])
 	{
-		returnVal.first = true;
-
-		std::pair<bool, int> converted;
-		for (std::string& strIt : m_data[std::pair(section, key)])
+		converted = INIStringToInt(strIt);
+		if (converted.first)
 		{
-			converted = INIStringToInt(strIt);
-			if (converted.first)
-			{
-				returnVal.second.push_back(converted.second);
-			}
-			else
-			{
-				EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-				returnVal.first = false;
-				continue;
-			}
+			returnVal.second.push_back(converted.second);
+		}
+		else
+		{
+			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
+					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+			returnVal.first = false;
+			continue;
 		}
 	}
 
@@ -768,47 +758,42 @@ std::pair<bool, std::vector<int>> File::INIReader::GetMultiInt(HashName section,
 
 std::pair<bool, float> File::INIReader::GetFloat(HashName section, HashName key, float defaultVal)
 {
-	if (m_data.count(std::pair(section, key)))
+	if (m_data[section][key].size() == 0)
 	{
-		if (m_data[std::pair(section, key)].size() > 1)
-		{
-			EP_WARN("File System: INIReader::GetFloat() called on a key with multiple values.  "
-					"Only the first value was returned.");
-		}
-		return INIStringToFloat(m_data[std::pair(section, key)].front());
-	}
-	else
-	{
-		EP_WARN("File System: Expected INI key missing during file parse.  Default value returned."
-				"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		EP_WARN("File System: INIReader::GetFloat() called on a key not present in the INI file.  "
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 		return std::pair(false, defaultVal);
 	}
+
+	if (m_data[section][key].size() > 1)
+	{
+		EP_WARN("File System: INIReader::GetFloat() called on a key with multiple values.  "
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+
+	return INIStringToFloat(m_data[section][key].front());
 }
 
 
 std::pair<bool, std::vector<float>> File::INIReader::GetMultiFloat(HashName section, HashName key)
 {
 	std::pair<bool, std::vector<float>> returnVal;
+	returnVal.first = true;
 
-	if (m_data.count(std::pair(section, key)))
+	std::pair<bool, float> converted;
+	for (std::string& strIt : m_data[section][key])
 	{
-		returnVal.first = true;
-
-		std::pair<bool, float> converted;
-		for (std::string& strIt : m_data[std::pair(section, key)])
+		converted = INIStringToFloat(strIt);
+		if (converted.first)
 		{
-			converted = INIStringToFloat(strIt);
-			if (converted.first)
-			{
-				returnVal.second.push_back(converted.second);
-			}
-			else
-			{
-				EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-				returnVal.first = false;
-				continue;
-			}
+			returnVal.second.push_back(converted.second);
+		}
+		else
+		{
+			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
+					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+			returnVal.first = false;
+			continue;
 		}
 	}
 
@@ -818,36 +803,31 @@ std::pair<bool, std::vector<float>> File::INIReader::GetMultiFloat(HashName sect
 
 std::pair<bool, std::string> File::INIReader::GetStr(HashName section, HashName key, std::string defaultVal)
 {
-	if (m_data.count(std::pair(section, key)))
+	if (m_data[section][key].size() == 0)
 	{
-		if (m_data[std::pair(section, key)].size() > 1)
-		{
-			EP_WARN("File System: INIReader::GetStr() called on a key with multiple values.  "
-					"Only the first value was returned.");
-		}
-		return std::pair(true, m_data[std::pair(section, key)].front());
-	}
-	else
-	{
-		EP_WARN("File System: Expected INI key missing during file parse.  Default value returned."
-				"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		EP_WARN("File System: INIReader::GetStr() called on a key not present in the INI file.  "
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 		return std::pair(false, defaultVal);
 	}
+
+	if (m_data[section][key].size() > 1)
+	{
+		EP_WARN("File System: INIReader::GetStr() called on a key with multiple values.  "
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+
+	return std::pair(true, m_data[section][key].front());
 }
 
 
 std::pair<bool, std::vector<std::string>> File::INIReader::GetMultiStr(HashName section, HashName key)
 {
 	std::pair<bool, std::vector<std::string>> returnVal;
+	returnVal.first = true;
 
-	if (m_data.count(std::pair(section, key)))
+	for (std::string& strIt : m_data[section][key])
 	{
-		returnVal.first = true;
-
-		for (std::string& strIt : m_data[std::pair(section, key)])
-		{
-			returnVal.second.push_back(strIt);
-		}
+		returnVal.second.push_back(strIt);
 	}
 
 	return returnVal;
@@ -856,25 +836,20 @@ std::pair<bool, std::vector<std::string>> File::INIReader::GetMultiStr(HashName 
 
 std::pair<bool, std::unordered_map<HashName, std::string>> File::INIReader::GetDictionary(HashName section, HashName key)
 {
-	if (m_data.count(std::pair(section, key)))
+	if (m_data[section][key].size() == 0)
 	{
-		if (m_data[std::pair(section, key)].size() > 1)
-		{
-			EP_WARN("File System: INIReader::GetDictionary() called on a key with multiple values.  "
-					"Only the first value was returned.");
-		}
-
-		std::string& str = m_data[std::pair(section, key)].front();
-
-		return INIStringToDictionary(str);
-	}
-	else
-	{
-		// The requested key is not present in the section.
-		EP_WARN("File System: Expected INI key missing during file parse.  Empty unordered_map returned."
-				"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		EP_WARN("File System: INIReader::GetDictionary() called on a key not present in the INI file.  "
+				"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 		return std::pair<bool, std::unordered_map<HashName, std::string>>(false, std::unordered_map<HashName, std::string>());
 	}
+	
+	if (m_data[section][key].size() > 1)
+	{
+		EP_WARN("File System: INIReader::GetDictionary() called on a key with multiple values.  "
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+
+	return INIStringToDictionary(m_data[section][key].front());
 }
 
 
@@ -883,24 +858,19 @@ std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>> File::IN
 	std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>> returnVal;
 	returnVal.first = true;
 
-	if (m_data.count(std::pair(section, key)))
+	std::pair<bool, std::unordered_map<HashName, std::string>> dict;
+	for (const std::string& str : m_data[section][key])
 	{
-		std::pair<bool, std::unordered_map<HashName, std::string>> dict;
+		dict = INIStringToDictionary(str);
 
-		for (const std::string& str : m_data[std::pair(section, key)])
+		if (!dict.first)
 		{
-			dict = INIStringToDictionary(str);
-
-			if (!dict.first)
-			{
-				EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-				//returnVal.first = false;
-			}
-			else
-			{
-				returnVal.second.push_back(dict.second);
-			}
+			EP_WARN("File System: A multi-key value was discarded due to a parsing issue."
+					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
+		}
+		else
+		{
+			returnVal.second.push_back(dict.second);
 		}
 	}
 
