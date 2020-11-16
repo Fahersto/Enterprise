@@ -99,7 +99,7 @@ public:
         EP_VERIFY(RegisterClassEx(&wc)); //TODO: Use EP_ASSERT_CODE here to call GetLastError().
 
         // Calculate initial window size.
-        RECT wr = { 0, 0, m_Settings.Width, m_Settings.Height };
+        RECT wr = { 0, 0, (LONG)m_Settings.Width, (LONG)m_Settings.Height };
         DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;    // Window style
         AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
         
