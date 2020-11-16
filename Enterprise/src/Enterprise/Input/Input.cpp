@@ -1,6 +1,6 @@
 #include "EP_PCH.h"
 #include "Input.h"
-#include "Enterprise\File\File.h"
+#include "Enterprise/File/File.h"
 #include "InputEvents.h"
 
 #define EP_INPUT_BLOCKER uint_fast8_t(-1)
@@ -121,7 +121,7 @@ Input::PlayerID Input::UnassignController(ControllerID controller)
 static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::string& str)
 {
 	#define STRTOCONTROLIDIMPL(control) \
-	if (str == #control) return std::pair(true, Enterprise::ControlID:: ## control)
+	if (str == #control) return std::pair(true, Enterprise::ControlID:: control)
 
 	STRTOCONTROLIDIMPL(GP_Dpad_Up);
 	STRTOCONTROLIDIMPL(GP_Dpad_Down);
@@ -407,7 +407,7 @@ void Input::BindAction(void(*callbackPtr)(PlayerID player),
 	}
 
 	BindingStack.emplace_back(
-		Binding{ callbackPtr, contextName,
+		Binding{ (void*)callbackPtr, contextName,
 		actionName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		EP_PLAYERID_ALL, 0, isBlocking });
 }
@@ -426,7 +426,7 @@ void Input::BindActionForPlayerID(void(*callbackPtr)(PlayerID player),
 	}
 
 	BindingStack.emplace_back(
-		Binding{ callbackPtr, contextName,
+		Binding{ (void*)callbackPtr, contextName,
 		actionName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		player, 0, isBlocking });
 }
@@ -953,9 +953,11 @@ void Input::Init()
 void Input::Update()
 {
 	// Clear player blockers
-	for (auto& bBlocked : isPlayerInputBlocked)
+	for (auto bBlocked = isPlayerInputBlocked.begin();
+		 bBlocked != isPlayerInputBlocked.end();
+		 ++bBlocked)
 	{
-		bBlocked = false;
+		*bBlocked = false;
 	}
 
 	// Clear keyboard blockers

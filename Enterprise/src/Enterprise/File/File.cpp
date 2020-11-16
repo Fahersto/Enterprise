@@ -6,7 +6,13 @@ using Enterprise::File;
 bool File::Exists(const std::string& path)
 {
 	FILE* handle;
-	errno_t errorcode = fopen_s(&handle, path.c_str(), "r");
+	errno_t errorcode;
+
+#ifdef _WIN32
+	errorcode = fopen_s(&handle, path.c_str(), "r");
+#else
+	handle = fopen(path.c_str(), "r");
+#endif
 
 	if (errorcode == 0)
 	{
@@ -33,7 +39,14 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		this->Close();
 	}
 
-	errno_t err = fopen_s(&m_handle, path.c_str(), "r");
+	errno_t err;
+
+#ifdef _WIN32
+	err = fopen_s(&m_handle, path.c_str(), "r");
+#else
+	m_handle = fopen(path.c_str(), "r");
+	err = errno;
+#endif
 
 	if (err == 0)
 	{

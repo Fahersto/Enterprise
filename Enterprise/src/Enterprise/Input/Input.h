@@ -80,7 +80,7 @@ public:
 				 HashPack...axisName)
 	{
 		BindingStack.emplace_back(
-			Binding{ callbackPtr, contextName,
+			Binding{ (void*)callbackPtr, contextName,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 			EP_PLAYERID_ALL, sizeof...(HashPack), isBlocking });
 
@@ -115,7 +115,7 @@ public:
 						  HashPack...axisName)
 	{
 		BindingStack.emplace_back(
-			Binding{ callbackPtr, contextName,
+			Binding{ (void*)callbackPtr, contextName,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 			player, sizeof...(HashPack), isBlocking });
 
