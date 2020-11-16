@@ -41,33 +41,27 @@ public:
 	/// @param contextname Name of the context.
 	static void LoadContextsFromFile(std::string filename);
 
-	/// Bind a callback function to an Action for all players.
-	/// @param contextName The hashed name of the input context to which this Action belongs.
-	/// @param actionName actionName The hashed name of the Action to bind.
+	/// Bind a callback function to an input Action.
 	/// @param callbackPtr callbackPtr Pointer to the callback function.
-	/// @param isBlocking Whether this control should "pass through" to lower bindings.
+	/// @param player The ID of the player whose Action will trigger this binding.
+	/// @note @c player can be set to @c EP_PLAYERID_ALL to bind all PlayerIDs at once.
+	/// @param isBlocking Passing "true" will block this binding's ControlIDs from being used in lower bindings.
+	/// @param contextName The hashed name of the context this Action is a part of.
+	/// @param actionName actionName The hashed name of the Action to bind.
 	static void BindAction(void(*callbackPtr)(PlayerID player),
-						   bool isBlocking,
-						   HashName contextName,
-						   HashName actionName);
-	/// Bind a callback function to an Action for a specific player.
-	/// @param contextName The hashed name of the input context to which this Action belongs.
-	/// @param actionName actionName The hashed name of the Action to bind.
-	/// @param player The player whose action can trigger this binding.
-	/// @param callbackPtr callbackPtr Pointer to the callback function.
-	/// @param isBlocking Whether this control should "pass through" to lower bindings.
-	static void BindActionForPlayerID(void(*callbackPtr)(PlayerID player),
 									PlayerID player,
 									bool isBlocking,
 									HashName contextName,
 									HashName actionName);
 
-	/// Bind a callback function to one or more Axes for all players.
+	/// Bind a callback function to one or more input Axes.
 	/// @tparam ...FloatPack A variable number of floats.
 	/// @tparam ...HashPack A variable number of HashNames.
-	/// @param callbackPtr Pointer to the callback function.
-	/// @param isBlocking Whether these controls should "pass through" to lower bindings.
-	/// @param contextName The hashed name of the input context to which these Axes belong.
+	/// @param callbackPtr callbackPtr Pointer to the callback function.
+	/// @param player The ID of the player whose Axes will be reported.
+	/// @note @c player can be set to @c EP_PLAYERID_ALL to bind all PlayerIDs at once.
+	/// @param isBlocking Passing "true" will block this binding's ControlIDs from being used in lower bindings.
+	/// @param contextName The hashed name of the context these Axes are a part of.
 	/// @param ...axisName The hashed name of each Axis to bind.
 	template <typename ... FloatPack, typename ... HashPack>
 	static std::enable_if_t<is_all_same<float, FloatPack...>::value&&
@@ -75,46 +69,10 @@ public:
 		sizeof...(FloatPack) == sizeof...(HashPack),
 		void>
 		BindAxes(void(*callbackPtr)(PlayerID, FloatPack...),
+				 PlayerID player,
 				 bool isBlocking,
 				 HashName contextName,
 				 HashPack...axisName)
-	{
-		BindingStack.emplace_back(
-			Binding{ (void*)callbackPtr, contextName,
-			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-			EP_PLAYERID_ALL, sizeof...(HashPack), isBlocking });
-
-		std::array<HashName, sizeof...(HashPack)> axesNames{ axisName... };
-		for (int i = 0; i < sizeof...(HashPack); i++)
-		{
-			BindingStack.back().ActionOrAxes[i] = axesNames[i];
-
-			if (AxisMap[contextName][axesNames[i]].size() == 0)
-			{
-				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings "
-						 "and will not reflect player input."
-						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
-			}
-		}
-	}
-	/// Bind a callback function to one or more Axes for all players.
-	/// @tparam ...FloatPack A variable number of floats.
-	/// @tparam ...HashPack A variable number of HashNames.
-	/// @param callbackPtr Pointer to the callback function
-	/// @param player The player for whom this binding will report.
-	/// @param isBlocking Whether these controls should "pass through" to lower bindings
-	/// @param contextName The hashed name of the input context to which these Axes belong.
-	/// @param ...axisName The hashed name of each Axis to bind.
-	template <typename ... FloatPack, typename ... HashPack>
-	static std::enable_if_t<is_all_same<float, FloatPack...>::value&&
-		is_all_same<HashName, HashPack...>::value &&
-		sizeof...(FloatPack) == sizeof...(HashPack),
-		void>
-		BindAxesForPlayerID(void(*callbackPtr)(PlayerID, FloatPack...),
-						  PlayerID player,
-						  bool isBlocking,
-						  HashName contextName,
-						  HashPack...axisName)
 	{
 		BindingStack.emplace_back(
 			Binding{ (void*)callbackPtr, contextName,

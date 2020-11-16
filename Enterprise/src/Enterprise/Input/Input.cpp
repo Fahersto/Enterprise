@@ -396,24 +396,6 @@ void Input::LoadContextsFromFile(std::string filename)
 
 
 void Input::BindAction(void(*callbackPtr)(PlayerID player),
-					   bool isBlocking,
-					   HashName contextName,
-					   HashName actionName)
-{
-	if (ActionMap[contextName][actionName].size() == 0)
-	{
-		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
-				 "and will never trigger.  Context Name: {}", SN(actionName), SN(contextName));
-	}
-
-	BindingStack.emplace_back(
-		Binding{ (void*)callbackPtr, contextName,
-		actionName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		EP_PLAYERID_ALL, 0, isBlocking });
-}
-
-
-void Input::BindActionForPlayerID(void(*callbackPtr)(PlayerID player),
 								PlayerID player,
 								bool isBlocking,
 								HashName contextName,
