@@ -89,7 +89,7 @@ void Enterprise::Input::GetRawInput()
                     gpBuffer.emplace_back();
                 }
 
-                EP_TRACE("Controller connected!");
+                EP_INFO("Controller connected!  ControllerID: {}", xinputToGamepadID[i] + 1);
                 Events::Dispatch(EventTypes::ControllerWake, ControllerID(xinputToGamepadID[i] + 1));
             }
 
@@ -237,9 +237,9 @@ void Enterprise::Input::GetRawInput()
 
                 PlayerID player = UnassignController(ControllerID(xinputToGamepadID[i] + 1));
                 gpBuffer[xinputToGamepadID[i]] = GamePadBuffer();
+                EP_TRACE("Controller disconnected!  ControllerID: {}", xinputToGamepadID[i] + 1);
 
                 Events::Dispatch(EventTypes::ControllerDisconnect, player);
-                EP_TRACE("Controller disconnected!");
 				
                 xinputToGamepadID[i] = EP_CONTROLLERID_NULL;
             }
