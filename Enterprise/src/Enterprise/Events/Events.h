@@ -237,15 +237,15 @@ public:
 
     /// Extract the data payload from a DataEvent.
     /// @tparam T The type of the data payload.
-    /// @param e The event.
+    /// @param e Reference to the Event to unpack.
     /// @return The data payload.
     /// @note C++17's structured bindings are useful for extracting data from tuples, as in:
     /// @code auto[x, y] \= Events\::Unpack&lt;std\::pair&lt;int, int&gt;&gt;(e); @endcode
     template <typename T>
-    static T& Unpack(Enterprise::Events::Event& e) {
-        // TODO: Find a way to check this at compile time
+    static T& Unpack(Enterprise::Events::Event& e) 
+    {
         Enterprise::Events::DataEvent<T>* converted = dynamic_cast<Enterprise::Events::DataEvent<T>*>(&e);
-        EP_ASSERT(converted); //TODO: Add helpful message here.
+        EP_ASSERTF(converted, "Events System: Unpack() cannot cast Event to requested DataEvent type.");
         return converted->Data();
     }
 
