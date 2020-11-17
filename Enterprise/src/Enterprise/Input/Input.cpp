@@ -289,15 +289,15 @@ void Input::LoadContextsFromFile(std::string filename)
 
 	for (HashName contextName : ini.Sections())
 	{
-		std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>> mappings =
+		std::vector<std::unordered_map<HashName, std::string>> mappings =
 			ini.GetMultiDictionary(contextName, HN("ActionMapping"));
 
 		bool hasActionMappings = false;
 		bool hasAxisMappings = false;
 
-		if (mappings.first)
+		if (!mappings.empty())
 		{
-			for (std::unordered_map<HashName, std::string>& map : mappings.second)
+			for (std::unordered_map<HashName, std::string>& map : mappings)
 			{
 				if (map.count(HN("name")) &&
 					map.count(HN("control")) &&
@@ -348,9 +348,9 @@ void Input::LoadContextsFromFile(std::string filename)
 		}
 
 		mappings = ini.GetMultiDictionary(contextName, HN("AxisMapping"));
-		if (mappings.first)
+		if (!mappings.empty())
 		{
-			for (std::unordered_map<HashName, std::string>& map : mappings.second)
+			for (std::unordered_map<HashName, std::string>& map : mappings)
 			{
 				if (map.count(HN("name")) &&
 					map.count(HN("control")) &&

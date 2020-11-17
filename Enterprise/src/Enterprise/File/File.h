@@ -79,11 +79,10 @@ public:
 	/// @param str The string to convert.
 	/// @return First: 'true' if conversion was successful. Second: The converted value.
 	static std::pair<bool, float> INIStringToFloat(const std::string& str);
-	/// Converts a string from INI value format to an std::unordered_map.
+	/// Converts a string from INI value format to a dictionary structure.
 	/// @param str The string to convert.
-	/// @return First: 'true' if conversion was successful. Second: The converted dictionary.
-	static std::pair<bool, std::unordered_map<HashName, std::string>>
-		INIStringToDictionary(const std::string& str);
+	/// @return The converted dictionary.  If the conversion fails, this will be empty.
+	static std::unordered_map<HashName, std::string> INIStringToDictionary(const std::string& str);
 
 
 	/// A structure containing the loaded contents of an INI file, and methods for extracting that data.
@@ -114,61 +113,61 @@ public:
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: Retrieved value.
-		std::pair<bool, bool>				GetBool(HashName section, HashName key, bool defaultVal);
+		bool				GetBool(HashName section, HashName key, bool defaultVal);
 		/// Get the list of values of a given section and key as booleans.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @return First: 'true' if get was successful. Second: List of retrieved values.
-		std::pair<bool, std::vector<bool>>	GetMultiBool(HashName section, HashName key);
+		std::vector<bool>	GetMultiBool(HashName section, HashName key);
 
 		/// Get a value from a given section and key as an int.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: Retrieved value.
-		std::pair<bool, int>				GetInt(HashName section, HashName key, int defaultVal);
+		int					GetInt(HashName section, HashName key, int defaultVal);
 		/// Get the list of values of a given section and key as ints.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @return First: 'true' if get was successful. Second: List of retrieved values.
-		std::pair<bool, std::vector<int>>	GetMultiInt(HashName section, HashName key);
+		std::vector<int>	GetMultiInt(HashName section, HashName key);
 
 		/// Get a value from a given section and key as a float.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: Retrieved value.
-		std::pair<bool, float>				GetFloat(HashName section, HashName key, float defaultVal);
+		float				GetFloat(HashName section, HashName key, float defaultVal);
 		/// Get the list of values of a given section and key as floats.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @return First: 'true' if get was successful. Second: List of retrieved values.
-		std::pair<bool, std::vector<float>>	GetMultiFloat(HashName section, HashName key);
+		std::vector<float>	GetMultiFloat(HashName section, HashName key);
 
 		/// Get a value from a given section and key as a string.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: Retrieved value.
-		std::pair<bool, std::string>				GetStr(HashName section, HashName key, std::string defaultVal);
+		std::string					GetStr(HashName section, HashName key, std::string defaultVal);
 		/// Get the list of values of a given section and key as strings.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @return First: 'true' if get was successful. Second: List of retrieved values.
-		std::pair<bool, std::vector<std::string>>	GetMultiStr(HashName section, HashName key);
+		std::vector<std::string>	GetMultiStr(HashName section, HashName key);
 
 		/// Get a value from a given section and key as an std::unordered_map.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: The value, converted to an std::unordered_map.
-		std::pair<bool, std::unordered_map<HashName, std::string>>				GetDictionary(HashName section, HashName key);
+		std::unordered_map<HashName, std::string>				GetDictionary(HashName section, HashName key);
 		/// Get the list of values of a given section and key as std::unordered_maps.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
 		/// @param defaultVal If the key fails to load or parse, the value to return.
 		/// @return First: 'true' if get was successful. Second: List of retrieved values, converted to std::unordered_maps.
-		std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>>	GetMultiDictionary(HashName section, HashName key);
+		std::vector<std::unordered_map<HashName, std::string>>	GetMultiDictionary(HashName section, HashName key);
 
 	private:
 		// A list of the HashNames for all sections represented by this INIReader.

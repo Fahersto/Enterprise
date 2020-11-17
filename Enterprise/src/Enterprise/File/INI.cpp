@@ -35,7 +35,7 @@ std::pair<bool, bool> File::INIStringToBool(const std::string& str)
 		{
 			if (reducedStr.empty())
 			{
-				EP_WARN("File System: Unable to convert empty value to type 'bool'.");
+				EP_WARN("File System: Unable to convert empty INI value to type 'bool'.");
 			}
 			else
 			{
@@ -96,7 +96,7 @@ std::pair<bool, int> File::INIStringToInt(const std::string& str)
 	{
 		if (str.empty())
 		{
-			EP_WARN("File System: Unable to convert empty value to type 'int'.");
+			EP_WARN("File System: Unable to convert empty INI value to type 'int'.");
 		}
 		else
 		{
@@ -135,7 +135,7 @@ std::pair<bool, float> File::INIStringToFloat(const std::string& str)
 	{
 		if (str.empty())
 		{
-			EP_WARN("File System: Unable to convert empty value to type 'float'.");
+			EP_WARN("File System: Unable to convert empty INI value to type 'float'.");
 		}
 		else
 		{
@@ -149,11 +149,9 @@ std::pair<bool, float> File::INIStringToFloat(const std::string& str)
 }
 
 
-std::pair<bool, std::unordered_map<HashName, std::string>>
-File::INIStringToDictionary(const std::string& str)
+std::unordered_map<HashName, std::string> File::INIStringToDictionary(const std::string& str)
 {
-	std::pair<bool, std::unordered_map<HashName, std::string>> returnVal;
-	returnVal.first = true;
+	std::unordered_map<HashName, std::string> returnVal;
 
 	size_t pos = str.find_first_not_of(' ');
 	if (pos != std::string::npos)
@@ -171,17 +169,17 @@ File::INIStringToDictionary(const std::string& str)
 				if (pos == std::string::npos)
 				{
 					// Line cuts off before expected subkey
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 				else if (str.at(pos) == ';')
 				{
 					// Encountered comment before expected subkey.
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 
@@ -189,17 +187,17 @@ File::INIStringToDictionary(const std::string& str)
 				if (pos2 == std::string::npos)
 				{
 					// No characters follow subkey on line
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 				else if (str.at(pos2) == ';')
 				{
 					// The subkey was immediately followed by a comment.
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 
@@ -210,17 +208,17 @@ File::INIStringToDictionary(const std::string& str)
 				if (pos == std::string::npos)
 				{
 					// Line ends bfore '='
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 				else if (str.at(pos) != '=')
 				{
 					// Second identifier or ';' before '='
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 
@@ -229,17 +227,17 @@ File::INIStringToDictionary(const std::string& str)
 				if (pos == std::string::npos)
 				{
 					// Line ends after '='
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 				else if (str.at(pos) == ';')
 				{
 					// Comment after '='.
-					EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+					EP_WARN("File System: INI value could not be converted to type "
+							"'std::unordered_map'.  Empty dictionary returned."
 							"Value: \"{}\"", str);
-					returnVal.first = false;
 					break;
 				}
 				else if (str.at(pos) == '\"')
@@ -249,22 +247,22 @@ File::INIStringToDictionary(const std::string& str)
 					if (pos2 == std::string::npos)
 					{
 						// Line ends before closing quote
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 
-					returnVal.second[subkey] = str.substr(pos + 1, pos2 - pos - 1);
+					returnVal[subkey] = str.substr(pos + 1, pos2 - pos - 1);
 
 					// Look for comma or ')'.
 					pos = str.find_first_not_of(' ', pos2 + 1);
 					if (pos == std::string::npos)
 					{
 						// Line ends before ',' or ')'.
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 					else if (str.at(pos) == ')')
@@ -301,9 +299,9 @@ File::INIStringToDictionary(const std::string& str)
 						if (pos >= str.size())
 						{
 							// There's no more characters after the comma.
-							EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+							EP_WARN("File System: INI value could not be converted to type "
+									"'std::unordered_map'.  Empty dictionary returned."
 									"Value: \"{}\"", str);
-							returnVal.first = false;
 							break;
 						}
 
@@ -313,9 +311,9 @@ File::INIStringToDictionary(const std::string& str)
 					else
 					{
 						// Subvalue not followed by ')' or ','.
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 				}
@@ -326,21 +324,21 @@ File::INIStringToDictionary(const std::string& str)
 					if (pos2 == std::string::npos)
 					{
 						// No characters follow the value.
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 					else if (pos == pos2)
 					{
 						// The subvalue is missing.
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 
-					returnVal.second[subkey] = str.substr(pos, pos2 - pos);
+					returnVal[subkey] = str.substr(pos, pos2 - pos);
 
 					pos = str.find_first_not_of(' ', pos2);
 					if (str.at(pos) == ')')
@@ -358,8 +356,8 @@ File::INIStringToDictionary(const std::string& str)
 							{
 								// There are unexpected characters on the line following the dictionary value.
 								// Technically, we can still use this dictionary, so post a warning, but still return the value.
-								EP_WARN("File System: Unexpected characters following complete dictionary value.  "
-										"Dictionary value still returned."
+								EP_WARN("File System: Unexpected characters following valid dictionary value.  "
+										"Dictionary value was returned."
 										"Value: \"{}\"", str);
 								break;
 							}
@@ -371,8 +369,10 @@ File::INIStringToDictionary(const std::string& str)
 						pos++;
 						if (pos >= str.size())
 						{
-							// There's no more characters after the comma.
-							returnVal.first = false;
+							// There are no other characters after the comma.
+							EP_WARN("File System: INI value could not be converted to type "
+									"'std::unordered_map'.  Empty dictionary returned."
+									"Value: \"{}\"", str);
 							break;
 						}
 
@@ -382,9 +382,9 @@ File::INIStringToDictionary(const std::string& str)
 					else
 					{
 						// Subvalue not followed by ')' or ','.
-						EP_WARN("File System: Invalid dictionary value.  Empty unordered_map returned."
+						EP_WARN("File System: INI value could not be converted to type "
+								"'std::unordered_map'.  Empty dictionary returned."
 								"Value: \"{}\"", str);
-						returnVal.first = false;
 						break;
 					}
 				}
@@ -393,16 +393,15 @@ File::INIStringToDictionary(const std::string& str)
 		else
 		{
 			// Invalid, doesn't start with '('
-			EP_WARN("File System: INI value string didn't parse correctly to type 'unordered_map'.  "
-					"Empty unordered_map returned.  Value: \"{}\"", str);
-			returnVal.first = false;
+			EP_WARN("File System: INI value could not be converted to type 'std::unordered_map'.  "
+					"Empty dictionary returned.  Value: \"{}\"", str);
 		}
 	}
 	else
 	{
 		// Value string is empty
-		EP_WARN("File System: Unable to convert empty value to type 'TYPE'.  Empty unordered_map returned.");
-		returnVal.first = false;
+		EP_WARN("File System: Empty INI value could not be converted to type "
+				"'std::unordered_map'.  Empty dictionary returned.");
 	}
 
 	return returnVal;
@@ -450,7 +449,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 							if (line.at(pos3) != ';')
 							{
 								EP_WARN("File System: Invalid characters encountered after section name in INI file \"{}\"."
-								"  Characters after \']\' were discarded.  Line:{}", path, ini.CurrentLine());
+								"  Characters after ']' were discarded.  Line:{}", path, ini.CurrentLine());
 							}
 						}
 					}
@@ -666,44 +665,60 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 }
 
 
-std::pair<bool, bool> File::INIReader::GetBool(HashName section, HashName key, bool defaultVal)
+bool File::INIReader::GetBool(HashName section, HashName key, bool defaultVal)
 {
 	if (m_data[section][key].size() == 0)
 	{
-		EP_WARN("File System: INIReader::GetBool() called on a key not present in the INI file.  "
+		EP_WARN("File System: INIReader::GetBool() called on a key not loaded from the INI file.  "
 				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-		return std::pair(false, defaultVal);
+		return defaultVal;
 	}
-
-	if (m_data[section][key].size() > 1)
+	else
 	{
-		EP_WARN("File System: INIReader::GetBool() called on a key with multiple values.  "
-				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-	}
+		std::pair<bool, bool> converted = INIStringToBool(m_data[section][key].front());
 
-	return INIStringToBool(m_data[section][key].front());
+		if (!converted.first)
+		{
+			EP_WARN("File System: An INI bool value was discarded due to a conversion issue.  "
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+
+			return defaultVal;
+		}
+		else if (m_data[section][key].size() > 1)
+		{
+			EP_WARN("File System: INIReader::GetBool() called on a key with multiple values.  "
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		}
+
+		return converted.second;
+	}
 }
 
 
-std::pair<bool, std::vector<bool>> File::INIReader::GetMultiBool(HashName section, HashName key)
+std::vector<bool> File::INIReader::GetMultiBool(HashName section, HashName key)
 {
-	std::pair<bool, std::vector<bool>> returnVal;
-	returnVal.first = true;
+	std::vector<bool> returnVal;
 
-	std::pair<bool, bool> converted;
-	for (std::string& strIt : m_data[section][key])
+	if (m_data[section][key].size() == 0)
 	{
-		converted = INIStringToBool(strIt);
-		if (converted.first)
+		EP_WARN("File System: INIReader::GetMultiBool() called on a key not loaded from the INI file.  "
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+	else
+	{
+		std::pair<bool, bool> converted;
+		for (std::string& strIt : m_data[section][key])
 		{
-			returnVal.second.push_back(converted.second);
-		}
-		else
-		{
-			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-			returnVal.first = false;
-			continue;
+			converted = INIStringToBool(strIt);
+			if (converted.first)
+			{
+				returnVal.push_back(converted.second);
+			}
+			else
+			{
+				EP_WARN("File System: An INI bool value was discarded due to a conversion issue."
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+			}
 		}
 	}
 
@@ -711,44 +726,63 @@ std::pair<bool, std::vector<bool>> File::INIReader::GetMultiBool(HashName sectio
 }
 
 
-std::pair<bool, int> File::INIReader::GetInt(HashName section, HashName key, int defaultVal)
+int File::INIReader::GetInt(HashName section, HashName key, int defaultVal)
 {
 	if (m_data[section][key].size() == 0)
 	{
-		EP_WARN("File System: INIReader::GetInt() called on a key not present in the INI file.  "
+		EP_WARN("File System: INIReader::GetInt() called on a key not loaded from the INI file.  "
 				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-		return std::pair(false, defaultVal);
-	}
 
-	if (m_data[section][key].size() > 1)
+		return defaultVal;
+	}
+	else
 	{
-		EP_WARN("File System: INIReader::GetInt() called on a key with multiple values.  "
-				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-	}
+		std::pair<bool, int> converted = INIStringToInt(m_data[section][key].front());
 
-	return INIStringToInt(m_data[section][key].front());
+		if (!converted.first)
+		{
+			EP_WARN("File System: An INI int value was discarded due to a conversion issue.  "
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+
+			return defaultVal;
+		}
+		else if (m_data[section][key].size() > 1)
+		{
+			EP_WARN("File System: INIReader::GetInt() called on a key with multiple values.  "
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		}
+
+		return converted.second;
+	}
 }
 
 
-std::pair<bool, std::vector<int>> File::INIReader::GetMultiInt(HashName section, HashName key)
+std::vector<int> File::INIReader::GetMultiInt(HashName section, HashName key)
 {
-	std::pair<bool, std::vector<int>> returnVal;
-	returnVal.first = true;
+	std::vector<int> returnVal;
 
-	std::pair<bool, int> converted;
-	for (std::string& strIt : m_data[section][key])
+	if (m_data[section][key].size() == 0)
 	{
-		converted = INIStringToInt(strIt);
-		if (converted.first)
+		EP_WARN("File System: INIReader::GetMultiInt() called on a key not loaded from the INI file.  "
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+	else
+	{
+		std::pair<bool, int> converted;
+
+		for (std::string& strIt : m_data[section][key])
 		{
-			returnVal.second.push_back(converted.second);
-		}
-		else
-		{
-			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-			returnVal.first = false;
-			continue;
+			converted = INIStringToInt(strIt);
+
+			if (converted.first)
+			{
+				returnVal.push_back(converted.second);
+			}
+			else
+			{
+				EP_WARN("File System: An INI int value was discarded due to a conversion issue."
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+			}
 		}
 	}
 
@@ -756,44 +790,60 @@ std::pair<bool, std::vector<int>> File::INIReader::GetMultiInt(HashName section,
 }
 
 
-std::pair<bool, float> File::INIReader::GetFloat(HashName section, HashName key, float defaultVal)
+float File::INIReader::GetFloat(HashName section, HashName key, float defaultVal)
 {
 	if (m_data[section][key].size() == 0)
 	{
-		EP_WARN("File System: INIReader::GetFloat() called on a key not present in the INI file.  "
+		EP_WARN("File System: INIReader::GetFloat() called on a key not loaded from the INI file.  "
 				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-		return std::pair(false, defaultVal);
+		return defaultVal;
 	}
-
-	if (m_data[section][key].size() > 1)
+	else
 	{
-		EP_WARN("File System: INIReader::GetFloat() called on a key with multiple values.  "
-				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-	}
+		std::pair<bool, float> converted = INIStringToFloat(m_data[section][key].front());
 
-	return INIStringToFloat(m_data[section][key].front());
+		if (!converted.first)
+		{
+			EP_WARN("File System: An INI float value was discarded due to a conversion issue.  "
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+			return defaultVal;
+		}
+		else if (m_data[section][key].size() > 1)
+		{
+			EP_WARN("File System: INIReader::GetFloat() called on a key with multiple values.  "
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		}
+
+		return converted.second;
+	}
 }
 
 
-std::pair<bool, std::vector<float>> File::INIReader::GetMultiFloat(HashName section, HashName key)
+std::vector<float> File::INIReader::GetMultiFloat(HashName section, HashName key)
 {
-	std::pair<bool, std::vector<float>> returnVal;
-	returnVal.first = true;
-
-	std::pair<bool, float> converted;
-	for (std::string& strIt : m_data[section][key])
+	std::vector<float> returnVal;
+	
+	if (m_data[section][key].size() == 0)
 	{
-		converted = INIStringToFloat(strIt);
-		if (converted.first)
+		EP_WARN("File System: INIReader::GetMultiFloat() called on a key not loaded from the INI file.  "
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+	else
+	{
+		std::pair<bool, float> converted;
+
+		for (std::string& strIt : m_data[section][key])
 		{
-			returnVal.second.push_back(converted.second);
-		}
-		else
-		{
-			EP_WARN("File System: A multi-key value was discarded due to conversion failure."
-					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-			returnVal.first = false;
-			continue;
+			converted = INIStringToFloat(strIt);
+			if (converted.first)
+			{
+				returnVal.push_back(converted.second);
+			}
+			else
+			{
+				EP_WARN("File System: An INI float value was discarded due to a conversion issue."
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+			}
 		}
 	}
 
@@ -801,76 +851,100 @@ std::pair<bool, std::vector<float>> File::INIReader::GetMultiFloat(HashName sect
 }
 
 
-std::pair<bool, std::string> File::INIReader::GetStr(HashName section, HashName key, std::string defaultVal)
+std::string File::INIReader::GetStr(HashName section, HashName key, std::string defaultVal)
 {
 	if (m_data[section][key].size() == 0)
 	{
-		EP_WARN("File System: INIReader::GetStr() called on a key not present in the INI file.  "
+		EP_WARN("File System: INIReader::GetStr() called on a key not loaded from the INI file.  "
 				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-		return std::pair(false, defaultVal);
+		return defaultVal;
 	}
-
-	if (m_data[section][key].size() > 1)
+	else if (m_data[section][key].size() > 1)
 	{
 		EP_WARN("File System: INIReader::GetStr() called on a key with multiple values.  "
 				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
 	}
 
-	return std::pair(true, m_data[section][key].front());
+	return m_data[section][key].front();
 }
 
 
-std::pair<bool, std::vector<std::string>> File::INIReader::GetMultiStr(HashName section, HashName key)
+std::vector<std::string> File::INIReader::GetMultiStr(HashName section, HashName key)
 {
-	std::pair<bool, std::vector<std::string>> returnVal;
-	returnVal.first = true;
+	std::vector<std::string> returnVal;
 
-	for (std::string& strIt : m_data[section][key])
+	if (m_data[section][key].size() == 0)
 	{
-		returnVal.second.push_back(strIt);
+		EP_WARN("File System: INIReader::GetMultiStr() called on a key not loaded from the INI file.  "
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+	else
+	{
+		for (std::string& strIt : m_data[section][key])
+		{
+			returnVal.push_back(strIt);
+		}
 	}
 
 	return returnVal;
 }
 
 
-std::pair<bool, std::unordered_map<HashName, std::string>> File::INIReader::GetDictionary(HashName section, HashName key)
+std::unordered_map<HashName, std::string> File::INIReader::GetDictionary(HashName section, HashName key)
 {
+	std::unordered_map<HashName, std::string> returnVal;
+
 	if (m_data[section][key].size() == 0)
 	{
-		EP_WARN("File System: INIReader::GetDictionary() called on a key not present in the INI file.  "
+		EP_WARN("File System: INIReader::GetDictionary() called on a key not loaded from the INI file.  "
 				"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
-		return std::pair<bool, std::unordered_map<HashName, std::string>>(false, std::unordered_map<HashName, std::string>());
 	}
-	
-	if (m_data[section][key].size() > 1)
+	else
 	{
-		EP_WARN("File System: INIReader::GetDictionary() called on a key with multiple values.  "
-				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		returnVal = INIStringToDictionary(m_data[section][key].front());
+
+		if (returnVal.empty())
+		{
+			EP_WARN("File System: An INI dictionary value was discarded due to a parsing issue.  "
+					"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		}
+		else if (m_data[section][key].size() > 1)
+		{
+			EP_WARN("File System: INIReader::GetDictionary() called on a key with multiple values.  "
+					"Only the first value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+		}
 	}
 
-	return INIStringToDictionary(m_data[section][key].front());
+	return returnVal;
 }
 
 
-std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>> File::INIReader::GetMultiDictionary(HashName section, HashName key)
+std::vector<std::unordered_map<HashName, std::string>> File::INIReader::GetMultiDictionary(HashName section, HashName key)
 {
-	std::pair<bool, std::vector<std::unordered_map<HashName, std::string>>> returnVal;
-	returnVal.first = true;
+	std::vector<std::unordered_map<HashName, std::string>> returnVal;
 
-	std::pair<bool, std::unordered_map<HashName, std::string>> dict;
-	for (const std::string& str : m_data[section][key])
+	if (m_data[section][key].size() == 0)
 	{
-		dict = INIStringToDictionary(str);
+		EP_WARN("File System: INIReader::GetMultiDictionary() called on a key not loaded from the INI file.  "
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+	}
+	else
+	{
+		std::unordered_map<HashName, std::string> dict;
 
-		if (!dict.first)
+		for (const std::string& str : m_data[section][key])
 		{
-			EP_WARN("File System: A multi-key value was discarded due to a parsing issue."
-					"\nFile: {}\nSection: {}\nKey: {}", m_path, section, key);
-		}
-		else
-		{
-			returnVal.second.push_back(dict.second);
+			dict = INIStringToDictionary(str);
+
+			if (dict.empty())
+			{
+				EP_WARN("File System: An INI dictionary value was discarded due to a parsing issue."
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+			}
+			else
+			{
+				returnVal.push_back(dict);
+			}
 		}
 	}
 
