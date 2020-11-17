@@ -111,62 +111,62 @@ public:
 		/// Get a value from a given section and key as a boolean.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: Retrieved value.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The retrieved value.
 		bool				GetBool(HashName section, HashName key, bool defaultVal);
 		/// Get the list of values of a given section and key as booleans.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @return First: 'true' if get was successful. Second: List of retrieved values.
+		/// @return The list of retrieved values.
 		std::vector<bool>	GetMultiBool(HashName section, HashName key);
 
 		/// Get a value from a given section and key as an int.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: Retrieved value.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The retrieved value.
 		int					GetInt(HashName section, HashName key, int defaultVal);
 		/// Get the list of values of a given section and key as ints.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @return First: 'true' if get was successful. Second: List of retrieved values.
+		/// @return The list of retrieved values.
 		std::vector<int>	GetMultiInt(HashName section, HashName key);
 
 		/// Get a value from a given section and key as a float.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: Retrieved value.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The retrieved value.
 		float				GetFloat(HashName section, HashName key, float defaultVal);
 		/// Get the list of values of a given section and key as floats.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @return First: 'true' if get was successful. Second: List of retrieved values.
+		/// @return The list of retrieved values.
 		std::vector<float>	GetMultiFloat(HashName section, HashName key);
 
 		/// Get a value from a given section and key as a string.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: Retrieved value.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The retrieved value.
 		std::string					GetStr(HashName section, HashName key, std::string defaultVal);
 		/// Get the list of values of a given section and key as strings.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @return First: 'true' if get was successful. Second: List of retrieved values.
+		/// @return The list of retrieved values.
 		std::vector<std::string>	GetMultiStr(HashName section, HashName key);
 
-		/// Get a value from a given section and key as an std::unordered_map.
+		/// Get a value from a given section and key as a dictionary.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: The value, converted to an std::unordered_map.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The retrieved dictionary.
 		std::unordered_map<HashName, std::string>				GetDictionary(HashName section, HashName key);
-		/// Get the list of values of a given section and key as std::unordered_maps.
+		/// Get the list of values of a given section and key as dictionaries.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal If the key fails to load or parse, the value to return.
-		/// @return First: 'true' if get was successful. Second: List of retrieved values, converted to std::unordered_maps.
+		/// @param defaultVal The value to return if the key fails to load or parse.
+		/// @return The list of retrieved dictionaries.
 		std::vector<std::unordered_map<HashName, std::string>>	GetMultiDictionary(HashName section, HashName key);
 
 	private:
