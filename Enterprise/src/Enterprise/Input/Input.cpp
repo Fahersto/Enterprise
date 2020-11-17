@@ -26,7 +26,7 @@ std::unordered_map<HashName, std::unordered_map<HashName, std::vector<Input::Axi
 std::vector<Input::Binding> Input::BindingStack;
 
 
-Input::PlayerID Input::NextAvailablePlayerID()
+Input::PlayerID Input::GetNextPlayerID()
 {
 	auto ID_it = std::find(ControllerForPlayer.begin(), ControllerForPlayer.end(), EP_CONTROLLERID_NULL);
 	if (ID_it != ControllerForPlayer.end())
@@ -35,29 +35,30 @@ Input::PlayerID Input::NextAvailablePlayerID()
 	}
 	else
 	{
-		PlayerID returnVal = ControllerForPlayer.size();
-		ControllerForPlayer.push_back(EP_CONTROLLERID_NULL);
-		isPlayerInputBlocked.push_back(false);
-		return returnVal;
+		return ControllerForPlayer.size();
 	}
 }
 
 
 void Input::AssignControllerToPlayer(PlayerID player, ControllerID controller)
 {
-	EP_ASSERTF(controller <= gpBuffer.size(),
-			   "Attempted to assign a ControllerID before it was allocated a buffer.");
-	EP_ASSERTF(player == 0 || controller != EP_CONTROLLERID_KBMOUSE, 
-			   "Only PlayerID 0 can be assigned keyboard and mouse input.");
+	EP_ASSERTF(player <= ControllerForPlayer.size(), "Input System: "
+			   "Cannot assign ControllerID \'{}\' to ineligible PlayerID \'{}\'.",
+			   controller, player);
+	EP_ASSERTF(controller <= gpBuffer.size(), "Input System: "
+			   "Attempted to assign ControllerID \'{}\' to PlayerID \'{}\' before its "
+			   "buffer was allocated.", controller, player);
+	EP_ASSERTF(player == 0 || controller != EP_CONTROLLERID_KBMOUSE, "Input System: "
+			   "Attempted to assign non-zero PlayerID \'{}\' the keyboard and mouse.");
 
-	if (player >= ControllerForPlayer.size())
+	if (player == ControllerForPlayer.size())
 	{
-		// 'player' has not been used yet, so we don't have to break its associations.
+		// 'player' has not been used before, so we don't have to break its associations.
 		ControllerForPlayer.push_back(controller);
 		isPlayerInputBlocked.push_back(false);
 		if (controller == EP_CONTROLLERID_KBMOUSE)
 		{
-			// 'player' is known to be 0 in the case of the keyboard and mouse.
+			// Keyboard and mouse can only ever be assigned to PlayerID(0), so this is tracked by a bool.
 			kbmBuffer.isAssigned = true;
 		}
 		else
@@ -65,7 +66,7 @@ void Input::AssignControllerToPlayer(PlayerID player, ControllerID controller)
 			gpBuffer[controller - 1].assignedPlayer = player;
 		}
 	}
-	else
+	else if (player < ControllerForPlayer.size())
 	{
 		// Break 'player''s previous association
 		if (ControllerForPlayer[player] == EP_CONTROLLERID_KBMOUSE)
@@ -74,10 +75,11 @@ void Input::AssignControllerToPlayer(PlayerID player, ControllerID controller)
 		}
 		else if (ControllerForPlayer[player] != EP_CONTROLLERID_NULL)
 		{
-			EP_ASSERTF(ControllerForPlayer[player] <= gpBuffer.size(),
-					   "Attempting to break an association to an invalid ControllerID.");
+			EP_ASSERTF(ControllerForPlayer[player] <= gpBuffer.size(), "Input System: "
+					   "Attempted to break an association to an invalid ControllerID.");
 			gpBuffer[ControllerForPlayer[player] - 1].assignedPlayer = EP_PLAYERID_NULL;
 		}
+
 		// We're reassigning controllerForPlayer[player] anyways, so don't bother to break that link here.
 
 		// Assign controllerforplayer and the buffer.
@@ -102,7 +104,8 @@ Input::PlayerID Input::UnassignController(ControllerID controller)
 	}
 	else
 	{
-		EP_ASSERTF(controller <= gpBuffer.size(), "Attempted to unassign unalloacted gamepad.");
+		EP_ASSERTF(controller <= gpBuffer.size(), "Input System: Attempted to unassign "
+												  "unalloacted gamepad.");
 		gpBuffer[controller - 1].assignedPlayer = EP_PLAYERID_NULL;
 	}
 
@@ -401,6 +404,8 @@ void Input::BindAction(void(*callbackPtr)(PlayerID player),
 								HashName contextName,
 								HashName actionName)
 {
+	EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to bind Action to EP_PLAYERID_NULL.");
+
 	if (ActionMap[contextName][actionName].size() == 0)
 	{
 		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
@@ -414,17 +419,11 @@ void Input::BindAction(void(*callbackPtr)(PlayerID player),
 }
 
 
-void Input::BlockLowerBindings()
+void Input::BlockLowerBindings(PlayerID player)
 {
-	BindingStack.emplace_back(
-		Binding{ nullptr, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		EP_PLAYERID_ALL, EP_INPUT_BLOCKER, false});
-}
+	EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to apply input blocker for "
+			   "EP_PLAYERID_NULL.");
 
-
-void Input::BlockLowerBindingsForPlayer(PlayerID player)
-{
 	BindingStack.emplace_back(
 		Binding{ nullptr, NULL,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -434,8 +433,14 @@ void Input::BlockLowerBindingsForPlayer(PlayerID player)
 
 void Input::PopBindings(size_t count)
 {
-	EP_ASSERT(count > 0);
-	EP_ASSERT(count <= BindingStack.size());
+	EP_ASSERTF(count <= BindingStack.size(), "Input System: Attempted to pop more bindings "
+			   "than were stored in BindingStack.");
+
+	if (count == 0)
+	{
+		EP_WARN("Input System: Attempted to pop zero bindings from BindingStack.");
+	}
+
 	BindingStack.erase(BindingStack.end() - count, BindingStack.end());
 }
 
@@ -898,13 +903,17 @@ void Input::ProcessBinding(const std::vector<Binding>::reverse_iterator& binding
 	}
 	else
 	{
-		if (ControllerForPlayer[bindingIt->playerID] == EP_CONTROLLERID_KBMOUSE)
+		// Process the binding, if the PlayerID has been assigned a ControllerID
+		if (bindingIt->playerID < ControllerForPlayer.size())
 		{
-			ProcessKeyboardBinding(bindingIt);
-		}
-		else if (ControllerForPlayer[bindingIt->playerID] != EP_CONTROLLERID_NULL)
-		{
-			ProcessGamepadBinding(bindingIt, bindingIt->playerID);
+			if (ControllerForPlayer[bindingIt->playerID] == EP_CONTROLLERID_KBMOUSE)
+			{
+				ProcessKeyboardBinding(bindingIt);
+			}
+			else if (ControllerForPlayer[bindingIt->playerID] != EP_CONTROLLERID_NULL)
+			{
+				ProcessGamepadBinding(bindingIt, bindingIt->playerID);
+			}
 		}
 	}
 }

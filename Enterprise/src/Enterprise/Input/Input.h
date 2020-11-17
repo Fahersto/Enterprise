@@ -29,7 +29,10 @@ public:
 	//typedef size_t GamepadID;
 
 	/// Get the next available Player ID.
-	static PlayerID NextAvailablePlayerID();
+	/// @remarks Specifically, this function will return the smallest number that currently
+	/// identifies no player.  If a controller gets disconnected, the PlayerID it was assigned
+	/// to may be returned by this function.
+	static PlayerID GetNextPlayerID();
 
 	/// Assign a controller to a specific player.
 	/// @param playerID The player to associate the controller with.
@@ -74,6 +77,8 @@ public:
 				 HashName contextName,
 				 HashPack...axisName)
 	{
+		EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to bind Axis to EP_PLAYERID_NULL.");
+
 		BindingStack.emplace_back(
 			Binding{ (void*)callbackPtr, contextName,
 			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -94,9 +99,8 @@ public:
 	}
 
 	/// Add a blocker to the input binding stack.  Bindings lower in the stack will not receive input.
-	static void BlockLowerBindings();
-	/// Add a blocker to the input binding stack for a single player.  Bindings lower in the stack will not receive input.
-	static void BlockLowerBindingsForPlayer(PlayerID player);
+	/// @param player The PlayerID to block.  This can be EP_PLAYERID_ALL.
+	static void BlockLowerBindings(PlayerID player);
 	
 	/// Pop one or more bindings from the binding stack.
 	/// @param count Number of bindings to pop.
