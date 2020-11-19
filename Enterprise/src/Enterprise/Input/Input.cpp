@@ -42,14 +42,10 @@ Input::PlayerID Input::GetNextPlayerID()
 
 void Input::AssignControllerToPlayer(PlayerID player, ControllerID controller)
 {
-	EP_ASSERTF(player <= ControllerForPlayer.size(), "Input System: "
-			   "Cannot assign ControllerID \'{}\' to ineligible PlayerID \'{}\'.",
-			   controller, player);
-	EP_ASSERTF(controller <= gpBuffer.size(), "Input System: "
-			   "Attempted to assign ControllerID \'{}\' to PlayerID \'{}\' before its "
-			   "buffer was allocated.", controller, player);
-	EP_ASSERTF(player == 0 || controller != EP_CONTROLLERID_KBMOUSE, "Input System: "
-			   "Attempted to assign non-zero PlayerID \'{}\' the keyboard and mouse.");
+	EP_ASSERTF(player <= ControllerForPlayer.size(), "Input System: Attempted to assign ControllerID to ineligible PlayerID.");
+	EP_ASSERTF(controller <= gpBuffer.size(), "Input System: Attempted to assign unallocated ControllerID.");
+	EP_ASSERTF(player == 0 || controller != EP_CONTROLLERID_KBMOUSE, "Input System: Attempted to assign keyboard and mouse "
+			   "to non-zero PlayerID.");
 
 	if (player == ControllerForPlayer.size())
 	{
