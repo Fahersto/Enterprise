@@ -17,13 +17,15 @@ workspace "Enterprise_Dev"
 -- Vendor library projects
 group "Dependencies"
     include "Enterprise/_vendor/SpookyHash/pm_library.lua" -- SpookyHash
-    configmap {
+    configmap 
+    {
         ["Dev"] = "Release",
         ["Dist"] = "Release",
         ["x64"] = "Static64"
     }
     include "Enterprise/_vendor/HotConsts/pm_library.lua" -- Hot Constants!
-    configmap {
+    configmap
+    {
         ["Dev"] = "Release",
         ["Dist"] = "Release",
         ["x64"] = "Static64"
@@ -67,7 +69,8 @@ project "Enterprise"
     architecture "x86_64"
 
     -- Files/Includes/Defines
-    files {
+    files 
+    {
         -- C/C++ source
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.c",
@@ -81,7 +84,8 @@ project "Enterprise"
     filter { "system:windows", "files:**.m or files:**.mm" }
         buildaction "None"  -- Don't build Obj-C files in MSVC
     filter {}
-    sysincludedirs {
+    sysincludedirs 
+    {
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
         "Enterprise/_vendor/SpookyHash/include",
@@ -114,7 +118,13 @@ project (EP_ProjectName)
         systemversion "10.15"
         buildoptions{ "-std=c++2a" } -- C++20 Draft
         links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
-        xcodebuildsettings {
+        postbuildcommands
+        {
+            "mkdir -p ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content",
+            "rsync -avu --delete --exclude=\".*\" Content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content" 
+        }
+        xcodebuildsettings
+        {
             ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
             -- ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements" -- This should probably be added per project.
             -- ["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon" -- Pending an icon build system.
@@ -141,17 +151,18 @@ project (EP_ProjectName)
     architecture "x86_64"
 
     -- Files/Includes/Defines
-    files {
+    files
+    {
         -- C/C++ source
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.c",
         "%{prj.name}/src/**.hpp",
-        "%{prj.name}/src/**.cpp",
-        EP_ProjectName .. "/_resources/**"
+        "%{prj.name}/src/**.cpp"
     }
     removefiles "**.DS_Store" -- Exclude macOS hidden files
     vpaths { ["src/Resources/*"] = (EP_ProjectName .. "/_resources/**") } -- Nesting "_resources" makes "src" the top level.
-    sysincludedirs {
+    sysincludedirs
+    {
         "Enterprise/src",
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
