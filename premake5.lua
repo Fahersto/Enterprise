@@ -120,6 +120,7 @@ project (EP_ProjectName)
         links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
         postbuildcommands
         {
+            "mkdir -p Content",
             "mkdir -p ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content",
             "rsync -avu --delete --exclude=\".*\" Content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content" 
         }
