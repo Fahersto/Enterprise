@@ -26,7 +26,7 @@
 #include <exception>
 #include <csignal>
 
-#include <SpookyHash/SpookyV2.h>
+#include <CTSpookyHash/CTSpooky.h>
 #include <HotConsts/HotConsts.h>
 
 #ifdef _WIN32

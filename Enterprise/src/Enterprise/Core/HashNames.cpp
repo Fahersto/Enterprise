@@ -6,7 +6,7 @@ static std::unordered_map<HashName, std::string> HashNameTable;
 
 HashName HN(std::string stringname)
 {
-	HashName hash = SpookyHash::Hash64(stringname.c_str(), stringname.size(), 0);
+	HashName hash = CTSpookyHash::Hash64(stringname.c_str(), stringname.size(), 0);
 
 	std::unordered_map<HashName, std::string>::iterator it = HashNameTable.find(hash);
 	if (it == HashNameTable.end())

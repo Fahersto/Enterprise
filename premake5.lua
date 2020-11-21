@@ -16,7 +16,7 @@ workspace "Enterprise_Dev"
 
 -- Vendor library projects
 group "Dependencies"
-    include "Enterprise/_vendor/SpookyHash/pm_library.lua" -- SpookyHash
+    include "Enterprise/_vendor/CTSpookyHash/pm_library.lua" -- CTSpookyHash
     configmap 
     {
         ["Dev"] = "Release",
@@ -36,7 +36,7 @@ group ""
 project "Enterprise"
     kind "StaticLib"
     location "%{prj.name}"
-    links { "SpookyHash", "HotConsts" }
+    links { "CTSpookyHash", "HotConsts" }
     language "C++"
 
     -- Platform-specific build settings
@@ -88,7 +88,7 @@ project "Enterprise"
     {
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
-        "Enterprise/_vendor/SpookyHash/include",
+        "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include"
     }
     includedirs "%{prj.name}/src"
@@ -167,7 +167,7 @@ project (EP_ProjectName)
         "Enterprise/src",
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
-        "Enterprise/_vendor/SpookyHash/include",
+        "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include"
     }
     includedirs "%{prj.name}/src"

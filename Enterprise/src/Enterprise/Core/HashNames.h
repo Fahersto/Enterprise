@@ -6,7 +6,7 @@ typedef uint64_t HashName;
 /// The hashed version of a string name.  Used throughout Enterprise.
 constexpr uint64_t operator ""_HN(const char* string, size_t len)
 {
-	return SpookyHash::Hash64(string, len, 0);
+	return CTSpookyHash::Hash64(string, len, 0);
 }
 
 /// Convert a string into a HashName.  Performs collision checks.

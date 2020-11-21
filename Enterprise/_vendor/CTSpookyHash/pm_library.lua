@@ -1,12 +1,11 @@
 --[[
-    SpookyHash Library
-    Simple library wrapper for the SpookyHash algorithm by Bob Jenkins for use 
-    in Enterprise Engine.
+    CTSpookyHash Library
+    Simple library wrapper for CTSpookyHash for use in Enterprise.
 ]]
 
 local configurationName = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-project "SpookyHash"
+project "CTSpookyHash"
     kind "StaticLib"
     language "C++"
     cppdialect "C++14"
@@ -29,14 +28,14 @@ project "SpookyHash"
     filter "configurations:Release"
         optimize "On"
     filter {}
-    
-    -- Platforms
-    filter "platforms:Static64"
+
+        -- Platforms
+        filter "platforms:Static64"
         architecture "x86_64"
     -- filter "platforms:Static32" -- Enterprise is 64-bit only.
     --     architecture "x86"
     filter {}
     
-    -- Files/Includes/Defines
-    files { "include/SpookyHash/SpookyV2.h", "src/SpookyV2.cpp" }
-    includedirs "include/SpookyHash"
+        -- Files/Includes/Defines
+    files { "include/CTSpookyHash/CTSpooky.h", "src/CTSpooky.cpp" }
+    includedirs "include/CTSpookyHash"
