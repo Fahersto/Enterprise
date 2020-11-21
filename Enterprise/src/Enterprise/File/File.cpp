@@ -108,7 +108,7 @@ std::string File::TextFileReader::ReadNextLine()
 			if (ferror(m_handle))
 			{
 				EP_FATAL("File System: Error encountered reading line in open text file.");
-				EP_DEBUGBREAK();
+//				EP_DEBUGBREAK();
 				throw Exceptions::FatalError();
 			}
 

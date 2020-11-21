@@ -57,7 +57,7 @@
 					"\n\nThe Enterprise engine library has encountered a condition that " \
 					"should never occur.  It has terminated the application."; \
 				Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
-				EP_DEBUGBREAK(); \
+				/*EP_DEBUGBREAK();*/ \
 				throw Enterprise::Exceptions::AssertFailed(); \
 			}
 	#else
@@ -71,7 +71,7 @@
 					"\n\nThis Enterprise application has encountered a condition that " \
 					"should never occur.  It has terminated itself."; \
 				Enterprise::Platform::DisplayErrorDialog(messagestream.str().c_str()); \
-				EP_DEBUGBREAK(); \
+				/*EP_DEBUGBREAK();*/ \
 				throw Enterprise::Exceptions::AssertFailed(); \
 			}
 	#endif
