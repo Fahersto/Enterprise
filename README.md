@@ -80,5 +80,5 @@ goals I'd like to eventually meet, even if they aren't a high priority:
 * Premake: <https://premake.github.io/>
 * Spdlog: <https://github.com/gabime/spdlog>
 * Cxx-prettyprint: <http://louisdx.github.io/cxx-prettyprint/>
-* SpookyHash (modified): <http://burtleburtle.net/bob/hash/spooky.html>
+* Compile-Time SpookyHash: <https://github.com/theOtherMichael/CTSpookyHash>
 * Hot Constants: <https://github.com/theOtherMichael/HotConsts>
