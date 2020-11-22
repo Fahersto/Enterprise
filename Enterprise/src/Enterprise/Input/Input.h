@@ -91,7 +91,7 @@ public:
 			{
 				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings "
 						 "and will not reflect player input."
-						 "  Context Name: {}", SN(axesNames[i]), SN(contextName));
+						 "  Context Name: {}", HN_ToStr(axesNames[i]), HN_ToStr(contextName));
 			}
 
 			BindingStack.back().ActionOrAxes[i] = axesNames[i];

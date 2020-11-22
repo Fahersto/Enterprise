@@ -25,7 +25,7 @@ HashName HN(std::string stringname);
 /// @param hashname The HashName to look up.
 /// @return The HashName's associated string.
 /// @note Because strings aren't interned in Dev and Release builds, this function just return the hash if invoked in Dev or Dist builds.
-std::string SN(HashName hashname);
+std::string HN_ToStr(HashName hashname);
 
 #else // EP_CONFIG_DEV, EP_CONFIG_DIST
 
@@ -49,7 +49,7 @@ inline HashName HN(std::string stringname)
 /// @param hashname The HashName to look up.
 /// @return The HashName's associated string.
 /// @note Because strings aren't interned in Dev and Release builds, this function just return the hash if invoked in Dev or Dist builds.
-inline std::string SN(HashName hashname)
+inline std::string HN_ToStr(HashName hashname)
 {
 	return std::to_string(hashname);
 }

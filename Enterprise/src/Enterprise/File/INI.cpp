@@ -670,7 +670,7 @@ bool File::INIReader::GetBool(HashName section, HashName key, bool defaultVal)
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetBool() called on a key not loaded from the INI file.  "
-				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		return defaultVal;
 	}
 	else
@@ -680,14 +680,14 @@ bool File::INIReader::GetBool(HashName section, HashName key, bool defaultVal)
 		if (!converted.first)
 		{
 			EP_WARN("File System: An INI bool value was discarded due to a conversion issue.  "
-					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 
 			return defaultVal;
 		}
 		else if (m_data[section][key].size() > 1)
 		{
 			EP_WARN("File System: INIReader::GetBool() called on a key with multiple values.  "
-					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		}
 
 		return converted.second;
@@ -702,7 +702,7 @@ std::vector<bool> File::INIReader::GetMultiBool(HashName section, HashName key)
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetMultiBool() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -717,7 +717,7 @@ std::vector<bool> File::INIReader::GetMultiBool(HashName section, HashName key)
 			else
 			{
 				EP_WARN("File System: An INI bool value was discarded due to a conversion issue."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 			}
 		}
 	}
@@ -731,7 +731,7 @@ int File::INIReader::GetInt(HashName section, HashName key, int defaultVal)
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetInt() called on a key not loaded from the INI file.  "
-				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 
 		return defaultVal;
 	}
@@ -742,14 +742,14 @@ int File::INIReader::GetInt(HashName section, HashName key, int defaultVal)
 		if (!converted.first)
 		{
 			EP_WARN("File System: An INI int value was discarded due to a conversion issue.  "
-					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 
 			return defaultVal;
 		}
 		else if (m_data[section][key].size() > 1)
 		{
 			EP_WARN("File System: INIReader::GetInt() called on a key with multiple values.  "
-					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		}
 
 		return converted.second;
@@ -764,7 +764,7 @@ std::vector<int> File::INIReader::GetMultiInt(HashName section, HashName key)
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetMultiInt() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -781,7 +781,7 @@ std::vector<int> File::INIReader::GetMultiInt(HashName section, HashName key)
 			else
 			{
 				EP_WARN("File System: An INI int value was discarded due to a conversion issue."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 			}
 		}
 	}
@@ -795,7 +795,7 @@ float File::INIReader::GetFloat(HashName section, HashName key, float defaultVal
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetFloat() called on a key not loaded from the INI file.  "
-				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		return defaultVal;
 	}
 	else
@@ -805,13 +805,13 @@ float File::INIReader::GetFloat(HashName section, HashName key, float defaultVal
 		if (!converted.first)
 		{
 			EP_WARN("File System: An INI float value was discarded due to a conversion issue.  "
-					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 			return defaultVal;
 		}
 		else if (m_data[section][key].size() > 1)
 		{
 			EP_WARN("File System: INIReader::GetFloat() called on a key with multiple values.  "
-					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		}
 
 		return converted.second;
@@ -826,7 +826,7 @@ std::vector<float> File::INIReader::GetMultiFloat(HashName section, HashName key
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetMultiFloat() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -842,7 +842,7 @@ std::vector<float> File::INIReader::GetMultiFloat(HashName section, HashName key
 			else
 			{
 				EP_WARN("File System: An INI float value was discarded due to a conversion issue."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 			}
 		}
 	}
@@ -856,13 +856,13 @@ std::string File::INIReader::GetStr(HashName section, HashName key, std::string 
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetStr() called on a key not loaded from the INI file.  "
-				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"The default value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		return defaultVal;
 	}
 	else if (m_data[section][key].size() > 1)
 	{
 		EP_WARN("File System: INIReader::GetStr() called on a key with multiple values.  "
-				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"Only the first was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 
 	return m_data[section][key].front();
@@ -876,7 +876,7 @@ std::vector<std::string> File::INIReader::GetMultiStr(HashName section, HashName
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetMultiStr() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -897,7 +897,7 @@ std::unordered_map<HashName, std::string> File::INIReader::GetDictionary(HashNam
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetDictionary() called on a key not loaded from the INI file.  "
-				"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -906,12 +906,12 @@ std::unordered_map<HashName, std::string> File::INIReader::GetDictionary(HashNam
 		if (returnVal.empty())
 		{
 			EP_WARN("File System: An INI dictionary value was discarded due to a parsing issue.  "
-					"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"An empty unordered_map was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		}
 		else if (m_data[section][key].size() > 1)
 		{
 			EP_WARN("File System: INIReader::GetDictionary() called on a key with multiple values.  "
-					"Only the first value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+					"Only the first value was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 		}
 	}
 
@@ -926,7 +926,7 @@ std::vector<std::unordered_map<HashName, std::string>> File::INIReader::GetMulti
 	if (m_data[section][key].size() == 0)
 	{
 		EP_WARN("File System: INIReader::GetMultiDictionary() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 	}
 	else
 	{
@@ -939,7 +939,7 @@ std::vector<std::unordered_map<HashName, std::string>> File::INIReader::GetMulti
 			if (dict.empty())
 			{
 				EP_WARN("File System: An INI dictionary value was discarded due to a parsing issue."
-						"\nFile: {}\nSection: {}\nKey: {}", m_path, SN(section), SN(key));
+						"\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
 			}
 			else
 			{

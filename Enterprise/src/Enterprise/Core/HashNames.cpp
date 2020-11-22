@@ -42,7 +42,7 @@ HashName HN(std::string stringname)
 	return hash;
 }
 
-std::string SN(HashName hashname)
+std::string HN_ToStr(HashName hashname)
 {
 	if (HashNameTable.count(hashname))
 	{

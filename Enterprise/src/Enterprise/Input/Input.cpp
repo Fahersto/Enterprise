@@ -330,14 +330,14 @@ void Input::LoadContextsFromFile(std::string filename)
 					else
 					{
 						EP_WARN("Input System: An ActionMapping failed to load due to a subvalue conversion error.  "
-								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, SN(contextName));
+								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
 						continue;
 					}
 				}
 				else
 				{
 					EP_WARN("Input System: An ActionMapping failed to load due to a missing subkey.  "
-							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, SN(contextName));
+							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
 					continue;
 				}
 			}
@@ -372,14 +372,14 @@ void Input::LoadContextsFromFile(std::string filename)
 					else
 					{
 						EP_WARN("Input System: An AxisMapping failed to load due to a subvalue conversion error.  "
-								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, SN(contextName));
+								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
 						continue;
 					}
 				}
 				else
 				{
 					EP_WARN("Input System: An AxisMapping failed to load due to a missing subkey.  "
-							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, SN(contextName));
+							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
 					continue;
 				}
 			}
@@ -388,7 +388,7 @@ void Input::LoadContextsFromFile(std::string filename)
 		if (!hasActionMappings && !hasAxisMappings)
 		{
 			EP_WARN("Input System: Input context \"{}\" contains no valid Action or Axis mappings."
-					"  File: {}", SN(contextName), filename);
+					"  File: {}", HN_ToStr(contextName), filename);
 		}
 	}
 }
@@ -405,7 +405,7 @@ void Input::BindAction(void(*callbackPtr)(PlayerID player),
 	if (ActionMap[contextName][actionName].size() == 0)
 	{
 		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
-				 "and will never trigger.  Context Name: {}", SN(actionName), SN(contextName));
+				 "and will never trigger.  Context Name: {}", HN_ToStr(actionName), HN_ToStr(contextName));
 	}
 
 	BindingStack.emplace_back(
