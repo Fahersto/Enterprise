@@ -16,20 +16,19 @@ workspace "Enterprise_Dev"
 
 -- Vendor library projects
 group "Dependencies"
+    -- Instead of mapping the solution/workspace's configurations with configmap,
+    -- we define new ones for each project.  This is required because XCode does
+    -- not support subprojects with differing configuration names.
+
     include "Enterprise/_vendor/CTSpookyHash/pm_library.lua" -- CTSpookyHash
-    configmap 
-    {
-        ["Dev"] = "Release",
-        ["Dist"] = "Release",
-        ["x64"] = "Static64"
-    }
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
+        
     include "Enterprise/_vendor/HotConsts/pm_library.lua" -- Hot Constants!
-    configmap
-    {
-        ["Dev"] = "Release",
-        ["Dist"] = "Release",
-        ["x64"] = "Static64"
-    }
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
 group ""
 
 -- Engine library
