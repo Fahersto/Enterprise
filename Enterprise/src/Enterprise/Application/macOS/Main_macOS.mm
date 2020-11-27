@@ -12,21 +12,22 @@
 @implementation MacAppDelegate
 
 /// Invoked when the user selects "Quit" from the dock.
-- (void)handleQuitFromDock:(NSAppleEventDescriptor*)Event withReplyEvent:(NSAppleEventDescriptor*)ReplyEvent {
+- (void)handleQuitFromDock:(NSAppleEventDescriptor*)Event withReplyEvent:(NSAppleEventDescriptor*)ReplyEvent
+{
     Enterprise::Events::Dispatch(EventTypes::QuitRequested);
 }
 
 /// Invoked when the user selects "Quit" from the menu bar.
-- (void)handleQuitFromAppMenu {
+- (void)handleQuitFromAppMenu
+{
     Enterprise::Events::Dispatch(EventTypes::QuitRequested);
 }
 
-// Init ================================================================================================================
-
-/// Called right before the application opens.  Set up Cocoa stuff here.
-- (void)applicationWillFinishLaunching:(NSNotification *)notification {
-    @autoreleasepool {
-        
+// Set up Cocoa stuff just before applictaion launch
+- (void)applicationWillFinishLaunching:(NSNotification *)notification
+{
+    @autoreleasepool
+	{
         // Set the custom callback for when Quit is selected from the Dock menu
         [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
                                                            andSelector:@selector(handleQuitFromDock:withReplyEvent:)
@@ -47,42 +48,51 @@
     }
 }
 
-// Entry Point / Main Loop =============================================================================================
-
-- (void)applicationDidFinishLaunching:(NSNotification *)Notification {
-    @autoreleasepool {
-        try
-        {
-            // Create the app
-            Enterprise::Application app;
-            
-            do
-            {
-                while( NSEvent *e = [NSApp nextEventMatchingMask: NSEventMaskAny
-                                                       untilDate: nil
-                                                          inMode: NSDefaultRunLoopMode
-                                                         dequeue: true] ) {
-                    [NSApp sendEvent: e]; // Dispatch OS messages
-                }
-            }
-            while (app.Run()); // Run the app
-        }
-        catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
-        catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
-        
-        /// Note: [terminate:] never returns.  App's destructor is called when leaving the try block.
-        [NSApp terminate:self];
-    }
-}
-
 @end
 
-/// Create the native app and kick off the event loop.  We'll hijack the loop in applicationDidFinishLaunching:.
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
+/// Entry point to Enterprise app on macOS.
+int main(int argc, const char * argv[])
+{
+    @autoreleasepool
+	{
+		// Create application
         [NSApplication sharedApplication];
-        [NSApp setDelegate:[MacAppDelegate new]];
-        [NSApp run];
+
+		// Set up custom app delegate
+		MacAppDelegate * delegate = [[MacAppDelegate alloc] init];
+		[NSApp setDelegate:delegate];
+
+		// Activate and launch the app
+		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+		[NSApp setPresentationOptions:NSApplicationPresentationDefault];
+		[NSApp activateIgnoringOtherApps:YES];
+        [NSApp finishLaunching];
+
+		try
+		{
+			Enterprise::Application app; // App constructor initializes game code
+			NSEvent *e;
+			do
+			{
+				// Pump messages
+				do
+				{
+					e = [NSApp nextEventMatchingMask: NSEventMaskAny
+										   untilDate: nil
+											  inMode: NSDefaultRunLoopMode
+											 dequeue: YES];
+					if (e)
+					{
+						[NSApp sendEvent: e];
+						[NSApp updateWindows];
+					}
+				} while (e);
+			} while (app.Run()); // Loop condition steps the engine
+
+			// app's destructor calls game cleanup code.
+		}
+		catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
+		catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
     }
     return 0;
 }
