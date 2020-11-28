@@ -12,7 +12,6 @@ using Enterprise::Events;
 
 Input::KBMouseBuffer Input::kbmBuffer;
 std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 1.
-std::vector<bool> Input::isGamepadConnected; // Accessed by ControllerID - 1.
 bool Input::currentBuffer = 0;
 
 /// Tracks the ControllerID used by each player.  Indexed by PlayerID.
@@ -109,8 +108,14 @@ Input::PlayerID Input::UnassignController(ControllerID controller)
 	if (it != ControllerForPlayer.end())
 	{
 		(*it) = EP_CONTROLLERID_NULL;
+		return PlayerID(it - ControllerForPlayer.begin());
 	}
-	return PlayerID(it - ControllerForPlayer.begin());
+	else
+	{
+		return EP_PLAYERID_NULL;
+	}
+
+	// TODO: Notify macOS platform code that the controller is unassigned, so GCController can unmark the player assignment.
 }
 
 
@@ -934,6 +939,8 @@ void Input::Init()
 	AssignControllerToPlayer(PlayerID(0), EP_CONTROLLERID_KBMOUSE);
 	// Automatically reassign the keyboard and mouse to PlayerID 0 upon controller disconnect.
 	Events::SubscribeToType(EventTypes::ControllerDisconnect, &handlePlayer0Disconnect);
+
+	PlatformInit();
 }
 
 

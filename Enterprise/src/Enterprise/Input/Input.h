@@ -148,7 +148,6 @@ private:
 		bool axes_blockstatus[size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1] = { 0 };
 	};
 	static std::vector<GamePadBuffer> gpBuffer;
-	static std::vector<bool> isGamepadConnected; // TODO: Get rid of this.
 
 	static bool currentBuffer;
 
@@ -187,6 +186,7 @@ private:
 	static void ProcessBinding(const std::vector<Binding>::reverse_iterator& it);
 
 	static void Init();
+	static void PlatformInit();
 	static void Update();
 };
 
