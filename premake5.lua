@@ -6,7 +6,11 @@
     for your platform in "_scripts".
 ]]
 
-local EP_ProjectName = "Sandbox" -- The name of your Enterprise project.
+-- The name of your Enterprise project.
+local EP_ProjectName = "Sandbox"
+-- Your organization identifier (used in macOS app bundle)
+local APPLE_OrganizationIdentifier = "com.MichaelMartz"
+
 local configurationName = "%{cfg.buildcfg}-%{cfg.system}"
 
 workspace "Enterprise_Dev"
@@ -116,7 +120,7 @@ project (EP_ProjectName)
     filter "system:macosx"
         systemversion "10.15"
         buildoptions{ "-std=c++2a" } -- C++20 Draft
-        links { "Foundation.framework", "AppKit.framework", "Cocoa.framework" }
+        links { "AppKit.framework", "GameController.framework" }
         postbuildcommands
         {
             "mkdir -p Content",
@@ -126,6 +130,7 @@ project (EP_ProjectName)
         xcodebuildsettings
         {
             ["INFOPLIST_FILE"] = "_resources/macOS/Info.plist",
+            ["PRODUCT_BUNDLE_IDENTIFIER"] = APPLE_OrganizationIdentifier .. "." .. EP_ProjectName;
             -- ["CODE_SIGN_ENTITLEMENTS"] = "_resources/macOS/Enterprise.entitlements" -- This should probably be added per project.
             -- ["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon" -- Pending an icon build system.
         }

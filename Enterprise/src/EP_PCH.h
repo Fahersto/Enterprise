@@ -37,9 +37,8 @@
 
 #if defined(__APPLE__) && defined(__MACH__)
     #ifdef __OBJC__
-        #import <Foundation/Foundation.h>
-        #import <Cocoa/Cocoa.h>
         #import <AppKit/AppKit.h>
+        #import <GameController/GameController.h>
     #endif
-#include <mach/mach_time.h>
+    #include <mach/mach_time.h>
 #endif
