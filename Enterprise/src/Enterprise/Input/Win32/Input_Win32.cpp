@@ -17,7 +17,12 @@ static Enterprise::Input::ControllerID xinputToGamepadID[4] =
     EP_CONTROLLERID_NULL,
     EP_CONTROLLERID_NULL
 };
-static std::vector<bool> isGamepadIDTaken;
+static std::vector<bool> isGamepadIDActive;
+
+void Enterprise::Input::PlatformInit()
+{
+    // Unused on Windows for XInput.
+}
 
 void Enterprise::Input::GetRawInput()
 {
@@ -33,18 +38,18 @@ void Enterprise::Input::GetRawInput()
             // Duplicate the existing buffer the frame that the packet number stops updating
             if (!xinputAlreadyCopiedBuffer[i])
             {
-                if (xinputToGamepadID[i] < isGamepadConnected.size())
+                if (xinputToGamepadID[i] < isGamepadIDActive.size())
                 {
                     // Copy the previous buffer to the current buffer if no packet change is detected
-                    gpBuffer[xinputToGamepadID[i]].buttons[currentBuffer] =
-                        gpBuffer[xinputToGamepadID[i]].buttons[!currentBuffer];
+                    Input::gpBuffer[xinputToGamepadID[i]].buttons[currentBuffer] =
+                        Input::gpBuffer[xinputToGamepadID[i]].buttons[!currentBuffer];
 
                     for (size_t j = 0;
                          j < (size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1); 
                          j++)
                     {
-                        gpBuffer[xinputToGamepadID[i]].axes[currentBuffer][j] =
-                            gpBuffer[xinputToGamepadID[i]].axes[!currentBuffer][j];
+                        Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer][j] =
+                            Input::gpBuffer[xinputToGamepadID[i]].axes[!currentBuffer][j];
                     }
                 }
                 xinputAlreadyCopiedBuffer[i] = true;
@@ -64,29 +69,19 @@ void Enterprise::Input::GetRawInput()
 				xinputWasConnected[i] = true;
 
 				// Assign the controller a ControllerID.
-                auto it = std::find(isGamepadIDTaken.begin(), 
-                                    isGamepadIDTaken.end(), 
+                auto it = std::find(isGamepadIDActive.begin(), 
+                                    isGamepadIDActive.end(), 
                                     false);
-                if (it != isGamepadIDTaken.end())
+                if (it != isGamepadIDActive.end())
                 {
-                    xinputToGamepadID[i] = it - isGamepadIDTaken.begin();
+                    xinputToGamepadID[i] = it - isGamepadIDActive.begin();
                     *it = true;
                 }
                 else
                 {
-                    xinputToGamepadID[i] = isGamepadIDTaken.size();
-                    isGamepadIDTaken.push_back(true);
-                }
-
-                // Make the engine savvy to the new controller
-                if (xinputToGamepadID[i] < isGamepadConnected.size())
-                {
-                    isGamepadConnected[xinputToGamepadID[i]] = true;
-                }
-                else
-                {
-                    isGamepadConnected.push_back(true);
-                    gpBuffer.emplace_back();
+                    xinputToGamepadID[i] = isGamepadIDActive.size();
+                    isGamepadIDActive.push_back(true);
+                    Input::gpBuffer.emplace_back();
                 }
 
                 EP_INFO("Controller connected!  ControllerID: {}", xinputToGamepadID[i] + 1);
@@ -133,7 +128,7 @@ void Enterprise::Input::GetRawInput()
                         XINPUT_GAMEPAD_Y
                     )) >> 2;
 
-                gpBuffer[xinputToGamepadID[i]].buttons[currentBuffer] = convertedbuttons;
+                Input::gpBuffer[xinputToGamepadID[i]].buttons[currentBuffer] = convertedbuttons;
             }
 
             // TODO: Add data-driven range normalization and dead zones for triggers and sticks.
@@ -142,12 +137,12 @@ void Enterprise::Input::GetRawInput()
             {
                 float trigger = float(max(state.Gamepad.bLeftTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
                 trigger /= float(255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
-                gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                     [size_t(ControlID::GP_LTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = trigger;
 
                 trigger = float(max(state.Gamepad.bRightTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
                 trigger /= float(255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
-                gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                     [size_t(ControlID::GP_RTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = trigger;
             }
 
@@ -162,30 +157,30 @@ void Enterprise::Input::GetRawInput()
 
                 if (magnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
                 {
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY;
 
                     if (magnitude > 32767) magnitude = 32767;
                     magnitude -= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
                     magnitude /= (32767 - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX * magnitude;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY * magnitude;
                 }
                 else
                 {
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
 
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_LStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
                 }
 
@@ -198,29 +193,29 @@ void Enterprise::Input::GetRawInput()
 
                 if (magnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
                 {
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY;
 
                     if (magnitude > 32767) magnitude = 32767;
                     magnitude -= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
                     magnitude /= (32767 - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX * magnitude;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY * magnitude;
                 }
                 else
                 {
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
 
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
-                    gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
+                    Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
                         [size_t(ControlID::GP_RStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
                 }
             }
@@ -232,11 +227,10 @@ void Enterprise::Input::GetRawInput()
                 xinputWasConnected[i] = false;
                 xinputPrevPacketNo[i] = 0;
                 xinputAlreadyCopiedBuffer[i] = 0;
-                isGamepadIDTaken[xinputToGamepadID[i]] = false;
-                isGamepadConnected[xinputToGamepadID[i]] = false;
+                isGamepadIDActive[xinputToGamepadID[i]] = false;
 
+                Input::gpBuffer[xinputToGamepadID[i]] = GamePadBuffer();
                 PlayerID player = UnassignController(ControllerID(xinputToGamepadID[i] + 1));
-                gpBuffer[xinputToGamepadID[i]] = GamePadBuffer();
                 EP_TRACE("Controller disconnected!  ControllerID: {}", xinputToGamepadID[i] + 1);
 
                 Events::Dispatch(EventTypes::ControllerDisconnect, player);
