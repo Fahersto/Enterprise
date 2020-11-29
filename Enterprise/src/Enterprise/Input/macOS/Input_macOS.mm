@@ -7,12 +7,15 @@
 using Enterprise::Input;
 using Enterprise::Events;
 
-static NSMutableArray<GCController *> *gamepads; // The list of connected GCControllers.  Ordered oldest to newest.
+static NSMutableArray *gamepads; // The list of connected GCControllers.  Ordered oldest to newest.
 static std::vector<size_t> activeGamepadIDs; // The list of active GamepadIDs.  Ordered oldest to newest.
 static std::vector<bool> isGamepadIDActive; // Stores GamepadID active status by index.
 
 void Input::PlatformInit()
 {
+	// Init gamepads array
+	gamepads = [[NSMutableArray alloc] init];
+
 	// New gamepad connections
 	[[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification
 													  object:nil
@@ -110,6 +113,121 @@ void Input::PlatformInit()
 
 void Input::GetRawInput()
 {
+	std::vector<size_t>::iterator GPIDit = activeGamepadIDs.begin();
+	for (GCController *gamepad in gamepads)
+	{
+		// Buttons
+
+		Input::gpBuffer[*GPIDit].buttons[currentBuffer] =
+			gamepad.extendedGamepad.dpad.up.pressed * BIT(uint16_t(ControlID::GP_Dpad_Up))
+			| gamepad.extendedGamepad.dpad.down.pressed * BIT(uint16_t(ControlID::GP_Dpad_Down))
+			| gamepad.extendedGamepad.dpad.left.pressed * BIT(uint16_t(ControlID::GP_Dpad_Left))
+			| gamepad.extendedGamepad.dpad.right.pressed * BIT(uint16_t(ControlID::GP_Dpad_Right))
+			| gamepad.extendedGamepad.buttonMenu.pressed * BIT(uint16_t(ControlID::GP_Menu))
+			// TODO: Handle gamepads without the options button.
+			| gamepad.extendedGamepad.buttonOptions.pressed * BIT(uint16_t(ControlID::GP_Options))
+			// TODO: Handle gamepads without clickable thumbsticks.
+			| gamepad.extendedGamepad.leftThumbstickButton.pressed * BIT(uint16_t(ControlID::GP_LStick_Click))
+			| gamepad.extendedGamepad.rightThumbstickButton.pressed * BIT(uint16_t(ControlID::GP_RStick_Click))
+			| gamepad.extendedGamepad.leftShoulder.pressed * BIT(uint16_t(ControlID::GP_LShoulder))
+			| gamepad.extendedGamepad.rightShoulder.pressed * BIT(uint16_t(ControlID::GP_RShoulder))
+			| gamepad.extendedGamepad.buttonA.pressed * BIT(uint16_t(ControlID::GP_FaceButton_Down))
+			| gamepad.extendedGamepad.buttonB.pressed * BIT(uint16_t(ControlID::GP_FaceButton_Right))
+			| gamepad.extendedGamepad.buttonX.pressed * BIT(uint16_t(ControlID::GP_FaceButton_Left))
+			| gamepad.extendedGamepad.buttonY.pressed * BIT(uint16_t(ControlID::GP_FaceButton_Up));
+
+		// Triggers
+
+		// The triggers are already normalized by the Game Controller framework.
+		Input::gpBuffer[*GPIDit].axes[currentBuffer]
+			[size_t(ControlID::GP_LTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = gamepad.extendedGamepad.leftTrigger.value;
+		Input::gpBuffer[*GPIDit].axes[currentBuffer]
+			[size_t(ControlID::GP_RTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = gamepad.extendedGamepad.rightTrigger.value;
+
+		// Sticks
+		{
+			// While the Game Controller framework does normalize the thumbsticks, they are normalized per axis.
+			// We have to renormalize them in 2D to ensure that the overall magnitude is never greater than 1.
+			// Dead zones are already handled in 2D by the framework.
+
+			// Left Stick
+
+			float thumbX = gamepad.extendedGamepad.leftThumbstick.xAxis.value;
+			float thumbY = gamepad.extendedGamepad.leftThumbstick.yAxis.value;
+			float magnitude = sqrt(thumbX * thumbX + thumbY * thumbY);
+
+			if (magnitude > 0.0)
+			{
+				// Get the unit vector for the stick
+				thumbX /= magnitude;
+				thumbY /= magnitude;
+
+				// Clamp the 2D magnitude to normalled range
+				if (magnitude > 1.0) magnitude = 1.0f;
+
+
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX * magnitude;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY * magnitude;
+			}
+			else
+			{
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_LStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+			}
+
+			// Right Stick
+
+			thumbX = gamepad.extendedGamepad.rightThumbstick.xAxis.value;
+			thumbY = gamepad.extendedGamepad.rightThumbstick.yAxis.value;
+			magnitude = sqrt(thumbX * thumbX + thumbY * thumbY);
+
+			if (magnitude > 0.0)
+			{
+				// Get the unit vector for the stick
+				thumbX /= magnitude;
+				thumbY /= magnitude;
+
+				// Clamp the 2D magnitude to normalled range
+				if (magnitude > 1.0) magnitude = 1.0f;
+
+
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbX * magnitude;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = thumbY * magnitude;
+			}
+			else
+			{
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_NormalX) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_NormalY) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_X) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+				Input::gpBuffer[*GPIDit].axes[currentBuffer]
+					[size_t(ControlID::GP_RStick_Y) - size_t(ControlID::_EndOfGPButtons) - 1] = 0.0f;
+			}
+		}
+
+		// Step the GPID iterator for the next connected gamepad
+		++GPIDit;
+	}
 }
 
 #endif // macOS
