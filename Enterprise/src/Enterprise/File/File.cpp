@@ -39,14 +39,9 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		this->Close();
 	}
 
-	errno_t err;
-
 #ifdef _WIN32
-	err = fopen_s(&m_handle, path.c_str(), "r");
-#else
-	m_handle = fopen(path.c_str(), "r");
-	err = errno;
-#endif
+
+	errno_t err = fopen_s(&m_handle, path.c_str(), "r");
 
 	if (err == 0)
 	{
@@ -77,8 +72,44 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 
 		char errormessage[80];
 		strerror_s(errormessage, err);
-		EP_ERROR("File System: Error opening file:	", errormessage);
+		EP_ERROR("File System: Error opening file. {}", errormessage);
 	}
+
+#else // macOS
+
+	m_handle = fopen(path.c_str(), "r");
+
+	if (m_handle)
+	{
+		m_errorcode = ErrorCode::Success;
+		m_LineNo = 0;
+		m_isHandleOpen = true;
+		m_EOF = false;
+	}
+	else
+	{
+		if (errno == EACCES)
+		{
+			// Permission Denied
+			m_errorcode = ErrorCode::PermissionFailure;
+		}
+		if (errno == ENOENT)
+		{
+			// File does not exist
+			m_errorcode = ErrorCode::DoesNotExist;
+		}
+		else
+		{
+			// Unhandled error
+			m_errorcode = ErrorCode::Unhandled;
+		}
+
+		m_isHandleOpen = false;
+		EP_ERROR("File System: Error opening file. {}", strerror(errno));
+	}
+
+#endif
+
 
 	return m_errorcode;
 }
