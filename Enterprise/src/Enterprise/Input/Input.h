@@ -39,9 +39,10 @@ public:
 	/// @param controllerID The ID for the controller to assign to the player.
 	static void AssignControllerToPlayer(PlayerID player, ControllerID controller);
 
-	/// Load an input context from an INI file.
-	/// @param filename Name of the INI file containing the context.
-	/// @param contextname Name of the context.
+	/// Load all input contexts in an INI file into the Input system.
+	/// @param filename Name of the INI file containing the contexts.
+	/// @note In order for a context to be loaded, it must be part of the section group
+	/// "Input/Contexts/".
 	static void LoadContextsFromFile(std::string filename);
 
 	/// Bind a callback function to an input Action.
