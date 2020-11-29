@@ -55,3 +55,6 @@ inline std::string HN_ToStr(HashName hashname)
 }
 
 #endif
+
+/// A null HashName.  Equivalent to HashName of empty string.
+#define HN_NULL HN("")
