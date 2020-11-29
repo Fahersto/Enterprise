@@ -20,6 +20,28 @@ public:
 		Unhandled
 	};
 
+	/// Converts a File::ErrorCode to a human-readable string.
+	static inline const char* ErrorCodeToString(ErrorCode err)
+	{
+		switch (err)
+		{
+			case ErrorCode::Success:
+				return "File operation was successful.";
+				break;
+			case ErrorCode::NotInitialized:
+				return "File operation attempted with uninitialized object.";
+				break;
+			case ErrorCode::PermissionFailure:
+				return "Permission failure.";
+				break;
+			case ErrorCode::DoesNotExist:
+				return "File does not exist";
+				break;
+			default:
+				return "Unhandled error!";
+				break;
+		}
+	}
 
 	/// Returns true if the file at the given path exists.
 	/// @param path The path to check.

@@ -656,8 +656,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 	else if (areErrorsFatal)
 	{
 		EP_FATAL("File System: A required INI file cannot be opened.  The game cannot continue."
-					"  File: {}  ErrorCode: {}", path, ini.GetError());
-//		EP_DEBUGBREAK();
+					"  File: {}  ErrorCode: {}", path, ErrorCodeToString(ini.GetError()));
 		throw Exceptions::FatalError();
 	}
 
