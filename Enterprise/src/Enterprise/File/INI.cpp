@@ -698,12 +698,7 @@ std::vector<bool> File::INIReader::GetMultiBool(HashName section, HashName key)
 {
 	std::vector<bool> returnVal;
 
-	if (m_data[section][key].size() == 0)
-	{
-		EP_WARN("File System: INIReader::GetMultiBool() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
-	}
-	else
+	if (m_data[section][key].size() != 0)
 	{
 		std::pair<bool, bool> converted;
 		for (std::string& strIt : m_data[section][key])
@@ -760,12 +755,7 @@ std::vector<int> File::INIReader::GetMultiInt(HashName section, HashName key)
 {
 	std::vector<int> returnVal;
 
-	if (m_data[section][key].size() == 0)
-	{
-		EP_WARN("File System: INIReader::GetMultiInt() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
-	}
-	else
+	if (m_data[section][key].size() != 0)
 	{
 		std::pair<bool, int> converted;
 
@@ -822,12 +812,7 @@ std::vector<float> File::INIReader::GetMultiFloat(HashName section, HashName key
 {
 	std::vector<float> returnVal;
 	
-	if (m_data[section][key].size() == 0)
-	{
-		EP_WARN("File System: INIReader::GetMultiFloat() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
-	}
-	else
+	if (m_data[section][key].size() != 0)
 	{
 		std::pair<bool, float> converted;
 
@@ -872,12 +857,7 @@ std::vector<std::string> File::INIReader::GetMultiStr(HashName section, HashName
 {
 	std::vector<std::string> returnVal;
 
-	if (m_data[section][key].size() == 0)
-	{
-		EP_WARN("File System: INIReader::GetMultiStr() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
-	}
-	else
+	if (m_data[section][key].size() != 0)
 	{
 		for (std::string& strIt : m_data[section][key])
 		{
@@ -922,12 +902,7 @@ std::vector<std::unordered_map<HashName, std::string>> File::INIReader::GetMulti
 {
 	std::vector<std::unordered_map<HashName, std::string>> returnVal;
 
-	if (m_data[section][key].size() == 0)
-	{
-		EP_WARN("File System: INIReader::GetMultiDictionary() called on a key not loaded from the INI file.  "
-				"An empty vector was returned.\nFile: {}\nSection: {}\nKey: {}", m_path, HN_ToStr(section), HN_ToStr(key));
-	}
-	else
+	if (m_data[section][key].size() != 0)
 	{
 		std::unordered_map<HashName, std::string> dict;
 
