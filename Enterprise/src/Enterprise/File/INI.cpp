@@ -408,11 +408,22 @@ std::unordered_map<HashName, std::string> File::INIStringToDictionary(const std:
 }
 
 
-File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFatal, const std::string& sectionGroup)
+File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFatal, const std::string& sectionFilter)
 {
 	// TODO: Handle base INI reload mechanism
 	// TODO: Handle Constants section
-	// TODO: Handle section group filtering
+
+	bool filterIsAGroup;
+	if (sectionFilter.empty())
+	{
+		filterIsAGroup = true;
+	}
+	else
+	{
+		EP_ASSERTF(sectionFilter.front() != ' ', "No leading whitespace is allowed in sectionFilter parameter");
+		EP_ASSERTF(sectionFilter.back() != ' ', "No trailing whitespace is allowed in sectionFilter parameter");
+		filterIsAGroup = sectionFilter.back() == '/';
+	}
 
 	m_path = path;
 	TextFileReader ini(path);
@@ -422,8 +433,12 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 	{
 		std::string line;
 		size_t pos, pos2, pos3;
-		HashName section = HN("");
+		HashName section = HN_NULL;
 		HashName key;
+
+		bool inQualifiedSection;
+		if (sectionFilter.empty()) { inQualifiedSection = true; } // No filter
+		else { inQualifiedSection = false; } // Using section filter, ignore sectionless keys
 		
 		while (!ini.isEOF())
 		{
@@ -438,11 +453,44 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 					pos2 = line.find_first_of(']', pos);
 					if (pos2 != std::string::npos)
 					{
+						// Strip leading and trailing whitespace
+						pos = line.find_first_not_of(' ', pos + 1);
+						pos2 = line.find_last_not_of(' ', pos2 - 1) + 1;
+
+						// Qualify section based on filter
+						if (filterIsAGroup)
+						{
+							// Check for matching prefix
+							if (line.find(sectionFilter, pos) == pos)
+							{
+								pos += sectionFilter.size();
+								section = HN(line.substr(pos, pos2 - pos));
+								m_sections.push_back(section);
+								inQualifiedSection = true;
+							}
+							else
+							{
+								section = HN_NULL;
+								inQualifiedSection = false;
+							}
+						}
+						else
+						{
+							// Look for exact match
+							if (sectionFilter == line.substr(pos, pos2 - pos))
+							{
+								section = HN_NULL;
+								inQualifiedSection = true;
+							}
+							else
+							{
+								section = HN_NULL;
+								inQualifiedSection = false;
+							}
+						}
+
 						// In the case of sections, we err on the side of using the section name, even if there
 						// are invalid characters after.  We do still check, though, to issue a warning.
-						section = HN(line.substr(pos + 1, pos2 - pos - 1));
-						m_sections.push_back(section);
-
 						pos3 = line.find_first_not_of(' ', pos2 + 1);
 						if (pos3 != std::string::npos)
 						{
@@ -460,7 +508,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 					}
 
 				}
-				else if (line.at(pos) != ';')
+				else if (line.at(pos) != ';' && inQualifiedSection)
 				{
 					pos2 = line.find_first_of(" =", pos);
 
