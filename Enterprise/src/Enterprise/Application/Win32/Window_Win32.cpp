@@ -42,24 +42,14 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         case WM_INPUT: // Raw Input API
         {
-            // Get required buffer size
-            UINT RIDataSize = 0;
-            EP_VERIFY_NEQ_SLOW(
-                GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &RIDataSize, sizeof(RAWINPUTHEADER)), 
-                UINT(-1));
+            UINT RIDataSize = sizeof(RAWINPUT);
+            BYTE RIData[sizeof(RAWINPUT)];
 
-            // Allocate buffer
-            LPBYTE RIData = new BYTE[RIDataSize];
-            EP_ASSERT_SLOW(RIData != NULL);
+            EP_VERIFY_SLOW(
+                GetRawInputData((HRAWINPUT)lParam, RID_INPUT, RIData, &RIDataSize, sizeof(RAWINPUTHEADER))
+                <= RIDataSize);
 
-            // Populate buffer and dispatch object
-            EP_VERIFY_EQ_SLOW(
-                GetRawInputData((HRAWINPUT)lParam, RID_INPUT, RIData, &RIDataSize, sizeof(RAWINPUTHEADER)), 
-                RIDataSize);
             Events::Dispatch(EventTypes::Win32_RawInput, (RAWINPUT*)RIData);
-
-            // Deallocate buffer
-            delete[] RIData;
 
 			return DefWindowProc(hWnd, message, wParam, lParam);
             break;
