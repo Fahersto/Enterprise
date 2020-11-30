@@ -28,4 +28,9 @@ EP_EVENTTYPE_DEF(MousePosition,                                     EventCategor
 EP_EVENTTYPE_DEF(ControllerWake,		EventCategories::Connectivity);
 EP_EVENTTYPE_DEF(ControllerDisconnect,	EventCategories::Connectivity);
 
+// Platform-exclusive
+#ifdef _WIN32
+EP_EVENTTYPE_DEF(Win32_RawInput);
+#endif // _WIN32
+
 }

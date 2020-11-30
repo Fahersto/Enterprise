@@ -15,7 +15,8 @@
 /// @param wParam The word parameter value.
 /// @param lParam The long parameter value.
 /// @return The LRESULT response to the message.
-LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
     using Enterprise::Events;
 
     switch (message)
@@ -38,25 +39,31 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         case WM_MOUSEMOVE: // Mouse cursor position change
             Events::Dispatch(EventTypes::MousePosition, std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
             break;
-            
-		case WM_INPUT: // Raw input API
-		{
-			// Get size of header.  Needed to get header.
-			UINT dwSize = 0;
-            EP_VERIFYF_NEQ_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)), UINT(-1),
-								"GetRawInputData() failure getting pData buffer size in WM_INPUT event.");
 
-			// Get header
-			LPBYTE lpb = new BYTE[dwSize]; // TODO: Move this to the stack.
-			EP_VERIFYF_NEQ_SLOW(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)), UINT(-1),
-								"GetRawInputData() failure getting RAWINPUTHEADER in WM_INPUT event.");
-			EP_ASSERTF_SLOW(lpb, "GetRawInputData() set pData to NULL in WM_INPUT event.");
-			RAWINPUT* data = (RAWINPUT*)lpb; //Cast input data
-			delete[] lpb;
+        case WM_INPUT: // Raw Input API
+        {
+            // Get required buffer size
+            UINT RIDataSize = 0;
+            EP_VERIFY_NEQ_SLOW(
+                GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &RIDataSize, sizeof(RAWINPUTHEADER)), 
+                UINT(-1));
 
-			// TODO: Use raw input data
-			break;
-		}
+            // Allocate buffer
+            LPBYTE RIData = new BYTE[RIDataSize];
+            EP_ASSERT_SLOW(RIData != NULL);
+
+            // Populate buffer and dispatch object
+            EP_VERIFY_EQ_SLOW(
+                GetRawInputData((HRAWINPUT)lParam, RID_INPUT, RIData, &RIDataSize, sizeof(RAWINPUTHEADER)), 
+                RIDataSize);
+            Events::Dispatch(EventTypes::Win32_RawInput, (RAWINPUT*)RIData);
+
+            // Deallocate buffer
+            delete[] RIData;
+
+			return DefWindowProc(hWnd, message, wParam, lParam);
+            break;
+        }
 		default: // Pass unhandled messages back to the base procedure
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;

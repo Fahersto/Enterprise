@@ -19,13 +19,61 @@ static Enterprise::Input::ControllerID xinputToGamepadID[4] =
 };
 static std::vector<bool> isGamepadIDActive;
 
+static bool ProcessRawInputEvent(Events::Event& e)
+{
+    RAWINPUT* data = Events::Unpack<RAWINPUT*>(e);
+
+    //if (data->header.dwType == RIM_TYPEKEYBOARD)
+    //{
+    //    EP_TRACE("Kbd: make={} Flags:{} Reserved:{} ExtraInformation:{}, msg={} VK={}",
+    //             data->data.keyboard.MakeCode,
+    //             data->data.keyboard.Flags,
+    //             data->data.keyboard.Reserved,
+    //             data->data.keyboard.ExtraInformation,
+    //             data->data.keyboard.Message,
+    //             data->data.keyboard.VKey);
+    //}
+    //else if (data->header.dwType == RIM_TYPEMOUSE)
+    //{
+    //    EP_TRACE("Mouse: usFlags={} ulButtons={} usButtonFlags={} usButtonData={} ulRawButtons={} lLastX={} lLastY={} ulExtraInformation={}",
+    //             data->data.mouse.usFlags,
+    //             data->data.mouse.ulButtons,
+    //             data->data.mouse.usButtonFlags,
+    //             data->data.mouse.usButtonData,
+    //             data->data.mouse.ulRawButtons,
+    //             data->data.mouse.lLastX,
+    //             data->data.mouse.lLastY,
+    //             data->data.mouse.ulExtraInformation);
+    //}
+
+    return true;
+}
+
 void Enterprise::Input::PlatformInit()
 {
-    // Unused on Windows for XInput.
+    // Raw Input registration (keyboard and mouse)
+    RAWINPUTDEVICE device[2];
+
+    // Mouse
+    device[0].usUsagePage = 0x01;
+    device[0].usUsage = 0x02;
+    device[0].dwFlags = 0;
+    device[0].hwndTarget = NULL;
+
+    // Keyboard
+    device[1].usUsagePage = 0x01;
+    device[1].usUsage = 0x06;
+    device[1].dwFlags = RIDEV_NOLEGACY;
+    device[1].hwndTarget = NULL;
+
+    EP_VERIFY_NEQ(RegisterRawInputDevices(device, 2, sizeof(device[0])), FALSE);
+
+    Events::SubscribeToType(EventTypes::Win32_RawInput, &ProcessRawInputEvent);
 }
 
 void Enterprise::Input::GetRawInput()
 {
+    // XInput
     DWORD dwResult;
     for (DWORD i = 0; i < XUSER_MAX_COUNT; i++)
     {

@@ -47,4 +47,11 @@ extern const Events::EventType ControllerWake;
 /// A player's assigned controller has been disconnected. | PlayerID player
 extern const Events::EventType ControllerDisconnect;
 
+// Platform-exclusive
+
+#ifdef _WIN32
+/// (Platform exclusive) A Raw Input API event.  Do not use in game code! | RAWINPUT* data
+extern const Events::EventType Win32_RawInput;
+#endif
+
 }
