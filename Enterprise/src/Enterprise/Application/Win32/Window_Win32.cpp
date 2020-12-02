@@ -53,8 +53,15 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 			return DefWindowProc(hWnd, message, wParam, lParam);
             break;
-        }
-		default: // Pass unhandled messages back to the base procedure
+		}
+		case WM_SYSCOMMAND: // Prevent opening the window menu with the Alt key
+			if (wParam == SC_KEYMENU && (lParam >> 16) <= 0)
+				return 0;
+			else
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			break;
+
+		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;
 	}
