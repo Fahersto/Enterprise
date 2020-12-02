@@ -279,7 +279,7 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 static std::string ControlIDToString(Enterprise::ControlID id)
 {
 	#define CONTROLIDTOSTRIMPL(control) \
-	if (id == Enterprise::ControlID:: ## control) return #control
+	if (id == Enterprise::ControlID:: control) return #control
 
 	CONTROLIDTOSTRIMPL(GP_Dpad_Up);
 	CONTROLIDTOSTRIMPL(GP_Dpad_Down);
