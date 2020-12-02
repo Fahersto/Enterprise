@@ -1,6 +1,8 @@
 #pragma once
 #include "EP_PCH.h"
 #include "Core.h"
+
+#include "Enterprise/Events/Events.h"
 #include "ControlIDs.h"
 
 #define EP_PLAYERID_NULL Enterprise::Input::PlayerID(-2)
@@ -95,7 +97,7 @@ public:
 						 "  Context Name: {}", HN_ToStr(axesNames[i]), HN_ToStr(contextName));
 			}
 
-			BindingStack.back().ActionOrAxes[i] = axesNames[i];
+			BindingStack.back().ActionOrAxesHN[i] = axesNames[i];
 		}
 	}
 
@@ -117,11 +119,13 @@ private:
 
 		/// Bit field representing the up/down state for every key and mouse button.
 		uint64_t keys[2][2] = { 0 };
+
 		/// Bit field representing whether a key has been blocked by a prior blocking context.
 		uint64_t keys_blockstatus[2] = { 0 };
 
 		/// Current state of all mouse axes.
 		float axes[2][size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1] = { 0 };
+
 		/// Whether a given axis has been blocked by a prior blocking context.
 		bool axes_blockstatus[size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1] = { 0 };
 		
@@ -140,11 +144,13 @@ private:
 
 		/// Bit field representing the up/down state for every button.
 		uint16_t buttons[2] = { 0 };
+
 		/// Bit field representing whether a button has been blocked by a prior blocking context.
 		uint16_t buttons_blockstatus = { 0 };
 
 		/// Current state of all gamepad axes.
 		float axes[2][size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1] = { 0 };
+
 		/// Whether a given axis has been blocked by a prior blocking context.
 		bool axes_blockstatus[size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1] = { 0 };
 	};
@@ -154,12 +160,12 @@ private:
 
 	struct Binding
 	{
-		void* callback;
-		HashName ContextName;
-		HashName ActionOrAxes[Constants::MaxAxesPerBinding];
+		void* callbackPtr;
+		HashName ContextHN;
+		HashName ActionOrAxesHN[Constants::MaxAxesPerBinding];
 		PlayerID playerID;
 		uint_fast8_t NumOfAxes;
-		bool bBlocking;
+		bool isBlocking;
 	};
 
 	struct ActionMapping
@@ -177,6 +183,7 @@ private:
 	static std::unordered_map<HashName, std::unordered_map<HashName, std::vector<AxisMapping>>> AxisMap;
 	static std::vector<Binding> BindingStack;
 
+	static bool HandlePlatformEvents(Events::Event& e);
 	static void GetRawInput();
 	static void CheckForControllerWake();
 	static PlayerID UnassignController(ControllerID controller);

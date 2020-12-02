@@ -19,35 +19,6 @@ static Enterprise::Input::ControllerID xinputToGamepadID[4] =
 };
 static std::vector<bool> isGamepadIDActive;
 
-static bool ProcessRawInputEvent(Events::Event& e)
-{
-    RAWINPUT* data = Events::Unpack<RAWINPUT*>(e);
-
-    //if (data->header.dwType == RIM_TYPEKEYBOARD)
-    //{
-    //    EP_TRACE("Kbd: make={} Flags:{} Reserved:{} ExtraInformation:{}, msg={} VK={}",
-    //             data->data.keyboard.MakeCode,
-    //             data->data.keyboard.Flags,
-    //             data->data.keyboard.Reserved,
-    //             data->data.keyboard.ExtraInformation,
-    //             data->data.keyboard.Message,
-    //             data->data.keyboard.VKey);
-    //}
-    //else if (data->header.dwType == RIM_TYPEMOUSE)
-    //{
-    //    EP_TRACE("Mouse: usFlags={} ulButtons={} usButtonFlags={} usButtonData={} ulRawButtons={} lLastX={} lLastY={} ulExtraInformation={}",
-    //             data->data.mouse.usFlags,
-    //             data->data.mouse.ulButtons,
-    //             data->data.mouse.usButtonFlags,
-    //             data->data.mouse.usButtonData,
-    //             data->data.mouse.ulRawButtons,
-    //             data->data.mouse.lLastX,
-    //             data->data.mouse.lLastY,
-    //             data->data.mouse.ulExtraInformation);
-    //}
-
-    return true;
-}
 
 void Enterprise::Input::PlatformInit()
 {
@@ -57,18 +28,189 @@ void Enterprise::Input::PlatformInit()
     // Mouse
     device[0].usUsagePage = 0x01;
     device[0].usUsage = 0x02;
-    device[0].dwFlags = 0;
+    device[0].dwFlags = 0; // Disabling legacy messages appears to block regular window interaction.
     device[0].hwndTarget = NULL;
 
     // Keyboard
     device[1].usUsagePage = 0x01;
     device[1].usUsage = 0x06;
-    device[1].dwFlags = RIDEV_NOLEGACY;
+    device[1].dwFlags = 0; // Disabling legacy messages means no WM_CHAR.
     device[1].hwndTarget = NULL;
 
     EP_VERIFY_NEQ(RegisterRawInputDevices(device, 2, sizeof(device[0])), FALSE);
 
-    Events::SubscribeToType(EventTypes::Win32_RawInput, &ProcessRawInputEvent);
+    Events::SubscribeToType(EventTypes::Win32_RawInput, &HandlePlatformEvents);
+}
+
+bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
+{
+    // Ensure that virtual-key codes have the expected relationship to the ControlID enum values
+
+    // One-offs (these don't break anything if changed, but changes warrant consideration)
+    static_assert(VK_BACK + 18 == uint16_t(ControlID::KB_Backspace));
+    static_assert(VK_TAB + 18 == uint16_t(ControlID::KB_Tab));
+    static_assert(VK_RETURN + 15 == uint16_t(ControlID::KB_Enter));
+    static_assert(VK_PAUSE + 10 == uint16_t(ControlID::KB_PauseBreak));
+    static_assert(VK_CAPITAL + 10 == uint16_t(ControlID::KB_CapsLock));
+    static_assert(VK_ESCAPE + 4 == uint16_t(ControlID::KB_Esc));
+    static_assert(VK_SNAPSHOT - 3 == uint16_t(ControlID::KB_PrintScreen));
+    static_assert(VK_INSERT - 3 == uint16_t(ControlID::KB_Insert));
+    static_assert(VK_DELETE - 3 == uint16_t(ControlID::KB_Delete));
+    static_assert(VK_NUMLOCK - 34 == uint16_t(ControlID::KB_NumLock));
+    static_assert(VK_SCROLL - 34 == uint16_t(ControlID::KB_ScrollLock));
+
+    // ControlID == vkey + 0
+    static_assert(VK_SPACE + 0 == uint16_t(ControlID::KB_Space));
+    static_assert(VK_PRIOR + 0 == uint16_t(ControlID::KB_PageUp));
+    static_assert(VK_NEXT + 0 == uint16_t(ControlID::KB_PageDown));
+    static_assert(VK_END + 0 == uint16_t(ControlID::KB_End));
+    static_assert(VK_HOME + 0 == uint16_t(ControlID::KB_Home));
+    static_assert(VK_LEFT + 0 == uint16_t(ControlID::KB_Left));
+    static_assert(VK_UP + 0 == uint16_t(ControlID::KB_Up));
+    static_assert(VK_RIGHT + 0 == uint16_t(ControlID::KB_Right));
+    static_assert(VK_DOWN + 0 == uint16_t(ControlID::KB_Down));
+
+    // ControlID == vkey - 4
+    static_assert(0x30 - 4 == uint16_t(ControlID::KB_0));
+    // ...
+    static_assert(0x39 - 4 == uint16_t(ControlID::KB_9));
+
+    // ControlID == vkey - 11
+    static_assert(0x41 - 11 == uint16_t(ControlID::KB_A));
+    // ...
+    static_assert(0x5A - 11 == uint16_t(ControlID::KB_Z));
+    static_assert(0x5B - 11 == uint16_t(ControlID::KB_LSuper));
+    static_assert(0x5C - 11 == uint16_t(ControlID::KB_RSuper));
+
+    // ControlID == vkey - 14
+    static_assert(0x60 - 14 == uint16_t(ControlID::KB_Numpad_0));
+    // ...
+    static_assert(0x69 - 14 == uint16_t(ControlID::KB_Numpad_9));
+    static_assert(VK_MULTIPLY - 14 == uint16_t(ControlID::KB_Numpad_Muliply));
+    static_assert(VK_ADD - 14 == uint16_t(ControlID::KB_Numpad_Add));
+    static_assert(VK_SEPARATOR - 14 == uint16_t(ControlID::KB_Numpad_Enter));
+    static_assert(VK_SUBTRACT - 14 == uint16_t(ControlID::KB_Numpad_Subtract));
+    static_assert(VK_DECIMAL - 14 == uint16_t(ControlID::KB_Numpad_Decimal));
+    static_assert(VK_DIVIDE - 14 == uint16_t(ControlID::KB_Numpad_Divide));
+    static_assert(VK_F1 - 14 == uint16_t(ControlID::KB_F1));
+    // ...
+    static_assert(VK_F12 - 14 == uint16_t(ControlID::KB_F12));
+
+    // ControlID == vkey - 48
+    static_assert(VK_LSHIFT - 48 == uint16_t(ControlID::KB_LShift));
+    static_assert(VK_RSHIFT - 48 == uint16_t(ControlID::KB_RShift));
+    static_assert(VK_LCONTROL - 48 == uint16_t(ControlID::KB_LCtrl));
+    static_assert(VK_RCONTROL - 48 == uint16_t(ControlID::KB_RCtrl));
+    static_assert(VK_LMENU - 48 == uint16_t(ControlID::KB_LAlt));
+    static_assert(VK_RMENU - 48 == uint16_t(ControlID::KB_RAlt));
+
+    // ControlID == vkey - 68
+    static_assert(VK_OEM_1 - 68 == uint16_t(ControlID::KB_Semicolon));
+    static_assert(VK_OEM_PLUS - 68 == uint16_t(ControlID::KB_Plus));
+    static_assert(VK_OEM_COMMA - 68 == uint16_t(ControlID::KB_Comma));
+    static_assert(VK_OEM_MINUS - 68 == uint16_t(ControlID::KB_Minus));
+    static_assert(VK_OEM_PERIOD - 68 == uint16_t(ControlID::KB_Period));
+    static_assert(VK_OEM_2 - 68 == uint16_t(ControlID::KB_FSlash));
+    static_assert(VK_OEM_3 - 68 == uint16_t(ControlID::KB_Tilde));
+
+    // ControlID == vkey - 94
+    static_assert(VK_OEM_4 - 94 == uint16_t(ControlID::KB_LBracket));
+    static_assert(VK_OEM_5 - 94 == uint16_t(ControlID::KB_BSlash));
+    static_assert(VK_OEM_6 - 94 == uint16_t(ControlID::KB_RBracket));
+    static_assert(VK_OEM_7 - 94 == uint16_t(ControlID::KB_Quote));
+
+    // Get the RawInput structure
+    RAWINPUT* ridata = Events::Unpack<RAWINPUT*>(e);
+    ControlID control = ControlID::_EndOfIDs;
+    bool isDownAction;
+
+    if (ridata->header.dwType == RIM_TYPEKEYBOARD)
+    {
+        USHORT keycode = ridata->data.keyboard.VKey;
+        isDownAction = !(ridata->data.keyboard.Flags & 0x01);
+
+        // Determine handedness of Shift, Control, and Alt keys
+        if (keycode == VK_SHIFT) { keycode = MapVirtualKey(ridata->data.keyboard.MakeCode, MAPVK_VSC_TO_VK_EX); }
+        if (keycode == VK_CONTROL) { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_RCONTROL : VK_LCONTROL; }
+        if (keycode == VK_MENU) { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_RMENU : VK_LMENU; }
+
+        // Distinguish Return vs. number pad Enter
+        if (keycode == VK_RETURN) { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_SEPARATOR : VK_RETURN; }
+
+        // Undo vkey transforms caused by (a lack of) number lock
+        if (keycode == VK_INSERT) { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_INSERT : VK_NUMPAD0; }
+        if (keycode == VK_END)    { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_END    : VK_NUMPAD1; }
+        if (keycode == VK_DOWN)   { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_DOWN   : VK_NUMPAD2; }
+        if (keycode == VK_NEXT)   { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_NEXT   : VK_NUMPAD3; }
+        if (keycode == VK_LEFT)   { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_LEFT   : VK_NUMPAD4; }
+        if (keycode == VK_CLEAR)  { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_CLEAR  : VK_NUMPAD5; }
+        if (keycode == VK_RIGHT)  { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_RIGHT  : VK_NUMPAD6; }
+        if (keycode == VK_HOME)   { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_HOME   : VK_NUMPAD7; }
+        if (keycode == VK_UP)     { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_UP     : VK_NUMPAD8; }
+        if (keycode == VK_PRIOR)  { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_PRIOR  : VK_NUMPAD9; }
+        if (keycode == VK_DELETE) { keycode = ridata->data.keyboard.Flags & RI_KEY_E0 ? VK_DELETE : VK_DECIMAL; }
+
+        // Map the vkey to a ControlID
+		switch (keycode)
+		{
+        case 0xFF:
+            break;
+		case VK_BACK:
+			control = ControlID::KB_Backspace;
+			break;
+		case VK_TAB:
+			control = ControlID::KB_Tab;
+			break;
+		case VK_RETURN:
+			control = ControlID::KB_Enter;
+			break;
+		case VK_PAUSE:
+			control = ControlID::KB_PauseBreak;
+			break;
+		case VK_CAPITAL:
+			control = ControlID::KB_CapsLock;
+			break;
+		case VK_ESCAPE:
+			control = ControlID::KB_Esc;
+			break;
+        case VK_SNAPSHOT: 
+            control = ControlID::KB_PrintScreen;
+            break;
+        case VK_INSERT:
+            control = ControlID::KB_Insert;
+            break;
+        case VK_DELETE:
+            control = ControlID::KB_Delete;
+            break;
+		case VK_NUMLOCK:
+			control = ControlID::KB_NumLock;
+			break;
+		case VK_SCROLL:
+			control = ControlID::KB_ScrollLock;
+            break;
+        default:
+			if (keycode >= VK_SPACE && keycode <= VK_DELETE) { control = ControlID(keycode); } // ControlID == vkey + 0
+			else if (keycode >= 0x30 && keycode <= 0x39) { control = ControlID(keycode - 4); } // ControlID == vkey - 4
+			else if (keycode >= 0x41 && keycode <= 0x5C) { control = ControlID(keycode - 11); } // ControlID == vkey - 11
+			else if (keycode >= VK_LSHIFT && keycode <= VK_RMENU) { control = ControlID(keycode - 48); } // ControlID == vkey - 48
+			else if (keycode >= 0x60 && keycode <= VK_F12) { control = ControlID(keycode - 14); } // ControlID == vkey - 14
+			else if (keycode >= VK_OEM_1 && keycode <= VK_OEM_3) { control = ControlID(keycode - 68); } // ControlID == vkey - 68
+			else if (keycode >= VK_OEM_4 && keycode <= VK_OEM_7) { control = ControlID(keycode - 94); } // ControlID == vkey - 94
+			break;
+		}
+
+        uint16_t bufferIndex = uint16_t(control) - uint16_t(ControlID::_EndOfGPAxes) - 1;
+        if (isDownAction)
+            kbmBuffer.keys[currentBuffer][bufferIndex > 63] |= bufferIndex > 63 ? BIT(bufferIndex % 64) : BIT(bufferIndex);
+        else
+            kbmBuffer.keys[currentBuffer][bufferIndex > 63] &= bufferIndex > 63 ? ~(BIT(bufferIndex % 64)) : ~(BIT(bufferIndex));
+    }
+    else if (ridata->header.dwType == RIM_TYPEMOUSE)
+    {
+        // TODO: Handle mouse events
+    }
+
+    return true;
 }
 
 void Enterprise::Input::GetRawInput()

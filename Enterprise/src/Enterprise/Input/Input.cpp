@@ -1,7 +1,9 @@
 #include "EP_PCH.h"
 #include "Input.h"
 #include "Enterprise/File/File.h"
+
 #include "InputEvents.h"
+#include "Enterprise/Application/ApplicationEvents.h"
 
 #define EP_INPUT_BLOCKER uint_fast8_t(-1)
 
@@ -205,8 +207,8 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(KB_X);
 	STRTOCONTROLIDIMPL(KB_Y);
 	STRTOCONTROLIDIMPL(KB_Z);
-	STRTOCONTROLIDIMPL(KB_Super_Left);
-	STRTOCONTROLIDIMPL(KB_Super_Right);
+	STRTOCONTROLIDIMPL(KB_LSuper);
+	STRTOCONTROLIDIMPL(KB_RSuper);
 	STRTOCONTROLIDIMPL(KB_Numpad_0);
 	STRTOCONTROLIDIMPL(KB_Numpad_1);
 	STRTOCONTROLIDIMPL(KB_Numpad_2);
@@ -219,6 +221,7 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(KB_Numpad_9);
 	STRTOCONTROLIDIMPL(KB_Numpad_Muliply);
 	STRTOCONTROLIDIMPL(KB_Numpad_Add);
+	STRTOCONTROLIDIMPL(KB_Numpad_Enter);
 	STRTOCONTROLIDIMPL(KB_Numpad_Subtract);
 	STRTOCONTROLIDIMPL(KB_Numpad_Decimal);
 	STRTOCONTROLIDIMPL(KB_Numpad_Divide);
@@ -236,27 +239,190 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(KB_F12);
 	STRTOCONTROLIDIMPL(KB_NumLock);
 	STRTOCONTROLIDIMPL(KB_ScrollLock);
-	STRTOCONTROLIDIMPL(KB_Shift_Left);
-	STRTOCONTROLIDIMPL(KB_Shift_Right);
-	STRTOCONTROLIDIMPL(KB_Ctrl_Left);
-	STRTOCONTROLIDIMPL(KB_Ctrl_Right);
-	STRTOCONTROLIDIMPL(KB_Menu_Left);
-	STRTOCONTROLIDIMPL(KB_Menu_Right);
+	STRTOCONTROLIDIMPL(KB_LShift);
+	STRTOCONTROLIDIMPL(KB_RShift);
+	STRTOCONTROLIDIMPL(KB_LCtrl);
+	STRTOCONTROLIDIMPL(KB_RCtrl);
+	STRTOCONTROLIDIMPL(KB_LAlt);
+	STRTOCONTROLIDIMPL(KB_RAlt);
 	STRTOCONTROLIDIMPL(Mouse_Button_1);
 	STRTOCONTROLIDIMPL(Mouse_Button_2);
 	STRTOCONTROLIDIMPL(Mouse_Button_3);
 	STRTOCONTROLIDIMPL(Mouse_Button_4);
 	STRTOCONTROLIDIMPL(Mouse_Button_5);
 	STRTOCONTROLIDIMPL(Mouse_Wheel_Y);
-	STRTOCONTROLIDIMPL(Mouse_Wheel_X);
-	STRTOCONTROLIDIMPL(Mouse_Pointer_X);
-	STRTOCONTROLIDIMPL(Mouse_Pointer_Y);
-	STRTOCONTROLIDIMPL(Mouse_Delta_X);
-	STRTOCONTROLIDIMPL(Mouse_Delta_Y);
+    STRTOCONTROLIDIMPL(Mouse_Wheel_X);
+    STRTOCONTROLIDIMPL(Mouse_Pointer_X);
+    STRTOCONTROLIDIMPL(Mouse_Pointer_Y);
+    STRTOCONTROLIDIMPL(Mouse_Delta_X);
+    STRTOCONTROLIDIMPL(Mouse_Delta_Y);
+    STRTOCONTROLIDIMPL(KB_Semicolon);
+	STRTOCONTROLIDIMPL(KB_Plus);
+	STRTOCONTROLIDIMPL(KB_Comma);
+	STRTOCONTROLIDIMPL(KB_Minus);
+	STRTOCONTROLIDIMPL(KB_Period);
+	STRTOCONTROLIDIMPL(KB_FSlash);
+	STRTOCONTROLIDIMPL(KB_Tilde);
+	STRTOCONTROLIDIMPL(KB_LBracket);
+	STRTOCONTROLIDIMPL(KB_BSlash);
+	STRTOCONTROLIDIMPL(KB_RBracket);
+	STRTOCONTROLIDIMPL(KB_Quote);
 
 	#undef STRTOCONTROLIDIMPL
 
 	return std::pair(false, Enterprise::ControlID::_EndOfIDs);
+}
+
+/// Converts a ControlID into a string.
+/// @param id ControlID to convert
+/// @return The string name of the ControlID.
+static std::string ControlIDToString(Enterprise::ControlID id)
+{
+	#define CONTROLIDTOSTRIMPL(control) \
+	if (id == Enterprise::ControlID:: ## control) return #control
+
+	CONTROLIDTOSTRIMPL(GP_Dpad_Up);
+	CONTROLIDTOSTRIMPL(GP_Dpad_Down);
+	CONTROLIDTOSTRIMPL(GP_Dpad_Left);
+	CONTROLIDTOSTRIMPL(GP_Dpad_Right);
+	CONTROLIDTOSTRIMPL(GP_Menu);
+	CONTROLIDTOSTRIMPL(GP_Options);
+	CONTROLIDTOSTRIMPL(GP_LStick_Click);
+	CONTROLIDTOSTRIMPL(GP_RStick_Click);
+	CONTROLIDTOSTRIMPL(GP_LShoulder);
+	CONTROLIDTOSTRIMPL(GP_RShoulder);
+	CONTROLIDTOSTRIMPL(GP_FaceButton_Down);
+	CONTROLIDTOSTRIMPL(GP_FaceButton_Right);
+	CONTROLIDTOSTRIMPL(GP_FaceButton_Left);
+	CONTROLIDTOSTRIMPL(GP_FaceButton_Up);
+	CONTROLIDTOSTRIMPL(GP_LTrigger);
+	CONTROLIDTOSTRIMPL(GP_RTrigger);
+	CONTROLIDTOSTRIMPL(GP_LStick_X);
+	CONTROLIDTOSTRIMPL(GP_LStick_Y);
+	CONTROLIDTOSTRIMPL(GP_LStick_NormalX);
+	CONTROLIDTOSTRIMPL(GP_LStick_NormalY);
+	CONTROLIDTOSTRIMPL(GP_RStick_X);
+	CONTROLIDTOSTRIMPL(GP_RStick_Y);
+	CONTROLIDTOSTRIMPL(GP_RStick_NormalX);
+	CONTROLIDTOSTRIMPL(GP_RStick_NormalY);
+	CONTROLIDTOSTRIMPL(KB_Backspace);
+	CONTROLIDTOSTRIMPL(KB_Tab);
+	CONTROLIDTOSTRIMPL(KB_Enter);
+	CONTROLIDTOSTRIMPL(KB_PauseBreak);
+	CONTROLIDTOSTRIMPL(KB_CapsLock);
+	CONTROLIDTOSTRIMPL(KB_Esc);
+	CONTROLIDTOSTRIMPL(KB_Space);
+	CONTROLIDTOSTRIMPL(KB_PageUp);
+	CONTROLIDTOSTRIMPL(KB_PageDown);
+	CONTROLIDTOSTRIMPL(KB_End);
+	CONTROLIDTOSTRIMPL(KB_Home);
+	CONTROLIDTOSTRIMPL(KB_Left);
+	CONTROLIDTOSTRIMPL(KB_Up);
+	CONTROLIDTOSTRIMPL(KB_Right);
+	CONTROLIDTOSTRIMPL(KB_Down);
+	CONTROLIDTOSTRIMPL(KB_PrintScreen);
+	CONTROLIDTOSTRIMPL(KB_Insert);
+	CONTROLIDTOSTRIMPL(KB_Delete);
+	CONTROLIDTOSTRIMPL(KB_0);
+	CONTROLIDTOSTRIMPL(KB_1);
+	CONTROLIDTOSTRIMPL(KB_2);
+	CONTROLIDTOSTRIMPL(KB_3);
+	CONTROLIDTOSTRIMPL(KB_4);
+	CONTROLIDTOSTRIMPL(KB_5);
+	CONTROLIDTOSTRIMPL(KB_6);
+	CONTROLIDTOSTRIMPL(KB_7);
+	CONTROLIDTOSTRIMPL(KB_8);
+	CONTROLIDTOSTRIMPL(KB_9);
+	CONTROLIDTOSTRIMPL(KB_A);
+	CONTROLIDTOSTRIMPL(KB_B);
+	CONTROLIDTOSTRIMPL(KB_C);
+	CONTROLIDTOSTRIMPL(KB_D);
+	CONTROLIDTOSTRIMPL(KB_E);
+	CONTROLIDTOSTRIMPL(KB_F);
+	CONTROLIDTOSTRIMPL(KB_G);
+	CONTROLIDTOSTRIMPL(KB_H);
+	CONTROLIDTOSTRIMPL(KB_I);
+	CONTROLIDTOSTRIMPL(KB_J);
+	CONTROLIDTOSTRIMPL(KB_K);
+	CONTROLIDTOSTRIMPL(KB_L);
+	CONTROLIDTOSTRIMPL(KB_M);
+	CONTROLIDTOSTRIMPL(KB_N);
+	CONTROLIDTOSTRIMPL(KB_O);
+	CONTROLIDTOSTRIMPL(KB_P);
+	CONTROLIDTOSTRIMPL(KB_Q);
+	CONTROLIDTOSTRIMPL(KB_R);
+	CONTROLIDTOSTRIMPL(KB_S);
+	CONTROLIDTOSTRIMPL(KB_T);
+	CONTROLIDTOSTRIMPL(KB_U);
+	CONTROLIDTOSTRIMPL(KB_V);
+	CONTROLIDTOSTRIMPL(KB_W);
+	CONTROLIDTOSTRIMPL(KB_X);
+	CONTROLIDTOSTRIMPL(KB_Y);
+	CONTROLIDTOSTRIMPL(KB_Z);
+	CONTROLIDTOSTRIMPL(KB_LSuper);
+	CONTROLIDTOSTRIMPL(KB_RSuper);
+	CONTROLIDTOSTRIMPL(KB_Numpad_0);
+	CONTROLIDTOSTRIMPL(KB_Numpad_1);
+	CONTROLIDTOSTRIMPL(KB_Numpad_2);
+	CONTROLIDTOSTRIMPL(KB_Numpad_3);
+	CONTROLIDTOSTRIMPL(KB_Numpad_4);
+	CONTROLIDTOSTRIMPL(KB_Numpad_5);
+	CONTROLIDTOSTRIMPL(KB_Numpad_6);
+	CONTROLIDTOSTRIMPL(KB_Numpad_7);
+	CONTROLIDTOSTRIMPL(KB_Numpad_8);
+	CONTROLIDTOSTRIMPL(KB_Numpad_9);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Muliply);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Add);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Enter);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Subtract);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Decimal);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Divide);
+	CONTROLIDTOSTRIMPL(KB_F1);
+	CONTROLIDTOSTRIMPL(KB_F2);
+	CONTROLIDTOSTRIMPL(KB_F3);
+	CONTROLIDTOSTRIMPL(KB_F4);
+	CONTROLIDTOSTRIMPL(KB_F5);
+	CONTROLIDTOSTRIMPL(KB_F6);
+	CONTROLIDTOSTRIMPL(KB_F7);
+	CONTROLIDTOSTRIMPL(KB_F8);
+	CONTROLIDTOSTRIMPL(KB_F9);
+	CONTROLIDTOSTRIMPL(KB_F10);
+	CONTROLIDTOSTRIMPL(KB_F11);
+	CONTROLIDTOSTRIMPL(KB_F12);
+	CONTROLIDTOSTRIMPL(KB_NumLock);
+	CONTROLIDTOSTRIMPL(KB_ScrollLock);
+	CONTROLIDTOSTRIMPL(KB_LShift);
+	CONTROLIDTOSTRIMPL(KB_RShift);
+	CONTROLIDTOSTRIMPL(KB_LCtrl);
+	CONTROLIDTOSTRIMPL(KB_RCtrl);
+	CONTROLIDTOSTRIMPL(KB_LAlt);
+	CONTROLIDTOSTRIMPL(KB_RAlt);
+	CONTROLIDTOSTRIMPL(Mouse_Button_1);
+	CONTROLIDTOSTRIMPL(Mouse_Button_2);
+	CONTROLIDTOSTRIMPL(Mouse_Button_3);
+	CONTROLIDTOSTRIMPL(Mouse_Button_4);
+	CONTROLIDTOSTRIMPL(Mouse_Button_5);
+	CONTROLIDTOSTRIMPL(Mouse_Wheel_Y);
+	CONTROLIDTOSTRIMPL(Mouse_Wheel_X);
+	CONTROLIDTOSTRIMPL(Mouse_Pointer_X);
+	CONTROLIDTOSTRIMPL(Mouse_Pointer_Y);
+	CONTROLIDTOSTRIMPL(Mouse_Delta_X);
+	CONTROLIDTOSTRIMPL(Mouse_Delta_Y);
+	CONTROLIDTOSTRIMPL(KB_Semicolon);
+	CONTROLIDTOSTRIMPL(KB_Plus);
+	CONTROLIDTOSTRIMPL(KB_Comma);
+	CONTROLIDTOSTRIMPL(KB_Minus);
+	CONTROLIDTOSTRIMPL(KB_Period);
+	CONTROLIDTOSTRIMPL(KB_FSlash);
+	CONTROLIDTOSTRIMPL(KB_Tilde);
+	CONTROLIDTOSTRIMPL(KB_LBracket);
+	CONTROLIDTOSTRIMPL(KB_BSlash);
+	CONTROLIDTOSTRIMPL(KB_RBracket);
+	CONTROLIDTOSTRIMPL(KB_Quote);
+
+	#undef CONTROLIDTOSTRIMPL
+
+	return "";
 }
 
 
@@ -494,11 +660,11 @@ void Input::CheckForControllerWake()
 
 
 /// Helper function that binds to and invokes an Axis callback.
-/// @param callback A pointer to the callback function.
+/// @param callbackPtr A pointer to the callback function.
 /// @param player The PlayerID for the call.
 /// @param numOfAxes The number of float parameters in this callback.
 /// @param Axes An array containing the axes values for this binding.
-static void InvokeAxisBindingCallback(void* callback,
+static void InvokeAxisBindingCallback(void* callbackPtr,
 									  Input::PlayerID player, 
 									  int numOfAxes, 
 									  float Axes[Enterprise::Constants::MaxAxesPerBinding])
@@ -508,70 +674,70 @@ static void InvokeAxisBindingCallback(void* callback,
 	case 1:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0]);
 	}
 	break;
 	case 2:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1]);
 	}
 	break;
 	case 3:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2]);
 	}
 	break;
 	case 4:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3]);
 	}
 	break;
 	case 5:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4]);
 	}
 	break;
 	case 6:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5]);
 	}
 	break;
 	case 7:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6]);
 	}
 	break;
 	case 8:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7]);
 	}
 	break;
 	case 9:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7], Axes[8]);
 	}
 	break;
 	case 10:
 	{
 		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callback);
+		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
 		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7], Axes[8], Axes[9]);
 	}
 	break;
@@ -590,8 +756,8 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 		{
 			bool isActionTriggered = false;
 
-			for (auto mappingIt = ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].begin();
-				 mappingIt != ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].end();
+			for (auto mappingIt = ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].begin();
+				 mappingIt != ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].end();
 				 ++mappingIt)
 			{
 				if (mappingIt->controlID > ControlID::_EndOfGPAxes)
@@ -611,7 +777,7 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 							 (kbmBuffer.keys[!currentBuffer][0] & control_flag) &&
 							 !mappingIt->isDownAction);
 
-						kbmBuffer.keys_blockstatus[0] |= control_flag * bindingIt->bBlocking;
+						kbmBuffer.keys_blockstatus[0] |= control_flag * bindingIt->isBlocking;
 					}
 					else if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons &&
 							 size_t(mappingIt->controlID) >= 64 &&
@@ -628,7 +794,7 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 							 (kbmBuffer.keys[!currentBuffer][1] & control_flag) &&
 							 !mappingIt->isDownAction);
 
-						kbmBuffer.keys_blockstatus[1] |= control_flag * bindingIt->bBlocking;
+						kbmBuffer.keys_blockstatus[1] |= control_flag * bindingIt->isBlocking;
 					}
 					else if (!kbmBuffer.axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfKBMouseButtons) - 1])
 					{
@@ -649,7 +815,7 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 							 (kbmBuffer.axes[!currentBuffer][control] < mappingIt->threshold) &&
 							 !mappingIt->isDownAction && mappingIt->threshold < 0);
 
-						kbmBuffer.axes_blockstatus[control] |= bindingIt->bBlocking;
+						kbmBuffer.axes_blockstatus[control] |= bindingIt->isBlocking;
 					}
 					else
 					{
@@ -667,7 +833,7 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 			if (isActionTriggered)
 			{
 				typedef void(*actionCallbackPtr)(PlayerID player);
-				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callback);
+				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callbackPtr);
 				(*callbackPtr)(0);
 			}
 		}
@@ -683,64 +849,65 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 
 		if (!isPlayerInputBlocked[0])
 		{
-			for (int axisID = 0; axisID < bindingIt->NumOfAxes; axisID++)
+			for (int outAxisIndex = 0; outAxisIndex < bindingIt->NumOfAxes; outAxisIndex++)
 			{
-				for (auto mappingIt = AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].begin();
-					 mappingIt != AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].end();
+				for (auto mappingIt = AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[outAxisIndex]].begin();
+					 mappingIt != AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[outAxisIndex]].end();
 					 ++mappingIt)
 				{
-					// At this point, we're iterating through every mappingIt in an axis, then puting it in out axes.
-
-					if (mappingIt->controlID > ControlID::_EndOfGPAxes)
+					if (mappingIt->controlID > ControlID::_EndOfGPAxes) // Check that this is a kb/mouse binding
 					{
-						if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons &&
-							size_t(mappingIt->controlID) < 64 &&
-							!(kbmBuffer.keys_blockstatus[0] & BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1)))
+						if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons)
 						{
-							// Unblocked key, low-order word.
-							uint64_t control_flag = BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1);
+							// This mapping is for a key or mouse button.
+							uint_fast16_t keyIndex = (uint_fast16_t)mappingIt->controlID - (uint_fast16_t)ControlID::_EndOfGPAxes - 1;
 
-							outAxes[axisID] +=
-								(kbmBuffer.keys[currentBuffer][0] & control_flag ? 1.0f : 0.0f) * mappingIt->scale;
+							// Is key bit in high-order word?
+							if (keyIndex < 64)
+							{
+								// Check if key is blocked
+								if (!(kbmBuffer.keys_blockstatus[0] & BIT(keyIndex)))
+								{
+									// Map key to axis
+									if (kbmBuffer.keys[currentBuffer][0] & BIT(keyIndex))
+										outAxes[outAxisIndex] += mappingIt->scale;
 
-							kbmBuffer.keys_blockstatus[0] |= control_flag * bindingIt->bBlocking;
-						}
-						else if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons &&
-								 size_t(mappingIt->controlID) >= 64 &&
-								 !(kbmBuffer.keys_blockstatus[1] & BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1 - 64)))
-						{
-							// Unblocked key, high-order word.
-							uint64_t control_flag = BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1 - 64);
+									// Set key block bit if appropriate
+									kbmBuffer.keys_blockstatus[0] |= BIT(keyIndex) * bindingIt->isBlocking;
+								}
+							}
+							else
+							{
+								// Check if key is blocked
+								if (!(kbmBuffer.keys_blockstatus[1] & BIT(keyIndex % 64)))
+								{
+									// Map key to axis
+									if (kbmBuffer.keys[currentBuffer][1] & BIT(keyIndex % 64))
+										outAxes[outAxisIndex] += mappingIt->scale;
 
-							outAxes[axisID] +=
-								(kbmBuffer.keys[currentBuffer][1] & control_flag ? 1.0f : 0.0f) * mappingIt->scale;
-
-							kbmBuffer.keys_blockstatus[1] |= control_flag * bindingIt->bBlocking;
-						}
-						else if (!kbmBuffer.axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfKBMouseButtons) - 1])
-						{
-							// Unblocked axis.
-							size_t control = size_t(mappingIt->controlID) - size_t(ControlID::_EndOfKBMouseButtons) - 1;
-
-							outAxes[axisID] += kbmBuffer.axes[currentBuffer][control] * mappingIt->scale;
-							kbmBuffer.axes_blockstatus[control] |= bindingIt->bBlocking;
+									// Set key block bit if appropriate
+									kbmBuffer.keys_blockstatus[1] |= BIT(keyIndex % 64) * bindingIt->isBlocking;
+								}
+							}
 						}
 						else
 						{
-							// Blocked control.
-							continue;
+							// this is a mouse axis.
+							uint_fast16_t axisIndex = (uint_fast16_t)mappingIt->controlID - (uint_fast16_t)ControlID::_EndOfKBMouseButtons - 1;
+							if (!kbmBuffer.axes_blockstatus[axisIndex])
+							{
+								// Not blocked.
+
+								outAxes[outAxisIndex] += kbmBuffer.axes[currentBuffer][axisIndex] * mappingIt->scale;
+								kbmBuffer.axes_blockstatus[axisIndex] |= bindingIt->isBlocking;
+							}
 						}
-					}
-					else
-					{
-						// Not a keyboard/mouse binding.
-						continue;
 					}
 				}
 			}
 		}
 
-		InvokeAxisBindingCallback(bindingIt->callback, 0, bindingIt->NumOfAxes, outAxes);
+		InvokeAxisBindingCallback(bindingIt->callbackPtr, 0, bindingIt->NumOfAxes, outAxes);
 	}
 }
 
@@ -756,8 +923,8 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 		{
 			bool isActionTriggered = false;
 
-			for (auto mappingIt = ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].begin();
-				 mappingIt != ActionMap[bindingIt->ContextName][bindingIt->ActionOrAxes[0]].end();
+			for (auto mappingIt = ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].begin();
+				 mappingIt != ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].end();
 				 ++mappingIt)
 			{
 				if (mappingIt->controlID < ControlID::_EndOfGPAxes)
@@ -776,7 +943,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 							 (gpBuffer[gamepad].buttons[!currentBuffer] & control_flag) &&
 							 !mappingIt->isDownAction);
 
-						gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->bBlocking;
+						gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->isBlocking;
 					}
 					else if (!gpBuffer[gamepad]
 							   .axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1])
@@ -798,7 +965,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 							 (gpBuffer[gamepad].axes[!currentBuffer][control] < mappingIt->threshold) &&
 							 !mappingIt->isDownAction && mappingIt->threshold < 0);
 
-						gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->bBlocking;
+						gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->isBlocking;
 					}
 					else
 					{
@@ -816,7 +983,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 			if (isActionTriggered)
 			{
 				typedef void(*actionCallbackPtr)(PlayerID player);
-				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callback);
+				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callbackPtr);
 				(*callbackPtr)(player);
 			}
 		}
@@ -834,8 +1001,8 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 		{
 			for (int axisID = 0; axisID < bindingIt->NumOfAxes; axisID++)
 			{
-				for (auto mappingIt = AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].begin();
-					 mappingIt != AxisMap[bindingIt->ContextName][bindingIt->ActionOrAxes[axisID]].end();
+				for (auto mappingIt = AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[axisID]].begin();
+					 mappingIt != AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[axisID]].end();
 					 ++mappingIt)
 				{
 					if (mappingIt->controlID < ControlID::_EndOfGPAxes)
@@ -849,7 +1016,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 							outAxes[axisID] += 
 								(gpBuffer[gamepad].buttons[currentBuffer] & control_flag ? 1.0f : 0.0f) * mappingIt->scale;
 
-							gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->bBlocking;
+							gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->isBlocking;
 						}
 						else if (!gpBuffer[gamepad]
 								 .axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1])
@@ -858,7 +1025,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 							size_t control = size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1;
 
 							outAxes[axisID] += gpBuffer[gamepad].axes[currentBuffer][control] * mappingIt->scale;
-							gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->bBlocking;
+							gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->isBlocking;
 						}
 						else
 						{
@@ -875,7 +1042,7 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 			}
 		}
 
-		InvokeAxisBindingCallback(bindingIt->callback, player, bindingIt->NumOfAxes, outAxes);
+		InvokeAxisBindingCallback(bindingIt->callbackPtr, player, bindingIt->NumOfAxes, outAxes);
 	}
 }
 
@@ -920,68 +1087,48 @@ void Input::ProcessBinding(const std::vector<Binding>::reverse_iterator& binding
 }
 
 
-static bool handlePlayer0Disconnect(Events::Event& e)
-{
-	// By default, Player 0 gets reassigned the keyboard and mouse automatically upon controller disconnect.
-	// Devs can override this behavior in their games by handling the ControllerDisconnect event.
-	Input::PlayerID player = Events::Unpack<Input::PlayerID>(e);
-	if (player == Input::PlayerID(0))
-	{
-		Input::AssignControllerToPlayer(Input::PlayerID(0), EP_CONTROLLERID_KBMOUSE);
-	}
-	return true;
-}
-
-
 void Input::Init()
 {
-	// By default, Player 0 is assigned keyboard and mouse.
-	AssignControllerToPlayer(PlayerID(0), EP_CONTROLLERID_KBMOUSE);
-	// Automatically reassign the keyboard and mouse to PlayerID 0 upon controller disconnect.
-	Events::SubscribeToType(EventTypes::ControllerDisconnect, &handlePlayer0Disconnect);
-
 	PlatformInit();
+
+	// Clear event-based input buffers if the window loses focus.
+	Events::SubscribeToType(
+		EventTypes::WindowLostFocus,
+		[](Events::Event& e)
+		{
+			memset(kbmBuffer.keys[currentBuffer], 0, sizeof(kbmBuffer.keys[currentBuffer]));
+			memset(kbmBuffer.axes[currentBuffer], 0, sizeof(kbmBuffer.axes[currentBuffer]));
+			return false;
+		});
+
+	// Assign the keyboard and mouse to PlayerID 0 by default
+	AssignControllerToPlayer(PlayerID(0), EP_CONTROLLERID_KBMOUSE);
 }
 
 
 void Input::Update()
 {
-	// Clear player blockers
-	for (auto bBlocked = isPlayerInputBlocked.begin();
-		 bBlocked != isPlayerInputBlocked.end();
-		 ++bBlocked)
-	{
-		*bBlocked = false;
-	}
-
-	// Clear keyboard blockers
+	// Clear blockers
+	std::fill(isPlayerInputBlocked.begin(), isPlayerInputBlocked.end(), false);
 	kbmBuffer.keys_blockstatus[0] = 0;
 	kbmBuffer.keys_blockstatus[1] = 0;
-	for (size_t i = 0; i < (size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1); i++)
-	{
-		kbmBuffer.axes_blockstatus[i] = false;
-	}
-
-	// Clear gamepad blockers
+	memset(kbmBuffer.axes_blockstatus, 0, sizeof(kbmBuffer.axes_blockstatus));
 	for (auto& gamepadBufferIt : gpBuffer)
 	{
 		gamepadBufferIt.buttons_blockstatus = 0;
-
-		for (size_t i = 0; i < (size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1); i++)
-		{
-			gamepadBufferIt.axes_blockstatus[i] = false;
-		}
+		memset(gamepadBufferIt.axes_blockstatus, false, sizeof(gamepadBufferIt.axes_blockstatus));
 	}
 
+	// Handle input
 	GetRawInput();
 	CheckForControllerWake();
-
-	// Dispatch mapped input
 	for (auto it = BindingStack.rbegin(); it != BindingStack.rend(); ++it)
 	{
 		ProcessBinding(it);
 	}
 
-	// This is done last so OS events can populate the new buffer between frames.
+	// Flip buffers
 	currentBuffer = !currentBuffer;
+	memcpy(kbmBuffer.keys[currentBuffer], kbmBuffer.keys[!currentBuffer], sizeof(kbmBuffer.keys[currentBuffer]));
+	memset(kbmBuffer.axes[currentBuffer], 0, sizeof(kbmBuffer.axes[currentBuffer]));
 }

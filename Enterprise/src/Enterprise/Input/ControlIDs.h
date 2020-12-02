@@ -42,11 +42,7 @@ enum class ControlID
 
 	KB_Backspace,
 	KB_Tab,
-	//KB_Clr, // Is this a thing on Mac keyboards?
 	KB_Enter,
-	//KB_Shift,
-	//KB_Ctrl,
-	//KB_Alt,
 	KB_PauseBreak,
 	KB_CapsLock,
 	KB_Esc,
@@ -73,6 +69,7 @@ enum class ControlID
 	KB_7,
 	KB_8,
 	KB_9,
+
 	KB_A,
 	KB_B,
 	KB_C,
@@ -100,9 +97,8 @@ enum class ControlID
 	KB_Y,
 	KB_Z,
 
-	KB_Super_Left,
-	KB_Super_Right,
-	//KB_Menu,
+	KB_LSuper, // Windows key, Command key
+	KB_RSuper, // Windows key, Command key
 
 	KB_Numpad_0,
 	KB_Numpad_1,
@@ -116,10 +112,11 @@ enum class ControlID
 	KB_Numpad_9,
 	KB_Numpad_Muliply,
 	KB_Numpad_Add,
-	//KB_Numpad_Separator, //Enter key?
+	KB_Numpad_Enter,
 	KB_Numpad_Subtract,
 	KB_Numpad_Decimal,
 	KB_Numpad_Divide,
+
 	KB_F1,
 	KB_F2,
 	KB_F3,
@@ -131,18 +128,29 @@ enum class ControlID
 	KB_F9,
 	KB_F10,
 	KB_F11,
-	KB_F12, // Are the other function keys common on mac?
+	KB_F12,
 
-	KB_NumLock,
+	KB_NumLock, // Clear key on Mac
 	KB_ScrollLock,
 
-	KB_Shift_Left,
-	KB_Shift_Right,
-	KB_Ctrl_Left,
-	KB_Ctrl_Right,
-	KB_Menu_Left,
-	KB_Menu_Right,
+	KB_LShift,
+	KB_RShift,
+	KB_LCtrl,
+	KB_RCtrl,
+	KB_LAlt,
+	KB_RAlt,
 
+	KB_Semicolon,
+	KB_Plus,
+	KB_Comma,
+	KB_Minus,
+	KB_Period,
+	KB_FSlash,
+	KB_Tilde,
+	KB_LBracket,
+	KB_BSlash,
+	KB_RBracket,
+	KB_Quote,
 
 	// Mouse
 	Mouse_Button_1, // Left
