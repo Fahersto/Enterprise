@@ -43,8 +43,8 @@ enum class ControlID
 	KB_Backspace,
 	KB_Tab,
 	KB_Enter,
-	KB_PauseBreak,
-	KB_CapsLock,
+	KB_PauseBreak, // F15 on macOS
+	KB_CapsLock, // Windows only
 	KB_Esc,
 	KB_Space,
 	KB_PageUp,
@@ -55,8 +55,8 @@ enum class ControlID
 	KB_Up,
 	KB_Right,
 	KB_Down,
-	KB_PrintScreen,
-	KB_Insert,
+	KB_PrintScreen, // F13 on macOS
+	KB_Insert, // Windows only
 	KB_Delete,
 
 	KB_0,
@@ -100,6 +100,7 @@ enum class ControlID
 	KB_LSuper, // Windows key, Command key
 	KB_RSuper, // Windows key, Command key
 
+	KB_Numpad_Equals, // macOS only
 	KB_Numpad_0,
 	KB_Numpad_1,
 	KB_Numpad_2,
@@ -129,9 +130,13 @@ enum class ControlID
 	KB_F10,
 	KB_F11,
 	KB_F12,
+	KB_F16, // macOS only
+	KB_F17, // macOS only
+	KB_F18, // macOS only
+	KB_F19, // macOS only
 
 	KB_NumLock, // Clear key on Mac
-	KB_ScrollLock,
+	KB_ScrollLock, // F14 on macOS
 
 	KB_LShift,
 	KB_RShift,

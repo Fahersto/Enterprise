@@ -33,4 +33,9 @@ EP_EVENTTYPE_DEF(ControllerDisconnect,	EventCategories::Connectivity);
 EP_EVENTTYPE_DEF(Win32_RawInput);
 #endif // _WIN32
 
+#if defined(__APPLE__) && defined(__MACH__)
+EP_EVENTTYPE_DEF(macOS_keyEvent);
+EP_EVENTTYPE_DEF(macOS_flagsChanged);
+#endif
+
 }

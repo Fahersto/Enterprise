@@ -17,23 +17,41 @@
 @implementation macOSWindowDelegate
 
 // The user has clicked the close button.
-- (BOOL)windowShouldClose:(NSWindow*)sender {
+- (BOOL)windowShouldClose:(NSWindow*)sender
+{
     Enterprise::Events::Dispatch(EventTypes::WindowClose);
     return NO; /// Window is closed automatically if the program terminates.  We don't do it here.
 }
 
 // The user has moved the window.
-- (void)windowDidMove:(NSNotification *)notification {
+- (void)windowDidMove:(NSNotification *)notification
+{
     // TODO: Set up consistent coordinate system across platforms
     Events::Dispatch(EventTypes::WindowMove, std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
 }
 
 // Window focus changed
-- (void)windowDidBecomeKey:(NSNotification *)notification {
+- (void)windowDidBecomeKey:(NSNotification *)notification
+{
     Events::Dispatch(EventTypes::WindowFocus);
 }
-- (void)windowDidResignKey:(NSNotification *)notification {
+- (void)windowDidResignKey:(NSNotification *)notification
+{
     Events::Dispatch(EventTypes::WindowLostFocus);
+}
+
+// Keyboard input
+- (void)keyDown:(NSEvent *)event
+{
+	Events::Dispatch(EventTypes::macOS_keyEvent, std::pair<unsigned short, bool>(event.keyCode, true));
+}
+- (void)keyUp:(NSEvent *)event
+{
+	Events::Dispatch(EventTypes::macOS_keyEvent, std::pair<unsigned short, bool>(event.keyCode, false));
+}
+- (void)flagsChanged:(NSEvent *)event
+{
+	Events::Dispatch(EventTypes::macOS_flagsChanged, (uint64_t)event.modifierFlags);
 }
 
 

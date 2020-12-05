@@ -54,4 +54,11 @@ extern const Events::EventType ControllerDisconnect;
 extern const Events::EventType Win32_RawInput;
 #endif
 
+#if defined(__APPLE__) && defined(__MACH__)
+/// (Platform exclusive) A Cocoa key event.  Do not use in game code! | std::pair(unsigned short keyCode, bool isDownAction)
+extern const Events::EventType macOS_keyEvent;
+/// (Platform exclusive) A Cocoa flagsChanged event.  Do not use in game code! | uint64_t flags
+extern const Events::EventType macOS_flagsChanged;
+#endif
+
 }
