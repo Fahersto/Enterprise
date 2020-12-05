@@ -130,6 +130,9 @@ enum class ControlID
 	KB_F10,
 	KB_F11,
 	KB_F12,
+	// F13 correlates to PrintScreen on macOS
+	// F14 correlates to ScrollLock on macOS
+	// F15 correlates to PauseBreak on macOS
 	KB_F16, // macOS only
 	KB_F17, // macOS only
 	KB_F18, // macOS only
