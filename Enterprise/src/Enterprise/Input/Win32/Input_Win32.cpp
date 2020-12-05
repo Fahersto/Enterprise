@@ -199,11 +199,14 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 			break;
 		}
 
-        uint16_t bufferIndex = uint16_t(control) - uint16_t(ControlID::_EndOfGPAxes) - 1;
-        if (isDownAction)
-            kbmBuffer.keys[currentBuffer][bufferIndex > 63] |= bufferIndex > 63 ? BIT(bufferIndex % 64) : BIT(bufferIndex);
-        else
-            kbmBuffer.keys[currentBuffer][bufferIndex > 63] &= bufferIndex > 63 ? ~(BIT(bufferIndex % 64)) : ~(BIT(bufferIndex));
+		if (control != ControlID::_EndOfIDs)
+		{
+			uint16_t bufferIndex = uint16_t(control) - uint16_t(ControlID::_EndOfGPAxes) - 1;
+			if (isDownAction)
+				kbmBuffer.keys[currentBuffer][bufferIndex > 63] |= bufferIndex > 63 ? BIT(bufferIndex % 64) : BIT(bufferIndex);
+			else
+				kbmBuffer.keys[currentBuffer][bufferIndex > 63] &= bufferIndex > 63 ? ~(BIT(bufferIndex % 64)) : ~(BIT(bufferIndex));
+		}
     }
     else if (ridata->header.dwType == RIM_TYPEMOUSE)
     {
