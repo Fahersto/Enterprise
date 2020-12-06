@@ -3,25 +3,28 @@
 
 namespace Enterprise
 {
-	/// The heart of an Enterprise program.  Instantiates and manages all of Enterprise's systems.
+	/// The heart of an Enterprise program.  Instantiates and manages all of 
+	/// Enterprise's systems, and steps all engine and game code.
+	/// @note Enterprise manages the application lifetime itself: do not try to 
+	/// instantiate an Application in game code.
 	class Application
 	{
 	public:
-		// Steps the game engine.  Returns true until application stops running.  Should only be called in the main function.
-
-		/// Steps the entire Enterprise engine.  Called continuously by the main loop.
+		/// Step the entire Enterprise engine.
 		/// @return Boolean indicating whether the main loop should continue.
-		/// @note The Run function's return value is used as the condition for the platform-specific main loop.
+		/// @remarks This function is called continuously by the main loop. Its 
+		/// return value is used as the condition for the loop.
 		bool Run();
 
 		/// Quit the application at the end of the current frame.
 		static void Quit();
 
-		/// Sets up the core systems of the application.
+		/// Set up the core systems of the application.
 		Application();
 
-		/// Cleans up the application prior to termination.
-		/// @note Even when the program is terminated due to an exception being thrown, this destructor is called.
+		/// Clean up the application prior to program termination.
+		/// @note This destructor guaranteed to be called even in the case of 
+		/// unhandled exceptions.
 		~Application();
 
 	private:
