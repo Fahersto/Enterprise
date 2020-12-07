@@ -131,6 +131,28 @@ std::vector<std::string> Application::GetCmdLineOption(HashName option)
 	return returnVal;
 }
 
+void Application::PrintCmdLineHelp()
+{
+	// TODO: Display the game name and version
+	std::cout << "Enterprise Engine Command Line Help" << std::endl;
+	std::cout << "    Options:" << std::endl;
+	for (cmdLineOptRegistryEntry& entry : _cmdLineOptionRegistry)
+	{
+		std::cout << "    " << entry.friendlyname << " (";
+		for (auto synonymIt = entry.synonyms.begin();
+			 synonymIt != entry.synonyms.end();
+			 ++synonymIt)
+		{
+			std::cout << *synonymIt;
+			if (synonymIt != entry.synonyms.end() - 1)
+			{
+				std::cout << ", ";
+			}
+		}
+		std::cout << "): " << entry.helpdescription << std::endl;
+	}
+}
+
 
 Application::Application()
 {
@@ -140,6 +162,9 @@ Application::Application()
 	#ifdef EP_CONFIG_DEBUG
 	Enterprise::Console::Init();
 	#endif
+
+	// Register "--help" command line option
+	RegisterCmdLineOption("Help", "Displays command line options supported by this program.", {"-h", "--help"}, 0);
 
 	// Initialize Systems
 	Time::Init();
@@ -157,9 +182,14 @@ Application::Application()
 
 	Game::Init();
 
-	// TODO: Assert if no window is created.
+	// Implement "--help" command line option
+	if (CheckCmdLineOption(HN("-h")))
+	{
+		PrintCmdLineHelp();
+		_isRunning = false;
+	}
 
-	//EP_ASSERT(false);
+	// TODO: Assert if no window is created.
 }
 
 bool Application::Run()

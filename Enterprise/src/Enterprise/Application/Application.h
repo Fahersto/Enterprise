@@ -102,6 +102,9 @@ namespace Enterprise
 		/// A listing of all reigstered command line options.
 		static std::vector<cmdLineOptRegistryEntry> _cmdLineOptionRegistry;
 
+		/// Prints the description of registered command line options to the console.
+		static void PrintCmdLineHelp();
+
 		/// Application's event handler.
 		/// @param e The event reference.
 		/// @return Whether Application wishes to block the event from propogation.
