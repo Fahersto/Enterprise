@@ -13,77 +13,192 @@
 
 namespace Enterprise 
 {
-	bool Application::_isRunning = true;
+bool Application::_isRunning = true;
 
-	Application::Application()
-	{
-		EP_ASSERT_NOREENTRY(); // Disallow creating a second Application.
+void Application::Quit() { _isRunning = false; }
 
-		// Create Console
-		#ifdef EP_CONFIG_DEBUG
-		Enterprise::Console::Init();
-		#endif
+std::unordered_map<HashName, std::vector<std::string>> Application::_cmdLineOptions;
+std::unordered_map<HashName, std::vector<HashName>> Application::_cmdLineOptionSynonyms;
+std::unordered_map<HashName, uint_fast16_t> Application::_cmdLineOptionExpectedArgs;
+std::vector<Application::cmdLineOptRegistryEntry> Application::_cmdLineOptionRegistry;
 
-		// Initialize Systems
-		Time::Init();
-		// File::Init();
-		// Network::Init();
-		Input::Init();
-		// Graphics::Init();
-		// Audio::Init();
-		// ECS::Init();
-		// StateStack::Init();
-
-		// Event subscriptions
-		Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
-        Events::SubscribeToType(EventTypes::QuitRequested, OnEvent);
-
-		Game::Init();
-
-		// TODO: Assert if no window is created.
-
-		//EP_ASSERT(false);
-	}
-
-	Application::~Application()
-	{
-		Game::Cleanup();
-
-		// Clean up the console
-		#ifdef EP_CONFIG_DEBUG
-		Enterprise::Console::Cleanup();
-		#endif
-	}
-
-	// Main loop
-	bool Application::Run()
-	{
-		// Physics frame
-		while (Time::PhysFrame())
+void Application::RegisterCmdLineOption(std::string friendlyname,
+										std::string helpdescription,
+										std::vector<std::string> options, 
+										uint_fast16_t expectedArgCount)
+{
+	_cmdLineOptionRegistry.push_back
+	(
 		{
-			// ...
+			friendlyname,
+			helpdescription,
+			options,
+			expectedArgCount
 		}
+	);
 
-		// Frame
-		Time::FrameStart();
-		Input::Update();
+	for (std::string& str : options)
+	{
+		EP_ASSERTF(_cmdLineOptionSynonyms.count(HN(str)) == 0,
+				   "Application: Duplicate registration for command-line option!");
+
+		// Populate each option's synonym lookup list.
+		for (std::string& otherstr : options)
+		{
+			_cmdLineOptionSynonyms[HN(str)].push_back(HN(otherstr));
+			_cmdLineOptionExpectedArgs[HN(str)] = expectedArgCount;
+		}
+	}
+}
+
+bool Application::CheckCmdLineOption(HashName opt)
+{
+	EP_ASSERTF(_cmdLineOptionSynonyms.count(opt),
+			   "Application: CheckCmdLineOption() invoked on unregistered "
+			   "command-line option!");
+	EP_ASSERTF(_cmdLineOptionExpectedArgs[opt] == 0,
+			   "Application: CheckCmdLineOption() invoked on a command-line "
+			   "option that expects arguments!");
+
+	bool specified = false;
+	for (HashName synonym : _cmdLineOptionSynonyms[opt])
+	{
+		if (_cmdLineOptions.count(synonym))
+		{
+			if (!specified)
+			{
+				specified = true;
+				if (_cmdLineOptions[synonym].size() > 0)
+				{
+					EP_ERROR("Application: Unexpected non-option arguments detected "
+							 "after command-line option \"{}\".", HN_ToStr(synonym));
+				}
+			}
+			else
+			{
+				EP_WARN("Application: Multiple synonyms for command-line option \"{}\" "
+						"were specified.", HN_ToStr(opt));
+			}
+		}
+	}
+
+	return specified;
+}
+
+std::vector<std::string> Application::GetCmdLineOption(HashName opt)
+{
+	EP_ASSERTF(_cmdLineOptionSynonyms.count(opt),
+			   "Application: GetCmdLineOption() invoked on unregistered "
+			   "command-line option!");
+	EP_ASSERTF(_cmdLineOptionExpectedArgs[opt] > 0, 
+			   "Application: GetCmdLineOption() invoked on a command-line "
+			   "option that does not expect arguments!");
+
+	std::vector<std::string> returnVal;
+	bool specified = false;
+
+	for (HashName& synonym : _cmdLineOptionSynonyms[opt])
+	{
+		if (_cmdLineOptions.count(synonym))
+		{
+			if (!specified)
+			{
+				if (_cmdLineOptions[synonym].size() == _cmdLineOptionExpectedArgs[synonym])
+				{
+					specified = true;
+					returnVal.insert(returnVal.begin(),
+									 _cmdLineOptions[synonym].begin(),
+									 _cmdLineOptions[synonym].end());
+				}
+				else
+				{
+					EP_ERROR("Application: Command-line option \"{}\" specified "
+							 "with the wrong number of arguments.  "
+							 "Expected: {}, Actual: {}",
+							 HN_ToStr(synonym),
+							 _cmdLineOptionExpectedArgs[synonym], 
+							 _cmdLineOptions[synonym].size());
+				}
+			}
+			else
+			{
+				EP_ERROR("Application: Multiple synonyms for command-line option \"{}\" "
+						"were specified.", HN_ToStr(opt));
+			}
+		}
+	}
+
+	return returnVal;
+}
+
+
+Application::Application()
+{
+	EP_ASSERT_NOREENTRY();
+
+	// Create Console
+	#ifdef EP_CONFIG_DEBUG
+	Enterprise::Console::Init();
+	#endif
+
+	// Initialize Systems
+	Time::Init();
+	// File::Init();
+	// Network::Init();
+	Input::Init();
+	// Graphics::Init();
+	// Audio::Init();
+	// ECS::Init();
+	// StateStack::Init();
+
+	// Event subscriptions
+	Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
+    Events::SubscribeToType(EventTypes::QuitRequested, OnEvent);
+
+	Game::Init();
+
+	// TODO: Assert if no window is created.
+
+	//EP_ASSERT(false);
+}
+
+bool Application::Run()
+{
+	// Physics frame
+	while (Time::PhysFrame())
+	{
 		// ...
-		Time::FrameEnd();
-
-		// Back to main function
-		return _isRunning;
 	}
 
-	void Application::Quit() { _isRunning = false; }
+	// Frame
+	Time::FrameStart();
+	Input::Update();
+	// ...
+	Time::FrameEnd();
 
-    bool Application::OnEvent(Events::Event& e)
-    {
-        if (e.Type() == EventTypes::WindowClose)
-            // By default, closing the window is treated as a request to quit.
-            Enterprise::Events::Dispatch(EventTypes::QuitRequested);
-        else if (e.Type() == EventTypes::QuitRequested)
-            // By default, selecting Quit from the macOS dock or app menu quits the program.
-			Enterprise::Application::Quit();
-		return true;
-	}
+	// Back to main function
+	return _isRunning;
+}
+
+Application::~Application()
+{
+	Game::Cleanup();
+
+	// Clean up the console
+	#ifdef EP_CONFIG_DEBUG
+	Enterprise::Console::Cleanup();
+	#endif
+}
+
+bool Application::OnEvent(Events::Event& e)
+{
+    if (e.Type() == EventTypes::WindowClose)
+        // By default, closing the window is treated as a request to quit.
+        Enterprise::Events::Dispatch(EventTypes::QuitRequested);
+    else if (e.Type() == EventTypes::QuitRequested)
+        // By default, selecting Quit from the macOS dock or app menu quits the program.
+		Enterprise::Application::Quit();
+	return true;
+}
+
 }

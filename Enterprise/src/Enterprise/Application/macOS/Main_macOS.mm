@@ -70,11 +70,30 @@ int main(int argc, const char * argv[])
 
 		try
 		{
-			Enterprise::Application app; // App constructor initializes game code
+			// Store the command line arguments in Application
+			HashName currentOption = HN("");
+			for (int i = 0; i < argc; i++)
+			{
+				if (argv[i][0] == '-')
+				{
+					currentOption = HN(argv[i]);
+					Application::_cmdLineOptions[currentOption];
+				}
+				else
+				{
+					Application::_cmdLineOptions[currentOption].push_back(argv[i]);
+				}
+			}
+			
+			// Create the Application
+			Enterprise::Application app;
+
+			// TODO: Handle --help
+			// TODO: Generate warnings for unused args
+
 			NSEvent *e;
 			do
 			{
-				// Pump messages
 				do
 				{
 					e = [NSApp nextEventMatchingMask: NSEventMaskAny
@@ -83,6 +102,7 @@ int main(int argc, const char * argv[])
 											 dequeue: YES];
 					if (e)
 					{
+						// Pump messages
 						[NSApp sendEvent: e];
 						[NSApp updateWindows];
 					}
