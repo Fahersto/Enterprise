@@ -1,12 +1,14 @@
 #pragma once
 #include "Enterprise/Events/Events.h"
 
+#if defined(__APPLE__) && defined (__MACH__)
+int main(int argc, const char * argv[]);
+#endif
+
 namespace Enterprise
 {
 	/// The heart of an Enterprise program.  Instantiates and manages all of
 	/// Enterprise's systems, and steps all engine and game code.
-	/// @note Enterprise manages the application lifetime itself: do not try to
-	/// instantiate an Application in game code.
 	class Application
 	{
 	public:
@@ -17,7 +19,8 @@ namespace Enterprise
 		/// @param friendlyname The human-readable name of the option.
 		/// @param helpdescription The description of the option to be displayed
 		/// with -h or --help.
-		/// @param options A list of option arguments that triggers this option.
+		/// @param options The list of option names that trigger this option. 
+		/// All must start with "-".
 		/// @param expectedArgCount The number of non-option arguments expected
 		/// to follow this option.
 		/// @remarks It is a best practice to use "-" for short names and "--"
@@ -29,35 +32,25 @@ namespace Enterprise
 										  uint_fast16_t expectedArgCount);
 
 		/// Check whether a command line option has been specified.
-		/// @param opt The HashName of the option to check, including hyphens.
+		/// @param option The HashName of the option to check, including hyphens.
 		/// @return Returns true if the option was specified on the command
 		/// line, otherwise returns false.
-		/// @note Both the long and short names of the option can be used for @copt.
+		/// @note This function accepts any synonym for @c option.
 		/// @remarks Use this function only when handling an option that doesn't
-		/// take non-option arguments.  It is not necessary to check an option
-		/// before using @cGetCmdOption() on it.
-		static bool CheckCmdLineOption(HashName opt);
+		/// take additional arguments.  Use @c GetCmdLineOption() for options
+		/// expecting arguments.
+		static bool CheckCmdLineOption(HashName option);
 
-		/// Get the non-option argument associated with a command-line option.
-		/// @param opt The HashName of the option to check, including hyphens.
-		/// @return The first non-option argument following the option.  If no
-		/// argument exists, an empty string will be returned.
-		/// @note Both the long and short names of the option can be used for @copt.
-		/// @note Enterprise will log a warning if the number of associated arguments
-		/// does not equal 1.
-		static std::vector<std::string> GetCmdLineOption(HashName opt);
-
-		/// Get a list of the non-option arguments associated with a command-line
-		/// option.
-		/// @param opt The HashName of the option to check, including hyphens.
-		/// @param count The number of expected non-option arguments.
-		/// @return A vector of pointers to non-option arguments associated with the
-		/// specified option.  If no associated arguments exist, the string will be
-		/// empty.
-		/// @note Both the long and short names of the option can be used for @copt.
-		/// @note Enterprise will log a warning if the number of associated arguments
-		/// does not equal @ccount.
-		static std::vector<std::string> GetCmdLineOption(HashName opt, uint_fast8_t count);
+		/// Get the non-option arguments associated with a command-line option.
+		/// @param option The HashName of the option to check, including hyphens.
+		/// @return A vector of the non-option arguments associated with the option.
+		/// If the option was not specified, or if the wrong number of arguments
+		/// were specified, an empty string will be returned.
+		/// @note This function accepts any synonym for @c option.
+		/// @remarks Use this function only when handling an option that expects
+		/// additional arguments.  Use @c CheckCmdLineOption() to check whether
+		/// a flag was specified.
+		static std::vector<std::string> GetCmdLineOption(HashName option);
 
 	private:
 		#ifdef _WIN32
@@ -83,8 +76,8 @@ namespace Enterprise
 		/// unhandled exceptions.
 		~Application();
 
-		/// The return value used in @cRun().
-		/// @remarks This value is set to false upon a call to @cApplication::Quit().
+		/// The return value used in @c Run().
+		/// @remarks This value is set to false upon a call to @c Application::Quit().
 		static bool _isRunning;
 
 		/// Stores the list of command line options provided and their associated

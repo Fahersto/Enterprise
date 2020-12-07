@@ -141,7 +141,7 @@ namespace Enterprise {
     /// The Windows platform implementation of the window creation function.
     /// @param settings A struct reference containing the desired window configuration.
     /// @return Generic poointer to the game window object.
-    /// @note @cm_Instance is deleted in the generic function @cWindow::Destroy()
+    /// @note @c m_Instance is deleted in the generic function @c Window::Destroy()
     Window* Window::Create(const WindowSettings& settings)
     {
         EP_ASSERT(!m_Instance); // Don't create multiple windows

@@ -5,6 +5,7 @@
 #include "Enterprise/Application/Application.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
+using Enterprise::Application;
 
 /// Enterprise's macOS aapp delegate.  Used to handle messages from macOS.
 @interface MacAppDelegate : NSObject <NSApplicationDelegate>
@@ -23,7 +24,7 @@
     Enterprise::Events::Dispatch(EventTypes::QuitRequested);
 }
 
-// Set up Cocoa stuff just before applictaion launch
+// Set up Cocoa stuff
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
     @autoreleasepool
@@ -50,19 +51,19 @@
 
 @end
 
-/// Entry point to Enterprise app on macOS.
+/// The application entry point in macOS builds.
 int main(int argc, const char * argv[])
 {
     @autoreleasepool
 	{
-		// Create application
+		// Create the NSApplication
         [NSApplication sharedApplication];
 
 		// Set up custom app delegate
 		MacAppDelegate * delegate = [[MacAppDelegate alloc] init];
 		[NSApp setDelegate:delegate];
 
-		// Activate and launch the app
+		// Activate and launch NSApp
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 		[NSApp setPresentationOptions:NSApplicationPresentationDefault];
 		[NSApp activateIgnoringOtherApps:YES];
@@ -85,36 +86,32 @@ int main(int argc, const char * argv[])
 				}
 			}
 			
-			// Create the Application
-			Enterprise::Application app;
+			// Create the Enterprise Application
+			Application app;
 
 			// TODO: Handle --help
 			// TODO: Generate warnings for unused args
 
+			// Enter main loop
 			NSEvent *e;
 			do
 			{
-				do
+				while((e = [NSApp nextEventMatchingMask: NSEventMaskAny
+											  untilDate: nil
+												 inMode: NSDefaultRunLoopMode
+												dequeue: YES]))
 				{
-					e = [NSApp nextEventMatchingMask: NSEventMaskAny
-										   untilDate: nil
-											  inMode: NSDefaultRunLoopMode
-											 dequeue: YES];
-					if (e)
-					{
-						// Pump messages
-						[NSApp sendEvent: e];
-						[NSApp updateWindows];
-					}
-				} while (e);
+					// Pump messages
+					[NSApp sendEvent: e];
+					[NSApp updateWindows];
+				}
 			} while (app.Run()); // Loop condition steps the engine
-
-			// app's destructor calls game cleanup code.
 		}
 		catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
 		catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
-    }
-    return 0;
+	}
+
+    return EXIT_SUCCESS;
 }
 
 #endif

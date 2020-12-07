@@ -51,17 +51,17 @@ void Application::RegisterCmdLineOption(std::string friendlyname,
 	}
 }
 
-bool Application::CheckCmdLineOption(HashName opt)
+bool Application::CheckCmdLineOption(HashName option)
 {
-	EP_ASSERTF(_cmdLineOptionSynonyms.count(opt),
+	EP_ASSERTF(_cmdLineOptionSynonyms.count(option),
 			   "Application: CheckCmdLineOption() invoked on unregistered "
 			   "command-line option!");
-	EP_ASSERTF(_cmdLineOptionExpectedArgs[opt] == 0,
+	EP_ASSERTF(_cmdLineOptionExpectedArgs[option] == 0,
 			   "Application: CheckCmdLineOption() invoked on a command-line "
 			   "option that expects arguments!");
 
 	bool specified = false;
-	for (HashName synonym : _cmdLineOptionSynonyms[opt])
+	for (HashName synonym : _cmdLineOptionSynonyms[option])
 	{
 		if (_cmdLineOptions.count(synonym))
 		{
@@ -77,7 +77,7 @@ bool Application::CheckCmdLineOption(HashName opt)
 			else
 			{
 				EP_WARN("Application: Multiple synonyms for command-line option \"{}\" "
-						"were specified.", HN_ToStr(opt));
+						"were specified.", HN_ToStr(option));
 			}
 		}
 	}
@@ -85,19 +85,19 @@ bool Application::CheckCmdLineOption(HashName opt)
 	return specified;
 }
 
-std::vector<std::string> Application::GetCmdLineOption(HashName opt)
+std::vector<std::string> Application::GetCmdLineOption(HashName option)
 {
-	EP_ASSERTF(_cmdLineOptionSynonyms.count(opt),
+	EP_ASSERTF(_cmdLineOptionSynonyms.count(option),
 			   "Application: GetCmdLineOption() invoked on unregistered "
 			   "command-line option!");
-	EP_ASSERTF(_cmdLineOptionExpectedArgs[opt] > 0, 
+	EP_ASSERTF(_cmdLineOptionExpectedArgs[option] > 0, 
 			   "Application: GetCmdLineOption() invoked on a command-line "
 			   "option that does not expect arguments!");
 
 	std::vector<std::string> returnVal;
 	bool specified = false;
 
-	for (HashName& synonym : _cmdLineOptionSynonyms[opt])
+	for (HashName& synonym : _cmdLineOptionSynonyms[option])
 	{
 		if (_cmdLineOptions.count(synonym))
 		{
@@ -123,7 +123,7 @@ std::vector<std::string> Application::GetCmdLineOption(HashName opt)
 			else
 			{
 				EP_ERROR("Application: Multiple synonyms for command-line option \"{}\" "
-						"were specified.", HN_ToStr(opt));
+						"were specified.", HN_ToStr(option));
 			}
 		}
 	}
