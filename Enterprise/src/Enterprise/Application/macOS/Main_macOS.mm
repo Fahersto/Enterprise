@@ -89,7 +89,6 @@ int main(int argc, const char * argv[])
 			// Create the Enterprise Application
 			Application app;
 
-			// TODO: Handle --help
 			// TODO: Generate warnings for unused args
 
 			// Enter main loop

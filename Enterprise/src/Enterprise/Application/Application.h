@@ -27,8 +27,8 @@ namespace Enterprise
 		/// for long names, though anything that starts with "-" is a valid
 		/// option argument.
 		static void RegisterCmdLineOption(std::string friendlyname,
-										  std::string helpdescription,
 										  std::vector<std::string> options,
+										  std::string helpdescription,
 										  uint_fast16_t expectedArgCount);
 
 		/// Check whether a command line option has been specified.

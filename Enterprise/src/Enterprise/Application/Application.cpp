@@ -23,8 +23,8 @@ std::unordered_map<HashName, uint_fast16_t> Application::_cmdLineOptionExpectedA
 std::vector<Application::cmdLineOptRegistryEntry> Application::_cmdLineOptionRegistry;
 
 void Application::RegisterCmdLineOption(std::string friendlyname,
-										std::string helpdescription,
 										std::vector<std::string> options, 
+										std::string helpdescription,
 										uint_fast16_t expectedArgCount)
 {
 	_cmdLineOptionRegistry.push_back
@@ -164,7 +164,8 @@ Application::Application()
 	#endif
 
 	// Register "--help" command line option
-	RegisterCmdLineOption("Help", "Displays command line options supported by this program.", {"-h", "--help"}, 0);
+	RegisterCmdLineOption("Help", { "-h", "--help" }, 
+						  "Displays command line options supported by this program.", 0);
 
 	// Initialize Systems
 	Time::Init();
