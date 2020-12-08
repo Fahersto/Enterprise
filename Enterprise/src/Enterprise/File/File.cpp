@@ -266,3 +266,34 @@ void Enterprise::File::Init()
 		SetPlatformDataPaths();
 	}
 }
+
+std::string Enterprise::File::convertFromVFSPath(std::string& path)
+{
+	if (path.rfind("CONTENT", 0) == 0)
+	{
+		return contentDirPath + path.substr(8);
+	}
+	else if (path.rfind("USER", 0) == 0)
+	{
+		return userDirPath + path.substr(5);
+	}
+	else if (path.rfind("MACHINE", 0) == 0)
+	{
+		return machineDirPath + path.substr(8);
+	}
+	else if (path.rfind("SAVE", 0) == 0)
+	{
+		return saveDirPath + path.substr(5);
+	}
+	else if (path.rfind("TEMP", 0) == 0)
+	{
+		return tempDirPath + path.substr(5);
+	}
+	else
+	{
+		EP_FATAL("File: convertFromVFSPath() was passed a path that does not start "
+				 "with a virtual drive name.  path: {}", path);
+		EP_ASSERT_NOENTRY();
+		return std::string();
+	}
+}

@@ -235,6 +235,11 @@ private:
 
 	/// Sets up the File system.
 	static void Init();
+
+	/// Convert an Enterprise VFS path to a native path.
+	/// @param path Path in Enterprise VFS format.
+	/// @return Path which can be used in native file system functions.
+	static std::string convertFromVFSPath(std::string& path);
 };
 
 }
