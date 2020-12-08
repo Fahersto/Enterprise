@@ -7,6 +7,10 @@
 namespace Enterprise::Constants
 {
 
+// Application constants
+const char* DeveloperName = "Michael Martz";
+const char* AppName = "Sandbox";
+
 // Time constants
 HC(float, PhysFrameLength) = 1.0f / 60.0f;
 HC(float, PhysFrameRepeatCap) = 60.0f;

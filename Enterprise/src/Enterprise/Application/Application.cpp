@@ -9,6 +9,7 @@
 
 // Systems
 #include "Enterprise/Time/Time.h"
+#include "Enterprise/File/File.h"
 #include "Enterprise/Input/Input.h"
 
 namespace Enterprise 
@@ -169,7 +170,7 @@ Application::Application()
 
 	// Initialize Systems
 	Time::Init();
-	// File::Init();
+	File::Init();
 	// Network::Init();
 	Input::Init();
 	// Graphics::Init();

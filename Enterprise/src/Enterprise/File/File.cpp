@@ -1,7 +1,39 @@
 #include "EP_PCH.h"
 #include "File.h"
+#include "Enterprise/Application/Application.h"
 
 using Enterprise::File;
+using Enterprise::Application;
+
+std::string File::contentDirPath;
+std::string File::userDirPath;
+std::string File::machineDirPath;
+std::string File::saveDirPath;
+std::string File::tempDirPath;
+
+
+void File::BackslashesToSlashes(std::string& str)
+{
+	for (auto it = str.begin(); it != str.end(); ++it)
+	{
+		if (*it == '\\')
+		{
+			*it = '/';
+		}
+	}
+}
+
+void File::SlashesToBackslashes(std::string& str)
+{
+	for (auto it = str.begin(); it != str.end(); ++it)
+	{
+		if (*it == '\\')
+		{
+			*it = '/';
+		}
+	}
+}
+
 
 bool File::Exists(const std::string& path)
 {
@@ -166,4 +198,71 @@ std::string File::TextFileReader::ReadNextLine()
 		}
 	}
 	return returnVal;
+}
+
+void Enterprise::File::Init()
+{
+	Application::RegisterCmdLineOption
+	(
+		"Content Directory", 
+		{ "-c", "--content-dir" },
+		"Set a custom location for the game's \"content\" directory.", 1
+	);
+	Application::RegisterCmdLineOption
+	(
+		"Data Directory",
+		{ "-d", "--data-dir" },
+		"Set a custom location for the game's data directories.", 1
+	);
+
+	std::vector<std::string> cmdLinePath;
+
+	// Set CONTENT path
+	cmdLinePath = Application::GetCmdLineOption(HN("--content-dir"));
+	if (cmdLinePath.size())
+	{
+		// Custom path specified on command line
+		BackslashesToSlashes(cmdLinePath.front());
+
+		if (cmdLinePath.front().back() != '/')
+		{
+			contentDirPath = cmdLinePath.front() + '/';
+		}
+		else
+		{
+			contentDirPath = cmdLinePath.front();
+		}
+	}
+	else
+	{
+		// Use default path for OS
+		SetPlatformContentPath();
+	}
+
+	// Set USER, MACHINE, LOCAL, and TEMP paths
+	cmdLinePath = Application::GetCmdLineOption(HN("--data-dir"));
+	if (cmdLinePath.size())
+	{
+		BackslashesToSlashes(cmdLinePath.front());
+
+		if (cmdLinePath.front().back() == '/')
+		{
+			userDirPath = cmdLinePath.front() + "user" + "/";
+			machineDirPath = cmdLinePath.front() + "machine" + "/";
+			saveDirPath = cmdLinePath.front() + "save" + "/";
+			tempDirPath = cmdLinePath.front() + "temp" + "/";
+		}
+		else
+		{
+			userDirPath = cmdLinePath.front() + "/" + "user" + "/";
+			machineDirPath = cmdLinePath.front() + "/" + "machine" + "/";
+			saveDirPath = cmdLinePath.front() + "/" + "save" + "/";
+			tempDirPath = cmdLinePath.front() + "/" + "temp" + "/";
+		}
+	}
+	else
+	{
+		// Use default path for OS
+		SetPlatformDataPaths();
+	}
 }

@@ -5,10 +5,27 @@
 namespace Enterprise
 {
 
+namespace Constants
+{
+/// The name of this game's developer.  Used in file paths.
+extern const char* DeveloperName;
+/// The name of the game.  Used in file paths.
+extern const char* AppName;
+}
+
 /// The Enterprise file system.
 class File
 {
 public:
+
+	/// Helper function which replaces any backslashes in a string with
+	/// forward slashes.
+	/// @param str Reference to the string to process.
+	static void BackslashesToSlashes(std::string& str);
+	/// Helper function which replaces any forward slashes in a string with
+	/// backslashes.
+	/// @param str Reference to the string to process.
+	static void SlashesToBackslashes(std::string& str);
 
 	/// The outcome of a file operation.
 	enum class ErrorCode
@@ -201,6 +218,23 @@ public:
 		// The virtual path to the file this reader represents.
 		std::string m_path;
 	};
+
+private:
+	friend class Application;
+
+	static std::string contentDirPath;
+	static std::string userDirPath;
+	static std::string machineDirPath;
+	static std::string saveDirPath;
+	static std::string tempDirPath;
+
+	/// Set contentDirPath to the default for this platform.
+	static void SetPlatformContentPath();
+	/// Set the paths to the data folders to the default for this platform.
+	static void SetPlatformDataPaths();
+
+	/// Sets up the File system.
+	static void Init();
 };
 
 }

@@ -33,6 +33,7 @@
     #include <windows.h>
     #include <windowsx.h>
     #include <Xinput.h>
+    #include <ShlObj.h>
 #endif
 
 #if defined(__APPLE__) && defined(__MACH__)
