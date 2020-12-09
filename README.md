@@ -44,12 +44,12 @@ manual changes to the "Sandbox" scheme:
   OS-level logging.
 
 ## Current State of Development
-The project is still pretty barebones, but it is now on a solid foundation and is just about ready for higher 
-systems like graphics and audio.  What I'm calling the "Foundation" systems (`Time`, `Events`, and `File`) 
-are all useable MVP's.
+The engine is still pretty barebones, but it is now on a solid foundation and is ready for higher systems 
+like `Graphics` and `Audio`.  What I'm calling the "Foundation" systems (`Time`, `Events`, and `File`) aren't 
+completely *finished*, but are all useable MVP's.
 
-After I've wrapped up a few things with the `File` system, I'll be moving onto the `Graphics` system, and 
-then onto `Audio`.  After that, only the gameplay systems remain.
+The `Input` system is pretty much done, excepting mouse input.  Up next is the `Graphics` system (finally), 
+after which will be `Audio` and the gameplay helper systems, `ECS` and `StateManager`.
 
 ### Roadmap
 Progress towards an MVP Enterprise Engine can be tracked by the development status of its main systems, which 
@@ -57,12 +57,12 @@ are:
 
 1. The `Time` system (done*)
 2. The `Events` system (done*)
-3. The `File` system (in progress)
+3. The `File` system (done*)
 4. The `Input` system (done*)
-5. The `Graphics` system (up next)
+5. The `Graphics` system (in progress)
 6. The `Audio` system
 7. The `ECS` system
-8. The `StateStack` system (probably going to be renamed in the future)
+8. The `StateManager`
 
 \* That is to say, good enough to move on from.
 
