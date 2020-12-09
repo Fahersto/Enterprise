@@ -10,6 +10,7 @@ namespace Enterprise::Constants
 // Application constants
 const char* DeveloperName = "Michael Martz";
 const char* AppName = "Sandbox";
+const char* Version = "0.0.0";
 
 // Time constants
 HC(float, PhysFrameLength) = 1.0f / 60.0f;

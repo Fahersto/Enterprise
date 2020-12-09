@@ -11,6 +11,8 @@ namespace Constants
 extern const char* DeveloperName;
 /// The name of the game.  Used in file paths.
 extern const char* AppName;
+/// The version number of the game.  Used in command line help.
+extern const char* Version;
 }
 
 /// The Enterprise file system.

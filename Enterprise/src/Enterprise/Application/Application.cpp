@@ -134,9 +134,7 @@ std::vector<std::string> Application::GetCmdLineOption(HashName option)
 
 void Application::PrintCmdLineHelp()
 {
-	// TODO: Display the game name and version
-	std::cout << "Enterprise Engine Command Line Help" << std::endl;
-	std::cout << "    Options:" << std::endl;
+	std::cout << Constants::AppName << ' ' << Constants::Version << " Command Line Help" << std::endl;
 	for (cmdLineOptRegistryEntry& entry : _cmdLineOptionRegistry)
 	{
 		std::cout << "    " << entry.friendlyname << " (";
@@ -166,7 +164,7 @@ Application::Application()
 
 	// Register "--help" command line option
 	RegisterCmdLineOption("Help", { "-h", "--help" }, 
-						  "Displays command line options supported by this program.", 0);
+						  "Displays command line options supported by this game.", 0);
 
 	// Initialize Systems
 	Time::Init();
