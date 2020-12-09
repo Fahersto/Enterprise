@@ -12,7 +12,7 @@ void Enterprise::File::SetPlatformContentPath()
 	UInt8 contentPath[1025];
 	EP_VERIFY(CFURLGetFileSystemRepresentation(contentURL, true, contentPath, 1024));
 
-	contentDirPath = std::string((char*)contentPath) + '/';
+	contentDirPath = std::string((char*)contentPath) + "/content/";
 
 	CFRelease(contentURL);
 	CFRelease(bundle);

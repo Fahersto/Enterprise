@@ -64,6 +64,7 @@ bool File::Exists(const std::string& path)
 	}
 }
 
+// TODO: Branch this off into the platform-specific cpp files
 File::ErrorCode File::TextFileReader::Open(const std::string& path)
 {
 	if (m_isHandleOpen)
@@ -71,9 +72,11 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		this->Close();
 	}
 
+	std::string nativePath = convertFromVFSPath(path);
+
 #ifdef _WIN32
 
-	errno_t err = fopen_s(&m_handle, path.c_str(), "r");
+	errno_t err = fopen_s(&m_handle, nativePath.c_str(), "r");
 
 	if (err == 0)
 	{
@@ -109,7 +112,7 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 
 #else // macOS
 
-	m_handle = fopen(path.c_str(), "r");
+	m_handle = fopen(nativePath.c_str(), "r");
 
 	if (m_handle)
 	{
@@ -267,7 +270,7 @@ void Enterprise::File::Init()
 	}
 }
 
-std::string Enterprise::File::convertFromVFSPath(std::string& path)
+std::string Enterprise::File::convertFromVFSPath(const std::string& path)
 {
 	if (path.rfind("CONTENT", 0) == 0)
 	{

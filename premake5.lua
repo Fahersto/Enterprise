@@ -123,9 +123,10 @@ project (EP_ProjectName)
         links { "AppKit.framework", "GameController.framework" }
         postbuildcommands
         {
-            "mkdir -p Content",
-            "mkdir -p ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content",
-            "rsync -avu --delete --exclude=\".*\" Content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/Content" 
+            -- Copy content directory into app bundle
+            "mkdir -p content",
+            "mkdir -p ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/content",
+            "rsync -avu --delete --exclude=\".*\" content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/content" 
         }
         xcodebuildsettings
         {
