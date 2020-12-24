@@ -3,7 +3,7 @@
 #include "Enterprise/File/File.h"
 
 #include "InputEvents.h"
-#include "Enterprise/Application/ApplicationEvents.h"
+#include "Enterprise/Graphics/WindowEvents.h"
 
 #define EP_INPUT_BLOCKER uint_fast8_t(-1)
 

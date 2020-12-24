@@ -4,31 +4,37 @@
 // Application stuff
 #include "Application.h"
 #include "Game.h"
-#include "Window.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
 // Systems
 #include "Enterprise/Time/Time.h"
 #include "Enterprise/File/File.h"
 #include "Enterprise/Input/Input.h"
+#include "Enterprise/Graphics/Graphics.h"
 
 namespace Enterprise 
 {
+
+// Static definitions
 bool Application::_isRunning = true;
-
-void Application::Quit() { _isRunning = false; }
-
 std::unordered_map<HashName, std::vector<std::string>> Application::_cmdLineOptions;
 std::unordered_map<HashName, std::vector<HashName>> Application::_cmdLineOptionSynonyms;
 std::unordered_map<HashName, uint_fast16_t> Application::_cmdLineOptionExpectedArgs;
-std::vector<Application::cmdLineOptRegistryEntry> Application::_cmdLineOptionRegistry;
+std::vector<Application::cmdLineOptHelpEntry> Application::_cmdLineOptionHelpRegistry;
+
+
+void Application::Quit()
+{
+	_isRunning = false;
+}
+
 
 void Application::RegisterCmdLineOption(std::string friendlyname,
 										std::vector<std::string> options, 
 										std::string helpdescription,
 										uint_fast16_t expectedArgCount)
 {
-	_cmdLineOptionRegistry.push_back
+	_cmdLineOptionHelpRegistry.push_back
 	(
 		{
 			friendlyname,
@@ -43,7 +49,6 @@ void Application::RegisterCmdLineOption(std::string friendlyname,
 		EP_ASSERTF(_cmdLineOptionSynonyms.count(HN(str)) == 0,
 				   "Application: Duplicate registration for command-line option!");
 
-		// Populate each option's synonym lookup list.
 		for (std::string& otherstr : options)
 		{
 			_cmdLineOptionSynonyms[HN(str)].push_back(HN(otherstr));
@@ -135,7 +140,7 @@ std::vector<std::string> Application::GetCmdLineOption(HashName option)
 void Application::PrintCmdLineHelp()
 {
 	std::cout << Constants::AppName << ' ' << Constants::Version << " Command Line Help" << std::endl;
-	for (cmdLineOptRegistryEntry& entry : _cmdLineOptionRegistry)
+	for (cmdLineOptHelpEntry& entry : _cmdLineOptionHelpRegistry)
 	{
 		std::cout << "    " << entry.friendlyname << " (";
 		for (auto synonymIt = entry.synonyms.begin();
@@ -157,30 +162,23 @@ Application::Application()
 {
 	EP_ASSERT_NOREENTRY();
 
-	// Create Console
 	#ifdef EP_CONFIG_DEBUG
 	Enterprise::Console::Init();
 	#endif
 
-	// Register "--help" command line option
 	RegisterCmdLineOption("Help", { "-h", "--help" }, 
 						  "Displays command line options supported by this game.", 0);
+	Events::SubscribeToType(EventTypes::QuitRequested, OnQuit);
 
 	// Initialize Systems
 	Time::Init();
 	File::Init();
-	// Network::Init();
 	Input::Init();
-	// Graphics::Init();
 	// Audio::Init();
 	// ECS::Init();
 	// StateStack::Init();
-
-	// Event subscriptions
-	Events::SubscribeToType(EventTypes::WindowClose, OnEvent);
-    Events::SubscribeToType(EventTypes::QuitRequested, OnEvent);
-
 	Game::Init();
+	Graphics::Init(); // Window creation must occur last.
 
 	// Implement "--help" command line option
 	if (CheckCmdLineOption(HN("-h")))
@@ -189,7 +187,7 @@ Application::Application()
 		_isRunning = false;
 	}
 
-	// TODO: Assert if no window is created.
+	// TODO: Generate warnings for unused command line args
 }
 
 bool Application::Run()
@@ -202,32 +200,32 @@ bool Application::Run()
 
 	// Frame
 	Time::FrameStart();
-	Input::Update();
-	// ...
+	{
+		Input::Update();
+		Graphics::Update();
+		// ...
+	}
 	Time::FrameEnd();
 
-	// Back to main function
 	return _isRunning;
 }
 
 Application::~Application()
 {
+	Graphics::Cleanup();
 	Game::Cleanup();
 
-	// Clean up the console
 	#ifdef EP_CONFIG_DEBUG
 	Enterprise::Console::Cleanup();
 	#endif
 }
 
-bool Application::OnEvent(Events::Event& e)
+bool Application::OnQuit(Events::Event& e)
 {
-    if (e.Type() == EventTypes::WindowClose)
-        // By default, closing the window is treated as a request to quit.
-        Enterprise::Events::Dispatch(EventTypes::QuitRequested);
-    else if (e.Type() == EventTypes::QuitRequested)
-        // By default, selecting Quit from the macOS dock or app menu quits the program.
-		Enterprise::Application::Quit();
+	EP_ASSERT(e.Type() == EventTypes::QuitRequested);
+
+    // By default, selecting Quit from the macOS dock or app menu quits the program.
+	Enterprise::Application::Quit();
 	return true;
 }
 

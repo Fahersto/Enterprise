@@ -34,7 +34,8 @@
     #include <windowsx.h>
     #include <Xinput.h>
     #include <ShlObj.h>
-#endif
+    #include <gl/GL.h>
+#endif // Win32
 
 #if defined(__APPLE__) && defined(__MACH__)
     #ifdef __OBJC__
@@ -43,4 +44,4 @@
     #endif
     #include <mach/mach_time.h>
 	#include <Carbon/Carbon.h> // Used for keycodes in Input_macOS.mm
-#endif
+#endif // macOS

@@ -4,9 +4,7 @@
 #include "Core.h"
 #include "Enterprise/Application/Application.h"
 
-using Enterprise::Application;
-
-/// The application entry point in Win32 builds.
+/// The application entry point on Windows systems.
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPSTR lpCmdLine,
@@ -14,27 +12,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 {
 	try
 	{
-		// Store the command line arguments in Application
+		// Populate command line options map
 		HashName currentOption = HN("");
 		for (int i = 0; i < __argc; i++)
 		{
 			if (__argv[i][0] == '-')
 			{
 				currentOption = HN(__argv[i]);
-				Application::_cmdLineOptions[currentOption];
+				Enterprise::Application::_cmdLineOptions[currentOption];
 			}
 			else
 			{
-				Application::_cmdLineOptions[currentOption].push_back(__argv[i]);
+				Enterprise::Application::_cmdLineOptions[currentOption].push_back(__argv[i]);
 			}
 		}
 
-		// Create the Enterprise Application
-		Application app;
-
-		// TODO: Generate warnings for unused args
-
 		// Enter main loop
+		Enterprise::Application app;
 		MSG msg = { 0 };
 		do
 		{
@@ -52,4 +46,4 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	return EXIT_SUCCESS;
 }
 
-#endif
+#endif // Win32

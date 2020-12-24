@@ -115,7 +115,7 @@ project (EP_ProjectName)
     filter "system:windows"
         systemversion "latest"
         buildoptions{ "/std:c++latest" } -- C++20 Draft
-        links { "xinput" }
+        links { "xinput", "OpenGL32" }
         staticruntime "On"
     filter "system:macosx"
         systemversion "10.15"

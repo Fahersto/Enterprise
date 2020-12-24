@@ -72,7 +72,7 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		this->Close();
 	}
 
-	std::string nativePath = convertFromVFSPath(path);
+	std::string nativePath = convertVPathToNativePath(path);
 
 #ifdef _WIN32
 
@@ -220,7 +220,7 @@ void Enterprise::File::Init()
 
 	std::vector<std::string> cmdLinePath;
 
-	// Set CONTENT path
+	// Use CONTENT path from command line override
 	cmdLinePath = Application::GetCmdLineOption(HN("--content-dir"));
 	if (cmdLinePath.size())
 	{
@@ -238,11 +238,11 @@ void Enterprise::File::Init()
 	}
 	else
 	{
-		// Use default path for OS
+		// Use platform's default path
 		SetPlatformContentPath();
 	}
 
-	// Set USER, MACHINE, LOCAL, and TEMP paths
+	// Use USER, MACHINE, LOCAL, and TEMP paths from command line override
 	cmdLinePath = Application::GetCmdLineOption(HN("--data-dir"));
 	if (cmdLinePath.size())
 	{
@@ -265,12 +265,12 @@ void Enterprise::File::Init()
 	}
 	else
 	{
-		// Use default path for OS
+		// Use platform's default path
 		SetPlatformDataPaths();
 	}
 }
 
-std::string Enterprise::File::convertFromVFSPath(const std::string& path)
+std::string Enterprise::File::convertVPathToNativePath(const std::string& path)
 {
 	if (path.rfind("CONTENT/", 0) == 0)
 	{
@@ -294,8 +294,8 @@ std::string Enterprise::File::convertFromVFSPath(const std::string& path)
 	}
 	else
 	{
-		EP_FATAL("File: convertFromVFSPath() was passed a path that does not start "
-				 "with a virtual drive name.  path: {}", path);
+		EP_FATAL("File: convertVPathToNativePath() was passed a path that does "
+				 "not start with a virtual drive name.  path: {}", path);
 		EP_ASSERT_NOENTRY();
 		return std::string();
 	}

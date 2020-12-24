@@ -241,7 +241,7 @@ private:
 	/// Convert an Enterprise VFS path to a native path.
 	/// @param path Path in Enterprise VFS format.
 	/// @return Path which can be used in native file system functions.
-	static std::string convertFromVFSPath(const std::string& path);
+	static std::string convertVPathToNativePath(const std::string& path);
 };
 
 }

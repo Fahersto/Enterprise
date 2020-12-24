@@ -15,12 +15,13 @@ namespace Enterprise
 		/// Quit the application at the end of the current frame.
 		static void Quit();
 
+
 		/// Set up the application to handle a command line option.
 		/// @param friendlyname The human-readable name of the option.
-		/// @param helpdescription The description of the option to be displayed
-		/// with -h or --help.
 		/// @param options The list of option names that trigger this option. 
 		/// All must start with "-".
+		/// @param helpdescription The description of the option to be displayed
+		/// with -h or --help.
 		/// @param expectedArgCount The number of non-option arguments expected
 		/// to follow this option.
 		/// @remarks It is a best practice to use "-" for short names and "--"
@@ -41,11 +42,11 @@ namespace Enterprise
 		/// expecting arguments.
 		static bool CheckCmdLineOption(HashName option);
 
-		/// Get the non-option arguments associated with a command-line option.
+		/// Get the arguments associated with a command-line option.
 		/// @param option The HashName of the option to check, including hyphens.
-		/// @return A vector of the non-option arguments associated with the option.
-		/// If the option was not specified, or if the wrong number of arguments
-		/// were specified, an empty string will be returned.
+		/// @return A vector containing the non-option arguments that followed
+		/// the option. If the option was not specified, or if the wrong number
+		/// of arguments were specified, an empty vector will be returned.
 		/// @note This function accepts any synonym for @c option.
 		/// @remarks Use this function only when handling an option that expects
 		/// additional arguments.  Use @c CheckCmdLineOption() to check whether
@@ -53,6 +54,7 @@ namespace Enterprise
 		static std::vector<std::string> GetCmdLineOption(HashName option);
 
 	private:
+		// Friend the entry function to give it access to Run().
 		#ifdef _WIN32
 		friend int WINAPI ::WinMain(_In_ HINSTANCE hInstance,
 									_In_opt_ HINSTANCE hPrevInstance,
@@ -61,6 +63,25 @@ namespace Enterprise
 		#elif defined(__APPLE__) && defined(__MACH__)
 		friend int ::main(int argc, const char* argv[]);
 		#endif
+
+		/// A full description of a supported command line option.
+		struct cmdLineOptHelpEntry
+		{
+			std::string friendlyname;
+			std::string helpdescription;
+			std::vector<std::string> synonyms;
+			uint_fast16_t expectedArgCount;
+		};
+
+		// Statics
+		static bool _isRunning;
+		static std::unordered_map<HashName, std::vector<std::string>> _cmdLineOptions;
+		static std::unordered_map<HashName, std::vector<HashName>> _cmdLineOptionSynonyms;
+		static std::unordered_map<HashName, uint_fast16_t> _cmdLineOptionExpectedArgs;
+		static std::vector<cmdLineOptHelpEntry> _cmdLineOptionHelpRegistry;
+
+		/// Print the available command line options to the console.
+		static void PrintCmdLineHelp();
 
 		/// Set up the core systems of the application.
 		Application();
@@ -76,38 +97,6 @@ namespace Enterprise
 		/// unhandled exceptions.
 		~Application();
 
-		/// The return value used in @c Run().
-		/// @remarks This value is set to false upon a call to @c Application::Quit().
-		static bool _isRunning;
-
-		/// Stores the list of command line options provided and their associated
-		/// non-option arguments.
-		static std::unordered_map<HashName, std::vector<std::string>> _cmdLineOptions;
-
-		/// A map associating a command line option with its synonyms.
-		static std::unordered_map<HashName, std::vector<HashName>> _cmdLineOptionSynonyms;
-
-		/// A map associating a command line option with its number of expected arguments.
-		static std::unordered_map<HashName, uint_fast16_t> _cmdLineOptionExpectedArgs;
-
-		/// A full description of a supported command line option.
-		struct cmdLineOptRegistryEntry
-		{
-			std::string friendlyname;
-			std::string helpdescription;
-			std::vector<std::string> synonyms;
-			uint_fast16_t expectedArgCount;
-		};
-
-		/// A listing of all reigstered command line options.
-		static std::vector<cmdLineOptRegistryEntry> _cmdLineOptionRegistry;
-
-		/// Prints the description of registered command line options to the console.
-		static void PrintCmdLineHelp();
-
-		/// Application's event handler.
-		/// @param e The event reference.
-		/// @return Whether Application wishes to block the event from propogation.
-		static bool OnEvent(Events::Event& e);
+		static bool OnQuit(Events::Event& e);
 	};
 }

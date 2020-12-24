@@ -51,7 +51,7 @@ using Enterprise::Application;
 
 @end
 
-/// The application entry point in macOS builds.
+/// The application entry point on macOS systems.
 int main(int argc, const char * argv[])
 {
     @autoreleasepool
@@ -71,7 +71,7 @@ int main(int argc, const char * argv[])
 
 		try
 		{
-			// Store the command line arguments in Application
+			// Populate command line options map
 			HashName currentOption = HN("");
 			for (int i = 0; i < argc; i++)
 			{
@@ -86,12 +86,8 @@ int main(int argc, const char * argv[])
 				}
 			}
 			
-			// Create the Enterprise Application
-			Application app;
-
-			// TODO: Generate warnings for unused args
-
 			// Enter main loop
+			Application app;
 			NSEvent *e;
 			do
 			{
@@ -104,7 +100,7 @@ int main(int argc, const char * argv[])
 					[NSApp sendEvent: e];
 					[NSApp updateWindows];
 				}
-			} while (app.Run()); // Loop condition steps the engine
+			} while (app.Run());
 		}
 		catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
 		catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
@@ -113,4 +109,4 @@ int main(int argc, const char * argv[])
     return EXIT_SUCCESS;
 }
 
-#endif
+#endif // macOS
