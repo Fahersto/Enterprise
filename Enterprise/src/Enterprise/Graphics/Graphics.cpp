@@ -1,5 +1,4 @@
 #include "EP_PCH.h"
-#ifdef _WIN32
 
 #include "Graphics.h"
 #include "Window.h"
@@ -25,27 +24,26 @@ void Enterprise::Graphics::Init()
 void Enterprise::Graphics::Update()
 {
     /* rotate a triangle around */
-    glClear(GL_COLOR_BUFFER_BIT);
-    glRotatef(1.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glRotatef(1.0f, 0.0f, 0.0f, 1.0f);
 
-    glBegin(GL_TRIANGLES);
-    glIndexi(1);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex2i(0, 1);
-    glIndexi(2);
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex2i(-1, -1);
-    glIndexi(3);
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex2i(1, -1);
-    glEnd();
-
-    Window::RedrawWindow();
+	glBegin(GL_TRIANGLES);
+	glIndexi(1);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex2i(0, 1);
+	glIndexi(2);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex2i(-1, -1);
+	glIndexi(3);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex2i(1, -1);
+	glEnd();
+	
+    Window::SwapBuffers();
 }
 
 void Enterprise::Graphics::Cleanup()
 {
     Window::DestroyPrimaryWindow();
 }
-
-#endif

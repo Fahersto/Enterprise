@@ -2,25 +2,20 @@
 #if defined(__APPLE__) && defined(__MACH__)
 
 #include "Core.h"
-#include "Enterprise/Application/Window.h"
-
-#include "Enterprise/Events/Events.h"
-#include "Enterprise/Application/Application.h"
-#include "Enterprise/Application/ApplicationEvents.h"
+#include "../Window.h"
+#include "../WindowEvents.h"
 #include "Enterprise/Input/InputEvents.h"
 
 
-// Window messages -------------------------------------------------------------------------------
 @interface macOSWindowDelegate : NSWindow <NSWindowDelegate>
 @end
-
 @implementation macOSWindowDelegate
 
 // The user has clicked the close button.
 - (BOOL)windowShouldClose:(NSWindow*)sender
 {
     Enterprise::Events::Dispatch(EventTypes::WindowClose);
-    return NO; /// Window is closed automatically if the program terminates.  We don't do it here.
+    return NO; // Window is closed automatically if the program terminates.  We don't do it here.
 }
 
 // The user has moved the window.
@@ -54,68 +49,82 @@
 	Events::Dispatch(EventTypes::macOS_flagsChanged, (uint64_t)event.modifierFlags);
 }
 
-
 @end
 
-// Window class  -----------------------------------------------------------------------------------
-class macOS_Window : public Enterprise::Window
-{
-public:
-    macOS_Window(const WindowSettings& settings) : Window(settings)
-    {
-        @autoreleasepool {
-            
-            // Set window style
-            NSWindowStyleMask style = 0;
-            style |= NSWindowStyleMaskClosable;
-            style |= NSWindowStyleMaskTitled;
-            style |= NSWindowStyleMaskFullSizeContentView;
-            style |= NSWindowStyleMaskMiniaturizable;
-            
-            // Allocate window
-            _windowReference = [[macOSWindowDelegate alloc] initWithContentRect:NSMakeRect(0, 0,
-                                                                                           settings.Width,
-                                                                                           settings.Height)
-                                                                      styleMask:style
-                                                                        backing:NSBackingStoreBuffered
-                                                                          defer:NO];
-            
-            // Creation success check
-            EP_ASSERT( _windowReference != nil );
-            
-            // Set window properties
-            NSString* convertedTitle = [[NSString alloc] initWithBytes:settings.Title.data()
-                                                                length:settings.Title.size() * sizeof(wchar_t)
-                                                              encoding:NSUTF32LittleEndianStringEncoding];
-            
-            [_windowReference setTitle: convertedTitle];
-            [_windowReference setDelegate: _windowReference];
-            [_windowReference setLevel:NSNormalWindowLevel];
-            [_windowReference setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary
-                                                 |NSWindowCollectionBehaviorDefault
-                                                 |NSWindowCollectionBehaviorManaged
-                                                 |NSWindowCollectionBehaviorParticipatesInCycle];
-            [_windowReference setAcceptsMouseMovedEvents: YES];
-            
-            // Show and center the window
-            [_windowReference makeKeyAndOrderFront:nil];
-            [_windowReference center];
-        }
-    }
-private:
-    macOSWindowDelegate* _windowReference;
-};
 
-// macOS-specific window create function -----------------------------------------------------------
-namespace Enterprise
+static macOSWindowDelegate* _windowReference;
+static NSOpenGLView* view;
+
+
+void Enterprise::Window::CreatePrimaryWindow()
 {
-    Window* Window::m_Instance = nullptr; // Must be defined here to avoid multiple inclusions
-    Window* Window::Create(const WindowSettings& settings)
-    {
-        EP_ASSERT(!m_Instance); // Don't create multiple windows
-        m_Instance = new macOS_Window(settings);
-        return m_Instance;
-    }
+	@autoreleasepool
+	{
+		NSRect viewingRect = NSMakeRect(0, 0, 500, 500); // TODO: Set from INI
+
+		// Create OpenGL view
+		NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
+		{
+//			NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
+			NSOpenGLPFAColorSize    , 24                           ,
+			NSOpenGLPFAAlphaSize    , 8                            ,
+			NSOpenGLPFADoubleBuffer ,
+			NSOpenGLPFAAccelerated  ,
+			0
+		};
+		NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
+		view = [[NSOpenGLView alloc] initWithFrame:viewingRect pixelFormat:pixelFormat];
+
+		// Set vsync
+		GLint swapInt = 1;
+		[[view openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
+		[[view openGLContext] makeCurrentContext];
+
+		// Allocate window
+		NSWindowStyleMask style = NSWindowStyleMaskClosable
+								| NSWindowStyleMaskTitled
+								| NSWindowStyleMaskFullSizeContentView
+								| NSWindowStyleMaskMiniaturizable;
+		_windowReference = [[macOSWindowDelegate alloc] initWithContentRect:viewingRect
+																  styleMask:style
+																	backing:NSBackingStoreBuffered
+																	  defer:NO];
+		EP_ASSERT( _windowReference != nil );
+
+		// Set window properties
+		NSString* convertedTitle = [[[NSString alloc] initWithBytes:Constants::WindowTitle
+															 length:wcslen(Constants::WindowTitle) * sizeof(wchar_t)
+														   encoding:NSUTF32LittleEndianStringEncoding] autorelease];
+
+		[_windowReference setTitle: convertedTitle];
+		[_windowReference setDelegate: _windowReference];
+		[_windowReference setLevel:NSNormalWindowLevel];
+		[_windowReference setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary
+												|NSWindowCollectionBehaviorDefault
+												|NSWindowCollectionBehaviorManaged
+												|NSWindowCollectionBehaviorParticipatesInCycle];
+		[_windowReference setAcceptsMouseMovedEvents: YES];
+
+		[_windowReference setOpaque:YES];
+		[_windowReference setContentView:view];
+		[_windowReference makeFirstResponder:view];
+
+		// Show and center the window
+		[_windowReference makeKeyAndOrderFront:nil];
+		[_windowReference center];
+	}
 }
 
-#endif
+void Enterprise::Window::DestroyPrimaryWindow()
+{
+	EP_ASSERT_NOREENTRY();
+	EP_ASSERTF(_windowReference, "Window: Attempted to destroy primary window before creation.");
+}
+
+void Enterprise::Window::SwapBuffers()
+{
+	glFlush();
+	[[view openGLContext] flushBuffer];
+}
+
+#endif // macOS

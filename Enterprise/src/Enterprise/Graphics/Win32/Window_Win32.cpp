@@ -228,7 +228,7 @@ void Enterprise::Window::DestroyPrimaryWindow()
 	}
 }
 
-void Enterprise::Window::RedrawWindow()
+void Enterprise::Window::SwapBuffers()
 {
 	SwapBuffers(hDC);
 }

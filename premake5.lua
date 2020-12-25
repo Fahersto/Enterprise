@@ -120,7 +120,7 @@ project (EP_ProjectName)
     filter "system:macosx"
         systemversion "10.15"
         buildoptions{ "-std=c++2a" } -- C++20 Draft
-        links { "AppKit.framework", "GameController.framework" }
+        links { "AppKit.framework", "GameController.framework", "Cocoa.framework", "OpenGL.framework" }
         postbuildcommands
         {
             -- Copy content directory into app bundle

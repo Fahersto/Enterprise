@@ -38,10 +38,12 @@
 #endif // Win32
 
 #if defined(__APPLE__) && defined(__MACH__)
+	#define GL_SILENCE_DEPRECATION
     #ifdef __OBJC__
         #import <AppKit/AppKit.h>
         #import <GameController/GameController.h>
     #endif
     #include <mach/mach_time.h>
 	#include <Carbon/Carbon.h> // Used for keycodes in Input_macOS.mm
+	#include <OpenGL/gl.h>
 #endif // macOS

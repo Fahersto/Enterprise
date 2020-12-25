@@ -20,8 +20,8 @@ public:
 	/// Destroys the main application window.
 	static void DestroyPrimaryWindow();
 
-	/// Swaps the graphics buffer and invalidates the game window.
-	static void RedrawWindow();
+	/// Swaps the graphics buffer and displays it.
+	static void SwapBuffers();
 
 };
 
