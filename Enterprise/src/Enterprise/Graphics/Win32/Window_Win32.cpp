@@ -133,7 +133,6 @@ void Enterprise::Window::CreatePrimaryWindow()
 	pfd.cDepthBits = 24;
 	pfd.cStencilBits = 8;
 	pfd.cAuxBuffers = 0;
-	pfd.iLayerType = PFD_MAIN_PLANE; // Ignored by Win32.
 
 	int pf = ChoosePixelFormat(hDC, &pfd);
 	EP_ASSERT(pf != 0);
@@ -230,7 +229,8 @@ void Enterprise::Window::DestroyPrimaryWindow()
 
 void Enterprise::Window::SwapBuffers()
 {
-	SwapBuffers(hDC);
+	glFlush();
+	::SwapBuffers(hDC);
 }
 
 #endif
