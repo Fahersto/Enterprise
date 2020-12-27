@@ -83,7 +83,6 @@ void Enterprise::Window::CreatePrimaryWindow()
 		// Allocate window
 		NSWindowStyleMask style = NSWindowStyleMaskClosable
 								| NSWindowStyleMaskTitled
-								| NSWindowStyleMaskFullSizeContentView
 								| NSWindowStyleMaskMiniaturizable;
 		_windowReference = [[macOSWindowDelegate alloc] initWithContentRect:viewingRect
 																  styleMask:style
