@@ -456,12 +456,21 @@ void Input::LoadContextsFromFile(std::string filename)
 
 	for (HashName contextName : ini.Sections())
 	{
-		std::vector<std::unordered_map<HashName, std::string>> mappings =
-			ini.GetMultiDictionary(contextName, HN("ActionMapping"));
+		// Flush the previously loaded context, if it was loaded before
+		if (ActionMap.count(contextName))
+		{
+			ActionMap[contextName].clear();
+		}
+		if (AxisMap.count(contextName))
+		{
+			AxisMap[contextName].clear();
+		}
 
+		std::vector<std::unordered_map<HashName, std::string>> mappings;
 		bool hasActionMappings = false;
 		bool hasAxisMappings = false;
 
+		mappings = ini.GetMultiDictionary(contextName, HN("ActionMapping"));
 		if (!mappings.empty())
 		{
 			for (std::unordered_map<HashName, std::string>& map : mappings)
