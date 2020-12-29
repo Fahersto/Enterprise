@@ -65,7 +65,7 @@ void Enterprise::Window::CreatePrimaryWindow()
 		// Create OpenGL view
 		NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
 		{
-//			NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
+			NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
 			NSOpenGLPFAColorSize    , 24                           ,
 			NSOpenGLPFAAlphaSize    , 8                            ,
 			NSOpenGLPFADoubleBuffer ,
@@ -75,10 +75,11 @@ void Enterprise::Window::CreatePrimaryWindow()
 		NSOpenGLPixelFormat *pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes] autorelease];
 		view = [[NSOpenGLView alloc] initWithFrame:viewingRect pixelFormat:pixelFormat];
 
-		// Set vsync
+		// Make context current and set up Glad
 		GLint swapInt = 1;
 		[[view openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 		[[view openGLContext] makeCurrentContext];
+		EP_VERIFY(gladLoadGL());
 
 		// Allocate window
 		NSWindowStyleMask style = NSWindowStyleMaskClosable
