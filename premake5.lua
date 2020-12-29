@@ -33,13 +33,18 @@ group "Dependencies"
         filter "configurations:Dev or Dist"
             optimize "On"
         filter {}
+
+    include "Enterprise/_vendor/Glad/pm_library.lua" -- Glad
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
 group ""
 
 -- Engine library
 project "Enterprise"
     kind "StaticLib"
     location "%{prj.name}"
-    links { "CTSpookyHash", "HotConsts" }
+    links { "CTSpookyHash", "HotConsts", "Glad" }
     language "C++"
 
     -- Platform-specific build settings
@@ -92,7 +97,8 @@ project "Enterprise"
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
         "Enterprise/_vendor/CTSpookyHash/include",
-        "Enterprise/_vendor/HotConsts/include"
+        "Enterprise/_vendor/HotConsts/include",
+        "Enterprise/_vendor/Glad/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CORE"
@@ -173,7 +179,8 @@ project (EP_ProjectName)
         "Enterprise/_vendor/spdlog/include",
         "Enterprise/_vendor/cxx-prettyprint",
         "Enterprise/_vendor/CTSpookyHash/include",
-        "Enterprise/_vendor/HotConsts/include"
+        "Enterprise/_vendor/HotConsts/include",
+        "Enterprise/_vendor/Glad/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CLIENT"

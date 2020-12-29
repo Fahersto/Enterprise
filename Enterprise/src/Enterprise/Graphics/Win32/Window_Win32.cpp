@@ -204,8 +204,10 @@ void Enterprise::Window::CreatePrimaryWindow()
 		free(lpPal);
 	}
 
+	// Create context and init Glad
 	hRC = wglCreateContext(hDC);
 	wglMakeCurrent(hDC, hRC);
+	EP_VERIFY(gladLoadGL());
 
 	// Display window
 	ShowWindow(hWnd, SW_SHOWNORMAL);

@@ -28,13 +28,13 @@
 
 #include <CTSpookyHash/CTSpooky.h>
 #include <HotConsts/HotConsts.h>
+#include <glad/glad.h>
 
 #ifdef _WIN32
     #include <windows.h>
     #include <windowsx.h>
     #include <Xinput.h>
     #include <ShlObj.h>
-    #include <gl/GL.h>
 #endif // Win32
 
 #if defined(__APPLE__) && defined(__MACH__)
@@ -45,5 +45,5 @@
     #endif
     #include <mach/mach_time.h>
 	#include <Carbon/Carbon.h> // Used for keycodes in Input_macOS.mm
-	#include <OpenGL/gl.h>
+	//#include <OpenGL/gl.h>
 #endif // macOS

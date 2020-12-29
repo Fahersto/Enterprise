@@ -23,23 +23,14 @@ void Enterprise::Graphics::Init()
 
 void Enterprise::Graphics::Update()
 {
-    /* rotate a triangle around */
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glRotatef(1.0f, 0.0f, 0.0f, 1.0f);
+	static float intensity = 0.0f;
+	intensity += 0.01f;
+	if (intensity >= 1.0f) intensity -= 1.0f;
 
-	glBegin(GL_TRIANGLES);
-	glIndexi(1);
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex2i(0, 1);
-	glIndexi(2);
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex2i(-1, -1);
-	glIndexi(3);
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex2i(1, -1);
-	glEnd();
-	
+    // Simple clear color test
+	glClearColor(intensity, intensity, intensity, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
     Window::SwapBuffers();
 }
 
