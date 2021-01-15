@@ -6,35 +6,39 @@
 #include "WindowEvents.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
+using Enterprise::Graphics;
+
+
 static bool OnWindowClose(Events::Event& e)
 {
-    EP_ASSERT(e.Type() == EventTypes::WindowClose);
+	EP_ASSERT(e.Type() == EventTypes::WindowClose);
 
     // By default, closing the window is equivalent to quitting from the OS.
     Enterprise::Events::Dispatch(EventTypes::QuitRequested);
     return true;
 }
 
-void Enterprise::Graphics::Init()
+void Graphics::Init()
 {
     Events::SubscribeToType(EventTypes::WindowClose, OnWindowClose);
     Window::CreatePrimaryWindow();
+
+	// Set up OpenGL global vertex array
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
-void Enterprise::Graphics::Update()
+void Graphics::Update()
 {
-	static float intensity = 0.0f;
-	intensity += 0.01f;
-	if (intensity >= 1.0f) intensity -= 1.0f;
+	ClearRenderTarget();
 
-    // Simple clear color test
-	glClearColor(intensity, intensity, intensity, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// Drawing code here
 
     Window::SwapBuffers();
 }
 
-void Enterprise::Graphics::Cleanup()
+void Graphics::Cleanup()
 {
     Window::DestroyPrimaryWindow();
 }
