@@ -29,6 +29,7 @@
 #include <CTSpookyHash/CTSpooky.h>
 #include <HotConsts/HotConsts.h>
 #include <glad/glad.h>
+#include <stb_image/stb_image.h>
 
 #ifdef _WIN32
     #include <windows.h>

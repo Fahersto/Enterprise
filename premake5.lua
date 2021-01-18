@@ -38,13 +38,20 @@ group "Dependencies"
         filter "configurations:Dev or Dist"
             optimize "On"
         filter {}
-group ""
+
+    include "Enterprise/_vendor/stb_image/pm_library.lua" -- stb_image
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
+
+group "" -- Dependencies
+
 
 -- Engine library
 project "Enterprise"
     kind "StaticLib"
     location "%{prj.name}"
-    links { "CTSpookyHash", "HotConsts", "Glad" }
+    links { "CTSpookyHash", "HotConsts", "Glad", "stb_image" }
     language "C++"
 
     -- Platform-specific build settings
@@ -98,7 +105,8 @@ project "Enterprise"
         "Enterprise/_vendor/cxx-prettyprint",
         "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include",
-        "Enterprise/_vendor/Glad/include"
+        "Enterprise/_vendor/Glad/include",
+        "Enterprise/_vendor/stb_image/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CORE"
@@ -109,6 +117,7 @@ project "Enterprise"
     filter "system:macosx"
         pchheader "src/EP_PCH.h"
     filter {}
+
 
 -- Game project
 project (EP_ProjectName)
@@ -180,7 +189,8 @@ project (EP_ProjectName)
         "Enterprise/_vendor/cxx-prettyprint",
         "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include",
-        "Enterprise/_vendor/Glad/include"
+        "Enterprise/_vendor/Glad/include",
+        "Enterprise/_vendor/stb_image/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CLIENT"

@@ -80,10 +80,12 @@ The following are "stretch goals" I may implement after having used the Enterpri
 * Win32
 * Raw Input (for low-level keyboard/mouse input)
 * XInput (for gamepad input)
+* OpenGL (DirectX support coming later)
 
 ### macOS
 * Cocoa
 * Game Controller Framework (for gamepad input)
+* OpenGL (Metal support coming later)
 
 ## Libraries Used
 * Premake: <https://premake.github.io/>
@@ -91,3 +93,5 @@ The following are "stretch goals" I may implement after having used the Enterpri
 * Cxx-prettyprint: <http://louisdx.github.io/cxx-prettyprint/>
 * Compile-Time SpookyHash: <https://github.com/theOtherMichael/CTSpookyHash>
 * Hot Constants: <https://github.com/theOtherMichael/HotConsts>
+* Glad: <https://glad.dav1d.de/>
+* stb_image: <https://github.com/nothings/stb>
