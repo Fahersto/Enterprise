@@ -42,6 +42,15 @@ static Graphics::ShaderDataType glTypeToShaderDataType(GLenum glType)
 		case GL_INT_VEC4:
 			return Graphics::ShaderDataType::Int4;
 			break;
+		case GL_SAMPLER_1D:
+			return Graphics::ShaderDataType::Int;
+			break;
+		case GL_SAMPLER_2D:
+			return Graphics::ShaderDataType::Int;
+			break;
+		case GL_SAMPLER_3D:
+			return Graphics::ShaderDataType::Int;
+			break;
 		case GL_UNSIGNED_INT:
 			return Graphics::ShaderDataType::UInt;
 			break;

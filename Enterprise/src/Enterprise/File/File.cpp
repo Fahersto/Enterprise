@@ -72,7 +72,7 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		this->Close();
 	}
 
-	std::string nativePath = convertVPathToNativePath(path);
+	std::string nativePath = VPathToNativePath(path);
 
 #ifdef _WIN32
 
@@ -270,7 +270,7 @@ void Enterprise::File::Init()
 	}
 }
 
-std::string Enterprise::File::convertVPathToNativePath(const std::string& path)
+std::string Enterprise::File::VPathToNativePath(const std::string& path)
 {
 	if (path.rfind("CONTENT/", 0) == 0)
 	{
@@ -294,7 +294,7 @@ std::string Enterprise::File::convertVPathToNativePath(const std::string& path)
 	}
 	else
 	{
-		EP_FATAL("File: convertVPathToNativePath() was passed a path that does "
+		EP_FATAL("File: VPathToNativePath() was passed a path that does "
 				 "not start with a virtual drive name.  path: {}", path);
 		EP_ASSERT_NOENTRY();
 		return std::string();

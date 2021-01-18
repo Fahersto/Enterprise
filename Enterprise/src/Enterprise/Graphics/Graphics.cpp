@@ -23,10 +23,14 @@ void Graphics::Init()
     Events::SubscribeToType(EventTypes::WindowClose, OnWindowClose);
     Window::CreatePrimaryWindow();
 
-	// Set up OpenGL global vertex array
+	// Set up global vertex array
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+
+	// Set up default blend mode
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Graphics::Update()

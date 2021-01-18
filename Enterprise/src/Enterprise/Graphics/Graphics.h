@@ -184,7 +184,7 @@ public:
 	/// @param texture Handle of the texture.
 	/// @param slot The texture slot to bind to.
 	/// @note To unbind a slot, use @c texture @c = @c 0.
-	static void BindTexture(TextureRef texture, unsigned int slot);
+	static void BindTexture(TextureRef texture, unsigned int slot = 0);
 	/// Delete a texture.
 	/// @param texture Handle of the texture.
 	static void DeleteTexture(TextureRef texture);
