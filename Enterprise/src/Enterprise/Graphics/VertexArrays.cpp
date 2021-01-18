@@ -226,23 +226,24 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 	uint64_t newAttributeEnableStatus = 0;
 	for (HashName name : vertexAttributeNames[array])
 	{
-		EP_ASSERTF_SLOW(_shaderAttributeIndices[_activeProgram].count(name),
-						"Graphics: Attempted to draw a vertex array when shader does not support all attributes.");
-		unsigned int index = _shaderAttributeIndices[_activeProgram][name];
-
-		// Enable the vertex attribute index, if it's not already enabled
-		if ((enabledAttributes & BIT(index)) == 0)
+		if (_shaderAttributeIndices[_activeProgram].count(name))
 		{
-			glEnableVertexAttribArray(index);
-		}
-		newAttributeEnableStatus |= BIT(index);
+			unsigned int index = _shaderAttributeIndices[_activeProgram][name];
 
-		glVertexAttribPointer(index,
-							  attributeParameterCounts[array][name],
-							  attributeGLTypes[array][name],
-							  GL_FALSE,
-							  vertexStrides[array],
-							  (void*)attributeVBOOffsets[array][name]);
+			// Enable the vertex attribute index, if it's not already enabled
+			if ((enabledAttributes & BIT(index)) == 0)
+			{
+				glEnableVertexAttribArray(index);
+			}
+			newAttributeEnableStatus |= BIT(index);
+
+			glVertexAttribPointer(index,
+								  attributeParameterCounts[array][name],
+								  attributeGLTypes[array][name],
+								  GL_FALSE,
+								  vertexStrides[array],
+								  (void*)attributeVBOOffsets[array][name]);
+		}
 	}
 
 	// Toggle off unused attributes
