@@ -220,8 +220,6 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 {
 	BindArray(array);
 
-	// TODO: Reverse the order: iterate through the shader's attributes, not the buffer's.
-
 	// Map the vertex buffer layout to match the active shader program.
 	uint64_t newAttributeEnableStatus = 0;
 	for (HashName name : vertexAttributeNames[array])
