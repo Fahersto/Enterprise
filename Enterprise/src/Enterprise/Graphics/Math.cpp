@@ -99,18 +99,19 @@ Mat4 Matrices::Scale(Vec3 scale)
 
 
 
-Mat4 Matrices::Orthographic(float left, float right, float top, float bottom, float nearClip, float farClip)
+Mat4 Matrices::Orthographic(float left, float right, float bottom, float top, float nearClip, float farClip)
 {
-	return Mat4();
+	return
+	{
+		2.0f / (right - left),             0.0f,                             0.0f,                                        0.0f,
+		0.0f,                              2.0f / (top - bottom),            0.0f,                                        0.0f,
+		0.0f,                              0.0f,                             2.0f / (farClip - nearClip),                 0.0f,
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(farClip - nearClip) / (farClip - nearClip), 1.0f
+	};
 }
 
-Mat4 Matrices::Perspective(float fov, float aspectRatio, float nearClip, float farClip)
+Mat4 Matrices::Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip)
 {
-	float top = tan(fov / 2) * nearClip;
-	float bottom = -top;
-	float right = top * aspectRatio;
-	float left = -right;
-
 	return
 	{
 		2.0f * nearClip / (right - left), 0.0f,                             0.0f,                                             0.0f,
@@ -120,9 +121,14 @@ Mat4 Matrices::Perspective(float fov, float aspectRatio, float nearClip, float f
 	};
 }
 
-Mat4 Matrices::PixelSpace()
+Mat4 Matrices::Perspective(float fov, float aspectRatio, float nearClip, float farClip)
 {
-	return Mat4();
+	float top = tan(fov / 2) * nearClip;
+	float bottom = -top;
+	float right = top * aspectRatio;
+	float left = -right;
+
+	return Frustrum(left, right, bottom, top, nearClip, farClip);
 }
 
 }
