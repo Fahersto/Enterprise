@@ -7,82 +7,126 @@ namespace Enterprise::Math
 /// A 2D vector.
 struct Vec2
 {
-	float X;
-	float Y;
+	float x;
+	float y;
 };
 
 /// A 3D vector.
 struct Vec3
 {
-	union
-	{
-		float X;
-		float Red;
-		float Roll;
-	};
-	union
-	{
-		float Y;
-		float Green;
-		float Pitch;
-	};
-	union
-	{
-		float Z;
-		float Blue;
-		float Yaw;
-	};
+	float x;
+	float y;
+	float z;
 };
 
 /// A 4D vector.
 struct Vec4
 {
-	union
-	{
-		float X;
-		float Red;
-	};
-	union
-	{
-		float Y;
-		float Green;
-	};
-	union
-	{
-		float Z;
-		float Blue;
-	};
-	union
-	{
-		float W;
-		float Alpha;
-	};
+	float x;
+	float y;
+	float z;
+	float w;
 };
 
 /// A 3x3 Matrix.
-struct Matrix3
+struct Mat3
 {
-	float c1[3];
-	float c2[3];
-	float c3[3];
+	float data[9];
+
+	Mat3 operator+(Mat3& other)
+	{
+		Mat3 returnVal;
+		for (uint_fast8_t i = 0; i < 9; i++)
+		{
+			returnVal.data[i] = data[i] + other.data[i];
+		}
+		return returnVal;
+	}
+	Mat3 operator-(Mat3& other)
+	{
+		Mat3 returnVal;
+		for (uint_fast8_t i = 0; i < 9; i++)
+		{
+			returnVal.data[i] = data[i] - other.data[i];
+		}
+		return returnVal;
+	}
+	Mat3 operator*(Mat3& other)
+	{
+		Mat3 returnVal;
+		for (uint_fast8_t i = 0; i < 3; i++)
+		{
+			for (uint_fast8_t j = 0; j < 3; j++)
+			{
+				returnVal.data[i * 3 + j] =
+					data[i * 3] * other.data[j] +
+					data[i * 3 + 1] * other.data[j + 3] +
+					data[i * 3 + 2] * other.data[j + 6];
+			}
+		}
+		return returnVal;
+	}
 };
 
 /// A 4x4 Matrix.
-struct Matrix4
+struct Mat4
 {
-	float c1[4];
-	float c2[4];
-	float c3[4];
-	float c4[4];
+	float data[16];
+
+	Mat4 operator+(Mat4& other)
+	{
+		Mat4 returnVal;
+		for (uint_fast8_t i = 0; i < 16; i++)
+		{
+			returnVal.data[i] = data[i] + other.data[i];
+		}
+		return returnVal;
+	}
+	Mat4 operator-(Mat4& other)
+	{
+		Mat4 returnVal;
+		for (uint_fast8_t i = 0; i < 16; i++)
+		{
+			returnVal.data[i] = data[i] - other.data[i];
+		}
+		return returnVal;
+	}
+	Mat4 operator*(Mat4& other)
+	{
+		Mat4 returnVal;
+		for (uint_fast8_t i = 0; i < 4; i++)
+		{
+			for (uint_fast8_t j = 0; j < 4; j++)
+			{
+				returnVal.data[i * 4 + j] =
+					data[i * 4]     * other.data[j] +
+					data[i * 4 + 1] * other.data[j + 4] +
+					data[i * 4 + 2] * other.data[j + 8] +
+					data[i * 4 + 3] * other.data[j + 12];
+			}
+		}
+		return returnVal;
+	}
 };
 
-/// Standard matrices lookup/generation.
+/// Standard matrices
+/// TODO: Would these work better as static methods of the Mat3/Mat4 classes?
 namespace Matrices
 {
-static Matrix4 Identity();
-static Matrix4 Orthographic(float left, float right, float top, float bottom, float near, float far);
-static Matrix4 Perspective(float fov, float aspectRatio, float near, float far);
-static Matrix4 PixelSpace();
+Mat3 Identity3();
+Mat4 Identity4();
+
+Mat4 Translation(float x, float y, float z);
+Mat4 Translation(Vec3 trans);
+Mat4 Rotation(float roll, float pitch, float yaw);
+Mat4 Rotation(Vec3 rot);
+Mat4 Scale(float scale);
+Mat4 Scale(float x, float y, float z);
+Mat4 Scale(Vec3 scale);
+
+Mat4 Orthographic(float left, float right, float top, float bottom, float nearClip, float farClip);
+Mat4 Perspective(float fov, float aspectRatio, float nearClip, float farClip);
+Mat4 PixelSpace();
 }
 
 }

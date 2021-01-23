@@ -77,11 +77,11 @@ public:
 	/// Set the current transform matrix.
 	/// @param transform The transform matrix to use in the next draw call.
 	/// @note This is equivalent to setting the "transform" uniform.
-	static void SetTransform(Math::Matrix4 transform);
+	static void SetTransform(Math::Mat4 transform);
 	/// Set the current projection matrix.
 	/// @param projection The projection matrix to use in the next draw call.
 	/// @note This is equivalent to setting the "projection" uniform.
-	static void SetProjection(Math::Matrix4 projection);
+	static void SetProjection(Math::Mat4 projection);
 
 	/// Set the value of a Float uniform.
 	/// @param uniform The HashName of the uniform.
@@ -168,11 +168,11 @@ public:
 	/// Set the value of a Mat3 uniform.
 	/// @param uniform The HashName of the uniform.
 	/// @param value The value.
-	static void SetUniform(HashName uniform, Math::Matrix3 value);
+	static void SetUniform(HashName uniform, Math::Mat3 value);
 	/// Set the value of a Mat4uniform.
 	/// @param uniform The HashName of the uniform.
 	/// @param value The value.
-	static void SetUniform(HashName uniform, Math::Matrix4 value);
+	static void SetUniform(HashName uniform, Math::Mat4 value);
 
 	// Texture functions
 

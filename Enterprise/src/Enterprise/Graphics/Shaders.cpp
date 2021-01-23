@@ -185,6 +185,12 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 {
 	EP_INFO("Graphics: Linking shader program. V: {}, P: {}", vShader, pShader);
 
+	if (!vShader && !pShader)
+	{
+		EP_ERROR("Graphics: Linking failed due to shader compilation failure.");
+		return 0;
+	}
+
 	unsigned int program = glCreateProgram();
 	glAttachShader(program, vShader);
 	glAttachShader(program, pShader);
@@ -268,12 +274,12 @@ void Graphics::DeleteProgram(ProgramRef program)
 
 // Uniforms
 
-void Graphics::SetTransform(Math::Matrix4 transform)
+void Graphics::SetTransform(Math::Mat4 transform)
 {
 	SetUniform(HN("transform"), transform);
 }
 
-void Graphics::SetProjection(Math::Matrix4 projection)
+void Graphics::SetProjection(Math::Mat4 projection)
 {
 	SetUniform(HN("projection"), projection);
 }
@@ -336,7 +342,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec2 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float2,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform2f(uniformLocations[_activeProgram][uniform], value.X, value.Y);
+	glUniform2f(uniformLocations[_activeProgram][uniform], value.x, value.y);
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec3 value)
@@ -348,7 +354,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec3 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform3f(uniformLocations[_activeProgram][uniform], value.X, value.Y, value.Z);
+	glUniform3f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z);
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec4 value)
@@ -360,7 +366,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec4 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform4f(uniformLocations[_activeProgram][uniform], value.X, value.Y, value.Z, value.W);
+	glUniform4f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z, value.w);
 }
 
 void Graphics::SetUniform(HashName uniform, int value)
@@ -459,7 +465,7 @@ void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int va
 	glUniform4ui(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4);
 }
 
-void Graphics::SetUniform(HashName uniform, Enterprise::Math::Matrix3 value)
+void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat3 value)
 {
 	EP_ASSERTF_SLOW(uniformLocations[_activeProgram].count(uniform),
 					"Graphics: Attempted to set uniform not present in the active shader program.");
@@ -468,10 +474,10 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Matrix3 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Mat3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], 1, GL_FALSE, (GLfloat*)&value);
+	glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value);
 }
 
-void Graphics::SetUniform(HashName uniform, Enterprise::Math::Matrix4 value)
+void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat4 value)
 {
 	EP_ASSERTF_SLOW(uniformLocations[_activeProgram].count(uniform),
 					"Graphics: Attempted to set uniform not present in the active shader program.");
@@ -480,5 +486,5 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Matrix4 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Mat4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], 1, GL_FALSE, (GLfloat*)&value);
+	glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value);
 }
