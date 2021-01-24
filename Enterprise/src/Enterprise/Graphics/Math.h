@@ -196,6 +196,8 @@ struct Mat3
 {
 	float data[9];
 
+	static Mat3 Identity();
+
 	Mat3& operator*=(const Mat3& other);
 	Mat3& operator*=(Mat3&& other);
 };
@@ -215,6 +217,20 @@ struct Mat4
 {
 	float data[16];
 
+	static Mat4 Identity();
+
+	static Mat4 Translation(float x, float y, float z);
+	static Mat4 Translation(Vec3 trans);
+	static Mat4 Rotation(float roll, float pitch, float yaw);
+	static Mat4 Rotation(Vec3 rot);
+	static Mat4 Scale(float scale);
+	static Mat4 Scale(float x, float y, float z);
+	static Mat4 Scale(Vec3 scale);
+
+	static Mat4 Orthographic(float left, float right, float bottom, float top, float nearClip, float farClip);
+	static Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
+	static Mat4 Perspective(float fov, float aspectRatio, float nearClip, float farClip);
+
 	Mat4& operator*=(const Mat4& other);
 	Mat4& operator*=(Mat4&& other);
 };
@@ -228,25 +244,5 @@ Vec4 operator*(const Mat4& lhs, const Vec4& rhs);
 Vec4 operator*(const Mat4& lhs, Vec4&& rhs);
 Vec4 operator*(Mat4&& lhs, const Vec4& rhs);
 Vec4 operator*(Mat4&& lhs, Vec4&& rhs);
-
-/// Standard matrices
-/// TODO: Would these work better as static methods of the Mat3/Mat4 classes?
-namespace Matrices
-{
-Mat3 Identity3();
-Mat4 Identity4();
-
-Mat4 Translation(float x, float y, float z);
-Mat4 Translation(Vec3 trans);
-Mat4 Rotation(float roll, float pitch, float yaw);
-Mat4 Rotation(Vec3 rot);
-Mat4 Scale(float scale);
-Mat4 Scale(float x, float y, float z);
-Mat4 Scale(Vec3 scale);
-
-Mat4 Orthographic(float left, float right, float bottom, float top, float nearClip, float farClip);
-Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
-Mat4 Perspective(float fov, float aspectRatio, float nearClip, float farClip);
-}
 
 }
