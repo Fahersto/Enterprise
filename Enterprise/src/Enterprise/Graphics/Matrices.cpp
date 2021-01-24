@@ -55,16 +55,6 @@ Mat4 Mat4::Rotation(float roll, float pitch, float yaw)
 		0.0f,                 0.0f,                                                       0.0f,                                                       1.0f
 	};
 }
-Mat4 Mat4::Rotation(Vec3 rot)
-{
-	return
-	{
-		cos(rot.x) * cos(rot.z), cos(rot.x) * sin(rot.z) * sin(rot.y) - sin(rot.x) * cos(rot.y), cos(rot.x) * sin(rot.z) * cos(rot.y) + sin(rot.x) * sin(rot.y), 0.0f,
-		sin(rot.x) * cos(rot.z), sin(rot.x) * sin(rot.z) * sin(rot.y) + cos(rot.x) * cos(rot.y), sin(rot.x) * sin(rot.z) * cos(rot.y) - cos(rot.x) * sin(rot.y), 0.0f,
-		-sin(rot.z),             cos(rot.z) * sin(rot.y),                                        cos(rot.z) * cos(rot.y),                                        0.0f,
-		0.0f,                    0.0f,                                                           0.0f,                                                           1.0f
-	};
-}
 Mat4 Mat4::Scale(float scale)
 {
 	return

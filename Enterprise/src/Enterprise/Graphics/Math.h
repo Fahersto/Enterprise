@@ -196,6 +196,7 @@ struct Mat3
 {
 	float data[9];
 
+	/// Generate a 3x3 identity matrix.
 	static Mat3 Identity();
 
 	Mat3& operator*=(const Mat3& other);
@@ -217,18 +218,55 @@ struct Mat4
 {
 	float data[16];
 
+	/// Generate a 4x4 identity matrix.
 	static Mat4 Identity();
 
+	/// Generate a 4x4 translation matrix.
+	/// @param x X component of translation.
+	/// @param y Y component of translation.
+	/// @param z Z component of translation.
 	static Mat4 Translation(float x, float y, float z);
+	/// Generate a 4x4 translation matrix.
+	/// @param trans Translation vector.
 	static Mat4 Translation(Vec3 trans);
+	/// Generate a 4x4 rotation matrix.
+	/// @param roll Angle of roll.
+	/// @param pitch Angle of pitch.
+	/// @param yaw Angle of yaw.
 	static Mat4 Rotation(float roll, float pitch, float yaw);
-	static Mat4 Rotation(Vec3 rot);
+	/// Generate a 4x4 scaling matrix.
+	/// @param scale The scale factor.
 	static Mat4 Scale(float scale);
+	/// Generate a 4x4 scaling matrix.
+	/// @param x The scale factor for the x component.
+	/// @param y The scale factor for the y component.
+	/// @param z The scale factor for the z component.
 	static Mat4 Scale(float x, float y, float z);
+	/// Generate a 4x4 scaling matrix.
+	/// @param scale The multi-dimensional scaling factor.
 	static Mat4 Scale(Vec3 scale);
 
+	/// Generate a 4x4 orthographic projection matrix.
+	/// @param left The x coordinate, in view space, of the left clipping plane.
+	/// @param right The x coordinate, in view space, of the right clipping plane.
+	/// @param bottom The y coordinate, in view space, of the lower clipping plane..
+	/// @param top The y coordinate, in view space, of the upper clipping plane.
+	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
+	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Orthographic(float left, float right, float bottom, float top, float nearClip, float farClip);
+	/// Generate a 4x4 perspective projection matrix.
+	/// @param left The x coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
+	/// @param right The x coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
+	/// @param bottom The y coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
+	/// @param top The y coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
+	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
+	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
+	/// Generate a 4x4 perspective projection matrix.
+	/// @param fov The field of view angle in the y direction.
+	/// @param aspectRatio The aspect ratio of the projection.  Determines the field of view in the x direction.
+	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
+	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Perspective(float fov, float aspectRatio, float nearClip, float farClip);
 
 	Mat4& operator*=(const Mat4& other);
