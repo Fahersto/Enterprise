@@ -47,12 +47,16 @@ Mat4 Mat4::Translation(Vec3 trans)
 }
 Mat4 Mat4::Rotation(float roll, float pitch, float yaw)
 {
+	float r = DegToRad(roll);
+	float p = DegToRad(pitch);
+	float y = DegToRad(yaw);
+
 	return
 	{
-		cos(roll) * cos(yaw), cos(roll) * sin(yaw) * sin(pitch) - sin(roll) * cos(pitch), cos(roll) * sin(yaw) * cos(pitch) + sin(roll) * sin(pitch), 0.0f,
-		sin(roll) * cos(yaw), sin(roll) * sin(yaw) * sin(pitch) + cos(roll) * cos(pitch), sin(roll) * sin(yaw) * cos(pitch) - cos(roll) * sin(pitch), 0.0f,
-		-sin(yaw),            cos(yaw) * sin(pitch),                                      cos(yaw) * cos(pitch),                                      0.0f,
-		0.0f,                 0.0f,                                                       0.0f,                                                       1.0f
+		cos(r) * cos(y), cos(r) * sin(y) * sin(p) - sin(r) * cos(p), cos(r) * sin(y) * cos(p) + sin(r) * sin(p), 0.0f,
+		sin(r) * cos(y), sin(r) * sin(y) * sin(p) + cos(r) * cos(p), sin(r) * sin(y) * cos(p) - cos(r) * sin(p), 0.0f,
+		-sin(y),         cos(y) * sin(p),                            cos(y) * cos(p),                            0.0f,
+		0.0f,                 0.0f,                                  0.0f,                                       1.0f
 	};
 }
 Mat4 Mat4::Scale(float scale)
@@ -108,7 +112,7 @@ Mat4 Mat4::Frustrum(float left, float right, float bottom, float top, float near
 }
 Mat4 Mat4::Perspective(float fov, float aspectRatio, float nearClip, float farClip)
 {
-	float top = tan(fov / 2) * nearClip;
+	float top = tan(DegToRad(fov) / 2) * nearClip;
 	float bottom = -top;
 	float right = top * aspectRatio;
 	float left = -right;

@@ -4,6 +4,9 @@
 namespace Enterprise::Math
 {
 
+constexpr float DegToRad(float degrees) { return (M_PI / 180.0) * degrees; }
+constexpr float RadToDeg(float radians) { return (180.0 / M_PI) * radians; }
+
 struct Mat3;
 struct Mat4;
 
@@ -230,9 +233,9 @@ struct Mat4
 	/// @param trans Translation vector.
 	static Mat4 Translation(Vec3 trans);
 	/// Generate a 4x4 rotation matrix.
-	/// @param roll Angle of roll.
-	/// @param pitch Angle of pitch.
-	/// @param yaw Angle of yaw.
+	/// @param roll Angle of roll in degrees.
+	/// @param pitch Angle of pitch in degrees.
+	/// @param yaw Angle of yaw in degrees.
 	static Mat4 Rotation(float roll, float pitch, float yaw);
 	/// Generate a 4x4 scaling matrix.
 	/// @param scale The scale factor.
@@ -263,7 +266,7 @@ struct Mat4
 	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
 	/// Generate a 4x4 perspective projection matrix.
-	/// @param fov The field of view angle in the y direction.
+	/// @param fov The field of view angle, in degrees, in the y direction.
 	/// @param aspectRatio The aspect ratio of the projection.  Determines the field of view in the x direction.
 	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
 	/// @param farClip The z coordinate, in view space, of the far clipping plane.
