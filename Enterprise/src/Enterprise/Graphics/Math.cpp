@@ -137,7 +137,7 @@ Vec2 operator-(const Vec2& lhs, Vec2&& rhs)
 		lhs.y - rhs.y
 	};
 }
-Vec2 operator*(const Vec2& lhs, const const Vec2& rhs)
+Vec2 operator*(const Vec2& lhs, const Vec2& rhs)
 {
 	return
 	{
@@ -202,7 +202,7 @@ Vec2 operator-(Vec2&& lhs, Vec2&& rhs)
 		lhs.y - rhs.y
 	};
 }
-Vec2 operator*(Vec2&& lhs, const const Vec2& rhs)
+Vec2 operator*(Vec2&& lhs, const Vec2& rhs)
 {
 	return
 	{
