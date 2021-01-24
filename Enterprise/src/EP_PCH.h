@@ -26,6 +26,9 @@
 #include <exception>
 #include <csignal>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <CTSpookyHash/CTSpooky.h>
 #include <HotConsts/HotConsts.h>
 #include <glad/glad.h>
