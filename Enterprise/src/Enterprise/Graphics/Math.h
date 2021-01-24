@@ -4,12 +4,68 @@
 namespace Enterprise::Math
 {
 
+struct Mat3;
+struct Mat4;
+
 /// A 2D vector.
 struct Vec2
 {
 	float x;
 	float y;
+
+	Vec2& operator+=(const Vec2& other);
+	Vec2& operator+=(Vec2&& other);
+	Vec2& operator-=(const Vec2& other);
+	Vec2& operator-=(Vec2&& other);
+	Vec2& operator*=(const Vec2& other);
+	Vec2& operator*=(Vec2&& other);
+	Vec2& operator/=(const Vec2& other);
+	Vec2& operator/=(Vec2&& other);
+
+	Vec2& operator*=(float other);
+	Vec2& operator/=(float other);
+
+	Vec2& operator*=(Mat3&& other);
+	Vec2& operator*=(const Mat3& other);
+	Vec2& operator*=(Mat4&& other);
+	Vec2& operator*=(const Mat4& other);
 };
+
+Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
+Vec2 operator+(const Vec2& lhs, Vec2&& rhs);
+Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
+Vec2 operator-(const Vec2& lhs, Vec2&& rhs);
+Vec2 operator*(const Vec2& lhs, const Vec2& rhs);
+Vec2 operator*(const Vec2& lhs, Vec2&& rhs);
+Vec2 operator/(const Vec2& lhs, const Vec2& rhs);
+Vec2 operator/(const Vec2& lhs, Vec2&& rhs);
+
+Vec2 operator+(Vec2&& lhs, const Vec2& rhs);
+Vec2 operator+(Vec2&& lhs, Vec2&& rhs);
+Vec2 operator-(Vec2&& lhs, const Vec2& rhs);
+Vec2 operator-(Vec2&& lhs, Vec2&& rhs);
+Vec2 operator*(Vec2&& lhs, const Vec2& rhs);
+Vec2 operator*(Vec2&& lhs, Vec2&& rhs);
+Vec2 operator/(Vec2&& lhs, const Vec2& rhs);
+Vec2 operator/(Vec2&& lhs, Vec2&& rhs);
+
+Vec2 operator*(const Vec2& lhs, float rhs);
+Vec2 operator/(const Vec2& lhs, float rhs);
+Vec2 operator*(Vec2&& lhs, float rhs);
+Vec2 operator/(Vec2&& lhs, float rhs);
+
+Vec2 operator*(const Vec2& lhs, const Mat3& rhs);
+Vec2 operator*(const Vec2& lhs, Mat3&& rhs);
+Vec2 operator*(const Vec2& lhs, const Mat4& rhs);
+Vec2 operator*(const Vec2& lhs, Mat4&& rhs);
+
+Vec2 operator*(Vec2&& lhs, const Mat3& rhs);
+Vec2 operator*(Vec2&& lhs, Mat3&& rhs);
+Vec2 operator*(Vec2&& lhs, const Mat4& rhs);
+Vec2 operator*(Vec2&& lhs, Mat4&& rhs);
+
+Vec2 operator*(float lhs, const Vec2& rhs);
+Vec2 operator*(float lhs, Vec2&& rhs);
 
 /// A 3D vector.
 struct Vec3
@@ -17,7 +73,60 @@ struct Vec3
 	float x;
 	float y;
 	float z;
+
+	Vec3& operator+=(const Vec3& other);
+	Vec3& operator+=(Vec3&& other);
+	Vec3& operator-=(const Vec3& other);
+	Vec3& operator-=(Vec3&& other);
+	Vec3& operator*=(const Vec3& other);
+	Vec3& operator*=(Vec3&& other);
+	Vec3& operator/=(const Vec3& other);
+	Vec3& operator/=(Vec3&& other);
+
+	Vec3& operator*=(float other);
+	Vec3& operator/=(float other);
+
+	Vec3& operator*=(const Mat3& other);
+	Vec3& operator*=(Mat3&& other);
+	Vec3& operator*=(const Mat4& other);
+	Vec3& operator*=(Mat4&& other);
 };
+
+Vec3 operator+(const Vec3& lhs, const Vec3& rhs);
+Vec3 operator+(const Vec3& lhs, Vec3&& rhs);
+Vec3 operator-(const Vec3& lhs, const Vec3& rhs);
+Vec3 operator-(const Vec3& lhs, Vec3&& rhs);
+Vec3 operator*(const Vec3& lhs, const Vec3& rhs);
+Vec3 operator*(const Vec3& lhs, Vec3&& rhs);
+Vec3 operator/(const Vec3& lhs, const Vec3& rhs);
+Vec3 operator/(const Vec3& lhs, Vec3&& rhs);
+
+Vec3 operator+(Vec3&& lhs, const Vec3& rhs);
+Vec3 operator+(Vec3&& lhs, Vec3&& rhs);
+Vec3 operator-(Vec3&& lhs, const Vec3& rhs);
+Vec3 operator-(Vec3&& lhs, Vec3&& rhs);
+Vec3 operator*(Vec3&& lhs, const Vec3& rhs);
+Vec3 operator*(Vec3&& lhs, Vec3&& rhs);
+Vec3 operator/(Vec3&& lhs, const Vec3& rhs);
+Vec3 operator/(Vec3&& lhs, Vec3&& rhs);
+
+Vec3 operator*(const Vec3& lhs, float rhs);
+Vec3 operator/(const Vec3& lhs, float rhs);
+Vec3 operator*(Vec3&& lhs, float rhs);
+Vec3 operator/(Vec3&& lhs, float rhs);
+
+Vec3 operator*(const Vec3& lhs, const Mat3& rhs);
+Vec3 operator*(const Vec3& lhs, Mat3&& rhs);
+Vec3 operator*(const Vec3& lhs, const Mat4& rhs);
+Vec3 operator*(const Vec3& lhs, Mat4&& rhs);
+
+Vec3 operator*(Vec3&& lhs, const Mat3& rhs);
+Vec3 operator*(Vec3&& lhs, Mat3&& rhs);
+Vec3 operator*(Vec3&& lhs, const Mat4& rhs);
+Vec3 operator*(Vec3&& lhs, Mat4&& rhs);
+
+Vec3 operator*(float lhs, const Vec3& rhs);
+Vec3 operator*(float lhs, Vec3&& rhs);
 
 /// A 4D vector.
 struct Vec4
@@ -26,155 +135,99 @@ struct Vec4
 	float y;
 	float z;
 	float w;
+
+	Vec4& operator+=(const Vec4& other);
+	Vec4& operator+=(Vec4&& other);
+	Vec4& operator-=(const Vec4& other);
+	Vec4& operator-=(Vec4&& other);
+	Vec4& operator*=(const Vec4& other);
+	Vec4& operator*=(Vec4&& other);
+	Vec4& operator/=(const Vec4& other);
+	Vec4& operator/=(Vec4&& other);
+	
+	Vec4& operator*=(float other);
+	Vec4& operator/=(float other);
+
+	Vec4& operator*=(const Mat3& other);
+	Vec4& operator*=(Mat3&& other);
+	Vec4& operator*=(const Mat4& other);
+	Vec4& operator*=(Mat4&& other);
 };
+
+Vec4 operator+(const Vec4& lhs, const Vec4& rhs);
+Vec4 operator+(const Vec4& lhs, Vec4&& rhs);
+Vec4 operator-(const Vec4& lhs, const Vec4& rhs);
+Vec4 operator-(const Vec4& lhs, Vec4&& rhs);
+Vec4 operator*(const Vec4& lhs, const Vec4& rhs);
+Vec4 operator*(const Vec4& lhs, Vec4&& rhs);
+Vec4 operator/(const Vec4& lhs, const Vec4& rhs);
+Vec4 operator/(const Vec4& lhs, Vec4&& rhs);
+
+Vec4 operator+(Vec4&& lhs, const Vec4& rhs);
+Vec4 operator+(Vec4&& lhs, Vec4&& rhs);
+Vec4 operator-(Vec4&& lhs, const Vec4& rhs);
+Vec4 operator-(Vec4&& lhs, Vec4&& rhs);
+Vec4 operator*(Vec4&& lhs, const Vec4& rhs);
+Vec4 operator*(Vec4&& lhs, Vec4&& rhs);
+Vec4 operator/(Vec4&& lhs, const Vec4& rhs);
+Vec4 operator/(Vec4&& lhs, Vec4&& rhs);
+
+Vec4 operator*(const Vec4& lhs, float rhs);
+Vec4 operator/(const Vec4& lhs, float rhs);
+
+Vec4 operator*(Vec4&& lhs, float rhs);
+Vec4 operator/(Vec4&& lhs, float rhs);
+
+Vec4 operator*(const Vec4& lhs, const Mat3& rhs);
+Vec4 operator*(const Vec4& lhs, Mat3&& rhs);
+Vec4 operator*(const Vec4& lhs, const Mat4& rhs);
+Vec4 operator*(const Vec4& lhs, Mat4&& rhs);
+
+Vec4 operator*(Vec4&& lhs, const Mat3& rhs);
+Vec4 operator*(Vec4&& lhs, Mat3&& rhs);
+Vec4 operator*(Vec4&& lhs, const Mat4& rhs);
+Vec4 operator*(Vec4&& lhs, Mat4&& rhs);
+
+Vec4 operator*(float lhs, Vec4& rhs);
+Vec4 operator*(float lhs, Vec4&& rhs);
 
 /// A 3x3 Matrix.
 struct Mat3
 {
 	float data[9];
 
-	Mat3 operator+(Mat3 other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 9; i++)
-		{
-			returnVal.data[i] = data[i] + other.data[i];
-		}
-		return returnVal;
-	}
-	Mat3 operator+(Mat3& other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 9; i++)
-		{
-			returnVal.data[i] = data[i] + other.data[i];
-		}
-		return returnVal;
-	}
-	Mat3 operator-(Mat3 other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 9; i++)
-		{
-			returnVal.data[i] = data[i] - other.data[i];
-		}
-		return returnVal;
-	}
-	Mat3 operator-(Mat3& other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 9; i++)
-		{
-			returnVal.data[i] = data[i] - other.data[i];
-		}
-		return returnVal;
-	}
-	Mat3 operator*(Mat3 other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 3; i++)
-		{
-			for (uint_fast8_t j = 0; j < 3; j++)
-			{
-				returnVal.data[i * 3 + j] =
-					data[i * 3] * other.data[j] +
-					data[i * 3 + 1] * other.data[j + 3] +
-					data[i * 3 + 2] * other.data[j + 6];
-			}
-		}
-		return returnVal;
-	}
-	Mat3 operator*(Mat3& other)
-	{
-		Mat3 returnVal;
-		for (uint_fast8_t i = 0; i < 3; i++)
-		{
-			for (uint_fast8_t j = 0; j < 3; j++)
-			{
-				returnVal.data[i * 3 + j] =
-					data[i * 3] * other.data[j] +
-					data[i * 3 + 1] * other.data[j + 3] +
-					data[i * 3 + 2] * other.data[j + 6];
-			}
-		}
-		return returnVal;
-	}
+	Mat3& operator*=(const Mat3& other);
+	Mat3& operator*=(Mat3&& other);
 };
+
+Mat3 operator*(const Mat3& lhs, const Mat3& rhs);
+Mat3 operator*(const Mat3& lhs, Mat3&& rhs);
+Mat3 operator*(Mat3&& lhs, const Mat3& rhs);
+Mat3 operator*(Mat3&& lhs, Mat3&& rhs);
+
+Vec3 operator*(const Mat3& lhs, const Vec3& rhs);
+Vec3 operator*(const Mat3& lhs, Vec3&& rhs);
+Vec3 operator*(Mat3&& lhs, const Vec3& rhs);
+Vec3 operator*(Mat3&& lhs, Vec3&& rhs);
 
 /// A 4x4 Matrix.
 struct Mat4
 {
 	float data[16];
 
-	Mat4 operator+(Mat4 other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 16; i++)
-		{
-			returnVal.data[i] = data[i] + other.data[i];
-		}
-		return returnVal;
-	}
-	Mat4 operator+(Mat4& other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 16; i++)
-		{
-			returnVal.data[i] = data[i] + other.data[i];
-		}
-		return returnVal;
-	}
-	Mat4 operator-(Mat4 other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 16; i++)
-		{
-			returnVal.data[i] = data[i] - other.data[i];
-		}
-		return returnVal;
-	}
-	Mat4 operator-(Mat4& other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 16; i++)
-		{
-			returnVal.data[i] = data[i] - other.data[i];
-		}
-		return returnVal;
-	}
-	Mat4 operator*(Mat4 other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 4; i++)
-		{
-			for (uint_fast8_t j = 0; j < 4; j++)
-			{
-				returnVal.data[i * 4 + j] =
-					data[i * 4]     * other.data[j] +
-					data[i * 4 + 1] * other.data[j + 4] +
-					data[i * 4 + 2] * other.data[j + 8] +
-					data[i * 4 + 3] * other.data[j + 12];
-			}
-		}
-		return returnVal;
-	}
-	Mat4 operator*(Mat4& other)
-	{
-		Mat4 returnVal;
-		for (uint_fast8_t i = 0; i < 4; i++)
-		{
-			for (uint_fast8_t j = 0; j < 4; j++)
-			{
-				returnVal.data[i * 4 + j] =
-					data[i * 4]     * other.data[j] +
-					data[i * 4 + 1] * other.data[j + 4] +
-					data[i * 4 + 2] * other.data[j + 8] +
-					data[i * 4 + 3] * other.data[j + 12];
-			}
-		}
-		return returnVal;
-	}
+	Mat4& operator*=(const Mat4& other);
+	Mat4& operator*=(Mat4&& other);
 };
+
+Mat4 operator*(const Mat4& lhs, const Mat4& rhs);
+Mat4 operator*(const Mat4& lhs, Mat4&& rhs);
+Mat4 operator*(Mat4&& lhs, const Mat4& rhs);
+Mat4 operator*(Mat4&& lhs, Mat4&& rhs);
+
+Vec4 operator*(const Mat4& lhs, const Vec4& rhs);
+Vec4 operator*(const Mat4& lhs, Vec4&& rhs);
+Vec4 operator*(Mat4&& lhs, const Vec4& rhs);
+Vec4 operator*(Mat4&& lhs, Vec4&& rhs);
 
 /// Standard matrices
 /// TODO: Would these work better as static methods of the Mat3/Mat4 classes?
