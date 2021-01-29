@@ -16,6 +16,8 @@ struct Vec2
 	float x;
 	float y;
 
+	Vec2(float X, float Y) : x(X), y(Y) {};
+
 	Vec2& operator+=(const Vec2& other);
 	Vec2& operator+=(Vec2&& other);
 	Vec2& operator-=(const Vec2& other);
@@ -76,6 +78,8 @@ struct Vec3
 	float x;
 	float y;
 	float z;
+
+	Vec3(float X, float Y, float Z) : x(X), y(Y), z(Z) {};
 
 	Vec3& operator+=(const Vec3& other);
 	Vec3& operator+=(Vec3&& other);
@@ -138,6 +142,8 @@ struct Vec4
 	float y;
 	float z;
 	float w;
+
+	Vec4(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {};
 
 	Vec4& operator+=(const Vec4& other);
 	Vec4& operator+=(Vec4&& other);
