@@ -97,17 +97,17 @@ Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float 
 		2.0f / (right - left),             0.0f,                             0.0f,                                        0.0f,
 		0.0f,                              2.0f / (top - bottom),            0.0f,                                        0.0f,
 		0.0f,                              0.0f,                             2.0f / (farClip - nearClip),                 0.0f,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(farClip - nearClip) / (farClip - nearClip), 1.0f
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(farClip + nearClip) / (farClip - nearClip), 1.0f
 	};
 }
 Mat4 Mat4::Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip)
 {
 	return
 	{
-		2.0f * nearClip / (right - left), 0.0f,                             0.0f,                                             0.0f,
-		0.0f,                             2.0f * nearClip / (top - bottom), 0.0f,                                             0.0f,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), (farClip + nearClip) / (farClip - nearClip),      1.0f,
-		0.0f,                             0.0f,                            -2.0f * farClip * nearClip / (farClip - nearClip), 0.0f
+		2.0f * nearClip / (right - left), 0.0f,                             0.0f,                                               0.0f,
+		0.0f,                             2.0f * nearClip / (top - bottom), 0.0f,                                               0.0f,
+		(right + left) / (right - left),  (top + bottom) / (top - bottom),  (farClip + nearClip) / (farClip - nearClip),        1.0f,
+		0.0f,                             0.0f,                            -(2.0f * farClip * nearClip) / (farClip - nearClip), 0.0f
 	};
 }
 Mat4 Mat4::Perspective(float fov, float aspectRatio, float nearClip, float farClip)
