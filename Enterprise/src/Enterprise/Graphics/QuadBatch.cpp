@@ -193,8 +193,8 @@ void Graphics::QuadBatch::AddQuad(Vec2 scale, Vec3 translation,
 {
 	EP_ASSERT_SLOW(textures.size() > 0);
 	EP_ASSERT_SLOW(textures.size() <= _maxTextureSlots);
-	EP_ASSERT_SLOW(textures.size() <= 32);
-	unsigned int outSlotAssignments[32] = { 0 };
+	EP_ASSERT_SLOW(textures.size() <= 16);
+	int outSlotAssignments[16] = { 0 };
 
 	int suppliedTextureIndex = 0;
 	for (TextureRef tex : textures)
@@ -286,8 +286,8 @@ void Graphics::QuadBatch::AddRotatedQuad(Vec2 origin,
 {
 	EP_ASSERT_SLOW(textures.size() > 0);
 	EP_ASSERT_SLOW(textures.size() <= _maxTextureSlots);
-	EP_ASSERT_SLOW(textures.size() <= 32);
-	unsigned int outSlotAssignments[32] = { 0 };
+	EP_ASSERT_SLOW(textures.size() <= 16);
+	int outSlotAssignments[16] = { 0 };
 
 	int suppliedTextureIndex = 0;
 	for (TextureRef tex : textures)

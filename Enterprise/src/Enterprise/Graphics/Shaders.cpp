@@ -733,5 +733,8 @@ void Graphics::SetUniformArray(HashName uniform, unsigned int count, Graphics::S
 	case ShaderDataType::Mat4:
 		glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src);
 		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		break;
 	}
 }
