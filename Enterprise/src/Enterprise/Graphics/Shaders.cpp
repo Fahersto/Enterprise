@@ -7,11 +7,14 @@ using Enterprise::File;
 
 Graphics::ProgramRef Graphics::_activeProgram;
 std::unordered_map<Graphics::ProgramRef, std::unordered_map<HashName, unsigned int>> Graphics::_shaderAttributeIndices;
+uint64_t Graphics::_enabledAttributes = 0;
 
 // The OpenGL location of a uniform in a shader.
 static std::unordered_map<Graphics::ProgramRef, std::unordered_map<HashName, int>> uniformLocations;
-// The data type of a uniform in a shader. TODO: Strip from relesae builds.
+// The data type of a uniform in a shader. TODO: Strip from release builds.
 static std::unordered_map<Graphics::ProgramRef, std::unordered_map<HashName, Graphics::ShaderDataType>> uniformTypes;
+// The number of elements in a uniform array.
+static std::unordered_map<Graphics::ProgramRef, std::unordered_map<HashName, int>> uniformNumOfElements;
 
 // Helper function: convert a ShaderDataType to an OpenGL enum representing the type.
 static Graphics::ShaderDataType glTypeToShaderDataType(GLenum glType)
@@ -73,6 +76,100 @@ static Graphics::ShaderDataType glTypeToShaderDataType(GLenum glType)
 			EP_ASSERT_NOENTRY();
 			return Graphics::ShaderDataType::none;
 			break;
+	}
+}
+
+static size_t sizeofShaderDataType(Graphics::ShaderDataType type)
+{
+	switch (type)
+	{
+	case Graphics::ShaderDataType::Float:
+		return sizeof(float);
+		break;
+	case Graphics::ShaderDataType::Float2:
+		return sizeof(float);
+		break;
+	case Graphics::ShaderDataType::Float3:
+		return sizeof(float);
+		break;
+	case Graphics::ShaderDataType::Float4:
+		return sizeof(float);
+		break;
+	case Graphics::ShaderDataType::Int:
+		return sizeof(int);
+		break;
+	case Graphics::ShaderDataType::Int2:
+		return sizeof(int);
+		break;
+	case Graphics::ShaderDataType::Int3:
+		return sizeof(int);
+		break;
+	case Graphics::ShaderDataType::Int4:
+		return sizeof(int);
+		break;
+	case Graphics::ShaderDataType::UInt:
+		return sizeof(unsigned int);
+		break;
+	case Graphics::ShaderDataType::UInt2:
+		return sizeof(unsigned int);
+		break;
+	case Graphics::ShaderDataType::UInt3:
+		return sizeof(unsigned int);
+		break;
+	case Graphics::ShaderDataType::UInt4:
+		return sizeof(unsigned int);
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		return 0;
+		break;
+	}
+}
+
+static int numOfShaderDataTypeArgs(Graphics::ShaderDataType type)
+{
+	switch (type)
+	{
+	case Graphics::ShaderDataType::Float:
+		return 1;
+		break;
+	case Graphics::ShaderDataType::Float2:
+		return 1;
+		break;
+	case Graphics::ShaderDataType::Float3:
+		return 3;
+		break;
+	case Graphics::ShaderDataType::Float4:
+		return 4;
+		break;
+	case Graphics::ShaderDataType::Int:
+		return 1;
+		break;
+	case Graphics::ShaderDataType::Int2:
+		return 2;
+		break;
+	case Graphics::ShaderDataType::Int3:
+		return 3;
+		break;
+	case Graphics::ShaderDataType::Int4:
+		return 4;
+		break;
+	case Graphics::ShaderDataType::UInt:
+		return 1;
+		break;
+	case Graphics::ShaderDataType::UInt2:
+		return 2;
+		break;
+	case Graphics::ShaderDataType::UInt3:
+		return 3;
+		break;
+	case Graphics::ShaderDataType::UInt4:
+		return 4;
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		return 0;
+		break;
 	}
 }
 
@@ -218,29 +315,128 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 		int maxNameLength;
 		int count;
 		int size;
-		GLenum type;
+		GLenum gltype;
 
 		// Uniforms
-		glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
-		char* uniformName = (char*)alloca(maxNameLength * sizeof(char));
-
-		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
-		for (int i = 0; i < count; i++)
 		{
-			glGetActiveUniform(program, (GLuint)i, maxNameLength, NULL, &size, &type, uniformName);
-			uniformLocations[program][HN(uniformName)] = glGetUniformLocation(program, uniformName);
-			uniformTypes[program][HN(uniformName)] = glTypeToShaderDataType(type);
+			glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+			char* uniformName = (char*)alloca(maxNameLength * sizeof(char));
+
+			glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+			for (int i = 0; i < count; i++)
+			{
+				glGetActiveUniform(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, uniformName);
+
+				// Array types have "[0]" appended to the end of the name, which need to be removed.
+				for (int i = 0; uniformName[i] != '\0'; i++)
+				{
+					if (uniformName[i] == '[')
+					{
+						uniformName[i] = '\0';
+						break;
+					}
+				}
+
+				uniformLocations[program][HN(uniformName)] = glGetUniformLocation(program, uniformName);
+				uniformTypes[program][HN(uniformName)] = glTypeToShaderDataType(gltype);
+				uniformNumOfElements[program][HN(uniformName)] = size; // TODO: Use size to bounds-check Graphics::SetUniformArray().
+			}
 		}
 
 		// Attributes
-		glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
-		char* attributeName = (char*)alloca(maxNameLength * sizeof(char));
-
-		glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count);
-		for (int i = 0; i < count; i++)
 		{
-			glGetActiveAttrib(program, (GLuint)i, maxNameLength, NULL, &size, &type, attributeName);
-			_shaderAttributeIndices[program][HN(attributeName)] = glGetAttribLocation(program, attributeName);
+			std::vector<std::tuple<HashName, unsigned int, ShaderDataType, uint64_t>> quadvertexinfo_sortable; // name, index, type, offset
+			bool has_ep_pos = false, has_ep_uv = false, has_ep_tex = false;
+
+			glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+			char* attributeName = (char*)alloca(maxNameLength * sizeof(char));
+
+			glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count);
+			for (int i = 0; i < count; i++)
+			{
+				glGetActiveAttrib(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, attributeName);
+				_shaderAttributeIndices[program][HN(attributeName)] = glGetAttribLocation(program, attributeName);
+
+				if (HN(attributeName) == HN("ep_pos")) { has_ep_pos = true; }
+				if (HN(attributeName) == HN("ep_uv")) { has_ep_uv = true; }
+				if (HN(attributeName) == HN("ep_tex")) { has_ep_tex = true; }
+
+				quadvertexinfo_sortable.push_back({ HN(attributeName),
+												  _shaderAttributeIndices[program][HN(attributeName)],
+												  glTypeToShaderDataType(gltype),
+												  0 });
+			}
+
+			EP_ASSERT_SLOW(has_ep_pos && has_ep_uv && has_ep_tex);
+
+			// Strictly order ep_pos, ep_uv, and ep_tex
+			for (auto it = quadvertexinfo_sortable.begin();
+				 it != quadvertexinfo_sortable.end();
+				 ++it)
+			{
+				switch (std::get<0>(*it))
+				{
+				case "ep_pos"_HN:
+					if (it != quadvertexinfo_sortable.begin())
+					{
+						std::iter_swap(it, quadvertexinfo_sortable.begin());
+					}
+					break;
+				case "ep_uv"_HN:
+					if (it != quadvertexinfo_sortable.begin() + 1)
+					{
+						std::iter_swap(it, quadvertexinfo_sortable.begin() + 1);
+					}
+					break;
+				case "ep_tex"_HN:
+					if (it != quadvertexinfo_sortable.begin() + 2)
+					{
+						std::iter_swap(it, quadvertexinfo_sortable.begin() + 2);
+					}
+					break;
+				}
+			}
+			// Sort remaining items by size
+			std::sort(quadvertexinfo_sortable.begin() + 3, quadvertexinfo_sortable.end(),
+					  [](const std::tuple<HashName, unsigned int, ShaderDataType, uint64_t>& a,
+						 const std::tuple<HashName, unsigned int, ShaderDataType, uint64_t>& b) -> bool
+					  {
+						  return sizeofShaderDataType(std::get<2>(a)) < sizeofShaderDataType(std::get<2>(b));
+					  });
+
+			// Set info for default attributes
+			_quadBatchVertexInfo[program][HN("ep_pos")] =
+			{
+				std::get<1>(quadvertexinfo_sortable.at(0)),
+				std::get<2>(quadvertexinfo_sortable.at(0)),
+				offsetof(struct QuadBatchDefaultVertex, ep_pos)
+			};
+			_quadBatchVertexInfo[program][HN("ep_uv")] =
+			{
+				std::get<1>(quadvertexinfo_sortable.at(1)),
+				std::get<2>(quadvertexinfo_sortable.at(1)),
+				offsetof(struct QuadBatchDefaultVertex, ep_uv)
+			};
+			_quadBatchVertexInfo[program][HN("ep_tex")] =
+			{
+				std::get<1>(quadvertexinfo_sortable.at(2)),
+				std::get<2>(quadvertexinfo_sortable.at(2)),
+				offsetof(struct QuadBatchDefaultVertex, ep_tex)
+			};
+
+			// Calculate offsets for non-default attributes and overall vertex stride
+			unsigned int stride = sizeof(QuadBatchDefaultVertex);
+			for (auto it = quadvertexinfo_sortable.begin() + 3;
+				 it != quadvertexinfo_sortable.end();
+				 ++it)
+			{
+				auto [name, index, type, offset] = *it;
+				_quadBatchVertexInfo[program][name] = { index, type, stride };
+				stride += (sizeofShaderDataType(type) - stride % sizeofShaderDataType(type)) % sizeofShaderDataType(type); // padding
+				stride += sizeofShaderDataType(type) * numOfShaderDataTypeArgs(type);
+			}
+			stride += (sizeof(float) - stride % sizeof(float)) % sizeof(float); // back-of-struct padding
+			_quadBatchVertexStrides[program] = stride;
 		}
 	}
 
@@ -487,4 +683,55 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat4 value)
 					"Graphics: Attempted to set uniform with wrong data type.");
 
 	glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value);
+}
+
+void Graphics::SetUniformArray(HashName uniform, unsigned int count, Graphics::ShaderDataType type, void* src)
+{
+	EP_ASSERT_SLOW(uniformLocations[_activeProgram].count(uniform));
+
+	switch (type)
+	{
+	case ShaderDataType::Float:
+		glUniform1fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		break;
+	case ShaderDataType::Float2:
+		glUniform2fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		break;
+	case ShaderDataType::Float3:
+		glUniform3fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		break;
+	case ShaderDataType::Float4:
+		glUniform4fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		break;
+	case ShaderDataType::Int:
+		glUniform1iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		break;
+	case ShaderDataType::Int2:
+		glUniform2iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		break;
+	case ShaderDataType::Int3:
+		glUniform3iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		break;
+	case ShaderDataType::Int4:
+		glUniform4iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		break;
+	case ShaderDataType::UInt:
+		glUniform1uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		break;
+	case ShaderDataType::UInt2:
+		glUniform2uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		break;
+	case ShaderDataType::UInt3:
+		glUniform3uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		break;
+	case ShaderDataType::UInt4:
+		glUniform4uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		break;
+	case ShaderDataType::Mat3:
+		glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src);
+		break;
+	case ShaderDataType::Mat4:
+		glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src);
+		break;
+	}
 }

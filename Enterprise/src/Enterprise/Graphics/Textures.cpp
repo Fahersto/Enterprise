@@ -36,7 +36,7 @@ Graphics::TextureRef Graphics::LoadTexture(std::string path)
 
 void Graphics::BindTexture(Graphics::TextureRef texture, unsigned int slot)
 {
-	EP_ASSERT_SLOW(slot < 32); // TODO: Assert when exceeding platform maximum.
+	EP_ASSERT_SLOW(slot < _maxTextureSlots);
 
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, texture);

@@ -4,11 +4,9 @@
 using Enterprise::Graphics;
 
 // Used in arrayRef generation.
-static Graphics::ArrayRef nextArrayRef = 0;
+static Graphics::ArrayRef nextArrayRef = 1;
 // The currently bound vertex array.
-static Graphics::ArrayRef activeArray = 0;
-// Bit field representing the enable/disable status of OpenGL vertex attributes.
-static uint64_t enabledAttributes = 0;
+Graphics::ArrayRef Graphics::_activeArray = 0;
 
 // OpenGL names for the vertex buffers.
 static std::unordered_map<Graphics::ArrayRef, unsigned int> vbos;
@@ -104,16 +102,6 @@ static void getAttributeTypeInfo(Graphics::ShaderDataType type, GLenum* outGLTyp
 	}
 }
 
-// Helper function: Binds the array's vbo and vio, if they're not already bound.
-static void BindArray(Enterprise::Graphics::ArrayRef array)
-{
-	if (array != activeArray)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
-		activeArray = array;
-	}
-}
 
 Graphics::ArrayRef Graphics::CreateVertexArray(bool dynamicVertices, bool dynamicIndices,
 											   size_t maxVertices, size_t maxTriangles,
@@ -168,7 +156,7 @@ Graphics::ArrayRef Graphics::CreateVertexArray(bool dynamicVertices, bool dynami
 				 dynamicIndices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
 	// Mark this array as bound
-	activeArray = nextArrayRef;
+	_activeArray = nextArrayRef;
 	nextArrayRef++; // TODO: Better ArrayRef generation.
 	return nextArrayRef - 1;
 }
@@ -197,7 +185,12 @@ void Graphics::SetVertexData(ArrayRef array, void* src, unsigned int first, unsi
 	EP_ASSERT(count);
 	EP_ASSERT(first + count <= vboSizes[array]);
 
-	BindArray(array);
+	if (array != Graphics::_activeArray)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		Graphics::_activeArray = array;
+	}
 	glBufferSubData(GL_ARRAY_BUFFER, vertexStrides[array] * first, vertexStrides[array] * count, src);
 }
 
@@ -207,7 +200,12 @@ void Graphics::SetIndexData(ArrayRef array, unsigned int* src, unsigned int firs
 	EP_ASSERT(count);
 	EP_ASSERT(first + count <= iboSizesInTriangles[array] * 3);
 
-	BindArray(array);
+	if (array != Graphics::_activeArray)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		Graphics::_activeArray = array;
+	}
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3 * first, sizeof(unsigned int) * count, src);
 }
 
@@ -218,7 +216,12 @@ void Graphics::DrawArray(ArrayRef array)
 
 void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 {
-	BindArray(array);
+	if (array != Graphics::_activeArray)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		Graphics::_activeArray = array;
+	}
 
 	// Map the vertex buffer layout to match the active shader program.
 	uint64_t newAttributeEnableStatus = 0;
@@ -229,23 +232,34 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 			unsigned int index = _shaderAttributeIndices[_activeProgram][name];
 
 			// Enable the vertex attribute index, if it's not already enabled
-			if ((enabledAttributes & BIT(index)) == 0)
+			if ((_enabledAttributes & BIT(index)) == 0)
 			{
 				glEnableVertexAttribArray(index);
 			}
 			newAttributeEnableStatus |= BIT(index);
 
-			glVertexAttribPointer(index,
-								  attributeParameterCounts[array][name],
-								  attributeGLTypes[array][name],
-								  GL_FALSE,
-								  vertexStrides[array],
-								  (void*)attributeVBOOffsets[array][name]);
+			if (attributeGLTypes[array][name] == GL_FLOAT)
+			{
+				glVertexAttribPointer(index,
+									  attributeParameterCounts[array][name],
+									  GL_FLOAT,
+									  GL_FALSE,
+									  vertexStrides[array],
+									  (void*)attributeVBOOffsets[array][name]);
+			}
+			else
+			{
+				glVertexAttribIPointer(index,
+									   attributeParameterCounts[array][name],
+									   attributeGLTypes[array][name],
+									   vertexStrides[array],
+									   (void*)attributeVBOOffsets[array][name]);
+			}
 		}
 	}
 
 	// Toggle off unused attributes
-	uint64_t toTurnOff = (newAttributeEnableStatus ^ enabledAttributes) & enabledAttributes;
+	uint64_t toTurnOff = (newAttributeEnableStatus ^ _enabledAttributes) & _enabledAttributes;
 	unsigned int leastSignificantSetPosition;
 	while (toTurnOff)
 	{
@@ -253,7 +267,7 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 		glDisableVertexAttribArray(leastSignificantSetPosition + 1);
 		toTurnOff &= ~(BIT(leastSignificantSetPosition));
 	}
-	enabledAttributes = newAttributeEnableStatus;
+	_enabledAttributes = newAttributeEnableStatus;
 
 	// Renderer pipeline check
 

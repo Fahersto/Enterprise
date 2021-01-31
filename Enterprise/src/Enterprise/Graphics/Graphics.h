@@ -174,6 +174,8 @@ public:
 	/// @param value The value.
 	static void SetUniform(HashName uniform, Math::Mat4 value);
 
+	static void SetUniformArray(HashName uniform, unsigned int count, ShaderDataType type, void* src);
+
 	// Texture functions
 
 	/// Load a texture from an image file.
@@ -241,48 +243,68 @@ public:
 	static void ClearRenderTarget();
 
 
-	/// 2D rendering functions.
-	class R2D
+	/// 2D batch rendering functions.
+	class QuadBatch
 	{
 	public:
-		/// Start a new 2D quad batch.
-		static void BeginBatch();
+		/// Start a new quad batch.
+		static void Begin();
 
-		/// Add a 2D quad to the current batch.
-		/// @param pos Position of the quad in world space.
-		/// @param size Dimensions of the quad in world space.
-		/// @param color Color to tint the quad.
-		/// @param tex Handle of the texture to use.
-		/// @param UV_TopLeft UV coordinates for the upper-left corner of the quad.
-		/// @param UV_BottomRight UV coordinates for the lower-right corner of the quad.
-		static void BatchQuad(Math::Vec2 pos, Math::Vec2 size,
-							  Math::Vec4 color, TextureRef tex, Math::Vec2 UV_TopLeft, Math::Vec2 UV_BottomRight);
+		/// Add a quad to the current batch.
+		/// @param scale Dimensions of the quad.
+		/// @param translation Position of the quad in world space.
+		/// @param uv_lowerleft UV coordinates for the lower-left corner of the quad.
+		/// @param uv_topright UV coordinates for the lower-left corner of the quad.
+		/// @param textures List of textures used by this quad.
+		static void AddQuad(Math::Vec2 scale, Math::Vec3 translation,
+							Math::Vec2 uv_lowerleft, Math::Vec2 uv_topright,
+							std::initializer_list<Graphics::TextureRef> textures);
 
-		/// Add a rotated 2D quad to the current batch.
-		/// @param pos Position of the quad in world space.
-		/// @param size Dimensions of the quad in world space.
-		/// @param origin Position of the quad's center of rotation in normalized coordinates.
-		/// @param rot Rotation in degrees.
-		/// @param color Color to tint the quad.
-		/// @param tex Handle of the texture to use.
-		/// @param UV_TopLeft UV coordinates for the upper-left corner of the quad.
-		/// @param UV_BottomRight UV coordinates for the lower-right corner of the quad.
-		/// @note @c origin is also used as the center of scaling.
-		static void BatchRotatedQuad(Math::Vec2 pos, Math::Vec2 size,
-									 Math::Vec2 origin, float rot,
-									 Math::Vec4 color, TextureRef tex, Math::Vec2 UV_TopLeft, Math::Vec2 UV_BottomRight);
+		/// Add a rotated quad to the current batch.
+		/// @param origin Coordinates in [(0, 0), (1, 1)] of quad center.
+		/// @param scale 2D scale factor.
+		/// @param roll Rotation in degrees about the Z axis.
+		/// @param pitch Rotation in degrees about the X axis.
+		/// @param yaw Rotation in degrees about the Y axis.
+		/// @param translation Position of the quad in world space.
+		/// @param uv_lowerleft UV coordinates for the lower-left corner of the quad.
+		/// @param uv_topright UV coordinates for the upper-right corner of the quad.
+		/// @param textures List of textures used by this quad.
+		static void AddRotatedQuad(Math::Vec2 origin,
+								   Math::Vec2 scale, float roll, float pitch, float yaw, Math::Vec3 translation,
+								   Math::Vec2 uv_lowerleft, Math::Vec2 uv_topright,
+								   std::initializer_list<Graphics::TextureRef> textures);
 
-		/// End the current 2D quad batch and draw it.
-		static void EndBatch();
+		// TODO: Create overloads
+		static void QuadAttribute(HashName attribute, float value);
+		static void VertexAttribute(uint_fast8_t vertex, HashName attribute, float value);
+
+		/// End the current quad batch and draw it.
+		static void End();
 	};
 
+	//class MeshBatch
+	//{
+	//};
+
 private:
+	static ProgramRef _activeProgram; // Handle of the currently active shader program.
+	static Graphics::ArrayRef _activeArray; // Handle of the currently active vertex array (0 if none are active).
+	static uint64_t _enabledAttributes; // Bit field representing the enable/disable status of OpenGL vertex attributes.
 
-	/// Handle of the currently active shader program.
-	static ProgramRef _activeProgram;
-
-	/// Table of each shader program's vertex attribute indices.
 	static std::unordered_map<ProgramRef, std::unordered_map<HashName, unsigned int>> _shaderAttributeIndices;
+	static std::unordered_map<ProgramRef, std::unordered_map<HashName, std::tuple<unsigned int, ShaderDataType, uint64_t>>> _quadBatchVertexInfo; // index, type, offset
+	static std::unordered_map<ProgramRef, unsigned int> _quadBatchVertexStrides;
+
+	static unsigned int _quadbatch_vbo, _quadbatch_ibo;
+	struct QuadBatchDefaultVertex
+	{
+		Math::Vec3 ep_pos;
+		Math::Vec2 ep_uv;
+		int ep_tex;
+	};
+	static int _maxTextureSlots;
+	static int* _textureSlots;
 
 	friend class Application;
 
