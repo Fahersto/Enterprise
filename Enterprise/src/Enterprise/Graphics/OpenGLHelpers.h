@@ -2,7 +2,7 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-#if defined(__APPLE__) && defined(__MACH__) && defined(EP_CONFIG_DEBUG)
+#ifdef EP_CONFIG_DEBUG
 
 #define EP_GL(code) code;\
 { \
@@ -30,9 +30,12 @@
 				EP_ERROR(" [OpenGL] Unhandled error! Type: {} File: {} Line: {}", err, __FILE__, __LINE__); \
 				break; \
 		} \
+		EP_DEBUGBREAK(); \
 	} \
 }
 
 #else
+
 #define EP_GL(code) code;
-#endif
+
+#endif // Debug / non-debug
