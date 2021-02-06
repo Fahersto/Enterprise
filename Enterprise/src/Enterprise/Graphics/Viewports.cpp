@@ -1,6 +1,8 @@
 #include "EP_PCH.h"
 #include "Graphics.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 
 
@@ -14,5 +16,5 @@ void Graphics::TargetTextureForRender(TextureRef texture)
 
 void Graphics::ClearRenderTarget()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	EP_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 };

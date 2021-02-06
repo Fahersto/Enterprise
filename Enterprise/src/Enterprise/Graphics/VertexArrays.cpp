@@ -1,6 +1,8 @@
 #include "EP_PCH.h"
 #include "Graphics.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 
 // Used in arrayRef generation.
@@ -137,23 +139,23 @@ Graphics::ArrayRef Graphics::CreateVertexArray(bool dynamicVertices, bool dynami
 
 	// Create VBO
 	unsigned int vbo;
-	glGenBuffers(1, &vbo);
+	EP_GL(glGenBuffers(1, &vbo));
 	vbos[nextArrayRef] = vbo;
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER,
-				 vertexStrides[nextArrayRef] * maxVertices,
-				 nullptr,
-				 dynamicVertices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+	EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+	EP_GL(glBufferData(GL_ARRAY_BUFFER,
+					   vertexStrides[nextArrayRef] * maxVertices,
+					   nullptr,
+					   dynamicVertices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 
 	// Create IBO
 	unsigned int ibo;
-	glGenBuffers(1, &ibo);
+	EP_GL(glGenBuffers(1, &ibo));
 	ibos[nextArrayRef] = ibo;
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-				 sizeof(unsigned int) * 3 * maxTriangles,
-				 nullptr,
-				 dynamicIndices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+	EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+	EP_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					   sizeof(unsigned int) * 3 * maxTriangles,
+					   nullptr,
+					   dynamicIndices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 
 	// Mark this array as bound
 	_activeArray = nextArrayRef;
@@ -163,8 +165,8 @@ Graphics::ArrayRef Graphics::CreateVertexArray(bool dynamicVertices, bool dynami
 
 void Graphics::DeleteVertexArray(ArrayRef array)
 {
-	glDeleteBuffers(1, &vbos[array]);
-	glDeleteBuffers(1, &ibos[array]);
+	EP_GL(glDeleteBuffers(1, &vbos[array]));
+	EP_GL(glDeleteBuffers(1, &ibos[array]));
 
 	vbos.erase(array);
 	vboSizes.erase(array);
@@ -187,11 +189,11 @@ void Graphics::SetVertexData(ArrayRef array, void* src, unsigned int first, unsi
 
 	if (array != Graphics::_activeArray)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vbos[array]));
+		EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]));
 		Graphics::_activeArray = array;
 	}
-	glBufferSubData(GL_ARRAY_BUFFER, vertexStrides[array] * first, vertexStrides[array] * count, src);
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER, vertexStrides[array] * first, vertexStrides[array] * count, src));
 }
 
 void Graphics::SetIndexData(ArrayRef array, unsigned int* src, unsigned int first, unsigned int count)
@@ -202,11 +204,11 @@ void Graphics::SetIndexData(ArrayRef array, unsigned int* src, unsigned int firs
 
 	if (array != Graphics::_activeArray)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vbos[array]));
+		EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]));
 		Graphics::_activeArray = array;
 	}
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3 * first, sizeof(unsigned int) * count, src);
+	EP_GL(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3 * first, sizeof(unsigned int) * count, src));
 }
 
 void Graphics::DrawArray(ArrayRef array)
@@ -218,8 +220,8 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 {
 	if (array != Graphics::_activeArray)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[array]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]);
+		EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vbos[array]));
+		EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[array]));
 		Graphics::_activeArray = array;
 	}
 
@@ -234,26 +236,26 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 			// Enable the vertex attribute index, if it's not already enabled
 			if ((_enabledAttributes & BIT(index)) == 0)
 			{
-				glEnableVertexAttribArray(index);
+				EP_GL(glEnableVertexAttribArray(index));
 			}
 			newAttributeEnableStatus |= BIT(index);
 
 			if (attributeGLTypes[array][name] == GL_FLOAT)
 			{
-				glVertexAttribPointer(index,
+				EP_GL(glVertexAttribPointer(index,
 									  attributeParameterCounts[array][name],
 									  GL_FLOAT,
 									  GL_FALSE,
 									  vertexStrides[array],
-									  (void*)attributeVBOOffsets[array][name]);
+									  (void*)attributeVBOOffsets[array][name]));
 			}
 			else
 			{
-				glVertexAttribIPointer(index,
+				EP_GL(glVertexAttribIPointer(index,
 									   attributeParameterCounts[array][name],
 									   attributeGLTypes[array][name],
 									   vertexStrides[array],
-									   (void*)attributeVBOOffsets[array][name]);
+									   (void*)attributeVBOOffsets[array][name]));
 			}
 		}
 	}
@@ -264,7 +266,7 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 	while (toTurnOff)
 	{
 		leastSignificantSetPosition = log2(toTurnOff & -toTurnOff);
-		glDisableVertexAttribArray(leastSignificantSetPosition + 1);
+		EP_GL(glDisableVertexAttribArray(leastSignificantSetPosition + 1));
 		toTurnOff &= ~(BIT(leastSignificantSetPosition));
 	}
 	_enabledAttributes = newAttributeEnableStatus;
@@ -272,19 +274,19 @@ void Graphics::DrawArray(ArrayRef array, unsigned int triangleCount)
 	// Renderer pipeline check
 
 #ifdef EP_CONFIG_DEBUG
-	glValidateProgram(_activeProgram);
+	EP_GL(glValidateProgram(_activeProgram));
 	int result;
-	glGetProgramiv(_activeProgram, GL_VALIDATE_STATUS, &result);
+	EP_GL(glGetProgramiv(_activeProgram, GL_VALIDATE_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		glGetProgramiv(_activeProgram, GL_INFO_LOG_LENGTH, &length);
+		EP_GL(glGetProgramiv(_activeProgram, GL_INFO_LOG_LENGTH, &length));
 		char* message = (char*)alloca(length * sizeof(char));
-		glGetProgramInfoLog(_activeProgram, length, &length, message);
+		EP_GL(glGetProgramInfoLog(_activeProgram, length, &length, message));
 		EP_ERROR(" [OpenGL] Program validation failure! {}", message);
 	}
 #endif
 
 	// Draw.
-	glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
+	EP_GL(glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_INT, nullptr));
 }

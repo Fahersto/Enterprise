@@ -6,6 +6,8 @@
 #include "WindowEvents.h"
 #include "Enterprise/Application/ApplicationEvents.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 
 static const unsigned int QuadBatch_MaxQuads = 25000;
@@ -28,23 +30,23 @@ void Graphics::Init()
 
 	// Set up global VAO (OpenGL)
 	unsigned int vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	EP_GL(glGenVertexArrays(1, &vao));
+	EP_GL(glBindVertexArray(vao));
 
 	// Initialize texture slot tracking
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &_maxTextureSlots);
+	EP_GL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &_maxTextureSlots));
 	_textureSlots = new int[_maxTextureSlots];
 	memset(_textureSlots, 0, _maxTextureSlots);
 
 	// QuadBatch VBO
-	glGenBuffers(1, &_quadbatch_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _quadbatch_vbo);
-	glBufferData(GL_ARRAY_BUFFER,
-				 QuadBatch_MaxQuads * sizeof(QuadBatchDefaultVertex) * 4,
-				 nullptr, GL_DYNAMIC_DRAW);
+	EP_GL(glGenBuffers(1, &_quadbatch_vbo));
+	EP_GL(glBindBuffer(GL_ARRAY_BUFFER, _quadbatch_vbo));
+	EP_GL(glBufferData(GL_ARRAY_BUFFER,
+					   QuadBatch_MaxQuads * sizeof(QuadBatchDefaultVertex) * 4,
+					   nullptr, GL_DYNAMIC_DRAW));
 
 	// QuadBatch IBO
-	glGenBuffers(1, &_quadbatch_ibo);
+	EP_GL(glGenBuffers(1, &_quadbatch_ibo));
 	unsigned int quadbatchindices[QuadBatch_MaxQuads * 6];
 	for (unsigned int i = 0; i < QuadBatch_MaxQuads; i++)
 	{
@@ -55,16 +57,16 @@ void Graphics::Init()
 		quadbatchindices[i * 6 + 4] = 4 * i + 3;
 		quadbatchindices[i * 6 + 5] = 4 * i;
 	}
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadbatch_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-				 QuadBatch_MaxQuads * sizeof(unsigned int) * 6,
-				 quadbatchindices, GL_STATIC_DRAW);
+	EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadbatch_ibo));
+	EP_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					   QuadBatch_MaxQuads * sizeof(unsigned int) * 6,
+					   quadbatchindices, GL_STATIC_DRAW));
 
 
-	glEnable(GL_BLEND); // blend mode
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// glEnable(GL_DEPTH_TEST); // depth test
-	// glEnable(GL_CULL_FACE); // backface culling
+	EP_GL(glEnable(GL_BLEND)); // blend mode
+	EP_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+//	EP_GL(glEnable(GL_DEPTH_TEST)); // depth test
+//	EP_GL(glEnable(GL_CULL_FACE)); // backface culling
 }
 
 void Graphics::Update()

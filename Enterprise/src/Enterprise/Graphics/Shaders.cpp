@@ -2,6 +2,8 @@
 #include "Graphics.h"
 #include "Enterprise/File/File.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 using Enterprise::File;
 
@@ -179,21 +181,21 @@ static int numOfShaderDataTypeArgs(Graphics::ShaderDataType type)
 Graphics::VShaderRef Graphics::LoadVertexShaderFromString(std::string src)
 {
 	const char* source = src.c_str();
-	unsigned int shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(shader, 1, &source, nullptr);
-	glCompileShader(shader);
+	unsigned int shader = EP_GL(glCreateShader(GL_VERTEX_SHADER));
+	EP_GL(glShaderSource(shader, 1, &source, nullptr));
+	EP_GL(glCompileShader(shader));
 
 	// Check for compilation errors
 	int result;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+	EP_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+		EP_GL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
 		char* message = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(shader, length, &length, message);
+		EP_GL(glGetShaderInfoLog(shader, length, &length, message));
 		EP_ERROR(" [OpenGL] Vertex shader compilation failure! {}", message);
-		glDeleteShader(shader);
+		EP_GL(glDeleteShader(shader));
 		return 0;
 	}
 
@@ -221,7 +223,7 @@ Graphics::VShaderRef Graphics::LoadVertexShader(std::string path)
 
 void Graphics::DeleteVertexShader(Graphics::VShaderRef shader)
 {
-	glDeleteShader(shader);
+	EP_GL(glDeleteShader(shader));
 	EP_INFO("Graphics: Deleted vertex shader {}.", shader);
 }
 
@@ -230,21 +232,21 @@ void Graphics::DeleteVertexShader(Graphics::VShaderRef shader)
 Graphics::PShaderRef Graphics::LoadPixelShaderFromString(std::string src)
 {
 	const char* source = src.c_str();
-	unsigned int shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(shader, 1, &source, nullptr);
-	glCompileShader(shader);
+	unsigned int shader = EP_GL(glCreateShader(GL_FRAGMENT_SHADER));
+	EP_GL(glShaderSource(shader, 1, &source, nullptr));
+	EP_GL(glCompileShader(shader));
 
 	// Check for compilation errors
 	int result;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+	EP_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+		EP_GL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
 		char* message = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(shader, length, &length, message);
+		EP_GL(glGetShaderInfoLog(shader, length, &length, message));
 		EP_ERROR(" [OpenGL] Pixel shader compilation failure! {}", message);
-		glDeleteShader(shader);
+		EP_GL(glDeleteShader(shader));
 		return 0;
 	}
 
@@ -272,7 +274,7 @@ Graphics::PShaderRef Graphics::LoadPixelShader(std::string path)
 
 void Graphics::DeletePixelShader(Graphics::PShaderRef shader)
 {
-	glDeleteShader(shader);
+	EP_GL(glDeleteShader(shader));
 	EP_INFO("Graphics: Deleted pixel shader {}.", shader);
 }
 
@@ -288,24 +290,24 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 		return 0;
 	}
 
-	unsigned int program = glCreateProgram();
-	glAttachShader(program, vShader);
-	glAttachShader(program, pShader);
-	glLinkProgram(program);
-	glDetachShader(program, vShader);
-	glDetachShader(program, pShader);
+	unsigned int program = EP_GL(glCreateProgram());
+	EP_GL(glAttachShader(program, vShader));
+	EP_GL(glAttachShader(program, pShader));
+	EP_GL(glLinkProgram(program));
+	EP_GL(glDetachShader(program, vShader));
+	EP_GL(glDetachShader(program, pShader));
 
 	// Check for linking errors
 	int result;
-	glGetProgramiv(program, GL_LINK_STATUS, &result);
+	EP_GL(glGetProgramiv(program, GL_LINK_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+		EP_GL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);)
 		char* message = (char*)alloca(length * sizeof(char));
-		glGetProgramInfoLog(program, length, &length, message);
+		EP_GL(glGetProgramInfoLog(program, length, &length, message));
 		EP_ERROR(" [OpenGL] Shader program linking error! {}", message);
-		glDeleteProgram(program);
+		EP_GL(glDeleteProgram(program));
 		return 0;
 	}
 	EP_INFO("          Success!");
@@ -319,13 +321,13 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 
 		// Uniforms
 		{
-			glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+			EP_GL(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength));
 			char* uniformName = (char*)alloca(maxNameLength * sizeof(char));
 
-			glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+			EP_GL(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count));
 			for (int i = 0; i < count; i++)
 			{
-				glGetActiveUniform(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, uniformName);
+				EP_GL(glGetActiveUniform(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, uniformName));
 
 				// Array types have "[0]" appended to the end of the name, which need to be removed.
 				for (int i = 0; uniformName[i] != '\0'; i++)
@@ -337,8 +339,8 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 					}
 				}
 
-				uniformLocations[program][HN(uniformName)] = glGetUniformLocation(program, uniformName);
-				uniformTypes[program][HN(uniformName)] = glTypeToShaderDataType(gltype);
+				uniformLocations[program][HN(uniformName)] = EP_GL(glGetUniformLocation(program, uniformName));
+				uniformTypes[program][HN(uniformName)] = EP_GL(glTypeToShaderDataType(gltype));
 				uniformNumOfElements[program][HN(uniformName)] = size; // TODO: Use size to bounds-check Graphics::SetUniformArray().
 			}
 		}
@@ -348,14 +350,14 @@ Graphics::ProgramRef Graphics::LinkShaders(Graphics::VShaderRef vShader, Graphic
 			std::vector<std::tuple<HashName, unsigned int, ShaderDataType, uint64_t>> quadvertexinfo_sortable; // name, index, type, offset
 			bool has_ep_pos = false, has_ep_uv = false, has_ep_tex = false;
 
-			glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+			EP_GL(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength));
 			char* attributeName = (char*)alloca(maxNameLength * sizeof(char));
 
-			glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count);
+			EP_GL(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
 			for (int i = 0; i < count; i++)
 			{
-				glGetActiveAttrib(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, attributeName);
-				_shaderAttributeIndices[program][HN(attributeName)] = glGetAttribLocation(program, attributeName);
+				EP_GL(glGetActiveAttrib(program, (GLuint)i, maxNameLength, NULL, &size, &gltype, attributeName));
+				_shaderAttributeIndices[program][HN(attributeName)] = EP_GL(glGetAttribLocation(program, attributeName));
 
 				if (HN(attributeName) == HN("ep_pos")) { has_ep_pos = true; }
 				if (HN(attributeName) == HN("ep_uv")) { has_ep_uv = true; }
@@ -449,7 +451,7 @@ void Graphics::BindProgram(ProgramRef program)
 	if (_activeProgram != program)
 	{
 		_activeProgram = program;
-		glUseProgram(program);
+		EP_GL(glUseProgram(program));
 	}
 }
 
@@ -461,7 +463,7 @@ void Graphics::DeleteProgram(ProgramRef program)
 	EP_ASSERTF(uniformTypes.count(program),
 			   "Graphics: Attempted to delete a shader program with an invalid reference.");
 
-	glDeleteProgram(program);
+	EP_GL(glDeleteProgram(program));
 
 	uniformLocations.at(program).clear();
 	uniformTypes.at(program).clear();
@@ -490,7 +492,7 @@ void Graphics::SetUniform(HashName uniform, float value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform1f(uniformLocations[_activeProgram][uniform], value);
+	EP_GL(glUniform1f(uniformLocations[_activeProgram][uniform], value));
 }
 
 void Graphics::SetUniform(HashName uniform, float value1, float value2)
@@ -502,7 +504,7 @@ void Graphics::SetUniform(HashName uniform, float value1, float value2)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float2,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform2f(uniformLocations[_activeProgram][uniform], value1, value2);
+	EP_GL(glUniform2f(uniformLocations[_activeProgram][uniform], value1, value2));
 }
 
 void Graphics::SetUniform(HashName uniform, float value1, float value2, float value3)
@@ -514,7 +516,7 @@ void Graphics::SetUniform(HashName uniform, float value1, float value2, float va
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform3f(uniformLocations[_activeProgram][uniform], value1, value2, value3);
+	EP_GL(glUniform3f(uniformLocations[_activeProgram][uniform], value1, value2, value3));
 }
 
 void Graphics::SetUniform(HashName uniform, float value1, float value2, float value3, float value4)
@@ -526,7 +528,7 @@ void Graphics::SetUniform(HashName uniform, float value1, float value2, float va
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform4f(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4);
+	EP_GL(glUniform4f(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4));
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec2 value)
@@ -538,7 +540,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec2 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float2,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform2f(uniformLocations[_activeProgram][uniform], value.x, value.y);
+	EP_GL(glUniform2f(uniformLocations[_activeProgram][uniform], value.x, value.y));
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec3 value)
@@ -550,7 +552,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec3 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform3f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z);
+	EP_GL(glUniform3f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z));
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec4 value)
@@ -562,7 +564,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Vec4 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Float4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform4f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z, value.w);
+	EP_GL(glUniform4f(uniformLocations[_activeProgram][uniform], value.x, value.y, value.z, value.w));
 }
 
 void Graphics::SetUniform(HashName uniform, int value)
@@ -574,7 +576,7 @@ void Graphics::SetUniform(HashName uniform, int value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Int,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform1i(uniformLocations[_activeProgram][uniform], value);
+	EP_GL(glUniform1i(uniformLocations[_activeProgram][uniform], value));
 }
 
 void Graphics::SetUniform(HashName uniform, int value1, int value2)
@@ -586,7 +588,7 @@ void Graphics::SetUniform(HashName uniform, int value1, int value2)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Int2,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform2i(uniformLocations[_activeProgram][uniform], value1, value2);
+	EP_GL(glUniform2i(uniformLocations[_activeProgram][uniform], value1, value2));
 }
 
 void Graphics::SetUniform(HashName uniform, int value1, int value2, int value3)
@@ -598,7 +600,7 @@ void Graphics::SetUniform(HashName uniform, int value1, int value2, int value3)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Int3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform3i(uniformLocations[_activeProgram][uniform], value1, value2, value3);
+	EP_GL(glUniform3i(uniformLocations[_activeProgram][uniform], value1, value2, value3));
 }
 
 void Graphics::SetUniform(HashName uniform, int value1, int value2, int value3, int value4)
@@ -610,7 +612,7 @@ void Graphics::SetUniform(HashName uniform, int value1, int value2, int value3, 
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Int4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform4i(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4);
+	EP_GL(glUniform4i(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4));
 }
 
 void Graphics::SetUniform(HashName uniform, unsigned int value)
@@ -622,7 +624,7 @@ void Graphics::SetUniform(HashName uniform, unsigned int value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::UInt,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform1ui(uniformLocations[_activeProgram][uniform], value);
+	EP_GL(glUniform1ui(uniformLocations[_activeProgram][uniform], value));
 }
 
 void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int value2)
@@ -634,7 +636,7 @@ void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int va
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::UInt2,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform2ui(uniformLocations[_activeProgram][uniform], value1, value2);
+	EP_GL(glUniform2ui(uniformLocations[_activeProgram][uniform], value1, value2));
 }
 
 void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int value2, unsigned int value3)
@@ -646,7 +648,7 @@ void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int va
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::UInt3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform3ui(uniformLocations[_activeProgram][uniform], value1, value2, value3);
+	EP_GL(glUniform3ui(uniformLocations[_activeProgram][uniform], value1, value2, value3));
 }
 
 void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int value2, unsigned int value3, unsigned int value4)
@@ -658,7 +660,7 @@ void Graphics::SetUniform(HashName uniform, unsigned int value1, unsigned int va
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::UInt4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniform4ui(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4);
+	EP_GL(glUniform4ui(uniformLocations[_activeProgram][uniform], value1, value2, value3, value4));
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat3 value)
@@ -670,7 +672,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat3 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Mat3,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value);
+	EP_GL(glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value));
 }
 
 void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat4 value)
@@ -682,7 +684,7 @@ void Graphics::SetUniform(HashName uniform, Enterprise::Math::Mat4 value)
 	EP_ASSERTF_SLOW(uniformTypes[_activeProgram][uniform] == ShaderDataType::Mat4,
 					"Graphics: Attempted to set uniform with wrong data type.");
 
-	glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value);
+	EP_GL(glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], 1, GL_TRUE, (GLfloat*)&value));
 }
 
 void Graphics::SetUniformArray(HashName uniform, unsigned int count, Graphics::ShaderDataType type, void* src)
@@ -692,46 +694,46 @@ void Graphics::SetUniformArray(HashName uniform, unsigned int count, Graphics::S
 	switch (type)
 	{
 	case ShaderDataType::Float:
-		glUniform1fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		EP_GL(glUniform1fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src));
 		break;
 	case ShaderDataType::Float2:
-		glUniform2fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		EP_GL(glUniform2fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src));
 		break;
 	case ShaderDataType::Float3:
-		glUniform3fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		EP_GL(glUniform3fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src));
 		break;
 	case ShaderDataType::Float4:
-		glUniform4fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src);
+		EP_GL(glUniform4fv(uniformLocations[_activeProgram][uniform], count, (GLfloat*)src));
 		break;
 	case ShaderDataType::Int:
-		glUniform1iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		EP_GL(glUniform1iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src));
 		break;
 	case ShaderDataType::Int2:
-		glUniform2iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		EP_GL(glUniform2iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src));
 		break;
 	case ShaderDataType::Int3:
-		glUniform3iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		EP_GL(glUniform3iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src));
 		break;
 	case ShaderDataType::Int4:
-		glUniform4iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src);
+		EP_GL(glUniform4iv(uniformLocations[_activeProgram][uniform], count, (GLint*)src));
 		break;
 	case ShaderDataType::UInt:
-		glUniform1uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		EP_GL(glUniform1uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src));
 		break;
 	case ShaderDataType::UInt2:
-		glUniform2uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		EP_GL(glUniform2uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src));
 		break;
 	case ShaderDataType::UInt3:
-		glUniform3uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		EP_GL(glUniform3uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src));
 		break;
 	case ShaderDataType::UInt4:
-		glUniform4uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src);
+		EP_GL(glUniform4uiv(uniformLocations[_activeProgram][uniform], count, (GLuint*)src));
 		break;
 	case ShaderDataType::Mat3:
-		glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src);
+		EP_GL(glUniformMatrix3fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src));
 		break;
 	case ShaderDataType::Mat4:
-		glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src);
+		EP_GL(glUniformMatrix4fv(uniformLocations[_activeProgram][uniform], count, GL_TRUE, (GLfloat*)src));
 		break;
 	default:
 		EP_ASSERT_NOENTRY();

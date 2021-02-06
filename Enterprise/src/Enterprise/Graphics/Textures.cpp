@@ -2,6 +2,8 @@
 #include "Graphics.h"
 #include "Enterprise/File/File.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 
 #ifndef EP_CONFIG_DIST
@@ -18,16 +20,16 @@ Graphics::TextureRef Graphics::LoadTexture(std::string path)
 
 	// Send image to GPU
 	TextureRef texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	EP_GL(glGenTextures(1, &texture));
+	EP_GL(glBindTexture(GL_TEXTURE_2D, texture));
+	EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+	EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+	EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer));
 	
 	// Unbind texture and release local buffer
-	glBindTexture(GL_TEXTURE_2D, 0);
+	EP_GL(glBindTexture(GL_TEXTURE_2D, 0));
 	stbi_image_free(buffer);
 
 	EP_ASSERT_CODE(isTexRefInUse[texture] = true); // Sets up the assert in DeleteTexture().
@@ -38,8 +40,8 @@ void Graphics::BindTexture(Graphics::TextureRef texture, unsigned int slot)
 {
 	EP_ASSERT_SLOW(slot < _maxTextureSlots);
 
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	EP_GL(glActiveTexture(GL_TEXTURE0 + slot));
+	EP_GL(glBindTexture(GL_TEXTURE_2D, texture));
 }
 
 void Graphics::DeleteTexture(Graphics::TextureRef texture)
@@ -48,5 +50,5 @@ void Graphics::DeleteTexture(Graphics::TextureRef texture)
 	EP_ASSERT(isTexRefInUse.count(texture));
 	EP_ASSERT_CODE(isTexRefInUse.erase(texture));
 
-	glDeleteTextures(1, &texture);
+	EP_GL(glDeleteTextures(1, &texture));
 }

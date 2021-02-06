@@ -1,6 +1,8 @@
 #include "EP_PCH.h"
 #include "Graphics.h"
 
+#include "OpenGLHelpers.h"
+
 using Enterprise::Graphics;
 using namespace Enterprise::Math;
 
@@ -146,27 +148,27 @@ void Graphics::QuadBatch::Begin()
 		// Enable the vertex attribute index, if it's not already enabled
 		if ((_enabledAttributes & BIT(index)) == 0)
 		{
-			glEnableVertexAttribArray(index);
+			EP_GL(glEnableVertexAttribArray(index));
 		}
 		newAttributeEnableStatus |= BIT(index);
 
 		// Set attribute pointers
 		if (gltype == GL_FLOAT)
 		{
-			glVertexAttribPointer(index,
-								  paramcount,
-								  GL_FLOAT,
-								  GL_FALSE,
-								  _quadBatchVertexStrides[_activeProgram],
-								  (void*)offset);
+			EP_GL(glVertexAttribPointer(index,
+										paramcount,
+										GL_FLOAT,
+										GL_FALSE,
+										_quadBatchVertexStrides[_activeProgram],
+										(void*)offset));
 		}
 		else
 		{
-			glVertexAttribIPointer(index,
-								   paramcount,
-								   gltype,
-								   _quadBatchVertexStrides[_activeProgram],
-								   (void*)offset);
+			EP_GL(glVertexAttribIPointer(index,
+										 paramcount,
+										 gltype,
+										 _quadBatchVertexStrides[_activeProgram],
+										 (void*)offset));
 		}
 	}
 
@@ -176,14 +178,14 @@ void Graphics::QuadBatch::Begin()
 	while (toTurnOff)
 	{
 		leastSignificantSetPosition = log2(toTurnOff & -toTurnOff);
-		glDisableVertexAttribArray(leastSignificantSetPosition + 1);
+		EP_GL(glDisableVertexAttribArray(leastSignificantSetPosition + 1));
 		toTurnOff &= ~(BIT(leastSignificantSetPosition));
 	}
 	_enabledAttributes = newAttributeEnableStatus;
 
 	// Bind the quad batch vbo and ibo.
-	glBindBuffer(GL_ARRAY_BUFFER, _quadbatch_vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadbatch_ibo);
+	EP_GL(glBindBuffer(GL_ARRAY_BUFFER, _quadbatch_vbo));
+	EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadbatch_ibo));
 	_activeArray = 0;
 }
 
@@ -253,22 +255,22 @@ void Graphics::QuadBatch::AddQuad(Vec2 scale, Vec3 translation,
 		}
 	};
 
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 0) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[0]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 1) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[1]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 2) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[2]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 3) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[3]);
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 0) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[0]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 1) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[1]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 2) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[2]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 3) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[3]));
 
 	currentQuadCount++;
 
@@ -362,22 +364,22 @@ void Graphics::QuadBatch::AddRotatedQuad(Vec2 origin,
 		}
 	};
 
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 0) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[0]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 1) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[1]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 2) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[2]);
-	glBufferSubData(GL_ARRAY_BUFFER,
-					((uint64_t)currentQuadCount * 4 + 3) * _quadBatchVertexStrides[_activeProgram],
-					sizeof(QuadBatchDefaultVertex),
-					&outVerts[3]);
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 0) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[0]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 1) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[1]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 2) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[2]));
+	EP_GL(glBufferSubData(GL_ARRAY_BUFFER,
+						  ((uint64_t)currentQuadCount * 4 + 3) * _quadBatchVertexStrides[_activeProgram],
+						  sizeof(QuadBatchDefaultVertex),
+						  &outVerts[3]));
 
 	currentQuadCount++;
 
@@ -399,20 +401,20 @@ void Graphics::QuadBatch::End()
 {
 	// Pipeline check
 	#ifdef EP_CONFIG_DEBUG
-	glValidateProgram(_activeProgram);
+	EP_GL(glValidateProgram(_activeProgram));
 	int result;
-	glGetProgramiv(_activeProgram, GL_VALIDATE_STATUS, &result);
+	EP_GL(glGetProgramiv(_activeProgram, GL_VALIDATE_STATUS, &result));
 	if (result == GL_FALSE)
 	{
 		int length;
-		glGetProgramiv(_activeProgram, GL_INFO_LOG_LENGTH, &length);
+		EP_GL(glGetProgramiv(_activeProgram, GL_INFO_LOG_LENGTH, &length));
 		char* message = (char*)alloca(length * sizeof(char));
-		glGetProgramInfoLog(_activeProgram, length, &length, message);
+		EP_GL(glGetProgramInfoLog(_activeProgram, length, &length, message));
 		EP_ERROR(" [OpenGL] Program validation failure! {}", message);
 	}
 	#endif
 
-	glDrawElements(GL_TRIANGLES, currentQuadCount * 6, GL_UNSIGNED_INT, nullptr);
+	EP_GL(glDrawElements(GL_TRIANGLES, currentQuadCount * 6, GL_UNSIGNED_INT, nullptr));
 
 	currentQuadCount = 0;
 	nextTextureSlot = 0;
