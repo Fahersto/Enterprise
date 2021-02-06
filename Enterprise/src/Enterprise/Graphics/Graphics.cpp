@@ -47,7 +47,7 @@ void Graphics::Init()
 
 	// QuadBatch IBO
 	EP_GL(glGenBuffers(1, &_quadbatch_ibo));
-	unsigned int quadbatchindices[QuadBatch_MaxQuads * 6];
+	unsigned int* quadbatchindices = new unsigned int[QuadBatch_MaxQuads * 6];
 	for (unsigned int i = 0; i < QuadBatch_MaxQuads; i++)
 	{
 		quadbatchindices[i * 6]     = 4 * i;
@@ -61,6 +61,7 @@ void Graphics::Init()
 	EP_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 					   QuadBatch_MaxQuads * sizeof(unsigned int) * 6,
 					   quadbatchindices, GL_STATIC_DRAW));
+	delete[] quadbatchindices;
 
 
 	EP_GL(glEnable(GL_BLEND)); // blend mode
@@ -75,7 +76,7 @@ void Graphics::Update()
 
 	// Drawing code here
 
-    Window::SwapBuffers();	 
+	Window::SwapBuffers();
 }
 
 void Graphics::Cleanup()
