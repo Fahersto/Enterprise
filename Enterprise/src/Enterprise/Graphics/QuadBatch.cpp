@@ -102,23 +102,7 @@ static HashName slotAttributeNames[] =
 	HN("ep_tex13"),
 	HN("ep_tex14"),
 	HN("ep_tex15"),
-	HN("ep_tex16"),
-	HN("ep_tex17"),
-	HN("ep_tex18"),
-	HN("ep_tex19"),
-	HN("ep_tex20"),
-	HN("ep_tex21"),
-	HN("ep_tex22"),
-	HN("ep_tex23"),
-	HN("ep_tex24"),
-	HN("ep_tex25"),
-	HN("ep_tex26"),
-	HN("ep_tex27"),
-	HN("ep_tex28"),
-	HN("ep_tex29"),
-	HN("ep_tex30"),
-	HN("ep_tex31"),
-	HN("ep_tex32")
+	HN("ep_tex16")	
 };
 
 // Batch quad drawing
@@ -127,10 +111,9 @@ void Graphics::QuadBatch::Begin()
 {
 	int textureSlotNumbers[] =
 	{
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-		17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 	};
-	SetUniformArray(HN("ep_texslots"), 32, ShaderDataType::Int, textureSlotNumbers);
+	SetUniformArray(HN("ep_texslots"), 16, ShaderDataType::Int, textureSlotNumbers);
 
 	uint64_t newAttributeEnableStatus = 0;
 	int paramcount = 0;
