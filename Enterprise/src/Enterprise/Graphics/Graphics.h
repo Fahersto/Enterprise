@@ -7,6 +7,11 @@
 namespace Enterprise
 {
 
+namespace Constants
+{
+extern const unsigned int QuadBatch_MaxQuads;
+}
+
 /// Enterprise's Graphics system.
 class Graphics
 {

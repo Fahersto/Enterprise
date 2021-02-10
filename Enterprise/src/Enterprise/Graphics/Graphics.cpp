@@ -10,7 +10,6 @@
 
 using Enterprise::Graphics;
 
-static const unsigned int QuadBatch_MaxQuads = 25000;
 int Graphics::_maxTextureSlots;
 int* Graphics::_textureSlots = nullptr;
 
@@ -42,13 +41,13 @@ void Graphics::Init()
 	EP_GL(glGenBuffers(1, &_quadbatch_vbo));
 	EP_GL(glBindBuffer(GL_ARRAY_BUFFER, _quadbatch_vbo));
 	EP_GL(glBufferData(GL_ARRAY_BUFFER,
-					   QuadBatch_MaxQuads * sizeof(QuadBatchDefaultVertex) * 4,
+					   Constants::QuadBatch_MaxQuads * sizeof(QuadBatchDefaultVertex) * 4,
 					   nullptr, GL_DYNAMIC_DRAW));
 
 	// QuadBatch IBO
 	EP_GL(glGenBuffers(1, &_quadbatch_ibo));
-	unsigned int* quadbatchindices = new unsigned int[QuadBatch_MaxQuads * 6];
-	for (unsigned int i = 0; i < QuadBatch_MaxQuads; i++)
+	unsigned int* quadbatchindices = new unsigned int[Constants::QuadBatch_MaxQuads * 6];
+	for (unsigned int i = 0; i < Constants::QuadBatch_MaxQuads; i++)
 	{
 		quadbatchindices[i * 6]     = 4 * i;
 		quadbatchindices[i * 6 + 1] = 4 * i + 1;
@@ -59,7 +58,7 @@ void Graphics::Init()
 	}
 	EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadbatch_ibo));
 	EP_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					   QuadBatch_MaxQuads * sizeof(unsigned int) * 6,
+					   Constants::QuadBatch_MaxQuads * sizeof(unsigned int) * 6,
 					   quadbatchindices, GL_STATIC_DRAW));
 	delete[] quadbatchindices;
 
