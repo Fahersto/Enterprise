@@ -1,4 +1,4 @@
-![Enterprise Engine](_resources/Branding/EPLogo_BlackCaptioned.png)
+![Enterprise Engine](readme_logo.png)
 
 # Enterprise Engine
 Enterprise is a "pet project" game engine I'm developing for Windows and macOS in my free time. I'm building 
@@ -21,6 +21,8 @@ script should look similar to the following:
 2. In *_scripts*, run the script file for your platform to build your project files.
     * Windows: **pm_Win32_VS2019.bat**
     * macOS: **pm_Mac_XCode11.command**
+
+    Mac users need to use `chmod u+x` or `chmod a+x` in Terminal to mark the script as executable before macOS will allow them to run it.
 3. In the root directory, open the newly generated `.sln` file (Visual Studio) or `.xcworkspace` file (Xcode) 
 and build it.
 
@@ -42,6 +44,13 @@ manual changes to the "Sandbox" scheme:
   text.
 * In **Run -> Arguments -> Environmental Variables**, set `OS_ACTIVITY_MODE = disable`.  This disables
   OS-level logging.
+
+### Doxygen Documentation Generation
+Enterprise features full Doxygen support (Doxygen 1.91).  If you have installed Doxygen on your system, you can generate Enterprise documentation by running the appropriate script file in `_scripts`:
+* Windows: **gendocs_Win32.bat**
+* macOS: **gendocs_Mac.command**
+
+The documentation will be output in `docs`, located in the project root.  Note that Doxygen must be installed in the default location for your platform for the script to work (`Program Files\doxygen` for Windows and `Applications` for Mac), and that Mac users must use `chmod` to mark the script as executable before it will run.
 
 ## Current State of Development
 The engine is still pretty barebones, but it is now on a solid foundation and is ready for higher systems 
