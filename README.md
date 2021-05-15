@@ -52,6 +52,8 @@ Enterprise features full Doxygen support (Doxygen 1.91).  If you have installed 
 
 The documentation will be output in `docs`, located in the project root.  Note that Doxygen must be installed in the default location for your platform for the script to work (`Program Files\doxygen` for Windows and `Applications` for Mac), and that Mac users must use `chmod` to mark the script as executable before it will run.
 
+The Doxygen binary distributions can be downloaded [here](https://www.doxygen.nl/download.html).
+
 ## Current State of Development
 The engine is still pretty barebones, but it is now on a solid foundation and is ready for higher systems 
 like `Graphics` and `Audio`.  What I'm calling the "Foundation" systems (`Time`, `Events`, and `File`) aren't 
