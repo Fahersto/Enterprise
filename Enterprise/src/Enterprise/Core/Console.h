@@ -16,6 +16,7 @@ public:
 
 	/// Logs a message to the debug console.
 	/// @tparam ...Args Types of the format string arguments.
+	/// @param level The desired logging level.
 	/// @param fmt Format string.  Use curly brackets to specify replacement fields.
 	/// @param ...args Format string arguments.
 	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,
@@ -38,6 +39,7 @@ public:
 	}
 	/// Logs a message to the debug console.
 	/// @tparam T Type of the message argument.
+	/// @param level The desired logging level.
 	/// @param msg A loggable object reference.
 	/// @pre @p msg must have overloaded the \<\< operator for output streams.
 	/// @warning	Do not call this method directly.  Instead, use EP_TRACE, EP_DEBUG, EP_INFO, EP_WARN, EP_ERROR,

@@ -26,7 +26,9 @@
 #include <exception>
 #include <csignal>
 
+/// @cond DOXYGEN_SKIP
 #define _USE_MATH_DEFINES
+/// @endcond
 #include <math.h>
 
 #include <CTSpookyHash/CTSpooky.h>

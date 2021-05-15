@@ -9,8 +9,10 @@
 #include "Enterprise/Core/ErrorMessageBox.h"
 #include "Enterprise/Core/HashNames.h"
 
-// Quickly assemble bit fields
+/// Rapidly assemble bit fields
 #define BIT(x) (1ull << (x))
+
+/// @cond DOXYGEN_SKIP
 
 /// Quickly identify if all of a group of types are the same.
 template<typename T, typename... Rest>
@@ -24,3 +26,5 @@ struct is_all_same<T, First, Rest...> :
 	std::integral_constant<bool, 
 		std::is_same<T, First>::value &&
 		is_all_same<T, Rest...>::value> {};
+
+/// @endcond

@@ -12,3 +12,6 @@
 # Xcode files
 **.xcworkspace/
 **.xcodeproj/
+
+# Doxygen output
+docs/

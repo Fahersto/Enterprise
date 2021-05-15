@@ -196,13 +196,11 @@ public:
 		/// Get a value from a given section and key as a dictionary.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal The value to return if the key fails to load or parse.
 		/// @return The retrieved dictionary.
 		std::unordered_map<HashName, std::string>				GetDictionary(HashName section, HashName key);
 		/// Get the list of values of a given section and key as dictionaries.
 		/// @param section The HashName of the section containing the key.
 		/// @param key The HashName of the key to look up.
-		/// @param defaultVal The value to return if the key fails to load or parse.
 		/// @return The list of retrieved dictionaries.
 		std::vector<std::unordered_map<HashName, std::string>>	GetMultiDictionary(HashName section, HashName key);
 

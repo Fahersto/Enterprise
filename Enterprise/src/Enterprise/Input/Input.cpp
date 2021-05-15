@@ -126,8 +126,10 @@ Input::PlayerID Input::UnassignController(ControllerID controller)
 /// @return First: Whether the conversion was successful.  Second: The converted ControlID.
 static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::string& str)
 {
+	/// @cond DOXYGEN_SKIP
 	#define STRTOCONTROLIDIMPL(control) \
 	if (str == #control) return std::pair(true, Enterprise::ControlID:: control)
+	/// @endcond
 
 	STRTOCONTROLIDIMPL(GP_Dpad_Up);
 	STRTOCONTROLIDIMPL(GP_Dpad_Down);
@@ -278,8 +280,10 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 /// @return The string name of the ControlID.
 static std::string ControlIDToString(Enterprise::ControlID id)
 {
+	/// @cond DOXYGEN_SKIP
 	#define CONTROLIDTOSTRIMPL(control) \
 	if (id == Enterprise::ControlID:: control) return #control
+	/// @endcond
 
 	CONTROLIDTOSTRIMPL(GP_Dpad_Up);
 	CONTROLIDTOSTRIMPL(GP_Dpad_Down);

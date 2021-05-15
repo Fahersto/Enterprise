@@ -37,8 +37,8 @@ public:
 	static PlayerID GetNextPlayerID();
 
 	/// Assign a controller to a specific player.
-	/// @param playerID The player to associate the controller with.
-	/// @param controllerID The ID for the controller to assign to the player.
+	/// @param player The player to associate the controller with.
+	/// @param controller The ID for the controller to assign to the player.
 	static void AssignControllerToPlayer(PlayerID player, ControllerID controller);
 
 	/// Load all input contexts in an INI file into the Input system.
