@@ -17,4 +17,7 @@ const wchar_t* WindowTitle = L"Enterprise Window Title";
 HC(float, PhysFrameLength) = 1.0f / 60.0f;
 HC(float, PhysFrameRepeatCap) = 60.0f;
 
+// Graphics constants
+const unsigned int QuadBatch_MaxQuads = 10'000;
+
 }
