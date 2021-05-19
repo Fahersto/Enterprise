@@ -30,6 +30,8 @@
 #endif
 
 
+/// @cond DOXYGEN_SKIP
+
 #ifdef EP_CONFIG_DEBUG
 	#define EP_ASSERTIONS_ENABLED
 	#define EP_SLOWASSERTIONS_ENABLED
@@ -76,6 +78,8 @@
 			}
 	#endif
 #endif
+
+/// @endcond
 
 
 #ifdef EP_ASSERTIONS_ENABLED
@@ -153,6 +157,9 @@
 	#define EP_VERIFY_NEQ_SLOW(expression, compareexpr)					EP_ASSERT_IMPL(expression != compareexpr, "")
 	/// Assert that an expression is not equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dev and Dist builds.
 	#define EP_VERIFYF_NEQ_SLOW(expression, compareexpr, message)		EP_ASSERT_IMPL(expression != compareexpr, message)
+	/// Execute code in assertion scenarios.  The expression is stripped out of Dev and Dist builds.
+	/// @warning Do not call code with side-effects in this code block, as it is stripped from distribution builds.
+	#define EP_ASSERT_CODE_SLOW(code)									do { code; } while ( false );
 #else
 	/// Assert that an expression is true.  The expression is stripped out of Dev and Dist builds.
 	#define EP_ASSERT_SLOW(expression)
@@ -170,4 +177,7 @@
 	#define EP_VERIFY_NEQ_SLOW(expression, compareexpr)					expression;
 	/// Assert that an expression is not equal to something, and log an error message if it's not.  Evaluates to just the first expression in Dev and Dist builds.
 	#define EP_VERIFYF_NEQ_SLOW(expression, compareexpr, message)		expression;
+	/// Execute code in assertion scenarios.  The code is stripped out of Dev and Dist builds.
+	/// @warning Do not call code with side-effects in this code block.
+	#define EP_ASSERT_CODE_SLOW(code)
 #endif
