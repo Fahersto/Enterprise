@@ -271,9 +271,9 @@ struct Mat4
 	static Mat4 Orthographic(float left, float right, float bottom, float top, float nearClip, float farClip);
 	/// Generate a 4x4 perspective projection matrix.
 	/// @param left The x coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
-	/// @param right The x coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
-	/// @param bottom The y coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
-	/// @param top The y coordinate, in view space, where the left clipping plane instersects with the near clipping plane.
+	/// @param right The x coordinate, in view space, where the right clipping plane instersects with the near clipping plane.
+	/// @param bottom The y coordinate, in view space, where the bottom clipping plane instersects with the near clipping plane.
+	/// @param top The y coordinate, in view space, where the top clipping plane instersects with the near clipping plane.
 	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
 	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
