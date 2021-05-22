@@ -1,6 +1,8 @@
 #include "EP_PCH.h"
 #include "Math.h"
 
+/// @cond DOXYGEN_SKIP
+
 namespace Enterprise::Math
 {
 
@@ -1572,3 +1574,5 @@ Vec4 operator*(Mat4&& lhs, Vec4&& rhs)
 }
 
 }
+
+/// @endcond

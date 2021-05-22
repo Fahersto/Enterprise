@@ -18,6 +18,7 @@ struct Vec2
 
 	Vec2(float X, float Y) : x(X), y(Y) {};
 
+	/// @cond DOXYGEN_SKIP
 	Vec2 operator-() { return Vec2(-x, -y); }
 
 	Vec2& operator+=(const Vec2& other);
@@ -36,8 +37,10 @@ struct Vec2
 	Vec2& operator*=(const Mat3& other);
 	Vec2& operator*=(Mat4&& other);
 	Vec2& operator*=(const Mat4& other);
+	/// @endcond
 };
 
+/// @cond DOXYGEN_SKIP
 Vec2 operator+(const Vec2& lhs, const Vec2& rhs);
 Vec2 operator+(const Vec2& lhs, Vec2&& rhs);
 Vec2 operator-(const Vec2& lhs, const Vec2& rhs);
@@ -73,6 +76,7 @@ Vec2 operator*(Vec2&& lhs, Mat4&& rhs);
 
 Vec2 operator*(float lhs, const Vec2& rhs);
 Vec2 operator*(float lhs, Vec2&& rhs);
+/// @endcond
 
 /// A 3D vector.
 struct Vec3
@@ -83,6 +87,7 @@ struct Vec3
 
 	Vec3(float X, float Y, float Z) : x(X), y(Y), z(Z) {};
 
+	/// @cond DOXYGEN_SKIP
 	Vec3 operator-() { return Vec3(-x, -y, -z); }
 
 	Vec3& operator+=(const Vec3& other);
@@ -101,8 +106,10 @@ struct Vec3
 	Vec3& operator*=(Mat3&& other);
 	Vec3& operator*=(const Mat4& other);
 	Vec3& operator*=(Mat4&& other);
+	/// @endcond
 };
 
+/// @cond DOXYGEN_SKIP
 Vec3 operator+(const Vec3& lhs, const Vec3& rhs);
 Vec3 operator+(const Vec3& lhs, Vec3&& rhs);
 Vec3 operator-(const Vec3& lhs, const Vec3& rhs);
@@ -138,6 +145,7 @@ Vec3 operator*(Vec3&& lhs, Mat4&& rhs);
 
 Vec3 operator*(float lhs, const Vec3& rhs);
 Vec3 operator*(float lhs, Vec3&& rhs);
+/// @endcond
 
 /// A 4D vector.
 struct Vec4
@@ -149,6 +157,7 @@ struct Vec4
 
 	Vec4(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {};
 
+	/// @cond DOXYGEN_SKIP
 	Vec4 operator-() { return Vec4(-x, -y, -z, -w); }
 
 	Vec4& operator+=(const Vec4& other);
@@ -167,8 +176,10 @@ struct Vec4
 	Vec4& operator*=(Mat3&& other);
 	Vec4& operator*=(const Mat4& other);
 	Vec4& operator*=(Mat4&& other);
+	/// @endcond
 };
 
+/// @cond DOXYGEN_SKIP
 Vec4 operator+(const Vec4& lhs, const Vec4& rhs);
 Vec4 operator+(const Vec4& lhs, Vec4&& rhs);
 Vec4 operator-(const Vec4& lhs, const Vec4& rhs);
@@ -205,6 +216,7 @@ Vec4 operator*(Vec4&& lhs, Mat4&& rhs);
 
 Vec4 operator*(float lhs, Vec4& rhs);
 Vec4 operator*(float lhs, Vec4&& rhs);
+/// @endcond
 
 /// A 3x3 Matrix.
 struct Mat3
@@ -214,10 +226,13 @@ struct Mat3
 	/// Generate a 3x3 identity matrix.
 	static Mat3 Identity();
 
+	/// @cond DOXYGEN_SKIP
 	Mat3& operator*=(const Mat3& other);
 	Mat3& operator*=(Mat3&& other);
+	/// @endcond
 };
 
+/// @cond DOXYGEN_SKIP
 Mat3 operator*(const Mat3& lhs, const Mat3& rhs);
 Mat3 operator*(const Mat3& lhs, Mat3&& rhs);
 Mat3 operator*(Mat3&& lhs, const Mat3& rhs);
@@ -227,6 +242,7 @@ Vec3 operator*(const Mat3& lhs, const Vec3& rhs);
 Vec3 operator*(const Mat3& lhs, Vec3&& rhs);
 Vec3 operator*(Mat3&& lhs, const Vec3& rhs);
 Vec3 operator*(Mat3&& lhs, Vec3&& rhs);
+/// @endcond
 
 /// A 4x4 Matrix.
 struct Mat4
@@ -284,10 +300,13 @@ struct Mat4
 	/// @param farClip The z coordinate, in view space, of the far clipping plane.
 	static Mat4 Perspective(float fov, float aspectRatio, float nearClip, float farClip);
 
+	/// @cond DOXYGEN_SKIP
 	Mat4& operator*=(const Mat4& other);
 	Mat4& operator*=(Mat4&& other);
+	/// @endcond
 };
 
+/// @cond DOXYGEN_SKIP
 Mat4 operator*(const Mat4& lhs, const Mat4& rhs);
 Mat4 operator*(const Mat4& lhs, Mat4&& rhs);
 Mat4 operator*(Mat4&& lhs, const Mat4& rhs);
@@ -297,5 +316,6 @@ Vec4 operator*(const Mat4& lhs, const Vec4& rhs);
 Vec4 operator*(const Mat4& lhs, Vec4&& rhs);
 Vec4 operator*(Mat4&& lhs, const Vec4& rhs);
 Vec4 operator*(Mat4&& lhs, Vec4&& rhs);
+/// @endcond
 
 }

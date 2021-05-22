@@ -7,7 +7,7 @@
 
 using Enterprise::Application;
 
-/// Enterprise's macOS aapp delegate.  Used to handle messages from macOS.
+/// Enterprise's macOS app delegate.  Used to handle messages from macOS.
 @interface MacAppDelegate : NSObject <NSApplicationDelegate>
 @end
 @implementation MacAppDelegate
