@@ -3,28 +3,28 @@
 #include "Graphics.h"
 #include "Window.h"
 
-#include "WindowEvents.h"
-#include "Enterprise/Application/ApplicationEvents.h"
+#include "Enterprise/Events/Events.h"
 
 #include "OpenGLHelpers.h"
 
 using Enterprise::Graphics;
+using Enterprise::Events;
 
 int Graphics::_maxTextureSlots;
 int* Graphics::_textureSlots = nullptr;
 
 static bool OnWindowClose(Events::Event& e)
 {
-	EP_ASSERT(e.Type() == EventTypes::WindowClose);
+	EP_ASSERT(e.Type() == HN("WindowClose"));
 
     // By default, closing the window is equivalent to quitting from the OS.
-    Enterprise::Events::Dispatch(EventTypes::QuitRequested);
+    Enterprise::Events::Dispatch(HN("QuitRequested"));
     return true;
 }
 
 void Graphics::Init()
 {
-	Events::SubscribeToType(EventTypes::WindowClose, OnWindowClose);
+	Events::Subscribe(HN("WindowClose"), OnWindowClose);
 	Window::CreatePrimaryWindow();
 
 	// Set up global VAO (OpenGL)

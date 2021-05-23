@@ -3,8 +3,7 @@
 
 #include "Core.h"
 #include "../Window.h"
-#include "../WindowEvents.h"
-#include "Enterprise/Input/InputEvents.h"
+#include "Enterprise/Events/Events.h"
 
 
 @interface macOSWindowDelegate : NSWindow <NSWindowDelegate>
@@ -14,7 +13,7 @@
 // The user has clicked the close button.
 - (BOOL)windowShouldClose:(NSWindow*)sender
 {
-    Enterprise::Events::Dispatch(EventTypes::WindowClose);
+    Enterprise::Events::Dispatch(HN("WindowClose"));
     return NO; // Window is closed automatically if the program terminates.  We don't do it here.
 }
 
@@ -22,31 +21,31 @@
 - (void)windowDidMove:(NSNotification *)notification
 {
     // TODO: Set up consistent coordinate system across platforms
-    Events::Dispatch(EventTypes::WindowMove, std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
+    Events::Dispatch(HN("WindowMove"), std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
 }
 
 // Window focus changed
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
-    Events::Dispatch(EventTypes::WindowFocus);
+    Events::Dispatch(HN("WindowFocus"));
 }
 - (void)windowDidResignKey:(NSNotification *)notification
 {
-    Events::Dispatch(EventTypes::WindowLostFocus);
+    Events::Dispatch(HN("WindowLostFocus"));
 }
 
 // Keyboard input
 - (void)keyDown:(NSEvent *)event
 {
-	Events::Dispatch(EventTypes::macOS_keyEvent, std::pair<unsigned short, bool>(event.keyCode, true));
+	Events::Dispatch(HN("macOS_keyEvent"), std::pair<unsigned short, bool>(event.keyCode, true));
 }
 - (void)keyUp:(NSEvent *)event
 {
-	Events::Dispatch(EventTypes::macOS_keyEvent, std::pair<unsigned short, bool>(event.keyCode, false));
+	Events::Dispatch(HN("macOS_keyEvent"), std::pair<unsigned short, bool>(event.keyCode, false));
 }
 - (void)flagsChanged:(NSEvent *)event
 {
-	Events::Dispatch(EventTypes::macOS_flagsChanged, (uint64_t)event.modifierFlags);
+	Events::Dispatch(HN("macOS_flagsChanged"), (uint64_t)event.modifierFlags);
 }
 
 @end

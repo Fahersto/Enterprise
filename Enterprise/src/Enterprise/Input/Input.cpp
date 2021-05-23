@@ -2,8 +2,6 @@
 #include "Input.h"
 #include "Enterprise/File/File.h"
 
-#include "InputEvents.h"
-#include "Enterprise/Graphics/WindowEvents.h"
 
 #define EP_INPUT_BLOCKER uint_fast8_t(-1)
 
@@ -633,7 +631,7 @@ void Input::CheckForControllerWake()
 		if (kbmBuffer.keys[currentBuffer][0] > kbmBuffer.keys[!currentBuffer][0] ||
 			kbmBuffer.keys[currentBuffer][1] > kbmBuffer.keys[!currentBuffer][1])
 		{
-			Events::Dispatch(EventTypes::ControllerWake, EP_CONTROLLERID_KBMOUSE);
+			Events::Dispatch(HN("ControllerWake"), EP_CONTROLLERID_KBMOUSE);
 		}
 		// Check for axes changes.
 		else
@@ -651,7 +649,7 @@ void Input::CheckForControllerWake()
 			// Check for button presses
 			if (gpIt->buttons[currentBuffer] > gpIt->buttons[!currentBuffer])
 			{
-				Events::Dispatch(EventTypes::ControllerWake, ControllerID(gpIt - gpBuffer.begin() + 1));
+				Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 1));
 			}
 			// Check for axes changes
 			else
@@ -662,7 +660,7 @@ void Input::CheckForControllerWake()
 				{
 					if (gpIt->axes[currentBuffer][i] != gpIt->axes[!currentBuffer][i])
 					{
-						Events::Dispatch(EventTypes::ControllerWake, ControllerID(gpIt - gpBuffer.begin() + 1));
+						Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 1));
 						break;
 					}
 				}
@@ -1105,8 +1103,8 @@ void Input::Init()
 	PlatformInit();
 
 	// Clear event-based input buffers if the window loses focus.
-	Events::SubscribeToType(
-		EventTypes::WindowLostFocus,
+	Events::Subscribe(
+		HN("WindowLostFocus"),
 		[](Events::Event& e)
 		{
 			memset(kbmBuffer.keys[currentBuffer], 0, sizeof(kbmBuffer.keys[currentBuffer]));

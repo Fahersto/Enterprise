@@ -4,7 +4,6 @@
 // Application stuff
 #include "Application.h"
 #include "Game.h"
-#include "Enterprise/Application/ApplicationEvents.h"
 
 // Systems
 #include "Enterprise/Time/Time.h"
@@ -168,7 +167,7 @@ Application::Application()
 
 	RegisterCmdLineOption("Help", { "-h", "--help" }, 
 						  "Displays command line options supported by this game.", 0);
-	Events::SubscribeToType(EventTypes::QuitRequested, OnQuit);
+	Events::Subscribe(HN("QuitRequested"), OnQuit);
 
 	// Initialize Systems
 	Time::Init();
@@ -222,7 +221,7 @@ Application::~Application()
 
 bool Application::OnQuit(Events::Event& e)
 {
-	EP_ASSERT(e.Type() == EventTypes::QuitRequested);
+	EP_ASSERT(e.Type() == HN("QuitRequested"));
 
     // By default, selecting Quit from the macOS dock or app menu quits the program.
 	Enterprise::Application::Quit();

@@ -1,9 +1,7 @@
 #include "EP_PCH.h"
 #if defined(__APPLE__) && defined(__MACH__)
 
-#include "Enterprise/Events/Events.h"
 #include "Enterprise/Application/Application.h"
-#include "Enterprise/Application/ApplicationEvents.h"
 
 using Enterprise::Application;
 
@@ -15,13 +13,13 @@ using Enterprise::Application;
 /// Invoked when the user selects "Quit" from the dock.
 - (void)handleQuitFromDock:(NSAppleEventDescriptor*)Event withReplyEvent:(NSAppleEventDescriptor*)ReplyEvent
 {
-    Enterprise::Events::Dispatch(EventTypes::QuitRequested);
+    Enterprise::Events::Dispatch(HN("QuitRequested"));
 }
 
 /// Invoked when the user selects "Quit" from the menu bar.
 - (void)handleQuitFromAppMenu
 {
-    Enterprise::Events::Dispatch(EventTypes::QuitRequested);
+    Enterprise::Events::Dispatch(HN("QuitRequested"));
 }
 
 // Set up Cocoa stuff

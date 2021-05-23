@@ -3,7 +3,6 @@
 
 #include "Core.h"
 #include "Enterprise/Input/Input.h"
-#include "Enterprise/Input/InputEvents.h"
 
 using Enterprise::Events;
 
@@ -39,11 +38,13 @@ void Enterprise::Input::PlatformInit()
 
 	EP_VERIFY_NEQ(RegisterRawInputDevices(device, 2, sizeof(device[0])), FALSE);
 
-	Events::SubscribeToType(EventTypes::Win32_RawInput, &HandlePlatformEvents);
+	Events::Subscribe(HN("Win32_RawInput"), &HandlePlatformEvents);
 }
 
 bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 {
+	EP_ASSERT_SLOW(e.Type() == HN("Win32_RawInput"));
+
 	RAWINPUT* ridata = Events::Unpack<RAWINPUT*>(e);
 	ControlID control = ControlID::_EndOfIDs;
 	bool isDownAction;
@@ -232,7 +233,7 @@ void Enterprise::Input::GetRawInput()
 				}
 
 				EP_INFO("Gamepad connected.  ControllerID: {}", xinputToGamepadID[i] + 1);
-				Events::Dispatch(EventTypes::ControllerWake, ControllerID(xinputToGamepadID[i] + 1));
+				Events::Dispatch(HN("ControllerWake"), ControllerID(xinputToGamepadID[i] + 1));
 			}
 
 			// Buttons
@@ -382,7 +383,7 @@ void Enterprise::Input::GetRawInput()
 				// Notify the game code of the disconnection.
 				if (disconnectedPlayerID != EP_PLAYERID_NULL)
 				{
-					Events::Dispatch(EventTypes::ControllerDisconnect, disconnectedPlayerID);
+					Events::Dispatch(HN("ControllerDisconnect"), disconnectedPlayerID);
 					EP_INFO("Gamepad disconnected.  PlayerID: {}", disconnectedPlayerID);
 				}
 				else

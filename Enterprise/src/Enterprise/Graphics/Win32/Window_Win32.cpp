@@ -3,8 +3,7 @@
 
 #include "Core.h"
 #include "../Window.h"
-#include "../WindowEvents.h"
-#include "Enterprise/Input/InputEvents.h"
+#include "Enterprise/Events/Events.h"
 
 static HWND hWnd; // handle to Win32 window
 static HDC hDC = nullptr; // device context
@@ -24,22 +23,22 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	switch (message)
 	{
 	case WM_CLOSE: // Clicked the close button
-		Events::Dispatch(EventTypes::WindowClose);
+		Events::Dispatch(HN("WindowClose"));
 		break;
 
 	case WM_ACTIVATEAPP: // Gained or lost focus
 		if (wParam == TRUE)
-			Events::Dispatch(EventTypes::WindowFocus);
+			Events::Dispatch(HN("WindowFocus"));
 		else
-			Events::Dispatch(EventTypes::WindowLostFocus);
+			Events::Dispatch(HN("WindowLostFocus"));
 		break;
 
 	case WM_CHAR: // Text entry
-		Events::Dispatch(EventTypes::KeyChar, char(wParam));
+		Events::Dispatch(HN("KeyChar"), char(wParam));
 		break;
 
 	case WM_MOUSEMOVE: // Mouse cursor position change
-		Events::Dispatch(EventTypes::MousePosition, std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
+		Events::Dispatch(HN("MousePosition"), std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
 		break;
 
 	case WM_INPUT: // Raw Input API
@@ -51,7 +50,7 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, RIData, &RIDataSize, sizeof(RAWINPUTHEADER))
 			<= RIDataSize);
 
-		Events::Dispatch(EventTypes::Win32_RawInput, (RAWINPUT*)RIData);
+		Events::Dispatch(HN("Win32_RawInput"), (RAWINPUT*)RIData);
 
 		return DefWindowProc(hWnd, message, wParam, lParam);
 		break;
