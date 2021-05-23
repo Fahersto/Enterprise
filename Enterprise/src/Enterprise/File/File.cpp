@@ -38,7 +38,7 @@ void File::SlashesToBackslashes(std::string& str)
 bool File::Exists(const std::string& path)
 {
 	FILE* handle;
-	errno_t errorcode;
+	errno_t errorcode = 0;
 
 #ifdef _WIN32
 	errorcode = fopen_s(&handle, path.c_str(), "r");
