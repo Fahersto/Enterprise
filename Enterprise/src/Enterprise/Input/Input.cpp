@@ -501,9 +501,9 @@ void Input::LoadContextsFromFile(std::string filename)
 						(
 							ActionMapping
 							{
-								.controlID = control_converted.second,
-								.threshold = threshold_converted.second,
-								.isDownAction = dir_converted.second,
+								control_converted.second,
+								threshold_converted.second,
+								dir_converted.second
 							}
 						);
 
@@ -544,8 +544,8 @@ void Input::LoadContextsFromFile(std::string filename)
 						(
 							AxisMapping
 							{
-								.controlID = control_converted.second,
-								.scale = scale_converted.second
+								control_converted.second,
+								scale_converted.second
 							}
 						);
 

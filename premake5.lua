@@ -57,11 +57,11 @@ project "Enterprise"
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
-        buildoptions{ "/std:c++latest" } -- C++20 Draft
+        buildoptions{ "/std:c++17" }
         staticruntime "On"
     filter "system:macosx"
         systemversion "10.15"
-        buildoptions{ "-std=c++2a" } -- C++20 Draft
+        buildoptions{ "-std=c++17" }
     filter {}
 
     -- Build locations
@@ -129,12 +129,12 @@ project (EP_ProjectName)
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
-        buildoptions{ "/std:c++latest" } -- C++20 Draft
+        buildoptions{ "/std:c++17" }
         links { "xinput", "OpenGL32" }
         staticruntime "On"
     filter "system:macosx"
         systemversion "10.15"
-        buildoptions{ "-std=c++2a" } -- C++20 Draft
+        buildoptions{ "-std=c++17" }
         links { "AppKit.framework", "GameController.framework", "Cocoa.framework", "OpenGL.framework" }
         postbuildcommands
         {
