@@ -5,6 +5,8 @@
 #include "../Window.h"
 #include "Enterprise/Events/Events.h"
 
+using Enterprise::Events;
+
 
 @interface macOSWindowDelegate : NSWindow <NSWindowDelegate>
 @end
@@ -13,7 +15,7 @@
 // The user has clicked the close button.
 - (BOOL)windowShouldClose:(NSWindow*)sender
 {
-    Enterprise::Events::Dispatch(HN("WindowClose"));
+    Events::Dispatch(HN("WindowClose"));
     return NO; // Window is closed automatically if the program terminates.  We don't do it here.
 }
 
