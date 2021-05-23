@@ -139,7 +139,7 @@ if (playerPressedJump == true)
 
 ```
 
-Once created, you can use the constant the same way you would any other.  However, in **Debug** and **Dist** configurations, your game will now become responsive to live changes in the source code.  If you modify a hot constant's value in the source while your game is running, it will automatically reflect the new value when the file is saved.  This is done by a background thread in a thread-safe way.
+Once created, you can use the constant the same way you would any other.  However, in **Debug** and **Dev** configurations, your game will now become responsive to live changes in the source code.  If you modify a hot constant's value in the source while your game is running, it will automatically reflect the new value when the file is saved.  This is done by a background thread in a thread-safe way.
 
 The Hot Constants reload mechanism is available in **Debug** and **Dev** builds only.  In **Dist** builds, the HC() macro expands into a simple constant declaration, leaving only hard-coded values in your final game.
 
