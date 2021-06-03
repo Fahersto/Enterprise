@@ -6,6 +6,7 @@ namespace Enterprise
 {
 
 /// The Enterprise events system.
+/// @see @ref Events
 class Events
 {
 public:

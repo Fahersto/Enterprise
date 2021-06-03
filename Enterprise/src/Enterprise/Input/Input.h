@@ -5,193 +5,145 @@
 #include "Enterprise/Events/Events.h"
 #include "ControlIDs.h"
 
-#define EP_PLAYERID_NULL Enterprise::Input::PlayerID(-2)
-#define EP_PLAYERID_ALL Enterprise::Input::PlayerID(-1)
-#define EP_CONTROLLERID_NULL Enterprise::Input::ControllerID(-1)
-#define EP_CONTROLLERID_KBMOUSE Enterprise::Input::ControllerID(0)
-
 namespace Enterprise
 {
 
-namespace Constants
-{
-// The maximum number of Axes a single callback can map.
-constexpr size_t MaxAxesPerBinding = 10;
-}
-
 /// The Enterprise input system.
+/// @see @ref Input
 class Input
 {
 public:
-	/// Identifies a player in a multiplayer game.
-	typedef size_t PlayerID;
-	/// Identifies a form of input (nullable, includes keyboard/mouse).
-	typedef size_t ControllerID;
-	/// Ideentifies a specific gamepad (non-nullable).
-	//typedef size_t GamepadID;
+	/// The maximum number of layers allowed in the input context stack.
+	static constexpr int MaxInputContextLayers = 10;
 
-	/// Get the next available Player ID.
-	/// @remarks Specifically, this function will return the smallest number that currently
-	/// identifies no player.  If a controller gets disconnected, the PlayerID it was assigned
-	/// to may be returned by this function.
-	static PlayerID GetNextPlayerID();
+	/// Identifier for a connected input controller.  Nullable.
+	typedef unsigned int ControllerID;
+	/// Identifier for an input stream.  Nullable.
+	typedef unsigned int StreamID;
 
-	/// Assign a controller to a specific player.
-	/// @param player The player to associate the controller with.
-	/// @param controller The ID for the controller to assign to the player.
-	static void AssignControllerToPlayer(PlayerID player, ControllerID controller);
+	/// Bind a controller to an input stream.
+	/// @param controller The controller to bind.
+	/// @param stream The input stream to bind to.
+	/// @note ControllerID 1 (keyboard and mouse) is automatically bound to StreamID 1 at launch.
+	static void BindController(ControllerID controller, StreamID stream);
 
-	/// Load all input contexts in an INI file into the Input system.
-	/// @param filename Name of the INI file containing the contexts.
-	/// @note In order for a context to be loaded, it must be part of the section group
-	/// "Input/Contexts/".
-	static void LoadContextsFromFile(std::string filename);
 
-	/// Bind a callback function to an input Action.
-	/// @param callbackPtr callbackPtr Pointer to the callback function.
-	/// @param player The ID of the player whose Action will trigger this binding.
-	/// @note @c player can be set to @c EP_PLAYERID_ALL to bind all PlayerIDs at once.
-	/// @param isBlocking Passing "true" will block this binding's ControlIDs from being used in lower bindings.
-	/// @param contextName The hashed name of the context this Action is a part of.
-	/// @param actionName actionName The hashed name of the Action to bind.
-	static void BindAction(void(*callbackPtr)(PlayerID player),
-									PlayerID player,
-									bool isBlocking,
-									HashName contextName,
-									HashName actionName);
+	/// Load input context definitions from an INI file.
+	/// @param filename Virtual path to the INI file to load.
+	static void LoadContextFile(std::string filename);
 
-	/// Bind a callback function to one or more input Axes.
-	/// @tparam ...FloatPack A variable number of floats.
-	/// @tparam ...HashPack A variable number of HashNames.
-	/// @param callbackPtr callbackPtr Pointer to the callback function.
-	/// @param player The ID of the player whose Axes will be reported.
-	/// @note @c player can be set to @c EP_PLAYERID_ALL to bind all PlayerIDs at once.
-	/// @param isBlocking Passing "true" will block this binding's ControlIDs from being used in lower bindings.
-	/// @param contextName The hashed name of the context these Axes are a part of.
-	/// @param ...axisName The hashed name of each Axis to bind.
-	template <typename ... FloatPack, typename ... HashPack>
-	static std::enable_if_t<is_all_same<float, FloatPack...>::value&&
-		is_all_same<HashName, HashPack...>::value &&
-		sizeof...(FloatPack) == sizeof...(HashPack),
-		void>
-		BindAxes(void(*callbackPtr)(PlayerID, FloatPack...),
-				 PlayerID player,
-				 bool isBlocking,
-				 HashName contextName,
-				 HashPack...axisName)
-	{
-		EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to bind Axis to EP_PLAYERID_NULL.");
+	/// Handle to a bound input context.
+	typedef void* ContextHandle;
 
-		BindingStack.emplace_back(
-			Binding{ (void*)callbackPtr, contextName,
-			NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-			player, sizeof...(HashPack), isBlocking });
+	/// Add a new input context to the context stack.
+	/// @param contextName The HashName of the context to bind.
+	/// @param stream The input stream to associate with this context.
+	/// @param blockingLevel The blocking behavior of this context.
+	/// 0=No blocking 1=Block only bound controls 2=Block all input
+	/// @param layer The layer to insert the new context into.
+	/// @return The handle of the newly bound context.
+	static ContextHandle BindContext(HashName contextName,
+									 StreamID stream,
+									 int blockingLevel = 0,
+									 unsigned int layer = 0);
 
-		std::array<HashName, sizeof...(HashPack)> axesNames{ axisName... };
-		for (int i = 0; i < sizeof...(HashPack); i++)
-		{
-			if (AxisMap[contextName][axesNames[i]].size() == 0)
-			{
-				EP_ERROR("Input System: Bound Axis \"{}\" has no loaded AxisMappings "
-						 "and will not reflect player input."
-						 "  Context Name: {}", HN_ToStr(axesNames[i]), HN_ToStr(contextName));
-			}
+	/// Pop an active input context from the context stack.
+	/// @param context Handle of the context.
+	static void PopContext(ContextHandle context);
 
-			BindingStack.back().ActionOrAxesHN[i] = axesNames[i];
-		}
-	}
 
-	/// Add a blocker to the input binding stack.  Bindings lower in the stack will not receive input.
-	/// @param player The PlayerID to block.  This can be EP_PLAYERID_ALL.
-	static void BlockLowerBindings(PlayerID player);
-	
-	/// Pop one or more bindings from the binding stack.
-	/// @param count Number of bindings to pop.
-	static void PopBindings(size_t count);
+	/// A pointer to an input action callback function.
+	typedef void(*ActionCallbackPtr)();
+
+	/// Bind an input action to a callback.
+	/// @param context The handle of the context containing the action. 
+	/// @param actionName The HashName of the action.
+	/// @param callback A pointer to the callback function.
+	static void BindAction(ContextHandle context,
+						   HashName actionName,
+						   ActionCallbackPtr callback);
+
+	/// Get the current value of an axis from an input context.
+	/// @param context The context handle.
+	/// @param axisName The HashName of the axis.
+	/// @return The current value of the axis.
+	static float GetAxis(ContextHandle context, HashName axisName);
 
 private:
 	friend class Application;
+
+	// Raw input stuff
 
 	struct KBMouseBuffer 
 	{
 		static_assert((size_t(ControlID::_EndOfKBMouseButtons) - size_t(ControlID::_EndOfGPAxes) - 1) <= 128,
 					  "There are more KBMouseButtons than will fit in two 64-bit bit fields.");
+		static constexpr size_t numOfMouseAxes = size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1;
 
-		/// Bit field representing the up/down state for every key and mouse button.
-		uint64_t keys[2][2] = { 0 };
+		bool isAssigned = false; // can only be assigned to StreamID(1), so we don't track the assigned stream.
 
-		/// Bit field representing whether a key has been blocked by a prior blocking context.
-		uint64_t keys_blockstatus[2] = { 0 };
+		uint64_t keys[2][2] = { 0 }; // bit fields.  Dim 1 = buffer, Dim 2 = low/high order word
+		float axes[2][numOfMouseAxes] = { 0 };
 
-		/// Current state of all mouse axes.
-		float axes[2][size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1] = { 0 };
+		uint64_t keys_blockstatus[2] = { 0 }; // bit field
+		bool axes_blockstatus[numOfMouseAxes] = { 0 };
 
-		/// Whether a given axis has been blocked by a prior blocking context.
-		bool axes_blockstatus[size_t(ControlID::_EndOfIDs) - size_t(ControlID::_EndOfKBMouseButtons) - 1] = { 0 };
-		
-		/// Whether the keyboard is currently assigned to Player 0 (no other player assignment is valid).
-		bool isAssigned = false;
 	};
-	static KBMouseBuffer kbmBuffer;
-
 	struct GamePadBuffer 
 	{
-		/// The currently assigned PlayerID.  This can be EP_PLAYERID_NULL.
-		PlayerID assignedPlayer = EP_PLAYERID_NULL;
-
 		static_assert(size_t(ControlID::_EndOfGPButtons) <= 16,
 					  "There are more GPButtons than will fit in a 16-bit bit field.");
+		static constexpr size_t numOfGamepadAxes = size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1;
 
-		/// Bit field representing the up/down state for every button.
-		uint16_t buttons[2] = { 0 };
+		StreamID assignedStream = NULL;
 
-		/// Bit field representing whether a button has been blocked by a prior blocking context.
-		uint16_t buttons_blockstatus = { 0 };
+		uint16_t buttons[2] = { 0 }; // Bit field
+		float axes[2][numOfGamepadAxes] = { 0 };
 
-		/// Current state of all gamepad axes.
-		float axes[2][size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1] = { 0 };
-
-		/// Whether a given axis has been blocked by a prior blocking context.
-		bool axes_blockstatus[size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1] = { 0 };
+		uint16_t buttons_blockstatus = { 0 }; // Bit field
+		bool axes_blockstatus[numOfGamepadAxes] = { 0 };
 	};
+
+	static KBMouseBuffer kbmBuffer;
 	static std::vector<GamePadBuffer> gpBuffer;
+	static bool currentBuffer; // used as index to double-buffered raw input
 
-	static bool currentBuffer;
-
-	struct Binding
-	{
-		void* callbackPtr;
-		HashName ContextHN;
-		HashName ActionOrAxesHN[Constants::MaxAxesPerBinding];
-		PlayerID playerID;
-		uint_fast8_t NumOfAxes;
-		bool isBlocking;
-	};
+	// Context stuff
 
 	struct ActionMapping
 	{
-		Enterprise::ControlID controlID;
+		HashName name;
+		ControlID control;
 		float threshold;
 		bool isDownAction;
 	};
 	struct AxisMapping
 	{
-		Enterprise::ControlID controlID;
+		HashName name;
+		ControlID control;
 		float scale;
 	};
-	static std::unordered_map<HashName, std::unordered_map<HashName, std::vector<ActionMapping>>> ActionMap;
-	static std::unordered_map<HashName, std::unordered_map<HashName, std::vector<AxisMapping>>> AxisMap;
-	static std::vector<Binding> BindingStack;
+	struct Context
+	{
+		std::vector<ActionMapping> actions;		// set by LoadContextFile()
+		std::vector<AxisMapping> axes;			// set by LoadContextFile()
+
+		int blockingLevel = 0;					// set by BindContext()
+		StreamID stream = NULL;					// set by BindContext()
+	};
+
+	static std::map<HashName, Context> contextRegistry;
+	static std::forward_list<Context> contextStack[MaxInputContextLayers];
+	static std::map<ContextHandle, int> layerOfContext; // The layer number of a given context.
+	static std::map<ContextHandle, std::map<HashName, std::vector<ActionCallbackPtr>>> actionCallbacks;
+	static std::map<ContextHandle, std::map<HashName, float>> axisValues;
+
 
 	static bool HandlePlatformEvents(Events::Event& e);
 	static void GetRawInput();
 	static void CheckForControllerWake();
-	static PlayerID UnassignController(ControllerID controller);
-
-	static void ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Enterprise::Input::Binding>::iterator>& bindingIt);
-	static void ProcessGamepadBinding(const std::reverse_iterator<std::vector<Enterprise::Input::Binding>::iterator>& bindingIt,
-									  PlayerID player);
-	static void ProcessBinding(const std::vector<Binding>::reverse_iterator& it);
+	static StreamID UnbindController(ControllerID controller);
+	static void ProcessContext(Context& context);
 
 	static void Init();
 	static void PlatformInit();

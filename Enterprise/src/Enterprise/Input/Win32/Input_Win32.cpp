@@ -9,13 +9,7 @@ using Enterprise::Events;
 static bool xinputWasConnected[4] = { 0 };
 static DWORD xinputPrevPacketNo[4] = { 0 };
 static bool xinputAlreadyCopiedBuffer[4] = { 0 };
-static Enterprise::Input::ControllerID xinputToGamepadID[4] =
-{
-	EP_CONTROLLERID_NULL,
-	EP_CONTROLLERID_NULL,
-	EP_CONTROLLERID_NULL,
-	EP_CONTROLLERID_NULL
-};
+static Enterprise::Input::StreamID xinputToGamepadID[4] = { NULL };
 static std::vector<bool> isGamepadIDActive;
 
 
@@ -232,8 +226,8 @@ void Enterprise::Input::GetRawInput()
 					Input::gpBuffer.emplace_back();
 				}
 
-				EP_INFO("Gamepad connected.  ControllerID: {}", xinputToGamepadID[i] + 1);
-				Events::Dispatch(HN("ControllerWake"), ControllerID(xinputToGamepadID[i] + 1));
+				EP_INFO("Gamepad connected.  ControllerID: {}", xinputToGamepadID[i] + 2);
+				Events::Dispatch(HN("ControllerWake"), ControllerID(xinputToGamepadID[i] + 2));
 			}
 
 			// Buttons
@@ -378,21 +372,21 @@ void Enterprise::Input::GetRawInput()
 				isGamepadIDActive[xinputToGamepadID[i]] = false;
 
 				Input::gpBuffer[xinputToGamepadID[i]] = GamePadBuffer();
-				PlayerID disconnectedPlayerID = UnassignController(ControllerID(xinputToGamepadID[i] + 1));
+				StreamID disconnectedStream = UnbindController(ControllerID(xinputToGamepadID[i] + 2));
 
 				// Notify the game code of the disconnection.
-				if (disconnectedPlayerID != EP_PLAYERID_NULL)
+				if (disconnectedStream != NULL)
 				{
-					Events::Dispatch(HN("ControllerDisconnect"), disconnectedPlayerID);
-					EP_INFO("Gamepad disconnected.  PlayerID: {}", disconnectedPlayerID);
+					Events::Dispatch(HN("ControllerDisconnect"), disconnectedStream);
+					EP_INFO("Gamepad disconnected.  StreamID: {}", disconnectedStream);
 				}
 				else
 				{
-					// ControllerDisconnect events only fire for gamepads assigned to a player.
-					EP_INFO("Gamepad disconnected.  PlayerID: unassigned");
+					// ControllerDisconnect events only fire for gamepads assigned to a stream.
+					EP_INFO("Gamepad disconnected.  StreamID: unassigned");
 				}
 				
-				xinputToGamepadID[i] = EP_CONTROLLERID_NULL;
+				xinputToGamepadID[i] = NULL;
 			}
 
 			// TODO: Increase performance by implementing a timer to delay checks on disconnected controllers.

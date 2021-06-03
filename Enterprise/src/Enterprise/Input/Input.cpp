@@ -2,117 +2,108 @@
 #include "Input.h"
 #include "Enterprise/File/File.h"
 
-
-#define EP_INPUT_BLOCKER uint_fast8_t(-1)
-
-
 using Enterprise::Input;
 using Enterprise::Events;
 
 
 Input::KBMouseBuffer Input::kbmBuffer;
-std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 1.
+std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 2.
 bool Input::currentBuffer = 0;
 
-/// Tracks the ControllerID used by each player.  Indexed by PlayerID.
-static std::vector<Input::ControllerID> ControllerForPlayer;
-/// Tracks whether a PlayerID's input was blocked earlier in the frame.  Indexed by PlayerID.
-static std::vector<bool> isPlayerInputBlocked;
+std::map<HashName, Input::Context> Input::contextRegistry;
+std::forward_list<Input::Context> Input::contextStack[MaxInputContextLayers];
+std::map<Input::ContextHandle, int> Input::layerOfContext;
+std::map<void*, std::map<HashName, std::vector<Input::ActionCallbackPtr>>> Input::actionCallbacks;
+std::map<void*, std::map<HashName, float>> Input::axisValues;
 
+static std::vector<Input::ControllerID> StreamBindings; // Indexed by StreamID.
+static std::vector<bool> isStreamBlocked; // Indexed by StreamID.
 
-std::unordered_map<HashName, std::unordered_map<HashName, std::vector<Input::ActionMapping>>> Input::ActionMap;
-std::unordered_map<HashName, std::unordered_map<HashName, std::vector<Input::AxisMapping>>> Input::AxisMap;
-std::vector<Input::Binding> Input::BindingStack;
-
-
-Input::PlayerID Input::GetNextPlayerID()
+void Input::BindController(ControllerID controller, StreamID stream)
 {
-	auto ID_it = std::find(ControllerForPlayer.begin(), ControllerForPlayer.end(), EP_CONTROLLERID_NULL);
-	if (ID_it != ControllerForPlayer.end())
+	EP_ASSERTF(controller != NULL, "Input::BindController(): 'controller' cannot be NULL.");
+	EP_ASSERTF(stream != NULL, "Input::BindController(): 'stream' cannot be NULL.");
+
+	EP_ASSERTF(controller < gpBuffer.size() + 2, "Input System: Attempted to assign unallocated ControllerID.");
+	EP_ASSERTF(stream == 1 || controller != ControllerID(1), "Input System: Attempted to assign keyboard and mouse "
+			   "to invalid StreamID.  Keyboard and mouse can only be bound to StreamID 1.");
+
+	if (stream >= StreamBindings.size())
 	{
-		return PlayerID(ID_it - ControllerForPlayer.begin());
+		// this stream has not been bound before
+
+		while (stream != StreamBindings.size())
+		{
+			StreamBindings.push_back(NULL);
+			isStreamBlocked.push_back(false);
+		}
+
+		StreamBindings.push_back(controller);
+		isStreamBlocked.push_back(false);
+		if (controller == ControllerID(1))
+		{
+			// Keyboard and mouse can only ever be assigned to StreamID 1, so this is tracked by a bool.
+			kbmBuffer.isAssigned = true;
+		}
+		else
+		{
+			gpBuffer[controller - 2].assignedStream = stream;
+		}
 	}
 	else
 	{
-		return ControllerForPlayer.size();
-	}
-}
-
-
-void Input::AssignControllerToPlayer(PlayerID player, ControllerID controller)
-{
-	EP_ASSERTF(player <= ControllerForPlayer.size(), "Input System: Attempted to assign ControllerID to ineligible PlayerID.");
-	EP_ASSERTF(controller <= gpBuffer.size(), "Input System: Attempted to assign unallocated ControllerID.");
-	EP_ASSERTF(player == 0 || controller != EP_CONTROLLERID_KBMOUSE, "Input System: Attempted to assign keyboard and mouse "
-			   "to non-zero PlayerID.");
-
-	if (player == ControllerForPlayer.size())
-	{
-		// 'player' has not been used before, so we don't have to break its associations.
-		ControllerForPlayer.push_back(controller);
-		isPlayerInputBlocked.push_back(false);
-		if (controller == EP_CONTROLLERID_KBMOUSE)
-		{
-			// Keyboard and mouse can only ever be assigned to PlayerID(0), so this is tracked by a bool.
-			kbmBuffer.isAssigned = true;
-		}
-		else
-		{
-			gpBuffer[controller - 1].assignedPlayer = player;
-		}
-	}
-	else if (player < ControllerForPlayer.size())
-	{
-		// Break 'player''s previous association
-		if (ControllerForPlayer[player] == EP_CONTROLLERID_KBMOUSE)
+		// Break the stream's previous binding
+		if (StreamBindings[stream] == ControllerID(1))
 		{
 			kbmBuffer.isAssigned = false;
 		}
-		else if (ControllerForPlayer[player] != EP_CONTROLLERID_NULL)
+		else if (StreamBindings[stream] != NULL)
 		{
-			EP_ASSERTF(ControllerForPlayer[player] <= gpBuffer.size(), "Input System: "
+			EP_ASSERTF(StreamBindings[stream] < gpBuffer.size() + 2, "Input System: "
 					   "Attempted to break an association to an invalid ControllerID.");
-			gpBuffer[ControllerForPlayer[player] - 1].assignedPlayer = EP_PLAYERID_NULL;
+			gpBuffer[StreamBindings[stream] - 2].assignedStream = NULL;
 		}
 
-		// We're reassigning controllerForPlayer[player] anyways, so don't bother to break that link here.
+		// We're reassigning StreamBindings[stream] anyways, so we don't bother to break that link here.
 
 		// Assign controllerforplayer and the buffer.
-		if (controller == EP_CONTROLLERID_KBMOUSE)
+		if (controller == ControllerID(1))
 		{
 			kbmBuffer.isAssigned = true;
 		}
 		else
 		{
-			gpBuffer[controller - 1].assignedPlayer = player;
+			gpBuffer[controller - 2].assignedStream = stream;
 		}
-		ControllerForPlayer[player] = controller;
+		StreamBindings[stream] = controller;
 	}
 }
 
 
-Input::PlayerID Input::UnassignController(ControllerID controller)
+Input::StreamID Input::UnbindController(ControllerID controller)
 {
-	if (controller == EP_CONTROLLERID_KBMOUSE)
+	EP_ASSERTF(controller != NULL, "Input::UnbindController(): 'controller' cannot be NULL.");
+
+	if (controller == ControllerID(1))
 	{
 		kbmBuffer.isAssigned = false;
 	}
 	else
 	{
-		EP_ASSERTF(controller <= gpBuffer.size(), "Input System: Attempted to unassign "
+		EP_ASSERTF(controller < gpBuffer.size() + 2, "Input System: Attempted to unassign "
 												  "unalloacted gamepad.");
-		gpBuffer[controller - 1].assignedPlayer = EP_PLAYERID_NULL;
+		gpBuffer[controller - 2].assignedStream = NULL;
 	}
 
-	auto it = std::find(ControllerForPlayer.begin(), ControllerForPlayer.end(), controller);
-	if (it != ControllerForPlayer.end())
+	auto it = std::find(StreamBindings.begin(), StreamBindings.end(), controller);
+	if (it != StreamBindings.end())
 	{
-		(*it) = EP_CONTROLLERID_NULL;
-		return PlayerID(it - ControllerForPlayer.begin());
+		(*it) = NULL;
+		return StreamID(it - StreamBindings.begin());
 	}
 	else
 	{
-		return EP_PLAYERID_NULL;
+		return NULL;
 	}
 
 	// TODO: Notify macOS platform code that the controller is unassigned, so GCController can unmark the player assignment.
@@ -452,20 +443,17 @@ static std::pair<bool, bool> StringToDirBool(const std::string& str)
 }
 
 
-void Input::LoadContextsFromFile(std::string filename)
+void Input::LoadContextFile(std::string filename)
 {
-	File::INIReader ini(filename, true, "Input/Contexts/");
+	File::INIReader ini(filename, true, "Input.");
 
-	for (HashName contextName : ini.Sections())
+	for (HashName& contextName : ini.Sections())
 	{
 		// Flush the previously loaded context, if it was loaded before
-		if (ActionMap.count(contextName))
+		if (contextRegistry.count(contextName))
 		{
-			ActionMap[contextName].clear();
-		}
-		if (AxisMap.count(contextName))
-		{
-			AxisMap[contextName].clear();
+			contextRegistry[contextName].actions.clear();
+			contextRegistry[contextName].axes.clear();
 		}
 
 		std::vector<std::unordered_map<HashName, std::string>> mappings;
@@ -497,10 +485,11 @@ void Input::LoadContextsFromFile(std::string filename)
 						dir_converted.first &&
 						threshold_converted.first)
 					{
-						ActionMap[contextName][HN(map[HN("name")])].emplace_back
+						contextRegistry[contextName].actions.emplace_back
 						(
 							ActionMapping
 							{
+								HN(map[HN("name")]),
 								control_converted.second,
 								threshold_converted.second,
 								dir_converted.second
@@ -540,10 +529,11 @@ void Input::LoadContextsFromFile(std::string filename)
 					if (control_converted.first &&
 						scale_converted.first)
 					{
-						AxisMap[contextName][HN(map[HN("name")])].emplace_back
+						contextRegistry[contextName].axes.emplace_back
 						(
 							AxisMapping
 							{
+								HN(map[HN("name")]),
 								control_converted.second,
 								scale_converted.second
 							}
@@ -576,50 +566,69 @@ void Input::LoadContextsFromFile(std::string filename)
 }
 
 
-void Input::BindAction(void(*callbackPtr)(PlayerID player),
-								PlayerID player,
-								bool isBlocking,
-								HashName contextName,
-								HashName actionName)
+Input::ContextHandle Input::BindContext(HashName contextName,
+										StreamID stream,
+										int blockingLevel,
+										unsigned int layer)
 {
-	EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to bind Action to EP_PLAYERID_NULL.");
+	EP_ASSERTF(contextRegistry.count(contextName) > 0, 
+			   "Input::BindContext(): contextName has not been loaded with Input::LoadContextFile().");
 
-	if (ActionMap[contextName][actionName].size() == 0)
+	contextStack[layer].push_front(contextRegistry[contextName]);
+	contextStack[layer].front().blockingLevel = blockingLevel;
+	contextStack[layer].front().stream = stream;
+	layerOfContext[&contextStack[layer].front()] = layer;
+
+	for (const auto& axis : contextRegistry[contextName].axes)
 	{
-		EP_ERROR("Input System: Bound Action \"{}\" has no loaded ActionMappings "
-				 "and will never trigger.  Context Name: {}", HN_ToStr(actionName), HN_ToStr(contextName));
+		axisValues[&contextStack[layer].front()][axis.name];
+	}
+	for (const auto& action : contextRegistry[contextName].actions)
+	{
+		actionCallbacks[&contextStack[layer].front()][action.name];
 	}
 
-	BindingStack.emplace_back(
-		Binding{ (void*)callbackPtr, contextName,
-		actionName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		player, 0, isBlocking });
+	return ContextHandle(&contextStack[layer].front());
 }
 
-
-void Input::BlockLowerBindings(PlayerID player)
+void Input::PopContext(ContextHandle context)
 {
-	EP_ASSERTF(player != EP_PLAYERID_NULL, "Input System: Attempted to apply input blocker for "
-			   "EP_PLAYERID_NULL.");
+	EP_ASSERTF(layerOfContext.count(context) > 0,
+			   "Input::PopContext(): 'context' is not currently bound.");
+	int layer = layerOfContext[context];
 
-	BindingStack.emplace_back(
-		Binding{ nullptr, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		player, EP_INPUT_BLOCKER, false });
-}
-
-
-void Input::PopBindings(size_t count)
-{
-	EP_ASSERTF(count <= BindingStack.size(), "Input System: Attempted to pop more bindings "
-			   "than were stored in BindingStack.");
-
-	if (count == 0)
+	auto prev = contextStack[layer].before_begin();
+	for (auto it = contextStack[layer].begin();
+		 it != contextStack[layer].end();
+		 ++it)
 	{
-		EP_WARN("Input System: Attempted to pop zero bindings from BindingStack.");
+		if (&(*it) == context)
+		{
+			contextStack[layer].erase_after(prev);
+			break;
+		}
+		prev = it;
 	}
+}
 
-	BindingStack.erase(BindingStack.end() - count, BindingStack.end());
+void Input::BindAction(ContextHandle context, HashName actionName, ActionCallbackPtr callback)
+{
+	EP_ASSERTF(actionCallbacks.count(context) > 0,
+			   "Input::BindAction(): context contains no input actions");
+	EP_ASSERTF(actionCallbacks[context].count(actionName) > 0,
+			   "Input::BindAction(): context does not contain this action");
+
+	actionCallbacks[context][actionName].push_back(callback);
+}
+
+float Input::GetAxis(ContextHandle context, HashName axisName)
+{
+	EP_ASSERTF(axisValues.count(context) > 0,
+			   "Input::GetAxis(): context contains no input axes");
+	EP_ASSERTF(axisValues[context].count(axisName) > 0,
+			   "Input::GetAxis(): context does not contain this axis");
+
+	return axisValues[context][axisName];
 }
 
 
@@ -631,7 +640,7 @@ void Input::CheckForControllerWake()
 		if (kbmBuffer.keys[currentBuffer][0] > kbmBuffer.keys[!currentBuffer][0] ||
 			kbmBuffer.keys[currentBuffer][1] > kbmBuffer.keys[!currentBuffer][1])
 		{
-			Events::Dispatch(HN("ControllerWake"), EP_CONTROLLERID_KBMOUSE);
+			Events::Dispatch(HN("ControllerWake"), ControllerID(1));
 		}
 		// Check for axes changes.
 		else
@@ -644,23 +653,23 @@ void Input::CheckForControllerWake()
 		 gpIt != gpBuffer.end();
 		 ++gpIt)
 	{
-		if (gpIt->assignedPlayer == EP_PLAYERID_NULL)
+		if (gpIt->assignedStream == NULL)
 		{
 			// Check for button presses
 			if (gpIt->buttons[currentBuffer] > gpIt->buttons[!currentBuffer])
 			{
-				Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 1));
+				Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 2));
 			}
 			// Check for axes changes
 			else
 			{
 				for (int i = 0; 
-					 i < (size_t(ControlID::_EndOfGPAxes) - size_t(ControlID::_EndOfGPButtons) - 1); 
+					 i < (int(ControlID::_EndOfGPAxes) - int(ControlID::_EndOfGPButtons) - 1); 
 					 i++)
 				{
 					if (gpIt->axes[currentBuffer][i] != gpIt->axes[!currentBuffer][i])
 					{
-						Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 1));
+						Events::Dispatch(HN("ControllerWake"), ControllerID(gpIt - gpBuffer.begin() + 2));
 						break;
 					}
 				}
@@ -670,163 +679,140 @@ void Input::CheckForControllerWake()
 }
 
 
-/// Helper function that binds to and invokes an Axis callback.
-/// @param callbackPtr A pointer to the callback function.
-/// @param player The PlayerID for the call.
-/// @param numOfAxes The number of float parameters in this callback.
-/// @param Axes An array containing the axes values for this binding.
-static void InvokeAxisBindingCallback(void* callbackPtr,
-									  Input::PlayerID player, 
-									  int numOfAxes, 
-									  float Axes[Enterprise::Constants::MaxAxesPerBinding])
+void Input::ProcessContext(Input::Context& context)
 {
-	switch (numOfAxes)
-	{
-	case 1:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0]);
-	}
-	break;
-	case 2:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1]);
-	}
-	break;
-	case 3:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2]);
-	}
-	break;
-	case 4:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3]);
-	}
-	break;
-	case 5:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4]);
-	}
-	break;
-	case 6:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5]);
-	}
-	break;
-	case 7:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6]);
-	}
-	break;
-	case 8:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7]);
-	}
-	break;
-	case 9:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7], Axes[8]);
-	}
-	break;
-	case 10:
-	{
-		typedef void(*axisCallbackPtr)(Input::PlayerID player, float, float, float, float, float, float, float, float, float, float);
-		axisCallbackPtr boundFnPtr = axisCallbackPtr(callbackPtr);
-		(*boundFnPtr)(player, Axes[0], Axes[1], Axes[2], Axes[3], Axes[4], Axes[5], Axes[6], Axes[7], Axes[8], Axes[9]);
-	}
-	break;
-	default:
-		EP_ASSERT_NOENTRY();
-		break;
-	}
-}
+	EP_ASSERT_SLOW(context.stream != NULL);
+	EP_ASSERT_SLOW(context.stream < StreamBindings.size());
 
-
-void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Binding>::iterator>& bindingIt)
-{
-	if (bindingIt->NumOfAxes == 0) // Actions
+	if (!isStreamBlocked[context.stream])
 	{
-		if (!isPlayerInputBlocked[0])
+		isStreamBlocked[context.stream] = (context.blockingLevel == 2);
+
+		if (StreamBindings[context.stream] == NULL)
 		{
-			bool isActionTriggered = false;
-
-			for (auto mappingIt = ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].begin();
-				 mappingIt != ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].end();
-				 ++mappingIt)
+			// No ControllerID is bound to the context's stream.
+			return;
+		}
+		else if (StreamBindings[context.stream] == ControllerID(1)) // Keyboard & mouse
+		{
+			for (const auto& axis : context.axes)
 			{
-				if (mappingIt->controlID > ControlID::_EndOfGPAxes)
+				if (axis.control > ControlID::_EndOfGPAxes)
 				{
-					if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons &&
-						size_t(mappingIt->controlID) < 64 &&
-						!(kbmBuffer.keys_blockstatus[0] & BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1)))
+					if (axis.control < ControlID::_EndOfKBMouseButtons)
 					{
-						// Unblocked button in low-order word.
-						uint64_t control_flag = BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1);
+						// This is a kb/mouse binding
 
-						isActionTriggered |=
-							((kbmBuffer.keys[currentBuffer][0] & control_flag) &&
-							 !(kbmBuffer.keys[!currentBuffer][0] & control_flag) &&
-							 mappingIt->isDownAction) ||
-							(!(kbmBuffer.keys[currentBuffer][0] & control_flag) &&
-							 (kbmBuffer.keys[!currentBuffer][0] & control_flag) &&
-							 !mappingIt->isDownAction);
+						int keyIndex = int(axis.control) - int(ControlID::_EndOfGPAxes) - 1;
 
-						kbmBuffer.keys_blockstatus[0] |= control_flag * bindingIt->isBlocking;
+						// Is key bit in high-order word?
+						if (keyIndex < 64)
+						{
+							// Check if key is blocked
+							if (!(kbmBuffer.keys_blockstatus[0] & BIT(keyIndex)))
+							{
+								// Map key to axis
+								if (kbmBuffer.keys[currentBuffer][0] & BIT(keyIndex))
+									axisValues[&context][axis.name] += axis.scale;
+
+								// Set key block bit if appropriate
+								if (context.blockingLevel > 0)
+									kbmBuffer.keys_blockstatus[0] |= BIT(keyIndex);
+							}
+						}
+						else
+						{
+							// Check if key is blocked
+							if (!(kbmBuffer.keys_blockstatus[1] & BIT(keyIndex % 64)))
+							{
+								// Map key to axis
+								if (kbmBuffer.keys[currentBuffer][1] & BIT(keyIndex % 64))
+									axisValues[&context][axis.name] += axis.scale;
+
+								// Set key block bit if appropriate
+								if (context.blockingLevel > 0)
+									kbmBuffer.keys_blockstatus[1] |= BIT(keyIndex % 64);
+							}
+						}
 					}
-					else if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons &&
-							 size_t(mappingIt->controlID) >= 64 &&
-							 !(kbmBuffer.keys_blockstatus[1] & BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1 - 64)))
+					else
+					{
+						// This is a mouse axis
+
+						int axisIndex = int(axis.control) - int(ControlID::_EndOfKBMouseButtons) - 1;
+						if (!kbmBuffer.axes_blockstatus[axisIndex])
+						{
+							// Not blocked.
+
+							axisValues[&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex] * axis.scale;
+							kbmBuffer.axes_blockstatus[axisIndex] |= (context.blockingLevel > 0);
+						}
+					}
+				}
+			}
+
+			std::map<HashName, bool> isActionTriggered;
+
+			for (const auto& action : context.actions)
+			{
+				if (action.control > ControlID::_EndOfGPAxes)
+				{
+					int kbm_control_index = uint64_t(action.control) - uint64_t(ControlID::_EndOfGPAxes) - 1;
+
+					if ((kbm_control_index) < 64 &&
+						!(kbmBuffer.keys_blockstatus[0] & BIT(kbm_control_index)))
+					{
+						// Unblocked button/key in low-order word.
+						uint64_t control_flag = BIT(kbm_control_index);
+
+						isActionTriggered[action.name] |=
+							((kbmBuffer.keys[currentBuffer][0] & control_flag) &&
+								!(kbmBuffer.keys[!currentBuffer][0] & control_flag) &&
+								action.isDownAction) ||
+							(!(kbmBuffer.keys[currentBuffer][0] & control_flag) &&
+								(kbmBuffer.keys[!currentBuffer][0] & control_flag) &&
+								!action.isDownAction);
+
+						if (context.blockingLevel > 0)
+							kbmBuffer.keys_blockstatus[0] |= control_flag;
+					}
+					else if (action.control < ControlID::_EndOfKBMouseButtons &&
+							 !(kbmBuffer.keys_blockstatus[1] & BIT(kbm_control_index - 64)))
 					{
 						// Unblocked button in high-order word.
-						uint64_t control_flag = BIT(uint64_t(mappingIt->controlID) - uint64_t(ControlID::_EndOfGPAxes) - 1 - 64);
+						uint64_t control_flag = BIT(kbm_control_index - 64);
 
-						isActionTriggered |=
+						isActionTriggered[action.name] |=
 							((kbmBuffer.keys[currentBuffer][1] & control_flag) &&
-							 !(kbmBuffer.keys[!currentBuffer][1] & control_flag) &&
-							 mappingIt->isDownAction) ||
+								!(kbmBuffer.keys[!currentBuffer][1] & control_flag) &&
+								action.isDownAction) ||
 							(!(kbmBuffer.keys[currentBuffer][1] & control_flag) &&
-							 (kbmBuffer.keys[!currentBuffer][1] & control_flag) &&
-							 !mappingIt->isDownAction);
+								(kbmBuffer.keys[!currentBuffer][1] & control_flag) &&
+								!action.isDownAction);
 
-						kbmBuffer.keys_blockstatus[1] |= control_flag * bindingIt->isBlocking;
+						if (context.blockingLevel > 0)
+							kbmBuffer.keys_blockstatus[1] |= control_flag;
 					}
-					else if (!kbmBuffer.axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfKBMouseButtons) - 1])
+					else if (!kbmBuffer.axes_blockstatus[int(action.control) - int(ControlID::_EndOfKBMouseButtons) - 1])
 					{
 						// Unblocked axis.
-						size_t control = size_t(mappingIt->controlID) - size_t(ControlID::_EndOfKBMouseButtons) - 1;
+						int control = int(action.control) - int(ControlID::_EndOfKBMouseButtons) - 1;
 
-						isActionTriggered |=
-							((kbmBuffer.axes[currentBuffer][control] > mappingIt->threshold) &&
-							 (kbmBuffer.axes[!currentBuffer][control] < mappingIt->threshold) &&
-							 mappingIt->isDownAction && mappingIt->threshold > 0) ||
-							((kbmBuffer.axes[currentBuffer][control] < mappingIt->threshold) &&
-							 (kbmBuffer.axes[!currentBuffer][control] > mappingIt->threshold) &&
-							 mappingIt->isDownAction && mappingIt->threshold < 0) ||
-							((kbmBuffer.axes[currentBuffer][control] < mappingIt->threshold) &&
-							 (kbmBuffer.axes[!currentBuffer][control] > mappingIt->threshold) &&
-							 !mappingIt->isDownAction && mappingIt->threshold > 0) ||
-							((kbmBuffer.axes[currentBuffer][control] > mappingIt->threshold) &&
-							 (kbmBuffer.axes[!currentBuffer][control] < mappingIt->threshold) &&
-							 !mappingIt->isDownAction && mappingIt->threshold < 0);
+						isActionTriggered[action.name] |=
+							((kbmBuffer.axes[currentBuffer][control] > action.threshold) &&
+								(kbmBuffer.axes[!currentBuffer][control] < action.threshold) &&
+								action.isDownAction && action.threshold > 0) ||
+							((kbmBuffer.axes[currentBuffer][control] < action.threshold) &&
+								(kbmBuffer.axes[!currentBuffer][control] > action.threshold) &&
+								action.isDownAction && action.threshold < 0) ||
+							((kbmBuffer.axes[currentBuffer][control] < action.threshold) &&
+								(kbmBuffer.axes[!currentBuffer][control] > action.threshold) &&
+								!action.isDownAction && action.threshold > 0) ||
+							((kbmBuffer.axes[currentBuffer][control] > action.threshold) &&
+								(kbmBuffer.axes[!currentBuffer][control] < action.threshold) &&
+								!action.isDownAction && action.threshold < 0);
 
-						kbmBuffer.axes_blockstatus[control] |= bindingIt->isBlocking;
+						kbmBuffer.axes_blockstatus[control] |= (context.blockingLevel > 0);
 					}
 					else
 					{
@@ -836,147 +822,50 @@ void Input::ProcessKeyboardBinding(const std::reverse_iterator<std::vector<Bindi
 				}
 				else
 				{
-					// Not a gamepad binding.
+					// Not a keyboard/mouse binding.
 					continue;
 				}
 			}
 
-			if (isActionTriggered)
+			for (const auto& [actionName, triggered] : isActionTriggered)
 			{
-				typedef void(*actionCallbackPtr)(PlayerID player);
-				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callbackPtr);
-				(*callbackPtr)(0);
-			}
-		}
-	}
-	else if (bindingIt->NumOfAxes == EP_INPUT_BLOCKER) // Blockers
-	{
-		isPlayerInputBlocked[0] = true;
-	}
-	else // Axes
-	{
-		EP_ASSERT_SLOW(bindingIt->NumOfAxes <= Constants::MaxAxesPerBinding);
-		float outAxes[Constants::MaxAxesPerBinding] = { 0 };
-
-		if (!isPlayerInputBlocked[0])
-		{
-			for (int outAxisIndex = 0; outAxisIndex < bindingIt->NumOfAxes; outAxisIndex++)
-			{
-				for (auto mappingIt = AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[outAxisIndex]].begin();
-					 mappingIt != AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[outAxisIndex]].end();
-					 ++mappingIt)
+				if (triggered)
 				{
-					if (mappingIt->controlID > ControlID::_EndOfGPAxes) // Check that this is a kb/mouse binding
+					for (const auto& callback : actionCallbacks[&context][actionName])
 					{
-						if (mappingIt->controlID < ControlID::_EndOfKBMouseButtons)
-						{
-							// This mapping is for a key or mouse button.
-							uint_fast16_t keyIndex = (uint_fast16_t)mappingIt->controlID - (uint_fast16_t)ControlID::_EndOfGPAxes - 1;
-
-							// Is key bit in high-order word?
-							if (keyIndex < 64)
-							{
-								// Check if key is blocked
-								if (!(kbmBuffer.keys_blockstatus[0] & BIT(keyIndex)))
-								{
-									// Map key to axis
-									if (kbmBuffer.keys[currentBuffer][0] & BIT(keyIndex))
-										outAxes[outAxisIndex] += mappingIt->scale;
-
-									// Set key block bit if appropriate
-									kbmBuffer.keys_blockstatus[0] |= BIT(keyIndex) * bindingIt->isBlocking;
-								}
-							}
-							else
-							{
-								// Check if key is blocked
-								if (!(kbmBuffer.keys_blockstatus[1] & BIT(keyIndex % 64)))
-								{
-									// Map key to axis
-									if (kbmBuffer.keys[currentBuffer][1] & BIT(keyIndex % 64))
-										outAxes[outAxisIndex] += mappingIt->scale;
-
-									// Set key block bit if appropriate
-									kbmBuffer.keys_blockstatus[1] |= BIT(keyIndex % 64) * bindingIt->isBlocking;
-								}
-							}
-						}
-						else
-						{
-							// this is a mouse axis.
-							uint_fast16_t axisIndex = (uint_fast16_t)mappingIt->controlID - (uint_fast16_t)ControlID::_EndOfKBMouseButtons - 1;
-							if (!kbmBuffer.axes_blockstatus[axisIndex])
-							{
-								// Not blocked.
-
-								outAxes[outAxisIndex] += kbmBuffer.axes[currentBuffer][axisIndex] * mappingIt->scale;
-								kbmBuffer.axes_blockstatus[axisIndex] |= bindingIt->isBlocking;
-							}
-						}
+						callback();
 					}
 				}
 			}
 		}
-
-		InvokeAxisBindingCallback(bindingIt->callbackPtr, 0, bindingIt->NumOfAxes, outAxes);
-	}
-}
-
-
-void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Binding>::iterator>& bindingIt, 
-											  PlayerID player)
-{
-	ControllerID gamepad = ControllerForPlayer[player] - 1;
-
-	if (bindingIt->NumOfAxes == 0) // Actions
-	{
-		if (!isPlayerInputBlocked[player])
+		else // Gamepad mappings
 		{
-			bool isActionTriggered = false;
+			ControllerID gamepad = StreamBindings[context.stream] - 2;
 
-			for (auto mappingIt = ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].begin();
-				 mappingIt != ActionMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[0]].end();
-				 ++mappingIt)
+			for (const auto& axis : context.axes)
 			{
-				if (mappingIt->controlID < ControlID::_EndOfGPAxes)
+				if (axis.control < ControlID::_EndOfGPAxes)
 				{
-					if (mappingIt->controlID < ControlID::_EndOfGPButtons &&
-						!(gpBuffer[gamepad].buttons_blockstatus & BIT(size_t(mappingIt->controlID))))
+					if (axis.control < ControlID::_EndOfGPButtons &&
+						!(gpBuffer[gamepad].buttons_blockstatus & BIT(int(axis.control))))
 					{
 						// Unblocked button.
-						uint16_t control_flag = BIT(uint16_t(mappingIt->controlID));
+						uint16_t control_flag = BIT(uint16_t(axis.control));
 
-						isActionTriggered |=
-							((gpBuffer[gamepad].buttons[currentBuffer] & control_flag) &&
-							!(gpBuffer[gamepad].buttons[!currentBuffer] & control_flag) &&
-							mappingIt->isDownAction) ||
-							(!(gpBuffer[gamepad].buttons[currentBuffer] & control_flag) &&
-							 (gpBuffer[gamepad].buttons[!currentBuffer] & control_flag) &&
-							 !mappingIt->isDownAction);
+						axisValues[&context][axis.name] +=
+							(gpBuffer[gamepad].buttons[currentBuffer] & control_flag ? 1.0f : 0.0f) * axis.scale;
 
-						gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->isBlocking;
+						if (context.blockingLevel > 0)
+							gpBuffer[gamepad].buttons_blockstatus |= control_flag;
 					}
 					else if (!gpBuffer[gamepad]
-							   .axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1])
+							 .axes_blockstatus[int(axis.control) - int(ControlID::_EndOfGPButtons) - 1])
 					{
 						// Unblocked axis.
-						size_t control = size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1;
+						int control = int(axis.control) - int(ControlID::_EndOfGPButtons) - 1;
 
-						isActionTriggered |=
-							((gpBuffer[gamepad].axes[currentBuffer][control] > mappingIt->threshold) &&
-							 (gpBuffer[gamepad].axes[!currentBuffer][control] < mappingIt->threshold) &&
-							 mappingIt->isDownAction && mappingIt->threshold > 0) ||
-							((gpBuffer[gamepad].axes[currentBuffer][control] < mappingIt->threshold) &&
-							 (gpBuffer[gamepad].axes[!currentBuffer][control] > mappingIt->threshold) &&
-							 mappingIt->isDownAction && mappingIt->threshold < 0) ||
-							((gpBuffer[gamepad].axes[currentBuffer][control] < mappingIt->threshold) &&
-							 (gpBuffer[gamepad].axes[!currentBuffer][control] > mappingIt->threshold) &&
-							 !mappingIt->isDownAction && mappingIt->threshold > 0) ||
-							((gpBuffer[gamepad].axes[currentBuffer][control] > mappingIt->threshold) &&
-							 (gpBuffer[gamepad].axes[!currentBuffer][control] < mappingIt->threshold) &&
-							 !mappingIt->isDownAction && mappingIt->threshold < 0);
-
-						gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->isBlocking;
+						axisValues[&context][axis.name] += gpBuffer[gamepad].axes[currentBuffer][control] * axis.scale;
+						gpBuffer[gamepad].axes_blockstatus[control] |= (context.blockingLevel > 0);
 					}
 					else
 					{
@@ -991,107 +880,73 @@ void Input::ProcessGamepadBinding(const std::reverse_iterator<std::vector<Bindin
 				}
 			}
 
-			if (isActionTriggered)
-			{
-				typedef void(*actionCallbackPtr)(PlayerID player);
-				actionCallbackPtr callbackPtr = actionCallbackPtr(bindingIt->callbackPtr);
-				(*callbackPtr)(player);
-			}
-		}
-	}
-	else if (bindingIt->NumOfAxes == EP_INPUT_BLOCKER) // Blockers
-	{
-		isPlayerInputBlocked[player] = true;
-	}
-	else // Axes
-	{
-		EP_ASSERT_SLOW(bindingIt->NumOfAxes <= Constants::MaxAxesPerBinding);
-		float outAxes[Constants::MaxAxesPerBinding] = { 0 };
+			std::map<HashName, bool> isActionTriggered;
 
-		if (!isPlayerInputBlocked[player])
-		{
-			for (int axisID = 0; axisID < bindingIt->NumOfAxes; axisID++)
+			for (const auto& action : context.actions)
 			{
-				for (auto mappingIt = AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[axisID]].begin();
-					 mappingIt != AxisMap[bindingIt->ContextHN][bindingIt->ActionOrAxesHN[axisID]].end();
-					 ++mappingIt)
+				if (action.control < ControlID::_EndOfGPAxes)
 				{
-					if (mappingIt->controlID < ControlID::_EndOfGPAxes)
+					if (action.control < ControlID::_EndOfGPButtons &&
+						!(gpBuffer[gamepad].buttons_blockstatus & BIT(int(action.control))))
 					{
-						if (mappingIt->controlID < ControlID::_EndOfGPButtons &&
-							!(gpBuffer[gamepad].buttons_blockstatus & BIT(size_t(mappingIt->controlID))))
-						{
-							// Unblocked button.
-							uint16_t control_flag = BIT(uint16_t(mappingIt->controlID));
+						// Unblocked button.
+						uint16_t control_flag = BIT(uint16_t(action.control));
 
-							outAxes[axisID] += 
-								(gpBuffer[gamepad].buttons[currentBuffer] & control_flag ? 1.0f : 0.0f) * mappingIt->scale;
+						isActionTriggered[action.name] |=
+							((gpBuffer[gamepad].buttons[currentBuffer] & control_flag) &&
+							 !(gpBuffer[gamepad].buttons[!currentBuffer] & control_flag) &&
+							 action.isDownAction) ||
+							(!(gpBuffer[gamepad].buttons[currentBuffer] & control_flag) &&
+							 (gpBuffer[gamepad].buttons[!currentBuffer] & control_flag) &&
+							 !action.isDownAction);
 
-							gpBuffer[gamepad].buttons_blockstatus |= control_flag * bindingIt->isBlocking;
-						}
-						else if (!gpBuffer[gamepad]
-								 .axes_blockstatus[size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1])
-						{
-							// Unblocked axis.
-							size_t control = size_t(mappingIt->controlID) - size_t(ControlID::_EndOfGPButtons) - 1;
+						if (context.blockingLevel > 0)
+							gpBuffer[gamepad].buttons_blockstatus |= control_flag;
+					}
+					else if (!gpBuffer[gamepad]
+							 .axes_blockstatus[int(action.control) - int(ControlID::_EndOfGPButtons) - 1])
+					{
+						// Unblocked axis.
+						int control = int(action.control) - int(ControlID::_EndOfGPButtons) - 1;
 
-							outAxes[axisID] += gpBuffer[gamepad].axes[currentBuffer][control] * mappingIt->scale;
-							gpBuffer[gamepad].axes_blockstatus[control] |= bindingIt->isBlocking;
-						}
-						else
-						{
-							// Blocked control.
-							continue;
-						}
+						isActionTriggered[action.name] |=
+							((gpBuffer[gamepad].axes[currentBuffer][control] > action.threshold) &&
+							 (gpBuffer[gamepad].axes[!currentBuffer][control] < action.threshold) &&
+							 action.isDownAction && action.threshold > 0) ||
+							((gpBuffer[gamepad].axes[currentBuffer][control] < action.threshold) &&
+							 (gpBuffer[gamepad].axes[!currentBuffer][control] > action.threshold) &&
+							 action.isDownAction && action.threshold < 0) ||
+							((gpBuffer[gamepad].axes[currentBuffer][control] < action.threshold) &&
+							 (gpBuffer[gamepad].axes[!currentBuffer][control] > action.threshold) &&
+							 !action.isDownAction && action.threshold > 0) ||
+							((gpBuffer[gamepad].axes[currentBuffer][control] > action.threshold) &&
+							 (gpBuffer[gamepad].axes[!currentBuffer][control] < action.threshold) &&
+							 !action.isDownAction && action.threshold < 0);
+
+						gpBuffer[gamepad].axes_blockstatus[control] |= (context.blockingLevel > 0);
 					}
 					else
 					{
-						// Not a gamepad binding.
+						// Blocked control.
 						continue;
 					}
 				}
+				else
+				{
+					// Not a gamepad binding.
+					continue;
+				}
 			}
-		}
 
-		InvokeAxisBindingCallback(bindingIt->callbackPtr, player, bindingIt->NumOfAxes, outAxes);
-	}
-}
-
-
-void Input::ProcessBinding(const std::vector<Binding>::reverse_iterator& bindingIt)
-{
-	if (bindingIt->playerID == EP_PLAYERID_ALL)
-	{
-		if (ControllerForPlayer[0] == EP_CONTROLLERID_KBMOUSE)
-		{
-			ProcessKeyboardBinding(bindingIt);
-		}
-		else if (ControllerForPlayer[0] != EP_CONTROLLERID_NULL)
-		{
-			ProcessGamepadBinding(bindingIt, PlayerID(0));
-		}
-
-		for (PlayerID playerIt = 1; playerIt < ControllerForPlayer.size(); playerIt++)
-		{
-			// The other PlayerIDs can only be assigned gamepads, so KB/mouse check is necessary.
-			if (ControllerForPlayer[playerIt] != EP_CONTROLLERID_NULL)
+			for (const auto& [actionName, triggered] : isActionTriggered)
 			{
-				ProcessGamepadBinding(bindingIt, playerIt);
-			}
-		}
-	}
-	else
-	{
-		// Process the binding, if the PlayerID has been assigned a ControllerID
-		if (bindingIt->playerID < ControllerForPlayer.size())
-		{
-			if (ControllerForPlayer[bindingIt->playerID] == EP_CONTROLLERID_KBMOUSE)
-			{
-				ProcessKeyboardBinding(bindingIt);
-			}
-			else if (ControllerForPlayer[bindingIt->playerID] != EP_CONTROLLERID_NULL)
-			{
-				ProcessGamepadBinding(bindingIt, bindingIt->playerID);
+				if (triggered)
+				{
+					for (const auto& callback : actionCallbacks[&context][actionName])
+					{
+						callback();
+					}
+				}
 			}
 		}
 	}
@@ -1112,15 +967,15 @@ void Input::Init()
 			return false;
 		});
 
-	// Assign the keyboard and mouse to PlayerID 0 by default
-	AssignControllerToPlayer(PlayerID(0), EP_CONTROLLERID_KBMOUSE);
+	// Bind the keyboard and mouse to StreamID 1 by default
+	BindController(ControllerID(1), StreamID(1));
 }
 
 
 void Input::Update()
 {
-	// Clear blockers
-	std::fill(isPlayerInputBlocked.begin(), isPlayerInputBlocked.end(), false);
+	// Clear raw input block flags
+	std::fill(isStreamBlocked.begin(), isStreamBlocked.end(), false);
 	kbmBuffer.keys_blockstatus[0] = 0;
 	kbmBuffer.keys_blockstatus[1] = 0;
 	memset(kbmBuffer.axes_blockstatus, 0, sizeof(kbmBuffer.axes_blockstatus));
@@ -1130,15 +985,27 @@ void Input::Update()
 		memset(gamepadBufferIt.axes_blockstatus, false, sizeof(gamepadBufferIt.axes_blockstatus));
 	}
 
-	// Handle input
-	GetRawInput();
-	CheckForControllerWake();
-	for (auto it = BindingStack.rbegin(); it != BindingStack.rend(); ++it)
+	// Reset active context axes
+	for (auto& [context, axes] : axisValues)
 	{
-		ProcessBinding(it);
+		for (auto& [axis, value] : axes)
+		{
+			value = 0.0f;
+		}
 	}
 
-	// Flip buffers
+	// Process input
+	GetRawInput();
+	CheckForControllerWake();
+	for (int i = 0; i < MaxInputContextLayers; i++)
+	{
+		for (auto& context : contextStack[i])
+		{
+			ProcessContext(context);
+		}
+	}
+
+	// Flip buffers for the next frame
 	currentBuffer = !currentBuffer;
 	memcpy(kbmBuffer.keys[currentBuffer], kbmBuffer.keys[!currentBuffer], sizeof(kbmBuffer.keys[currentBuffer]));
 	memset(kbmBuffer.axes[currentBuffer], 0, sizeof(kbmBuffer.axes[currentBuffer]));

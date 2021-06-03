@@ -45,9 +45,9 @@ void Input::PlatformInit()
 			}
 
 			// Notify the game code that the controller was connected.
-			Events::Dispatch(HN("ControllerWake"), newGPID + 1);
+			Events::Dispatch(HN("ControllerWake"), newGPID + 2);
 
-			EP_INFO("Gamepad connected.  ControllerID: {}", newGPID + 1);
+			EP_INFO("Gamepad connected.  ControllerID: {}", newGPID + 2);
 		}
 	 }];
 
@@ -65,18 +65,18 @@ void Input::PlatformInit()
 
 			// Release the GamepadID in the engine.
 			Input::gpBuffer[disconnectedGPID] = GamePadBuffer(); // Clear buffer for future connections
-			PlayerID disconnectedPlayerID = Input::UnassignController(disconnectedGPID + 1);
+			StreamID disconnectedStream = Input::UnbindController(disconnectedGPID + 2);
 
 			// Notify the game code of the disconnection.
-			if (disconnectedPlayerID != EP_PLAYERID_NULL)
+			if (disconnectedStream != NULL)
 			{
-				Events::Dispatch(HN("ControllerDisconnect"), disconnectedPlayerID);
-				EP_INFO("Gamepad disconnected.  PlayerID: {}", disconnectedPlayerID);
+				Events::Dispatch(HN("ControllerDisconnect"), disconnectedStream);
+				EP_INFO("Gamepad disconnected.  StreamID: {}", disconnectedStream);
 			}
 			else
 			{
 				// ControllerDisconnect events only fire for gamepads assigned to a player.
-				EP_INFO("Gamepad disconnected.  PlayerID: unassigned");
+				EP_INFO("Gamepad disconnected.  StreamID: unassigned");
 			}
 
 			// Delete the gamepad reference and clear its ID.
@@ -282,7 +282,7 @@ bool Input::HandlePlatformEvents(Events::Event& e)
 	return true;
 }
 
-// Somehow, when a PlayerID is assigned a Controller ID, that has to cause the associated controller object's
+// Somehow, when a StreamID is assigned a ControllerID, that has to cause the associated controller object's
 // PlayerIndex property to be set.  Likewise, we need to unset it when the controller is unassigned.
 // Perhaps an event would do?
 

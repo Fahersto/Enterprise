@@ -422,7 +422,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, bool areErrorsFat
 	{
 		EP_ASSERTF(sectionFilter.front() != ' ', "No leading whitespace is allowed in sectionFilter parameter");
 		EP_ASSERTF(sectionFilter.back() != ' ', "No trailing whitespace is allowed in sectionFilter parameter");
-		filterIsAGroup = sectionFilter.back() == '/';
+		filterIsAGroup = sectionFilter.back() == '.';
 	}
 
 	m_path = path;
