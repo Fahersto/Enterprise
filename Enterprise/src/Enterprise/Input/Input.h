@@ -16,9 +16,11 @@ public:
 	/// The maximum number of layers allowed in the input context stack.
 	static constexpr int MaxInputContextLayers = 10;
 
-	/// Identifier for a connected input controller.  Nullable.
+	/// Identifier for a connected input controller.
+	/// @note `ControllerID(0)` is considered "null".
 	typedef unsigned int ControllerID;
-	/// Identifier for an input stream.  Nullable.
+	/// Identifier for an input stream.
+	/// @note `StreamID(0)` is considered "null".
 	typedef unsigned int StreamID;
 
 	/// Bind a controller to an input stream.

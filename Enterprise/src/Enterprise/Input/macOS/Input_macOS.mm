@@ -68,7 +68,7 @@ void Input::PlatformInit()
 			StreamID disconnectedStream = Input::UnbindController(disconnectedGPID + 2);
 
 			// Notify the game code of the disconnection.
-			if (disconnectedStream != NULL)
+			if (disconnectedStream != 0)
 			{
 				Events::Dispatch(HN("ControllerDisconnect"), disconnectedStream);
 				EP_INFO("Gamepad disconnected.  StreamID: {}", disconnectedStream);

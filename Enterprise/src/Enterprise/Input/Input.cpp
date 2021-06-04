@@ -21,8 +21,8 @@ static std::vector<bool> isStreamBlocked; // Indexed by StreamID.
 
 void Input::BindController(ControllerID controller, StreamID stream)
 {
-	EP_ASSERTF(controller != NULL, "Input::BindController(): 'controller' cannot be NULL.");
-	EP_ASSERTF(stream != NULL, "Input::BindController(): 'stream' cannot be NULL.");
+	EP_ASSERTF(controller != 0, "Input::BindController(): 'controller' cannot be NULL.");
+	EP_ASSERTF(stream != 0, "Input::BindController(): 'stream' cannot be NULL.");
 
 	EP_ASSERTF(controller < gpBuffer.size() + 2, "Input System: Attempted to assign unallocated ControllerID.");
 	EP_ASSERTF(stream == 1 || controller != ControllerID(1), "Input System: Attempted to assign keyboard and mouse "
@@ -57,7 +57,7 @@ void Input::BindController(ControllerID controller, StreamID stream)
 		{
 			kbmBuffer.isAssigned = false;
 		}
-		else if (StreamBindings[stream] != NULL)
+		else if (StreamBindings[stream] != 0)
 		{
 			EP_ASSERTF(StreamBindings[stream] < gpBuffer.size() + 2, "Input System: "
 					   "Attempted to break an association to an invalid ControllerID.");
@@ -82,7 +82,7 @@ void Input::BindController(ControllerID controller, StreamID stream)
 
 Input::StreamID Input::UnbindController(ControllerID controller)
 {
-	EP_ASSERTF(controller != NULL, "Input::UnbindController(): 'controller' cannot be NULL.");
+	EP_ASSERTF(controller != 0, "Input::UnbindController(): 'controller' cannot be NULL.");
 
 	if (controller == ControllerID(1))
 	{
@@ -653,7 +653,7 @@ void Input::CheckForControllerWake()
 		 gpIt != gpBuffer.end();
 		 ++gpIt)
 	{
-		if (gpIt->assignedStream == NULL)
+		if (gpIt->assignedStream == 0)
 		{
 			// Check for button presses
 			if (gpIt->buttons[currentBuffer] > gpIt->buttons[!currentBuffer])
@@ -681,14 +681,14 @@ void Input::CheckForControllerWake()
 
 void Input::ProcessContext(Input::Context& context)
 {
-	EP_ASSERT_SLOW(context.stream != NULL);
+	EP_ASSERT_SLOW(context.stream != 0);
 	EP_ASSERT_SLOW(context.stream < StreamBindings.size());
 
 	if (!isStreamBlocked[context.stream])
 	{
 		isStreamBlocked[context.stream] = (context.blockingLevel == 2);
 
-		if (StreamBindings[context.stream] == NULL)
+		if (StreamBindings[context.stream] == 0)
 		{
 			// No ControllerID is bound to the context's stream.
 			return;

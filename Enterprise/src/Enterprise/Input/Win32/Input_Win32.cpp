@@ -9,7 +9,7 @@ using Enterprise::Events;
 static bool xinputWasConnected[4] = { 0 };
 static DWORD xinputPrevPacketNo[4] = { 0 };
 static bool xinputAlreadyCopiedBuffer[4] = { 0 };
-static Enterprise::Input::StreamID xinputToGamepadID[4] = { NULL };
+static Enterprise::Input::StreamID xinputToGamepadID[4] = { 0 };
 static std::vector<bool> isGamepadIDActive;
 
 
@@ -375,7 +375,7 @@ void Enterprise::Input::GetRawInput()
 				StreamID disconnectedStream = UnbindController(ControllerID(xinputToGamepadID[i] + 2));
 
 				// Notify the game code of the disconnection.
-				if (disconnectedStream != NULL)
+				if (disconnectedStream != 0)
 				{
 					Events::Dispatch(HN("ControllerDisconnect"), disconnectedStream);
 					EP_INFO("Gamepad disconnected.  StreamID: {}", disconnectedStream);
@@ -386,7 +386,7 @@ void Enterprise::Input::GetRawInput()
 					EP_INFO("Gamepad disconnected.  StreamID: unassigned");
 				}
 				
-				xinputToGamepadID[i] = NULL;
+				xinputToGamepadID[i] = 0;
 			}
 
 			// TODO: Increase performance by implementing a timer to delay checks on disconnected controllers.
