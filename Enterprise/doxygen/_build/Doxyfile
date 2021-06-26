@@ -2263,9 +2263,7 @@ PREDEFINED             = "HCEX(type, name)=extern const HotConsts::HC_Atomic<typ
                          EP_CONFIG_DEBUG \
                          _WIN32 \
                          __APPLE__ \
-                         __MACH__ \
-                         "EP_EVENTCATEGORY_DEF(name)=const Enterprise::Events::EventCategory name" \
-                         "EP_EVENTTYPE_DEF(name)=const Enterprise::Events::EventType name"
+                         __MACH__ 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
