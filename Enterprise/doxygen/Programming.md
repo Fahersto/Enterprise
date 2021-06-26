@@ -1,7 +1,7 @@
 @page Programming Programmer Resources
 @tableofcontents
 
-#### Subpages
+Subpages:
 * @subpage Assertions
 * @subpage Console
 
