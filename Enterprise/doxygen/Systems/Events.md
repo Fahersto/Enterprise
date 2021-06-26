@@ -91,6 +91,24 @@ A blocking callback prevents lower-priority callbacks from being called.  Normal
 
 For example, clicking on the game window's close button generates a "QuitRequested" event, which by default terminates the program at the end of the current frame.  However, developers can subvert this behavior by handling the "QuitRequested" event themselves and returning "true" in the custom callback.  This allows developers to give players the chance to save their games prior to termination, or the chance to cancel the quit request completely.
 
+## Lambdas as Event Handlers
+
+It is possible to use lambdas as event callbacks, as long as its signature matches that of [EventCallbackPtr](@ref Enterprise::Events::EventCallbackPtr).  This can consolidate your code considerably in some situations.
+
+```cpp
+using Enterprise::Events;
+
+void Init()
+{
+    Events::Subscribe(HN("ExampleEvent"),
+                      [](Events::Event& e)
+                      {
+                          // Handle event here
+                          return false;
+                      });
+}
+```
+
 # Example: Kill Streak Tracking
 
 Let's look at an example.  Say your game is about fighting off waves of robots, and you want to implement a kill-streak tracker.  An events-based solution might look like the following: 
