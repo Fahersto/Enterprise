@@ -17,7 +17,7 @@ At the time of this writing, %Enterprise supports the following input devices:
 * PlayStation 4 and PlayStation 5 controllers (macOS only for now)
 * MFi (Made for iOS) controllers (macOS only)
 
-On Windows, gamepad support is provided through the XInput API, and on macOS, it is provided through the Game Controller framework.  While Xbox controllers are presently the only supported gamepad type on Windows, %Enterprise will eventually support non-Xbox gamepads as well, including PlayStation controllers, through the DirectInput API.  Only gamepads that support the [GCExtendedGamepad](https://developer.apple.com/documentation/gamecontroller/gcextendedgamepad) profile are supported on Mac, though that is subject to change as well.
+On Windows, gamepad support is provided through the XInput API, and on macOS, it is provided through the %Game Controller framework.  While Xbox controllers are presently the only supported gamepad type on Windows, %Enterprise will eventually support non-Xbox gamepads as well, including PlayStation controllers, through the DirectInput API.  Only gamepads that support the [GCExtendedGamepad](https://developer.apple.com/documentation/gamecontroller/gcextendedgamepad) profile are supported on Mac, though that is subject to change as well.
 
 # Input Contexts
 
@@ -42,13 +42,13 @@ Buttons and keys have a natural association with actions, and likewise, triggers
 | Keyboard Keys | Key *pressed*         | Key *released*      | `1.0f` while held, `0.0f` while released |
 | Mouse Buttons | Button *clicked*      | Button *released*   | `1.0f` while held, `0.0f` while released |
 | Mouse Scroll Wheel | Wheel clicked *down* one increment | Wheel clicked *up* one increment | `1.0f` * number of clicked increments (scrolling down produces negative values) |
-| Mouse delta axes | *N/A*              | *N/A*               | Delta movement this frame*               |
+| Mouse delta axes | *N/A*              | *N/A*               | Delta movement this frame (not normalized) |
 | Mouse pointer axes | *N/A*            | *N/A*               | Cursor coordinates in pixel space        |
 | Gamepad buttons | Button *pressed*    | Button *released*   | `1.0f` while held, `0.0f` while released |
 | Gamepad analog triggers | Value crosses threshold moving in the *positive* direction | Value crosses threshold moving in the *negative* direction | Value in [`0.0f`, `1.0f`], where `0.0f` is released and `1.0f` is fully depressed |
 | Gamepad thumbstick axes | Value crosses threshold moving *away* from `0.0f` | Value crosses threshold moving *towards* `0.0f` | Value in [`-1.0f`, `1.0f`], where `0.0f` is centered and `-1.0f` and `1.0f` are axis extremes |
 
-@note Mouse delta axes are not normalized.  All games that use the mouse delta should include a "mouse sensitivity" setting to allow players to adjust against the DPI in their mouse.
+@note Because different mice have different DPI values, all games that use mouse deltas should include a "mouse sensitivity" setting via an in-game menu.  Mouse deltas are not normalized.
 
 @anchor Defining_a_Context
 ## Defining a Context
@@ -86,25 +86,25 @@ AxisMapping=(name="MoveX", control=GP_LStick_X, scale=1.0)
 `AxisMapping` takes three sub-values:
 
 * **name**: The name of the axis.
-* **control**: The name of the physical control being mapped.  This must be a [ControlID](@ref Enterprise::ControlID).
+* **control**: The name of the physical control being mapped.  This must be the name of an Enterprise::ControlID.
 * **scale (optional)**: A factor for pre-scaling the raw control value.  Defaults to `1.0f` if unspecified.
 
-If you map multiple controls to the same axis, the final axis value will be *the sum of all mappings*.  This is useful in scenarios such as *ASWD* movement, where the 'A' and 'D' keys and 'S' and 'W' keys need to "push" the same axes in opposite directions.
+If you map multiple controls to the same axis, the final axis value will be *the sum of all mappings*.  This is useful in scenarios such as *ASWD* movement, where the 'A' and 'D' keys and 'S' and 'W' keys "push" the same axes in opposite directions.
 
-After a context is instantiated, its axes can be polled using Input::GetAxis().
+@note Be sure to clamp your axis values before using them.  If a player modifies their INI files, they can potentially cheat in your game by modifying the scale of their controls!
 
 ### Action Mappings
 
 Actions are defined with `ActionMapping` keys.  As with `AxisMapping`, `ActionMapping` accepts dictionary values.
 
 ```ini
-ActionMapping(name="FireWeapon", control=GP_RTrigger, dir=down, threshold=0.4)
+ActionMapping=(name="FireWeapon", control=GP_RTrigger, dir=down, threshold=0.4)
 ```
 
 `ActionMapping` takes four sub-values:
 
 * **name**: The name of the action.
-* **control**: The name of the physical control being mapped.  This must be a [ControlID](@ref Enterprise::ControlID).
+* **control**: The name of the physical control being mapped.  This must be the name of an Enterprise::ControlID.
 * **dir**: The direction of control use that should trigger the action.  Valid values are "up" and "down".
 * **threshold (optional)**: For non-binary controls, the value at which the action is triggered.  Defaults to `0.5f` if unspecified.
 
@@ -118,7 +118,7 @@ When defining actions for non-binary controls, `threshold` determines the point 
 
 In %Enterprise, input devices are referred to as **controllers**.  Controllers can either be gamepads or the keyboard and mouse.
 
-%Enterprise enumerates all connected controllers using an integer `typedef`, ControllerID (not to be confused with [ControlID](@ref Enterprise::ControlID)).  ControllerIDs are assigned according to the following rules:
+%Enterprise enumerates all connected controllers using an integer `typedef`, Input::ControllerID (not to be confused with Enterprise::ControlID).  ControllerIDs are assigned according to the following rules:
 
 * ControllerID 0 represents a *null* connection.
 * ControllerID 1 represents the keyboard and mouse.
@@ -134,20 +134,21 @@ As a developer, you will generally only use ControllerIDs when handling controll
 
 To track player input, %Enterprise games dynamically assign controllers to one or more **input streams**.  %Input streams serve as "channels" for player input: each input context is bound to a specific stream, and only responds to input from that stream.  By working with streams instead of controllers, it is possible to respond to player input in a multiplayer game without knowing *which* controller each player is using.
 
-Streams are identified with another integer `typedef`, StreamID.  As with ControllerIDs, StreamID 0 represents a *null* stream; but unlike ControllerIDs, StreamIDs are not prescribed by the engine.  Instead, developers themselves choose the number and function of the streams.
+Streams are identified with another integer `typedef`, Input::StreamID.  As with ControllerIDs, StreamID 0 represents a *null* stream; but unlike ControllerIDs, StreamIDs are not prescribed by the engine.  Instead, developers themselves choose the number and function of the streams.  For example, StreamID 1 might be used for Player One, StreamID 2 for Player Two, etc.
 
 ## Controller Assignment
 
 By default, the keyboard and mouse (ControllerID 1) is assigned to StreamID 1, but no other assignments occur automatically.  To support gamepads in your game, you must assign them to an input stream.
 
-The best time to do this is in response to a "ControllerWake" event.  *ControllerWake* events are triggered in two circumstances:
+The best place to do this is in a "ControllerWake" event handler.  *ControllerWake* events occur in three situations:
 
-1. A controller was just connected to the computer.
-2. %Input was detected on an unassigned controller.
+1. A controller was already connected at application launch.
+2. A controller was just connected to the computer.
+3. %Input was detected on an unassigned controller.
 
-*ControllerWake* events carry a `ControllerID` payload identifying the controller that just woke up.  In the event handler function, this can be used to assign the controller to a stream.  Controllers are assigned to streams using the function Input::BindController().
+*ControllerWake* events contain the `ControllerID` of the controller that just woke up.  This can be passed into Input::BindController() to assign the controller to a stream.
 
-In the following example, the game will automatically assign the most recently connected or used controller to StreamID 1:
+In the following example, the most recently used/connected controller is automatically assigned to StreamID 1:
 
 ```cpp
 using Enterprise::Events;
@@ -155,8 +156,10 @@ using Enterprise::Input;
 
 bool handleControllerWake(Events::Event& e)
 {
-    Input::BindController(Events::Unpack<Input::ControllerID>(e), 1); 
-	return false;
+    Input::ControllerID awokenController = Events::Unpack<Input::ControllerID>(e);
+    Input::BindController(awokenController, 1);
+
+    return false;
 }
 
 void Init()
@@ -165,17 +168,17 @@ void Init()
 }
 ```
 
-@note *ControllerWake* events are not handled by the engine internally.  If you so wish, you can return `true` in your event handler to block *ControllerWake* events without breaking anything.
+The above code is sufficient for most single-player games. However, multiplayer games require more robust stream management.  An example of an advanced approach is provided in [Example: \"Press to Join\" Controller Assignment](@ref Example_Press_to_Join_Controller_Assignment).
 
-The above code is sufficient for most single-player games. However, multiplayer games require more robust stream management.  An example of how to approach this problem is provided in [Example: Advanced Controller Assignment](@ref Example_Advanced_Controller_Assignment).
+@note *ControllerWake* events do not have a default handler.  It is safe to return `true` in your event handler function to block *ControllerWake* events.
 
 @see @ref Events
 
 ## Disconnected Controllers
 
-When a gamepad is disconnected from the player's computer, it is automatically unassigned from its input stream, if it was assigned.  However, you may wish to implement a custom response to the disconnection, such as pausing the game or presenting an in-game warning.
+When a gamepad is disconnected from the player's computer, it is automatically unassigned from its input stream, if it was assigned to one.  However, it is often useful to implement a custom response to the disconnection, such as automatically pausing the game or presenting an in-game pop-up.
 
-To handle disconnections, subscribe to "ControllerDisconnect" events.  *ControllerDisconnect* events carry a `StreamID` payload, allowing you to identify which input stream was just cut off:
+To respond to disconnections, subscribe to "ControllerDisconnect" events.  *ControllerDisconnect* passes the `StreamID` that was just cut off, allowing you to identify which player is impacted.
 
 ```cpp
 using Enterprise::Events;
@@ -183,8 +186,10 @@ using Enterprise::Input;
 
 bool onControllerDisconnect(Events::Event& e)
 {
+    Input::StreamID disconnectedStream = Events::Unpack<Input::StreamID>(e);
+
     PauseGame();
-    EP_TRACE("Controller disconnected for StreamID {}", Events::Unpack<Input::StreamID>(e));
+    EP_TRACE("Controller disconnected for StreamID {}", disconnectedStream);
     
     return false;
 }
@@ -195,92 +200,87 @@ void Init()
 }
 ```
 
+Only controllers assigned to a stream generate *ControllerDisconnect* events.
+
 @note Just as with *ControllerWake*, *ControllerDisconnect* is not handled by the engine's low-level systems.  It is safe to block the event.
 
 @see @ref Events
 
-@anchor Example_Advanced_Controller_Assignment
-## Example: Advanced Controller Assignment
+@anchor Example_Press_to_Join_Controller_Assignment
+## Example: "Press to Join" Controller Assignment
 
 @note This example contains advanced input response code and discussion of the context stack.  Check out [Reading Input](@ref Reading_Input) before studying this section.
 
-It is common for multiplayer games to provide each player with their own input stream.  However, robust controller assignment sometimes requires more complex arrangements.
+It is common for multiplayer games to provide each player with their own input stream.  However, robust controller assignment systems require more complex arrangements.
 
-For example, consider a “Press \[button\] to join” system for assigning controllers in a multiplayer lobby.  In %Enterprise, this can be implemented by dedicating a stream to reading input from unassigned controllers.  The following code sample shows how:
+For example, consider a “Press \[button\] to join” system.  In %Enterprise, this can be implemented by dedicating a stream to handling unassigned controllers.  The following code sample shows how that works:
 
 ```cpp
-// MultiplayerLobbyState.cpp
 using Enterprise::Events;
 using Enterprise::Input;
 
-static Events::EventCallbackPtr wakeCallback, disconnectCallback;
-static Input::ControllerID lastWokenController = 0;
+Input::ControllerID lastWokenController = 0;
+constexpr Input::StreamID watcherStream = 5;
+Input::ContextHandle watcherContext;
 
-static constexpr Input::StreamID unassignedStream = 5;
-static Input::ContextHandle unassignedContext;
-
-static bool playerJoined[4] = { 0 };
+bool hasPlayerJoined[4] = { 0 };
 
 void Init()
 {
-    // Automatically assign every unassigned controller to the "unassigned" stream
-    wakeCallback = Events::Subscribe(HN("ControllerWake"),
-                                     [](Events::Event& e)
-                                     {
-                                         lastWokenController = Events::Unpack<Input::ControllerID>(e);
-                                         Input::BindController(lastWokenController, unassignedStream);
-                                         return true;
-                                     });
+    // Automatically assign every unassigned controller to watcherStream
+    Events::Subscribe(HN("ControllerWake"),
+                      [](Events::Event& e)
+                      {
+                          lastWokenController = Events::Unpack<Input::ControllerID>(e);
+                          Input::BindController(lastWokenController, watcherStream);
+                          return true;
+                      });
 
     // Track when a player's controller is disconnected
-    disconnectCallback = Events::Subscribe(HN("ControllerDisconnect"),
-                                           [](Events::Event& e)
-                                           {
-                                               StreamID disconnectedStream = Events::Unpack<StreamID>(e);
-                                               if (disconnectedStream < unassignedStream)
-                                               {
-                                                   playerJoined[disconnectedStream - 1] = false;
-                                               }
-                                               return true;
-                                           });
+    Events::Subscribe(HN("ControllerDisconnect"),
+                      [](Events::Event& e)
+                      {
+                          Input::StreamID disconnectedStream = Events::Unpack<StreamID>(e);
+                          if (disconnectedStream < watcherStream)
+                          {
+                              hasPlayerJoined[disconnectedStream - 1] = false;
+                          }
+                          return true;
+                      });
     
     // Bind an input context for handling "press to join" controls
-    unassignedContext = Input::BindContext(HN("PressToJoin"), unassignedStream);
+    watcherContext = Input::BindContext(HN("PressToJoin"), watcherStream);
 
     // Make the "Join" action assign the controller to the next player's input stream
-    Input::BindAction(unassignedContext, HN("Join"),
+    Input::BindAction(watcherContext, HN("Join"),
                       []()
                       {
                           for (int i = 0; i < 4; i++)
                           {
-                              if (!playerJoined[i])
+                              if (!hasPlayerJoined[i])
                               {
                                   Input::BindController(lastWokenController, i + 1);
-                                  playerJoined[i] = true;
+                                  hasPlayerJoined[i] = true;
+
+                                  // Tell the game a controller has been assigned to player 'i'
+
+                                  break;
                               }
                           }
                       });
 }
-
-void Cleanup()
-{
-    Input::PopContext(unassignedContext);
-    Input::UnbindController(unassignedStream);
-    Events::UnsubscribeAll(wakeCallback);
-    Events::UnsubscribeAll(disconnectCallback);
-}
 ```
 
-This example works because *ControllerWake* and *ControllerDisconnect* events trigger before the context stack is serviced.  This allows a controller to be used the very same frame it is assigned to a stream.  In this example, the following happens when a player presses the "join" button on an unassigned gamepad:
+When a player presses the "join" button on an unassigned gamepad in the above example, the following sequence of events occurs:
 
-1. A *ControllerWake* event is triggered for the gamepad, because it is not currently assigned to a stream.
-2. The *ControllerWake* event handler is called, which immediately assigns the gamepad to `unassignedStream`.
-3. The context stack is serviced.  At this point, the gamepad is still assigned to `unassignedStream`, which the "PressToJoin" context is assigned to.
-4. The "PressToJoin" context detects and triggers the "Join" action, the callback for which handles gamepad assignment.
+1. A *ControllerWake* event is triggered for the gamepad.
+2. The *ControllerWake* handler assigns the gamepad to `watcherStream`.
+3. The context stack is serviced, and the "PressToJoin" context (which is watching `watcherStream`) checks the newly assigned gamepad for the "Join" button press.
+4. The *Join* action is triggered, and in the callback, the gamepad is reassigned to one of the dedicated "player" input streams.
 
-As you can see, `unassignedContext` is able to handle the "Join" action for every unassigned controller, even though only one controller is assigned to `unassignedStream` at a time.
+This technique allows `watcherStream` to technically watch for input from all unassigned controllers at once, even though it is only ever assigned one controller at a time.  However, it suffers from a notable drawback: if multiple unassigned controllers are being operated simultaneously, it is possible to completely miss a "join" button press on one or more of them.  This is because only the last gamepad assigned to `watcherStream` will be checked for a "join" button press when the context stack is serviced, and multiple gamepads can generate wake events in the same frame.  In other words, a gamepad can be assigned to `watcherStream`, then immediately be unassigned from it before the "join" button is checked.
 
-This implementation has a downside, however: should players be interacting with more than one unassigned controller at a time, there is a chance that a "Join" button press will be missed.  This is because the two controllers will be generating competing wake events, and if both generate wake events in one frame, only one of them will be assigned to the `unassignedStream` when the context stack is serviced.  However, this is a low probability event, and it is unlikely to be a problem for most games.
+All of that being said, the chances of this actually negatively impacting the player's experience is likely to be very low.  It is possible to develop more robust handling methods that will resolve the "wake collision" problem described above, should it be necessary in your game.
 
 @anchor Reading_Input
 # Reading Input
@@ -288,19 +288,19 @@ This implementation has a downside, however: should players be interacting with 
 Once you have defined a context in an INI file and set up controller assignment, you are ready to start reading input.  There are four steps to it:
 
 1. Load the context's configuration file using Input::LoadContextFile().
-2. Bind the context to the context stack using Input::BindContext().
+2. Add an instance of the context to the context stack using Input::BindContext().
 3. Bind action callbacks using Input::BindAction().
 4. Poll axis values using Input::GetAxis().
 
 ## Loading Contexts
 
-The first step to using an input context is to load its definition into the **context registry**.  The context registry is the repository for all loaded context definitions: it describes how contexts are supposed to behave when they are bound to an input stream.  Context definitions are loaded using Input::LoadContextFile().
+The first step to using an input context is to load its definition into the **context registry**.  The context registry is a dictionary of context definitions: it describes how contexts are supposed to behave when they are bound to an input stream.  Context definitions are loaded using Input::LoadContextFile().
 
-Input::LoadContextFile() works by parsing an INI file for sections in the *Input* section group.  For every section in that group, a context definition is added to the registry.  More information about context definitions is available in the section [Defining a Context](@ref Defining_a_Context), located earlier in this article.
+Input::LoadContextFile() works by parsing an INI file for sections in the *%Input* section group.  A context definition is added to the registry for every subsection, each subsection name becoming the name of a context.  Refer back to [Defining a Context](@ref Defining_a_Context) for a more detailed explanation of how contexts are defined in INI files.
 
-Typically, LoadContextFile() is only invoked during application launch.  Context definitions only need to be loaded once: after they’re in the registry, Input::BindContext() can use them repeatedly until the application is terminated.  However, for development purposes, it may be useful to reload context definitions at runtime.  To do this, simply run Input::LoadContextFile() on the file again.
+LoadContextFile() is usually only invoked once per file, often during application launch.  In a lot of games, context definitions only need to be loaded once: after they’re in the registry, Input::BindContext() can use them until program termination.  However, it is sometimes useful to reload context definitions at runtime.  To do this, simply run Input::LoadContextFile() on the file again.
 
-@remarks After the @ref Console is finished, reloading context definitions will likely become a built-in command.
+@remarks After the @ref Console is finished, reloading context definitions from their files will likely become a built-in command.
 
 ## Binding Contexts
 
@@ -326,12 +326,12 @@ BindContext() returns a handle to the created instance of the context.  With it,
 
 ## Binding Actions
 
-Once the context is bound, you can use it to handle actions and axes.  Action response is handled through callbacks, registered using Input::BindAction():
+After binding the context, you can use it to respond to player input.  Actions are responded to through callbacks, which are registered using Input::BindAction():
 
 ```cpp
 using Enterprise::Input;
 
-static Input::ContextHandle context;
+Input::ContextHandle context;
 void onJump(){ player.Jump(); }
 
 void Init()
@@ -349,12 +349,12 @@ Input::BindAction(context, HN("Jump"), [](){ player.Jump(); });
 
 ## Reading Axes
 
-Unlike actions, input axes are polled.  To read one, call Input::GetAxis() with the context handle:
+Unlike actions, input axes are polled.  To read one, call Input::GetAxis().
 
 ```cpp
 using Enterprise::Input;
 
-static Input::ContextHandle context;
+Input::ContextHandle context;
 
 void Init()
 {

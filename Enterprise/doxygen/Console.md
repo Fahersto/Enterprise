@@ -1,4 +1,4 @@
-@page Console Developer Console
+@page Console Developer %Console
 
 %Enterprise will feature a developer console for entering commands and logging output while a game is running.  At present, however, this is limited to logging output to a separate console window.
 
