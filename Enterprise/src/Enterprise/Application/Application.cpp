@@ -11,7 +11,7 @@
 #include "Enterprise/Input/Input.h"
 #include "Enterprise/Graphics/Graphics.h"
 
-namespace Enterprise 
+namespace Enterprise
 {
 
 // Static definitions
@@ -173,11 +173,11 @@ Application::Application()
 	Time::Init();
 	File::Init();
 	Input::Init();
+	Graphics::Init();
 	// Audio::Init();
 	// ECS::Init();
 	// StateStack::Init();
 	Game::Init();
-	Graphics::Init(); // Window creation must occur last.
 
 	// Implement "--help" command line option
 	if (CheckCmdLineOption(HN("-h")))
@@ -211,8 +211,8 @@ bool Application::Run()
 
 Application::~Application()
 {
-	Graphics::Cleanup();
 	Game::Cleanup();
+	Graphics::Cleanup();
 
 	#ifdef EP_CONFIG_DEBUG
 	Enterprise::Console::Cleanup();

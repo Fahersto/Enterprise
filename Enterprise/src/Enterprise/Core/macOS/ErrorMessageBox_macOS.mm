@@ -13,11 +13,11 @@ void DisplayErrorDialog(std::wstring& ErrorMessage)
 
 void DisplayErrorDialog(const wchar_t* ErrorMessage)
 {
-    @autoreleasepool {
-        NSString* convertedErrorMessage = [[NSString alloc] initWithBytes:ErrorMessage
-                                                                   length: (sizeof(wchar_t) * wcslen(ErrorMessage))
-                                                                 encoding:NSUTF32LittleEndianStringEncoding];
-        NSAlert *errorBox = [[NSAlert alloc] init];
+	@autoreleasepool {
+		NSString* convertedErrorMessage = [[[NSString alloc] initWithBytes:ErrorMessage
+																	length: (sizeof(wchar_t) * wcslen(ErrorMessage))
+																  encoding:NSUTF32LittleEndianStringEncoding] autorelease];
+        NSAlert *errorBox = [[[NSAlert alloc] init] autorelease];
         [errorBox setMessageText:@"Enterprise Error"];
         [errorBox setInformativeText:convertedErrorMessage];
         [errorBox addButtonWithTitle:@"Ok"];

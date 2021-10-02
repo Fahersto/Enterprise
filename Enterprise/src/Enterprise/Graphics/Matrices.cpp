@@ -59,6 +59,10 @@ Mat4 Mat4::Rotation(float roll, float pitch, float yaw)
 		0.0f,                 0.0f,                                  0.0f,                                       1.0f
 	};
 }
+Mat4 Mat4::Rotation(Vec3 rot)
+{
+	return Rotation(rot.x, rot.y, rot.z);
+}
 Mat4 Mat4::Scale(float scale)
 {
 	return
@@ -100,7 +104,7 @@ Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float 
 		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(farClip + nearClip) / (farClip - nearClip), 1.0f
 	};
 }
-Mat4 Mat4::Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip)
+Mat4 Mat4::Frustum(float left, float right, float bottom, float top, float nearClip, float farClip)
 {
 	return
 	{
@@ -117,7 +121,7 @@ Mat4 Mat4::Perspective(float fov, float aspectRatio, float nearClip, float farCl
 	float right = top * aspectRatio;
 	float left = -right;
 
-	return Frustrum(left, right, bottom, top, nearClip, farClip);
+	return Frustum(left, right, bottom, top, nearClip, farClip);
 }
 
 }

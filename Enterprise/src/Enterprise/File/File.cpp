@@ -64,7 +64,85 @@ bool File::Exists(const std::string& path)
 	}
 }
 
-// TODO: Branch this off into the platform-specific cpp files
+
+File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outString)
+{
+	std::string nativePath = VPathToNativePath(path);
+
+#ifdef _WIN32
+
+	FILE* fhandle = NULL;
+	errno_t err = fopen_s(&fhandle, nativePath.c_str(), "r");
+
+	if (err == 0)
+	{
+		fseek(fhandle, 0, SEEK_END);
+		outString->resize(ftell(fhandle));
+		rewind(fhandle);
+		fread_s(&(*outString)[0], outString->size(), 1, outString->size(), fhandle);
+		fclose(fhandle);
+		return ErrorCode::Success;
+	}
+	else
+	{
+		char errormessage[80];
+		strerror_s(errormessage, err);
+		EP_ERROR("File::LoadTextFile(): Error opening file. {}", errormessage);
+
+		if (errno == EACCES)
+		{
+			// Permission Denied
+			return ErrorCode::PermissionFailure;
+		}
+		if (errno == ENOENT)
+		{
+			// File does not exist
+			return ErrorCode::DoesNotExist;
+		}
+		else
+		{
+			// Unhandled error
+			return ErrorCode::Unhandled;
+		}
+	}
+
+#else // macOS
+
+	FILE* fhandle = fopen(nativePath.c_str(), "r");
+
+	if (fhandle)
+	{
+		fseek(fhandle, 0, SEEK_END);
+		outString->resize(ftell(fhandle));
+		rewind(fhandle);
+		fread(&(*outString)[0], 1, outString->size(), fhandle);
+		fclose(fhandle);
+		return ErrorCode::Success;
+	}
+	else
+	{
+		EP_ERROR("File::LoadTextFile(): Error opening file. {}", strerror(errno));
+
+		if (errno == EACCES)
+		{
+			// Permission Denied
+			return ErrorCode::PermissionFailure;
+		}
+		if (errno == ENOENT)
+		{
+			// File does not exist
+			return ErrorCode::DoesNotExist;
+		}
+		else
+		{
+			// Unhandled error
+			return ErrorCode::Unhandled;
+		}
+	}
+
+#endif
+}
+
 File::ErrorCode File::TextFileReader::Open(const std::string& path)
 {
 	if (m_isHandleOpen)
@@ -107,7 +185,7 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 
 		char errormessage[80];
 		strerror_s(errormessage, err);
-		EP_ERROR("File System: Error opening file. {}", errormessage);
+		EP_ERROR("File::TextFileReader::Open(): Error opening file. {}", errormessage);
 	}
 
 #else // macOS
@@ -140,11 +218,10 @@ File::ErrorCode File::TextFileReader::Open(const std::string& path)
 		}
 
 		m_isHandleOpen = false;
-		EP_ERROR("File System: Error opening file. {}", strerror(errno));
+		EP_ERROR("File::TextFileReader::Open(): Error opening file. {}", strerror(errno));
 	}
 
 #endif
-
 
 	return m_errorcode;
 }

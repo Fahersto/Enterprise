@@ -7,21 +7,35 @@ namespace Enterprise
 
 namespace Constants
 {
-/// The title of the game window.
+extern const unsigned int TEMP_WindowWidth;
+extern const unsigned int TEMP_WindowHeight;
+
 extern const wchar_t* WindowTitle;
 }
 
 class Window
 {
 public:
-	/// Creates the main application window.
 	static void CreatePrimaryWindow();
-
-	/// Destroys the main application window.
 	static void DestroyPrimaryWindow();
-
-	/// Swaps the graphics buffer and displays it.
 	static void SwapBuffers();
+
+	enum class WindowMode
+	{
+		Windowed,
+		Borderless,
+		Fullscreen
+	};
+	static void SetWindowMode(WindowMode mode);
+
+	static unsigned int GetWidth() { return windowWidth; }
+	static unsigned int GetHeight() { return windowHeight; }
+	static float GetAspectRatio() { return aspectRatio; }
+
+private:
+	static unsigned int windowWidth;
+	static unsigned int windowHeight;
+	static float aspectRatio;
 
 };
 

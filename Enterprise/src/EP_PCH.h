@@ -12,6 +12,8 @@
 #include <list>
 #include <forward_list>
 #include <algorithm>
+#include <set>
+#include <stack>
 
 #include <string>
 #include <wchar.h>

@@ -12,7 +12,13 @@ constexpr uint64_t operator ""_HN(const char* stringname, size_t len)
 #ifdef EP_CONFIG_DEBUG
 
 /// Convert a C string into a HashName.  Performs collision checks in Debug builds.
-/// @param stringname The string to convert.
+/// @param stringname The C string to convert.
+/// @param length The number of characters in @c stringname.
+/// @return The string's associated HashName.
+HashName HN(const char* stringname, size_t length);
+
+/// Convert a C string into a HashName.  Performs collision checks in Debug builds.
+/// @param stringname The C string to convert.
 /// @return The string's associated HashName.
 HashName HN(const char* stringname);
 
@@ -24,13 +30,23 @@ HashName HN(std::string stringname);
 /// Returns the string associated with a HashName.
 /// @param hashname The HashName to look up.
 /// @return The HashName's associated string.
-/// @note Because strings aren't interned in Dev and Release builds, this function just return the hash if invoked in Dev or Dist builds.
+/// @note Because strings aren't interned in Dev and Release builds, this function 
+/// just returns the hash if invoked in Dev or Dist builds.
 std::string HN_ToStr(HashName hashname);
 
 #else // EP_CONFIG_DEV, EP_CONFIG_DIST
 
 /// Convert a C string into a HashName.  Performs collision checks in Debug builds.
-/// @param stringname The string to convert.
+/// @param stringname The C string to convert.
+/// @param length The number of characters in @c stringname.
+/// @return The string's associated HashName.
+constexpr HashName HN(const char* stringname, size_t length)
+{
+	return CTSpookyHash::Hash64(stringname, length, 0);
+}
+
+/// Convert a C string into a HashName.  Performs collision checks in Debug builds.
+/// @param stringname The C string to convert.
 /// @return The string's associated HashName.
 constexpr HashName HN(const char* stringname)
 {
@@ -48,7 +64,8 @@ inline HashName HN(std::string stringname)
 /// Returns the string associated with a HashName.
 /// @param hashname The HashName to look up.
 /// @return The HashName's associated string.
-/// @note Because strings aren't interned in Dev and Release builds, this function just return the hash if invoked in Dev or Dist builds.
+/// @note Because strings aren't interned in Dev and Release builds, this function 
+/// just returns the hash if invoked in Dev or Dist builds.
 inline std::string HN_ToStr(HashName hashname)
 {
 	return std::to_string(hashname);

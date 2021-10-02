@@ -64,13 +64,20 @@ public:
 	static bool Exists(const std::string& path);
 
 
+	/// Load the contents of a text file into an std::string.
+	/// @param path The path to the text file.
+	/// @param outString Pointer to string object which will receive the contents of the text file.
+	/// @return The result of the file open operation.
+	/// @remarks Use this function to load an entire file into memory at once.  To stream large files, create a File::TextFileReader.
+	static ErrorCode LoadTextFile(const std::string& path, std::string* outString);
+	
 	/// Opens a handle to a text file and provides methods to read data from it.
 	class TextFileReader
 	{
 	public:
 		TextFileReader() {};
 		/// Open a file handle during construction.
-		/// @param path The path the text file.
+		/// @param path The path to the text file.
 		TextFileReader(const std::string& path) { m_errorcode = Open(path); }
 		~TextFileReader() { Close(); }
 
@@ -103,6 +110,8 @@ public:
 		bool m_EOF = false;
 	};
 
+
+	// TODO: Improve dictionary lookup functions and remove these functions from public scope.
 
 	/// Converts a string from INI value format to a boolean.
 	/// @param str The string to convert.

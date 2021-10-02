@@ -18,6 +18,7 @@ HC(float, PhysFrameLength) = 1.0f / 60.0f;
 HC(float, PhysFrameRepeatCap) = 60.0f;
 
 // Graphics constants
-const unsigned int QuadBatch_MaxQuads = 10'000;
+const unsigned int TEMP_WindowWidth = 1280;
+const unsigned int TEMP_WindowHeight = 720;
 
 }

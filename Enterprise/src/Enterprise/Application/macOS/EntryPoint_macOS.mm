@@ -10,40 +10,27 @@ using Enterprise::Application;
 @end
 @implementation MacAppDelegate
 
-/// Invoked when the user selects "Quit" from the dock.
-- (void)handleQuitFromDock:(NSAppleEventDescriptor*)Event withReplyEvent:(NSAppleEventDescriptor*)ReplyEvent
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)Sender
 {
-    Enterprise::Events::Dispatch(HN("QuitRequested"));
+	Enterprise::Events::Dispatch(HN("QuitRequested"));
+	return NSTerminateCancel;
 }
 
-/// Invoked when the user selects "Quit" from the menu bar.
-- (void)handleQuitFromAppMenu
-{
-    Enterprise::Events::Dispatch(HN("QuitRequested"));
-}
-
-// Set up Cocoa stuff
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
     @autoreleasepool
 	{
-        // Set the custom callback for when Quit is selected from the Dock menu
-        [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
-                                                           andSelector:@selector(handleQuitFromDock:withReplyEvent:)
-                                                         forEventClass:kCoreEventClass
-                                                            andEventID:kAEQuitApplication];
-        
         // Set up the menu bar
-        NSMenu* MenuBar = [NSMenu new];
-        NSMenuItem* AppMenu = [NSMenuItem new]; // Application menu
+        NSMenu* MenuBar = [[NSMenu new] autorelease];
+        NSMenuItem* AppMenu = [[NSMenuItem new] autorelease]; // Application menu
         [MenuBar addItem:AppMenu];
-        NSMenu* AppMenuImpl = [NSMenu new]; // Contents of application menu
+        NSMenu* AppMenuImpl = [[NSMenu new] autorelease]; // Contents of application menu
         [AppMenu setSubmenu:AppMenuImpl];
         NSMenuItem* QuitOption = [[NSMenuItem alloc]initWithTitle:@"Quit" // Quit option
-                                                           action:@selector(handleQuitFromAppMenu)
+                                                           action:@selector(terminate:)
                                                     keyEquivalent:@""];
         [AppMenuImpl addItem:QuitOption];
-        [NSApp setMainMenu:MenuBar]; // Register our choices
+        [NSApp setMainMenu:MenuBar];
     }
 }
 
@@ -58,7 +45,7 @@ int main(int argc, const char * argv[])
         [NSApplication sharedApplication];
 
 		// Set up custom app delegate
-		MacAppDelegate * delegate = [[MacAppDelegate alloc] init];
+		MacAppDelegate * delegate = [[[MacAppDelegate alloc] init] autorelease];
 		[NSApp setDelegate:delegate];
 
 		// Activate and launch NSApp
@@ -100,8 +87,8 @@ int main(int argc, const char * argv[])
 				}
 			} while (app.Run());
 		}
-		catch (Enterprise::Exceptions::AssertFailed&){ exit(EXIT_FAILURE); }
-		catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
+		catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
+		catch (Enterprise::Exceptions::FatalError&)   { exit(EXIT_FAILURE); }
 	}
 
     return EXIT_SUCCESS;

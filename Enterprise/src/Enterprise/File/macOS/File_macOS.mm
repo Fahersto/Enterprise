@@ -15,7 +15,6 @@ void Enterprise::File::SetPlatformContentPath()
 	contentDirPath = std::string((char*)contentPath) + "/content/";
 
 	CFRelease(contentURL);
-	CFRelease(bundle);
 }
 
 void Enterprise::File::SetPlatformDataPaths()

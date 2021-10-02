@@ -85,6 +85,8 @@ struct Vec3
 	float y;
 	float z;
 
+	Vec3() : x(0.0f), y(0.0f), z(0.0f) {};
+	Vec3(float val) : x(val), y(val), z(val) {};
 	Vec3(float X, float Y, float Z) : x(X), y(Y), z(Z) {};
 
 	/// @cond DOXYGEN_SKIP
@@ -155,6 +157,8 @@ struct Vec4
 	float z;
 	float w;
 
+	Vec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {};
+	Vec4(float val) : x(val), y(val), z(val), w(val) {};
 	Vec4(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {};
 
 	/// @cond DOXYGEN_SKIP
@@ -265,6 +269,9 @@ struct Mat4
 	/// @param pitch Angle of pitch in degrees.
 	/// @param yaw Angle of yaw in degrees.
 	static Mat4 Rotation(float roll, float pitch, float yaw);
+	/// Generate a 4x4 rotation matrix.
+	/// @param rot The roll, pitch, and yaw of the rotation in degrees, expressed as a vector.
+	static Mat4 Rotation(Vec3 rot);
 	/// Generate a 4x4 scaling matrix.
 	/// @param scale The scale factor.
 	static Mat4 Scale(float scale);
@@ -292,7 +299,7 @@ struct Mat4
 	/// @param top The y coordinate, in view space, where the top clipping plane instersects with the near clipping plane.
 	/// @param nearClip The z coordinate, in view space, of the near clipping plane.
 	/// @param farClip The z coordinate, in view space, of the far clipping plane.
-	static Mat4 Frustrum(float left, float right, float bottom, float top, float nearClip, float farClip);
+	static Mat4 Frustum(float left, float right, float bottom, float top, float nearClip, float farClip);
 	/// Generate a 4x4 perspective projection matrix.
 	/// @param fov The field of view angle, in degrees, in the y direction.
 	/// @param aspectRatio The aspect ratio of the projection.  Determines the field of view in the x direction.
