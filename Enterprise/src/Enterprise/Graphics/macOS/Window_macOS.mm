@@ -68,7 +68,7 @@ static NSOpenGLView* view;
 
 void Window::CreatePrimaryWindow()
 {
-	EP_ASSERT_NOENTRY();
+	EP_ASSERT_NOREENTRY();
 
 	windowWidth = Constants::TEMP_WindowWidth;
 	windowHeight = Constants::TEMP_WindowHeight;
