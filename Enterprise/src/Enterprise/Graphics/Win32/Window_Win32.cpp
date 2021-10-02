@@ -5,21 +5,21 @@
 #include "../Window.h"
 #include "Enterprise/Events/Events.h"
 
+using Enterprise::Events;
+using Enterprise::Window;
+
+unsigned int Window::windowWidth;
+unsigned int Window::windowHeight;
+float Window::aspectRatio;
+static Window::WindowMode currentMode = Window::WindowMode::Windowed;
+
 static HWND hWnd; // handle to Win32 window
 static HDC hDC = nullptr; // device context
 static HGLRC hRC = nullptr; // rendering context
 static HPALETTE hPalette = nullptr; // custom palette (if needed)
 
-/// The Win32 window procedure function for the game window.
-/// @param hWnd The window handle.
-/// @param message The message identifier.
-/// @param wParam The word parameter value.
-/// @param lParam The long parameter value.
-/// @return The LRESULT response to the message.
 LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	using Enterprise::Events;
-
 	switch (message)
 	{
 	case WM_CLOSE: // Clicked the close button
@@ -69,12 +69,13 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
-
-/// Sets up and displays the Win32 game window.
-/// @param settings A struct reference containing the desired window configuration.
-void Enterprise::Window::CreatePrimaryWindow()
+void Window::CreatePrimaryWindow()
 {
 	EP_ASSERT_NOREENTRY();
+
+	windowWidth = Constants::TEMP_WindowWidth;
+	windowHeight = Constants::TEMP_WindowHeight;
+	aspectRatio = (double)windowWidth / (double)windowHeight;
 
 	// Get handle to the application (Note, this might* pose problems for multithreading).
 	HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -98,8 +99,8 @@ void Enterprise::Window::CreatePrimaryWindow()
 	// Register the class
 	EP_VERIFY(RegisterClassEx(&wc)); //TODO: Use EP_ASSERT_CODE here to call GetLastError().
 
-	// Calculate initial window size.  TODO: Set up from INI
-	RECT wr = { 0, 0, 500, 500 };
+	// Calculate initial window size.
+	RECT wr = { 0, 0, windowWidth, windowHeight};
 	DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;    // Window style
 	AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
 
@@ -212,7 +213,7 @@ void Enterprise::Window::CreatePrimaryWindow()
 	ShowWindow(hWnd, SW_SHOWNORMAL);
 }
 
-void Enterprise::Window::DestroyPrimaryWindow()
+void Window::DestroyPrimaryWindow()
 {
 	EP_ASSERT_NOREENTRY();
 	EP_ASSERTF(hWnd,
@@ -228,10 +229,15 @@ void Enterprise::Window::DestroyPrimaryWindow()
 	}
 }
 
-void Enterprise::Window::SwapBuffers()
+void Window::SwapBuffers()
 {
 	glFlush();
 	::SwapBuffers(hDC);
+}
+
+void Window::SetWindowMode(WindowMode mode)
+{
+	// TODO: Implement
 }
 
 #endif

@@ -3,6 +3,10 @@
 // EP_PCH.h
 // Enterprise's precompiled header.
 
+#ifdef _WIN32
+    #define NOMINMAX // for std::min() and std::max()
+#endif
+
 #include <iostream>
 #include <fstream>
 

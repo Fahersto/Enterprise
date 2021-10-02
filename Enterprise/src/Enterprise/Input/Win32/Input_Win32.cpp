@@ -277,12 +277,12 @@ void Enterprise::Input::GetRawInput()
 
 			// Triggers
 			{
-				float trigger = float(max(state.Gamepad.bLeftTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
+				float trigger = float(std::max(state.Gamepad.bLeftTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
 				trigger /= float(255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 				Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
 					[size_t(ControlID::GP_LTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = trigger;
 
-				trigger = float(max(state.Gamepad.bRightTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
+				trigger = float(std::max(state.Gamepad.bRightTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD, 0));
 				trigger /= float(255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 				Input::gpBuffer[xinputToGamepadID[i]].axes[currentBuffer]
 					[size_t(ControlID::GP_RTrigger) - size_t(ControlID::_EndOfGPButtons) - 1] = trigger;
