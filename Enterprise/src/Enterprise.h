@@ -20,5 +20,5 @@
 #include "Enterprise/Graphics/Graphics.h"
 #include "Enterprise/Graphics/Window.h"
 // #include "Enterprise/Audio/Audio.h"
-// #include "Enterprise/ECS/ECS.h"
-// #include "Enterprise/StateStack/StateStack.h"
+// #include "Enterprise/SceneManager/SceneManager.h"
+// #include "Enterprise/StateManager/StateManager.h"

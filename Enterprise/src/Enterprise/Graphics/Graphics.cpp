@@ -94,7 +94,7 @@ void Graphics::Init()
 	perDrawGlobalUB = CreateUniformBuffer(HN("EP_PERDRAW"), sizeof(perDrawGlobalUBStruct), &perDrawGlobalUBData, true);
 }
 
-void Graphics::Update()
+void Graphics::PostDraw()
 {
 	memset(isTextureSlotUsedThisDraw, 0, maxTextureSlots * sizeof(bool));
 

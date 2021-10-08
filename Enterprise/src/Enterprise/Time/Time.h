@@ -5,12 +5,12 @@
 namespace Enterprise 
 {
 
-namespace Constants
+namespace Constants::Time
 {
-/// Length, in game-seconds, of the physics timestep.
-HCEX(float, PhysFrameLength);
-/// The maximum number of real seconds back-to-back physics frames are allowed to take.
-HCEX(float, PhysFrameRepeatCap);
+/// The length of the fixed timestep in game seconds.
+HCEX(double, FixedTimestep);
+/// The maximum number of real seconds each frame is allowed to simulate.
+HCEX(double, MaxFrameDelta);
 }
 
 
@@ -18,75 +18,57 @@ HCEX(float, PhysFrameRepeatCap);
 class Time
 {
 public:
-	// Getters ------------------------------
-
-	/// Gets the number of real-world seconds that have elapsed since application start.
-	/// @return The number of seconds the application has been open.
-	/// @note	The count is current to the top of the current frame.
-	static float RunningTime();
+	/// Get the number of real seconds that have passed since application launch.
+	/// @return The number of real-world seconds between application launch and the start of the current frame.
+	/// @note If called from FixedUpdate(), the value is current to the start of the current fixed timestep.
+	static float RealTime();
+	/// Get the number of game seconds that have passed since application launch.
+	/// @return The number of game-world seconds between application launch and the start of the current frame.
+	/// @note If called from FixedUpdate(), the value is current to the start of the current fixed timestep.
+	static float GameTime();
 	
-	/// Gets the number of game-seconds that have passed since the last frame.
-	/// @return The number of game-time seconds that have passed since the last frame.
-	/// @note	This value scales with SetTimeScale.
-	/// @note	In physics frames, the value is fixed.
-	static float FrameDelta();
-
-	/// Gets the number of real-world seconds that have passed since the last frame.
-	/// @return The number of real seconds that have passed since the last frame.
-	/// @note		This value does not stretch if you've applied a time scale factor.
-	/// @remarks	This value is useful for stepping things which should not be affected by bullet-time
-	///				effects, such as UI elements.
+	/// Get the number of real seconds that have passed since the previous frame.
+	/// @return The number of real-world seconds that have passed since the previous frame.
+	/// @note If called from FixedUpdate(), returns the fixed timestep's current length in real seconds.
 	static float RealDelta();
-	
-	/// Gets an interpolation value representing this frame's position through the current physics frame.
-	/// @return A value in the range [0.0, 1.0], where 0.0 represents the start of the physics frame and
-	/// 1.0 represents the end of it.
-	///
-	/// @remarks	This value can be used to smooth the motion of physics objects when being rendered.
-	///				When a physics frame is finished calculating, physics objects will be simulated
-	///				slightly into the future.  PhysPhase can be used to simulate the position of physics
-	///				objects in between the start and end of the last physics frame.
-	static float PhysPhase();
+	/// Get the number of game seconds that have passed since the previous frame.
+	/// @return The number of game-world seconds that have passed since the previous frame.
+	/// @note If called from FixedUpdate(), this value always equals Constants::Time::FixedTimestep.
+	static float GameDelta();
 
-	// Setters ------------------------------
+	/// Get the number of real seconds that have not yet been processed by FixedUpdate().
+	/// @return The number of real-world seconds that have passed since the previous FixedUpdate().
+	/// @remarks This value is useful for projecting the world state prior to rendering a frame.
+	/// It serves no purpose in FixedUpdate().
+	static float RealRemainder();
+	/// Get the number of game seconds that have not yet been processed by FixedUpdate().
+	/// @return The number of game-world seconds that have passed since the previous FixedUpdate().
+	/// @remarks This value is useful for projecting the world state prior to rendering a frame.
+	/// It serves no purpose in FixedUpdate().
+	static float GameRemainder();
 
-	/// Sets the rate of in-game time flow.  Useful for bullet-time effects.
-	/// @param scalar The factor to apply to the flow of game time.
-	/// @pre @p scalar cannot be negative.
-	static void SetTimeScale(float scalar);
+	/// Get this frame's position between fixed updates, expressed as a value in the range [0.0, 1.0).
+	/// @return An interpolation value in [0.0, 1.0), where 0.0 is the start of the fixed timestep and 1.0 is the end.
+	/// @remarks This value is useful for interpolating between the last two world states calculated in FixedUpdate().
+	/// It serves no purpose in FixedUpdate().
+	static float FixedFrameInterp();
 
-	// TODO: Add a lerping version of SetTimeScale.
-	//inline static void SetTimeScale(float scalar, float lerpTime);
-
-	// TODO: Add timer functions
+	/// Set the rate of in-game time flow.  Useful for time dilation effects.
+	/// @param scalar The rate of game time over real time.
+	/// @remarks The game world runs twice as fast when the time scale is set to @c 2.0, and half as fast when set to @c 0.5.
+	static void SetTimeScale(double scalar);
 
 private:
 	friend class Application;
 
-	/// Initializes timing functions.
-	/// @note This is defined per platform.
 	static void Init();
+	static void PlatformInit();
+	static uint64_t GetRawTicks();
+	static uint64_t SecondsToTicks(double seconds);
+	static float TicksToSeconds(uint64_t ticks);
 
-	/// Updates internal time storage and fills accumulators.
-	/// @note This is called at the start of each frame and each physics frame.
-	static void Tick();
-
-	/// Calculates the time in seconds since Time::Init().
-	/// @note This is defined per platform.
-	static float GetRawTime();
-
-	/// Checks the physics frame timer.
-	/// @return Returns true when a physics frame is pending.
-	/// @note	If this function doesn't return true in less than @c Constants::PhysFrameRepeatCap
-	///			seconds, the timer is reset. Time will drop the unsimulated time to avoid death spirals.
-	static bool PhysFrame();
-
-	/// Updates time values for use in a new frame.
-	static void FrameStart();
-
-	/// Marks the end of a frame.
-	/// @note This function resets the clock for the physics frame repeat check (death spiral abort timer).
-	static void FrameEnd();
+	static void Update();
+	static bool FixedUpdatePending();
 };
 
 }

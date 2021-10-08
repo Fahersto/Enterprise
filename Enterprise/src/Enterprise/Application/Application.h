@@ -97,6 +97,6 @@ namespace Enterprise
 		/// unhandled exceptions.
 		~Application();
 
-		static bool OnQuit(Events::Event& e);
+		static bool OnQuitRequested(Events::Event& e);
 	};
 }

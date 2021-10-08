@@ -2,27 +2,32 @@
 #ifdef _WIN32
 
 #include "Core.h"
-#include "Enterprise/Time/Time.h"
+#include "../Time.h"
 
-LARGE_INTEGER _startCount, _currentCount = {};
-double _tickPeriod = {};
+using Enterprise::Time;
 
-void Enterprise::Time::Init() 
+static LARGE_INTEGER tickFrequency, startTicks, currentTicks;
+
+void Time::PlatformInit()
 {
-    // Calculate the tick length in seconds
-    LARGE_INTEGER QPF;
-    QueryPerformanceFrequency(&QPF);
-    _tickPeriod = 1.0 / QPF.QuadPart;
-
-    // Track what time the program started
-	QueryPerformanceCounter(&_startCount);
-	_currentCount = _startCount;
+	QueryPerformanceFrequency(&tickFrequency);
+	QueryPerformanceCounter(&startTicks);
 }
 
-float Enterprise::Time::GetRawTime()
+uint64_t Time::GetRawTicks()
 {
-	QueryPerformanceCounter(&_currentCount);
-	return float((_currentCount.QuadPart - _startCount.QuadPart) * _tickPeriod);
+	QueryPerformanceCounter(&currentTicks);
+	return currentTicks.QuadPart - startTicks.QuadPart;
+}
+
+uint64_t Time::SecondsToTicks(double seconds)
+{
+	return seconds * tickFrequency.QuadPart;
+}
+
+float Time::TicksToSeconds(uint64_t ticks)
+{
+	return double(ticks) / double(tickFrequency.QuadPart);
 }
 
 #endif

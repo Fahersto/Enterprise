@@ -471,7 +471,7 @@ private:
 	friend class Application;
 
 	static void Init();
-	static void Update();
+	static void PostDraw();
 	static void Cleanup();
 };
 

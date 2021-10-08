@@ -1,127 +1,133 @@
 #include "EP_PCH.h"
 #include "Time.h"
 
-// Tick() vars
+using Enterprise::Time;
 
-/// Time, in real seconds, since the application started.
-float runningTime = 0.0f;
-/// The previous value of runningTime.
-float prevTime = 0.0f;
-/// The current conversion rate between real seconds and game seconds.
-float timeScale = 1.0f;
-/// The number of real seconds that have passed since last Tick().
-float tickDeltaReal = 0.0f;
-/// The amount of game-time seconds that have passed since last Tick().
-float tickDeltaScaled = 0.0f;
+static uint64_t fixedTimestepInRealTicks;
+#ifdef EP_CONFIG_DIST
+static uint64_t fixedTimestepInGameTicks, maxFrameDeltaInRealTicks;
+#endif
 
+static double currentTimeScale = 1.0;
 
-// Accumulators
+static uint64_t currentSysTimeInTicks = 0, previousSysTimeInTicks;
+static uint64_t measuredRealTickDelta, measuredGameTickDelta;
+static uint64_t realRunningTicks = 0, gameRunningTicks = 0;
+static uint64_t unsimmedRealTicks = 0, unsimmedGameTicks = 0;
 
-float frameAccumulator = 0.0f; float frameAccumulator_real = 0.0f;
-float physFrameAccumulator = Enterprise::Constants::PhysFrameLength; float physFrameAccumulator_real = 0.0f;
-float physFrameRepeatAccumulator = 0.0f;
+static float realRunningTime_out, gameRunningTime_out;
+static float realDelta_out, gameDelta_out;
+static float unsimmedRealTime_out, unsimmedGameTime_out;
+static float fixedFrameInterp_out;
 
+float Time::RealTime() { return realRunningTime_out; }
+float Time::GameTime() { return gameRunningTime_out; }
+float Time::RealDelta() { return realDelta_out; }
+float Time::GameDelta() { return gameDelta_out; }
+float Time::RealRemainder() { return unsimmedRealTime_out; }
+float Time::GameRemainder() { return unsimmedGameTime_out; }
+float Time::FixedFrameInterp() { return fixedFrameInterp_out; }
 
-// Gettable vars
-
-/// The number of game-seconds being simulated this frame or physics frame.
-float frameDelta = 0.0f;
-/// The number of real seconds the current frame or physics frame represents.
-float realDelta = 0.0f;
-/// A value in [0.0, 1.0] representing the current progress through the physics frame.
-float physPhase = 1.0f;
-
-namespace Enterprise
+void Time::SetTimeScale(double scalar)
 {
-	float Time::RunningTime() { return runningTime; }
-	float Time::FrameDelta() { return frameDelta; }
-	float Time::RealDelta() { return realDelta; }
-	float Time::PhysPhase() { EP_ASSERT(physPhase > 0.0f); return physPhase; }
-	
-    void Time::SetTimeScale(float scalar)
+	if (scalar >= 0.0f)
 	{
-		// TODO: Make it so negative values don't crash the game.
-		EP_ASSERT(scalar >= 0.0f); //Time::SetTimeScale() called with negative parameter.  Scalar cannot be negative.  Set timeScale to 0.0f.
-		timeScale = scalar;
+		currentTimeScale = scalar;
+	}
+	else
+	{
+		EP_WARN("Time::SetTimeScale(): 'scalar' set to negative value.  Set to 0.0 instead.");
+		currentTimeScale = 0.0f;
 	}
 
-    // ------------------------------------------------------------------
+	fixedTimestepInRealTicks = SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale);
+}
 
-	void Time::Tick()
+void Time::Init()
+{
+	PlatformInit();
+
+#ifdef EP_CONFIG_DIST
+	maxFrameDeltaInRealTicks = SecondsToTicks(Constants::Time::MaxFrameDelta / currentTimeScale);
+	fixedTimestepInRealTicks = SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale);
+	fixedTimestepInGameTicks = SecondsToTicks(Constants::Time::FixedTimestep);
+#endif
+}
+
+
+void Time::Update()
+{
+	previousSysTimeInTicks = currentSysTimeInTicks;
+	currentSysTimeInTicks  = GetRawTicks();
+
+#ifdef EP_CONFIG_DIST
+	measuredRealTickDelta  = std::min(currentSysTimeInTicks - previousSysTimeInTicks, maxFrameDeltaInRealTicks);
+#else
+	measuredRealTickDelta = std::min(currentSysTimeInTicks - previousSysTimeInTicks, SecondsToTicks(Constants::Time::MaxFrameDelta / currentTimeScale));
+#endif
+	measuredGameTickDelta  = measuredRealTickDelta * currentTimeScale;
+
+	realRunningTicks += measuredRealTickDelta;
+	gameRunningTicks += measuredGameTickDelta;
+
+	unsimmedRealTicks += measuredRealTickDelta;
+	unsimmedGameTicks += measuredGameTickDelta;
+
+	// Going to FixedUpdate()
+#ifdef EP_CONFIG_DIST
+	realDelta_out = TicksToSeconds(fixedTimestepInRealTicks);
+#else
+	realDelta_out = TicksToSeconds(SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale));
+#endif
+	gameDelta_out = Constants::Time::FixedTimestep;
+
+	unsimmedRealTime_out = 0.0f;
+	unsimmedGameTime_out = 0.0f;
+	fixedFrameInterp_out = 0.0f;
+
+	// TODO: Update time variables in shader uniform buffer
+}
+
+bool Time::FixedUpdatePending()
+{
+#ifdef EP_CONFIG_DIST
+	if (unsimmedGameTicks >= fixedTimestepInGameTicks)
 	{
-		prevTime = runningTime;
-		runningTime = GetRawTime();
-		tickDeltaReal = runningTime - prevTime;
-		tickDeltaScaled = tickDeltaReal * timeScale;
+		// Going to FixedUpdate()
+		unsimmedRealTicks -= fixedTimestepInRealTicks;
+		unsimmedGameTicks -= fixedTimestepInGameTicks;
+#else
+	if (unsimmedGameTicks >= SecondsToTicks(Constants::Time::FixedTimestep))
+	{
+		// Going to FixedUpdate()
+		unsimmedRealTicks -= SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale);
+		unsimmedGameTicks -= SecondsToTicks(Constants::Time::FixedTimestep);
+#endif
 
-		// Increment accumulators
-		frameAccumulator += tickDeltaScaled;
-		frameAccumulator_real += tickDeltaReal;
-		physFrameAccumulator += tickDeltaScaled;
-		physFrameAccumulator_real += tickDeltaReal;
-		physFrameRepeatAccumulator += tickDeltaReal;
+		realRunningTime_out = TicksToSeconds(realRunningTicks - unsimmedRealTicks);
+		gameRunningTime_out = TicksToSeconds(gameRunningTicks - unsimmedGameTicks);
 
-		// Perhaps here is the place to increment timers?
+		return true;
 	}
-
-	bool Time::PhysFrame()
+	else
 	{
-		Tick();
+		// Going to Update()
+		realRunningTime_out = TicksToSeconds(realRunningTicks);
+		gameRunningTime_out = TicksToSeconds(gameRunningTicks);
 
-		// Abort death spirals
-		if (physFrameRepeatAccumulator >= Constants::PhysFrameRepeatCap)
-		{
-            EP_WARN("Time: Physics frames were skipped to abort a death spiral. \n"
-                    "Accumulator: {}\nCap: {}\nFrames Dropped: {}", 
-					physFrameRepeatAccumulator, Constants::PhysFrameRepeatCap, 
-					(physFrameRepeatAccumulator - Constants::PhysFrameRepeatCap) / Constants::PhysFrameLength);
+		realDelta_out = TicksToSeconds(measuredRealTickDelta);
+		gameDelta_out = TicksToSeconds(measuredGameTickDelta);
 
-			// Dump remaining time from accumulators
-			frameAccumulator -= (physFrameAccumulator - Constants::PhysFrameLength);
-			physFrameAccumulator = Constants::PhysFrameLength;
-			physPhase = 1.0f;
-			
-			// Move to a new general frame
-			return false;
-			
-			// physFrameRepeatAccumulator gets reset in FrameEnd().
-		}
+		unsimmedRealTime_out = TicksToSeconds(unsimmedRealTicks);
+		unsimmedGameTime_out = TicksToSeconds(unsimmedGameTicks);
 
-		// Check the PhysFrame timer
-		if (physFrameAccumulator >= Constants::PhysFrameLength)
-		{
-			// Update gettable vars
-			frameDelta = Constants::PhysFrameLength;
-			realDelta = physFrameAccumulator_real;
-			physPhase = -1.0f; // HACK: Triggers assertion if physics code calls PhysPhase().
+#ifdef EP_CONFIG_DIST
+		fixedFrameInterp_out = double(unsimmedGameTicks) / double(fixedTimestepInGameTicks);
+#else
+		fixedFrameInterp_out = TicksToSeconds(unsimmedGameTicks) / Constants::Time::FixedTimestep;
+#endif
 
-			// Reset accumulators
-			physFrameAccumulator -= Constants::PhysFrameLength;
-			physFrameAccumulator_real = 0.0f;
-
-			// Trigger PhysFrame
-			return true;
-		}
-		else
-			return false;
-	}
-
-	void Time::FrameStart()
-	{
-		Tick();
-
-		// Update gettable vars
-		frameDelta = frameAccumulator;
-		realDelta = frameAccumulator_real;
-		physPhase = physFrameAccumulator / Constants::PhysFrameLength;
-
-		// Reset accumulator
-		frameAccumulator = 0.0f;
-		frameAccumulator_real = 0.0f;
-	}
-
-	void Time::FrameEnd()
-	{
-		physFrameRepeatAccumulator = 0.0f;
+		return false;
 	}
 }
+

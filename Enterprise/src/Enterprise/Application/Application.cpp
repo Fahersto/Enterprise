@@ -167,16 +167,15 @@ Application::Application()
 
 	RegisterCmdLineOption("Help", { "-h", "--help" }, 
 						  "Displays command line options supported by this game.", 0);
-	Events::Subscribe(HN("QuitRequested"), OnQuit);
+	Events::Subscribe(HN("QuitRequested"), OnQuitRequested);
 
-	// Initialize Systems
 	Time::Init();
 	File::Init();
 	Input::Init();
 	Graphics::Init();
 	// Audio::Init();
-	// ECS::Init();
-	// StateStack::Init();
+	// SceneManager::Init();
+	// StateManager::Init();
 	Game::Init();
 
 	// Implement "--help" command line option
@@ -191,20 +190,22 @@ Application::Application()
 
 bool Application::Run()
 {
-	// Physics frame
-	while (Time::PhysFrame())
+	Time::Update();
+	Input::Update();
+
+	while (Time::FixedUpdatePending())
 	{
-		// ...
+		//SceneManager::FixedUpdate();
+		//StateManager::FixedUpdate();
 	}
 
-	// Frame
-	Time::FrameStart();
-	{
-		Input::Update();
-		Graphics::Update();
-		// ...
-	}
-	Time::FrameEnd();
+	//SceneManager::Update();
+	//StateManager::Update();
+
+	//SceneManager::Draw()
+	//StateManager::Draw();
+
+	Graphics::PostDraw();
 
 	return _isRunning;
 }
@@ -219,7 +220,7 @@ Application::~Application()
 	#endif
 }
 
-bool Application::OnQuit(Events::Event& e)
+bool Application::OnQuitRequested(Events::Event& e)
 {
 	EP_ASSERT(e.Type() == HN("QuitRequested"));
 

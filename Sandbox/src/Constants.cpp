@@ -14,8 +14,11 @@ const char* Version = "0.0.0";
 const wchar_t* WindowTitle = L"Enterprise Window Title";
 
 // Time constants
-HC(float, PhysFrameLength) = 1.0f / 60.0f;
-HC(float, PhysFrameRepeatCap) = 60.0f;
+namespace Time
+{
+HC(double, FixedTimestep) = 1.0 / 240.0;
+HC(double, MaxFrameDelta) = 1.0 / 15.0;
+}
 
 // Graphics constants
 const unsigned int TEMP_WindowWidth = 1280;
