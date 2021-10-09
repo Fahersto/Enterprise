@@ -7,7 +7,7 @@ Subpages:
 * @subpage Input
 * @subpage Graphics
 * @subpage Audio
-* @subpage ECS
+* @subpage SceneManager
 * @subpage StateManager
 
 ---
@@ -17,9 +17,9 @@ At the bedrock of %Enterprise is its systems.  %Enterprise's core systems are si
 * Automatically handles low-level background tasks
 * Fulfills requests made by other systems
 
-At the time of this writing, eight systems are planned for development: [Events](@ref Events), [Time](@ref Time), [File](@ref File), [Input](@ref Input), [Graphics](@ref Graphics), [Audio](@ref Audio), [ECS](@ref ECS), and [StateManager](@ref StateManager).  These systems often depend on each other, resulting in the dependency hierarchy shown below:
+At the time of this writing, eight systems are planned for development: [Events](@ref Events), [Time](@ref Time), [File](@ref File), [Input](@ref Input), [Graphics](@ref Graphics), [Audio](@ref Audio), [SceneManager](@ref SceneManager), and [StateManager](@ref StateManager).  These systems often depend on each other, resulting in the dependency hierarchy shown below:
 
-![A graph showing how Enterprise's eight systems can be sorted into three layers.  At the highest level is ECS and StateManager, at the mid level is Input, Graphics, and Audio, and at the lowest level is Time, Events, and File.](system_hierarchy.png)
+![A graph showing how Enterprise's eight systems can be sorted into three layers.  At the highest level is SceneManager and StateManager, at the mid level is Input, Graphics, and Audio, and at the lowest level is Time, Events, and File.](system_hierarchy.png)
 
 @remarks To support networked games, I may eventually add a fourth foundation system called *Network*.  At the the time of this writing, however, this is not on the roadmap.
 

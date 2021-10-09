@@ -60,24 +60,21 @@ Predefined macros are available for conditionalizing code to run on only specifi
 @anchor Core_Calls
 # Core Calls
 
-As you learn %Enterprise, you will notice a few method names crop up again and again: *Init(), Tick(), Update(), PhysUpdate(), Draw(),* and *Cleanup()*.  These are the "core calls": functions that are invoked at specific times during the application lifecycle.  Core calls are used throughout %Enterprise to organize execution, and developers are encouraged to follow the paradigm when developing their own classes and systems.
+As you learn %Enterprise, you will notice a few method names crop up again and again: *Init(), FixedUpdate(), Update(), Draw(),* and *Cleanup()*.  These are known as the "core calls": functions whose names tell you exactly when they will be invoked.  Core calls are used throughout %Enterprise to organize execution, and developers are encouraged to follow the paradigm when developing their own systems and classes.
 
 The core calls are invoked as follows:
 
-* **Init()** and **Cleanup()**: Called at the start and end of a class's lifecycle.  These are not replacements for constructors and destructors: instead, they are used in situations where constructors and destructors are not suitable, such as managing the lifecycle of [ring buffer](https://en.wikipedia.org/wiki/Circular_buffer) objects.
-* **Tick()**: In %Enterprise, a "tick" occurs at the start of each frame and each physics frame.  Every call to Application::Run() triggers at least one Tick(), so ticks happen very, very frequently.
-* **Update()**: Called once every frame.  Gameplay code is typically implemented here.
-* **PhysUpdate()**: Called once every physics frame, which occurs at a fixed timestep.  Physics simulations are updated here.
+* **Init()** and **Cleanup()**: Called at the start and end of a class's lifecycle.  These are not replacements for constructors and destructors: instead, they are used in situations where constructors and destructors are not suitable, such as static classes or [ring buffer objects](https://en.wikipedia.org/wiki/Circular_buffer).
+* **FixedUpdate()**: Called every Constants::Time::FixedTimestep seconds, independent of the game's actual framerate.  This is useful for complex simulations, such as physics simulations.  Correct use of FixedUpdate can make your gameplay much more stable and deterministic, even across a wide variety of platforms.
+* **Update()**: Called once every frame.  Gameplay and UI code is often implemented here.
 * **Draw()**: Called immediately after Update().  Rendering code lives here.
 
-@note At the time of this writing, Tick() is not used for anything besides timing physics frames.  It will be removed from this list in the future if it remains unused.
+Core calls are invoked in a hierarchy.  At the top of the hierarchy is Enterprise::Application, which invokes the core calls of each of %Enterprise's [core systems](@ref Systems) during Application::Run().  From there, the systems invoke the core calls of all their constituents, and the constituents do the same until the entire engine has been serviced.
 
-Core calls are invoked in a hierarchy.  At the top of the hierarchy is Enterprise::Application, which invokes the core calls of each of %Enterprise's [core systems](@ref Systems) during Application::Run().  From there, the systems invoke the core calls of all their constituents, and the constituents do the same until the core calls have fully propagated throughout the engine.
-
-As a developer, you will most commonly implement core calls when developing your own subsystems for [ECS](@ref ECS) or game states for [StateManager](@ref StateManager).
+As a developer, you will most commonly implement core calls when developing your own subsystems for [SceneManager](@ref SceneManager) or game states for [StateManager](@ref StateManager).
 
 @see @ref Time
-@see @ref ECS
+@see @ref SceneManager
 @see @ref StateManager
 
 # Assertions
@@ -103,7 +100,7 @@ Due to these benefits, many of %Enterprise's core system APIs take HashNames as 
 
 * Event dispatching and identification
 * Setting shader uniform values
-* Tagging ECS entities
+* Tagging scene entities
 * and more!
 
 To generate a HashName, use the global function HN().  In **Debug** builds, this function hashes the string, performs collision detection, and interns the string for use in the [console](@ref Console).  In **Dev** and **Dist** builds, it simply performs a `constexpr` conversion without collision detection (at compile time, when possible):
@@ -194,7 +191,7 @@ This must be done in Game::Init().
 
 After an option is registered, you can use Application::CheckCmdLineOption() or Application::GetCmdLineOption() to respond to it.  Use CheckCmdLineOption() to check for simple flags, and GetCmdLineOption() to check options that have additional parameters.
 
-@note Application::CheckCmdLineOption() and Application::GetCmdLineOption() can be invoked at any time after Game::Init(), even during Update(), PhysUpdate(), or Draw().  The command line options are stored into a global hash table at application launch, and they remain available for lookup until the program terminates.
+@note Application::CheckCmdLineOption() and Application::GetCmdLineOption() can be invoked at any time after Game::Init(), even during Update(), FixedUpdate(), or Draw().  The command line options are stored into a global hash table at application launch, and they remain available for lookup until the program terminates.
 
 # Developer Console
 
