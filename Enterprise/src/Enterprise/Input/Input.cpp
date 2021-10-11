@@ -1,10 +1,11 @@
 #include "EP_PCH.h"
 #include "Input.h"
 #include "Enterprise/File/File.h"
+#include "Enterprise/Time/Time.h"
 
 using Enterprise::Input;
 using Enterprise::Events;
-
+using Enterprise::Time;
 
 Input::KBMouseBuffer Input::kbmBuffer;
 std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 2.
@@ -14,7 +15,9 @@ std::map<HashName, Input::Context> Input::contextRegistry;
 std::forward_list<Input::Context> Input::contextStack[MaxInputContextLayers];
 std::map<Input::ContextHandle, int> Input::layerOfContext;
 std::map<void*, std::map<HashName, std::vector<Input::ActionCallbackPtr>>> Input::actionCallbacks;
-std::map<void*, std::map<HashName, float>> Input::axisValues;
+std::map<void*, std::map<HashName, float>> Input::axisValues[2]; // Array index is Time::inFixedTimestep().
+static float mouseAxisAccumulator[4] = { 0 };
+static float mouseDeltaAccumulator = 0.0f;
 
 static std::vector<Input::ControllerID> StreamBindings; // Indexed by StreamID.
 static std::vector<bool> isStreamBlocked; // Indexed by StreamID.
@@ -241,12 +244,12 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(Mouse_Button_3);
 	STRTOCONTROLIDIMPL(Mouse_Button_4);
 	STRTOCONTROLIDIMPL(Mouse_Button_5);
-	STRTOCONTROLIDIMPL(Mouse_Wheel_Y);
-    STRTOCONTROLIDIMPL(Mouse_Wheel_X);
     STRTOCONTROLIDIMPL(Mouse_Pointer_X);
     STRTOCONTROLIDIMPL(Mouse_Pointer_Y);
     STRTOCONTROLIDIMPL(Mouse_Delta_X);
     STRTOCONTROLIDIMPL(Mouse_Delta_Y);
+	STRTOCONTROLIDIMPL(Mouse_Wheel_Y);
+    STRTOCONTROLIDIMPL(Mouse_Wheel_X);
     STRTOCONTROLIDIMPL(KB_Semicolon);
 	STRTOCONTROLIDIMPL(KB_Plus);
 	STRTOCONTROLIDIMPL(KB_Comma);
@@ -395,12 +398,12 @@ static std::string ControlIDToString(Enterprise::ControlID id)
 	CONTROLIDTOSTRIMPL(Mouse_Button_3);
 	CONTROLIDTOSTRIMPL(Mouse_Button_4);
 	CONTROLIDTOSTRIMPL(Mouse_Button_5);
-	CONTROLIDTOSTRIMPL(Mouse_Wheel_Y);
-	CONTROLIDTOSTRIMPL(Mouse_Wheel_X);
 	CONTROLIDTOSTRIMPL(Mouse_Pointer_X);
 	CONTROLIDTOSTRIMPL(Mouse_Pointer_Y);
 	CONTROLIDTOSTRIMPL(Mouse_Delta_X);
 	CONTROLIDTOSTRIMPL(Mouse_Delta_Y);
+	CONTROLIDTOSTRIMPL(Mouse_Wheel_Y);
+	CONTROLIDTOSTRIMPL(Mouse_Wheel_X);
 	CONTROLIDTOSTRIMPL(KB_Semicolon);
 	CONTROLIDTOSTRIMPL(KB_Plus);
 	CONTROLIDTOSTRIMPL(KB_Comma);
@@ -581,7 +584,8 @@ Input::ContextHandle Input::BindContext(HashName contextName,
 
 	for (const auto& axis : contextRegistry[contextName].axes)
 	{
-		axisValues[&contextStack[layer].front()][axis.name];
+		axisValues[0][&contextStack[layer].front()][axis.name];
+		axisValues[1][&contextStack[layer].front()][axis.name];
 	}
 	for (const auto& action : contextRegistry[contextName].actions)
 	{
@@ -623,12 +627,12 @@ void Input::BindAction(ContextHandle context, HashName actionName, ActionCallbac
 
 float Input::GetAxis(ContextHandle context, HashName axisName)
 {
-	EP_ASSERTF(axisValues.count(context) > 0,
-			   "Input::GetAxis(): context contains no input axes");
-	EP_ASSERTF(axisValues[context].count(axisName) > 0,
-			   "Input::GetAxis(): context does not contain this axis");
+	EP_ASSERTF_SLOW(axisValues[0].count(context) > 0,
+		"Input::GetAxis(): context contains no input axes");
+	EP_ASSERTF_SLOW(axisValues[0][context].count(axisName) > 0,
+		"Input::GetAxis(): context does not contain this axis");
 
-	return axisValues[context][axisName];
+	return axisValues[Time::inFixedTimestep()][context][axisName];
 }
 
 
@@ -713,7 +717,10 @@ void Input::ProcessContext(Input::Context& context)
 							{
 								// Map key to axis
 								if (kbmBuffer.keys[currentBuffer][0] & BIT(keyIndex))
-									axisValues[&context][axis.name] += axis.scale;
+								{
+									axisValues[0][&context][axis.name] += axis.scale;
+									axisValues[1][&context][axis.name] += axis.scale;
+								}
 
 								// Set key block bit if appropriate
 								if (context.blockingLevel > 0)
@@ -727,7 +734,10 @@ void Input::ProcessContext(Input::Context& context)
 							{
 								// Map key to axis
 								if (kbmBuffer.keys[currentBuffer][1] & BIT(keyIndex % 64))
-									axisValues[&context][axis.name] += axis.scale;
+								{
+									axisValues[0][&context][axis.name] += axis.scale;
+									axisValues[1][&context][axis.name] += axis.scale;
+								}
 
 								// Set key block bit if appropriate
 								if (context.blockingLevel > 0)
@@ -743,8 +753,19 @@ void Input::ProcessContext(Input::Context& context)
 						if (!kbmBuffer.axes_blockstatus[axisIndex])
 						{
 							// Not blocked.
+							if (axis.control == ControlID::Mouse_Pointer_X || axis.control == ControlID::Mouse_Pointer_Y)
+							{
+								// Pointer (unscaled)
+								axisValues[0][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex];
+								axisValues[1][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex];
+							}
+							else
+							{
+								// Delta or scroll
+								axisValues[0][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex] / Time::ActualRealDelta() * axis.scale;
+								axisValues[1][&context][axis.name] += mouseAxisAccumulator[axisIndex - 2] / mouseDeltaAccumulator * axis.scale;
+							}
 
-							axisValues[&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex] * axis.scale;
 							kbmBuffer.axes_blockstatus[axisIndex] |= (context.blockingLevel > 0);
 						}
 					}
@@ -852,7 +873,9 @@ void Input::ProcessContext(Input::Context& context)
 						// Unblocked button.
 						uint16_t control_flag = BIT(uint16_t(axis.control));
 
-						axisValues[&context][axis.name] +=
+						axisValues[0][&context][axis.name] +=
+							(gpBuffer[gamepad].buttons[currentBuffer] & control_flag ? 1.0f : 0.0f) * axis.scale;
+						axisValues[1][&context][axis.name] +=
 							(gpBuffer[gamepad].buttons[currentBuffer] & control_flag ? 1.0f : 0.0f) * axis.scale;
 
 						if (context.blockingLevel > 0)
@@ -864,7 +887,8 @@ void Input::ProcessContext(Input::Context& context)
 						// Unblocked axis.
 						int control = int(axis.control) - int(ControlID::_EndOfGPButtons) - 1;
 
-						axisValues[&context][axis.name] += gpBuffer[gamepad].axes[currentBuffer][control] * axis.scale;
+						axisValues[0][&context][axis.name] += gpBuffer[gamepad].axes[currentBuffer][control] * axis.scale;
+						axisValues[1][&context][axis.name] += gpBuffer[gamepad].axes[currentBuffer][control] * axis.scale;
 						gpBuffer[gamepad].axes_blockstatus[control] |= (context.blockingLevel > 0);
 					}
 					else
@@ -985,8 +1009,22 @@ void Input::Update()
 		memset(gamepadBufferIt.axes_blockstatus, false, sizeof(gamepadBufferIt.axes_blockstatus));
 	}
 
+	// Accumulate raw mouse deltas for use in FixedUpdate() axes
+	mouseAxisAccumulator[0] += kbmBuffer.axes[currentBuffer][2];
+	mouseAxisAccumulator[1] += kbmBuffer.axes[currentBuffer][3];
+	mouseAxisAccumulator[2] += kbmBuffer.axes[currentBuffer][4];
+	mouseAxisAccumulator[3] += kbmBuffer.axes[currentBuffer][5];
+	mouseDeltaAccumulator += Time::ActualRealDelta();
+
 	// Reset active context axes
-	for (auto& [context, axes] : axisValues)
+	for (auto& [context, axes] : axisValues[0])
+	{
+		for (auto& [axis, value] : axes)
+		{
+			value = 0.0f;
+		}
+	}
+	for (auto& [context, axes] : axisValues[1])
 	{
 		for (auto& [axis, value] : axes)
 		{
@@ -1003,6 +1041,13 @@ void Input::Update()
 		{
 			ProcessContext(context);
 		}
+	}
+
+	if (Time::isFixedUpdatePending())
+	{
+		// Clear raw mouse delta accumulators, as the results will be used this FixedUpdate()
+		memset(mouseAxisAccumulator, 0, sizeof(mouseAxisAccumulator));
+		mouseDeltaAccumulator = 0.0f;
 	}
 
 	// Flip buffers for the next frame

@@ -159,7 +159,39 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 	}
 	else if (ridata->header.dwType == RIM_TYPEMOUSE)
 	{
-		// TODO: Handle mouse events
+		EP_ASSERT((ridata->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0);
+
+		// Mouse Buttons
+		static_assert(BIT((int(ControlID::Mouse_Button_1) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x100000000000);
+		static_assert(BIT((int(ControlID::Mouse_Button_2) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x200000000000);
+		static_assert(BIT((int(ControlID::Mouse_Button_3) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x400000000000);
+		static_assert(BIT((int(ControlID::Mouse_Button_4) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x800000000000);
+		static_assert(BIT((int(ControlID::Mouse_Button_5) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x1000000000000);
+
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN))    kbmBuffer.keys[currentBuffer][1] |=  0x100000000000;
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x100000000000;
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN))    kbmBuffer.keys[currentBuffer][1] |=  0x200000000000;
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x200000000000;
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN))    kbmBuffer.keys[currentBuffer][1] |=  0x400000000000;
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x400000000000;
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN))    kbmBuffer.keys[currentBuffer][1] |=  0x800000000000;
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x800000000000;
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN))    kbmBuffer.keys[currentBuffer][1] |=  0x1000000000000;
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x1000000000000;
+
+		// Delta Movement
+		kbmBuffer.axes[currentBuffer][2] += ridata->data.mouse.lLastX;
+		kbmBuffer.axes[currentBuffer][3] -= ridata->data.mouse.lLastY;
+
+		// Scroll Wheel
+		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_WHEEL))
+		{
+			kbmBuffer.axes[currentBuffer][4] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
+		}
+		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_HWHEEL))
+		{
+			kbmBuffer.axes[currentBuffer][5] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
+		}
 	}
 
 	return true;

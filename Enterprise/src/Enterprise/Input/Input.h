@@ -138,7 +138,7 @@ private:
 	static std::forward_list<Context> contextStack[MaxInputContextLayers];
 	static std::map<ContextHandle, int> layerOfContext; // The layer number of a given context.
 	static std::map<ContextHandle, std::map<HashName, std::vector<ActionCallbackPtr>>> actionCallbacks;
-	static std::map<ContextHandle, std::map<HashName, float>> axisValues;
+	static std::map<ContextHandle, std::map<HashName, float>> axisValues[2];
 
 
 	static bool HandlePlatformEvents(Events::Event& e);

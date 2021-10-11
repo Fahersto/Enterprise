@@ -193,7 +193,7 @@ bool Application::Run()
 	Time::Update();
 	Input::Update();
 
-	while (Time::FixedUpdatePending())
+	while (Time::ProcessFixedUpdate())
 	{
 		//SceneManager::FixedUpdate();
 		//StateManager::FixedUpdate();

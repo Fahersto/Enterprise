@@ -15,11 +15,13 @@ static uint64_t measuredRealTickDelta, measuredGameTickDelta;
 static uint64_t realRunningTicks = 0, gameRunningTicks = 0;
 static uint64_t unsimmedRealTicks = 0, unsimmedGameTicks = 0;
 
+static bool inFixedTimestep_out = true;
 static float realRunningTime_out, gameRunningTime_out;
 static float realDelta_out, gameDelta_out;
 static float unsimmedRealTime_out, unsimmedGameTime_out;
 static float fixedFrameInterp_out;
 
+bool Time::inFixedTimestep() { return inFixedTimestep_out; }
 float Time::RealTime() { return realRunningTime_out; }
 float Time::GameTime() { return gameRunningTime_out; }
 float Time::RealDelta() { return realDelta_out; }
@@ -74,6 +76,8 @@ void Time::Update()
 	unsimmedGameTicks += measuredGameTickDelta;
 
 	// Going to FixedUpdate()
+	inFixedTimestep_out = true;
+
 #ifdef EP_CONFIG_DIST
 	realDelta_out = TicksToSeconds(fixedTimestepInRealTicks);
 #else
@@ -88,7 +92,7 @@ void Time::Update()
 	// TODO: Update time variables in shader uniform buffer
 }
 
-bool Time::FixedUpdatePending()
+bool Time::ProcessFixedUpdate()
 {
 #ifdef EP_CONFIG_DIST
 	if (unsimmedGameTicks >= fixedTimestepInGameTicks)
@@ -112,6 +116,8 @@ bool Time::FixedUpdatePending()
 	else
 	{
 		// Going to Update()
+		inFixedTimestep_out = false;
+
 		realRunningTime_out = TicksToSeconds(realRunningTicks);
 		gameRunningTime_out = TicksToSeconds(gameRunningTicks);
 
@@ -131,3 +137,17 @@ bool Time::FixedUpdatePending()
 	}
 }
 
+
+bool Time::isFixedUpdatePending()
+{
+#ifdef EP_CONFIG_DIST
+	return unsimmedGameTicks / fixedTimestepInGameTicks;
+#else
+	return unsimmedGameTicks / SecondsToTicks(Constants::Time::FixedTimestep);
+#endif
+}
+
+float Time::ActualRealDelta()
+{
+	return TicksToSeconds(measuredRealTickDelta);
+}

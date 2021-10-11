@@ -18,6 +18,10 @@ HCEX(double, MaxFrameDelta);
 class Time
 {
 public:
+	/// Check whether the current code path is in a FixedUpdate().
+	/// @return @c true if in FixedUpdate(), @c false if in Update() or Draw().
+	static bool inFixedTimestep();
+
 	/// Get the number of real seconds that have passed since application launch.
 	/// @return The number of real-world seconds between application launch and the start of the current frame.
 	/// @note If called from FixedUpdate(), the value is current to the start of the current fixed timestep.
@@ -60,6 +64,7 @@ public:
 
 private:
 	friend class Application;
+	friend class Input;
 
 	static void Init();
 	static void PlatformInit();
@@ -68,7 +73,11 @@ private:
 	static float TicksToSeconds(uint64_t ticks);
 
 	static void Update();
-	static bool FixedUpdatePending();
+	static bool ProcessFixedUpdate();
+
+	// Special access for values needed by the Input system
+	static float ActualRealDelta();
+	static bool isFixedUpdatePending();
 };
 
 }
