@@ -16,6 +16,8 @@ struct Vec2
 	float x;
 	float y;
 
+	Vec2() : x(0.0f), y(0.0f) {};
+	Vec2(float val) : x(val), y(val) {};
 	Vec2(float X, float Y) : x(X), y(Y) {};
 
 	/// @cond DOXYGEN_SKIP
