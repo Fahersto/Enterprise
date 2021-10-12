@@ -127,7 +127,7 @@ void Window::CreatePrimaryWindow()
 	memset(&pfd, 0, sizeof(pfd));
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;// | PFD_DOUBLEBUFFER;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 32;
 	pfd.cDepthBits = 24;
@@ -211,6 +211,37 @@ void Window::CreatePrimaryWindow()
 
 	// Display window
 	ShowWindow(hWnd, SW_SHOWNORMAL);
+
+	// Vsync
+	typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
+	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
+	if (wglGetExtensionsStringARB)
+	{
+		std::string_view supportedWGLExtensionsList(wglGetExtensionsStringARB(hDC));
+		if (supportedWGLExtensionsList.find("WGL_EXT_swap_control") != std::string::npos)
+		{
+			typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
+			PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+			if (wglSwapIntervalEXT)
+			{
+				if (wglSwapIntervalEXT(0) == FALSE) // TODO: Set from INI file
+				{
+					switch (GetLastError())
+					{
+					case ERROR_INVALID_DATA:
+						EP_ERROR("Window::CreatePrimaryWindow(): wglSwapIntervalEXT(): 'interval' was invalid!");
+						break;
+					case ERROR_DC_NOT_FOUND:
+						EP_ERROR("Window::CreatePrimaryWindow(): wglSwapIntervalEXT(): Device context not found!");
+						break;
+					}
+				}
+			}
+			else EP_WARN("Window::CreatePrimaryWindow(): wglSwapIntervalEXT() failed to load!  Vertical sync not available.");
+		}
+		else EP_WARN("Window::CreatePrimaryWindow(): WGL_EXT_swap_control unsupported!Vertical sync not available.");
+	}
+	else EP_ERROR("Window::CreatePrimaryWindow(): wglGetExtensionsStringARB() failed to load!  WGL extensions not available.");
 }
 
 void Window::DestroyPrimaryWindow()
@@ -231,7 +262,6 @@ void Window::DestroyPrimaryWindow()
 
 void Window::SwapBuffers()
 {
-	glFlush();
 	::SwapBuffers(hDC);
 }
 

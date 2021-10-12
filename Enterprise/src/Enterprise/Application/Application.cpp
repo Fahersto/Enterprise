@@ -10,6 +10,7 @@
 #include "Enterprise/File/File.h"
 #include "Enterprise/Input/Input.h"
 #include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Graphics/Window.h"
 
 namespace Enterprise
 {
@@ -202,10 +203,10 @@ bool Application::Run()
 	//SceneManager::Update();
 	//StateManager::Update();
 
+	Window::SwapBuffers();
+	Graphics::PreDraw();
 	//SceneManager::Draw()
 	//StateManager::Draw();
-
-	Graphics::PostDraw();
 
 	return _isRunning;
 }

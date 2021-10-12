@@ -96,7 +96,7 @@ void Window::CreatePrimaryWindow()
 		view = [[NSOpenGLView alloc] initWithFrame:viewingRect pixelFormat:pixelFormat];
 
 		// Make context current and set up Glad
-		GLint swapInt = 1; // TODO: Set from INI file
+		GLint swapInt = 0; // TODO: Set from INI file
 		[[view openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 		[[view openGLContext] makeCurrentContext];
 		EP_VERIFY(gladLoadGL());
