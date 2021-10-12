@@ -180,8 +180,8 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)) kbmBuffer.keys[currentBuffer][1] &= ~0x1000000000000;
 
 		// Delta Movement
-		kbmBuffer.axes[currentBuffer][2] += ridata->data.mouse.lLastX;
-		kbmBuffer.axes[currentBuffer][3] -= ridata->data.mouse.lLastY;
+		kbmBuffer.axes[currentBuffer][0] += ridata->data.mouse.lLastX;
+		kbmBuffer.axes[currentBuffer][1] -= ridata->data.mouse.lLastY;
 
 		// Scroll Wheel
 		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_WHEEL))

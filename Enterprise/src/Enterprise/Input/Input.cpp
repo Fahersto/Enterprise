@@ -8,6 +8,7 @@ using Enterprise::Events;
 using Enterprise::Time;
 
 Input::KBMouseBuffer Input::kbmBuffer;
+Enterprise::Math::Vec2 Input::cursorPos;
 std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 2.
 bool Input::currentBuffer = 0;
 
@@ -244,8 +245,6 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(Mouse_Button_3);
 	STRTOCONTROLIDIMPL(Mouse_Button_4);
 	STRTOCONTROLIDIMPL(Mouse_Button_5);
-    STRTOCONTROLIDIMPL(Mouse_Pointer_X);
-    STRTOCONTROLIDIMPL(Mouse_Pointer_Y);
     STRTOCONTROLIDIMPL(Mouse_Delta_X);
     STRTOCONTROLIDIMPL(Mouse_Delta_Y);
 	STRTOCONTROLIDIMPL(Mouse_Wheel_Y);
@@ -398,8 +397,6 @@ static std::string ControlIDToString(Enterprise::ControlID id)
 	CONTROLIDTOSTRIMPL(Mouse_Button_3);
 	CONTROLIDTOSTRIMPL(Mouse_Button_4);
 	CONTROLIDTOSTRIMPL(Mouse_Button_5);
-	CONTROLIDTOSTRIMPL(Mouse_Pointer_X);
-	CONTROLIDTOSTRIMPL(Mouse_Pointer_Y);
 	CONTROLIDTOSTRIMPL(Mouse_Delta_X);
 	CONTROLIDTOSTRIMPL(Mouse_Delta_Y);
 	CONTROLIDTOSTRIMPL(Mouse_Wheel_Y);
@@ -753,18 +750,8 @@ void Input::ProcessContext(Input::Context& context)
 						if (!kbmBuffer.axes_blockstatus[axisIndex])
 						{
 							// Not blocked.
-							if (axis.control == ControlID::Mouse_Pointer_X || axis.control == ControlID::Mouse_Pointer_Y)
-							{
-								// Pointer (unscaled)
-								axisValues[0][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex];
-								axisValues[1][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex];
-							}
-							else
-							{
-								// Delta or scroll
-								axisValues[0][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex] / Time::ActualRealDelta() * axis.scale;
-								axisValues[1][&context][axis.name] += mouseAxisAccumulator[axisIndex - 2] / mouseDeltaAccumulator * axis.scale;
-							}
+							axisValues[0][&context][axis.name] += kbmBuffer.axes[currentBuffer][axisIndex] / Time::ActualRealDelta() * axis.scale;
+							axisValues[1][&context][axis.name] += mouseAxisAccumulator[axisIndex] / mouseDeltaAccumulator * axis.scale;
 
 							kbmBuffer.axes_blockstatus[axisIndex] |= (context.blockingLevel > 0);
 						}
@@ -991,6 +978,16 @@ void Input::Init()
 			return false;
 		});
 
+	// Catch mouse position events for polling
+	Events::Subscribe(
+		HN("MousePosition"),
+		[](Events::Event& e)
+		{
+			auto position = Events::Unpack<Math::Vec2>(e);
+			cursorPos = position;
+			return true;
+		});
+
 	// Bind the keyboard and mouse to StreamID 1 by default
 	BindController(ControllerID(1), StreamID(1));
 }
@@ -1010,10 +1007,10 @@ void Input::Update()
 	}
 
 	// Accumulate raw mouse deltas for use in FixedUpdate() axes
-	mouseAxisAccumulator[0] += kbmBuffer.axes[currentBuffer][2];
-	mouseAxisAccumulator[1] += kbmBuffer.axes[currentBuffer][3];
-	mouseAxisAccumulator[2] += kbmBuffer.axes[currentBuffer][4];
-	mouseAxisAccumulator[3] += kbmBuffer.axes[currentBuffer][5];
+	mouseAxisAccumulator[0] += kbmBuffer.axes[currentBuffer][0];
+	mouseAxisAccumulator[1] += kbmBuffer.axes[currentBuffer][1];
+	mouseAxisAccumulator[2] += kbmBuffer.axes[currentBuffer][2];
+	mouseAxisAccumulator[3] += kbmBuffer.axes[currentBuffer][3];
 	mouseDeltaAccumulator += Time::ActualRealDelta();
 
 	// Reset active context axes

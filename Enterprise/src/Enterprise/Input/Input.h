@@ -2,7 +2,8 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-#include "Enterprise/Events/Events.h"
+#include "../Events/Events.h"
+#include "../Graphics/Math.h"
 #include "ControlIDs.h"
 
 namespace Enterprise
@@ -71,6 +72,12 @@ public:
 	/// @return The current value of the axis.
 	static float GetAxis(ContextHandle context, HashName axisName);
 
+	/// Get the current position of the mouse cursor.
+	/// @return The current position of the cursor in pixel coordinates.
+	/// @remarks Pixel space is relative to the lower left corner of the window or screen, where that corner is (0, 0)
+	/// and the upper-right corner is (Window::GetWidth(), Window::GetHeight()).
+	static inline Math::Vec2 GetMousePos() { return cursorPos; };
+
 private:
 	friend class Application;
 
@@ -107,6 +114,7 @@ private:
 	};
 
 	static KBMouseBuffer kbmBuffer;
+	static Math::Vec2 cursorPos;
 	static std::vector<GamePadBuffer> gpBuffer;
 	static bool currentBuffer; // used as index to double-buffered raw input
 

@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "../Window.h"
 #include "Enterprise/Events/Events.h"
+#include "Enterprise/Graphics/Math.h"
 
 using Enterprise::Events;
 using Enterprise::Window;
@@ -38,7 +39,8 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_MOUSEMOVE: // Mouse cursor position change
-		Events::Dispatch(HN("MousePosition"), std::pair<int, int>(LOWORD(lParam), HIWORD(lParam)));
+		Events::Dispatch(HN("MousePosition"),
+			Enterprise::Math::Vec2(GET_X_LPARAM(lParam), float(Window::GetHeight()) - GET_Y_LPARAM(lParam)));
 		break;
 
 	case WM_INPUT: // Raw Input API

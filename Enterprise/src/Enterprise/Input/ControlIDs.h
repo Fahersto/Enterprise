@@ -169,8 +169,6 @@ enum class ControlID
 
 	_EndOfKBMouseButtons,
 
-	Mouse_Pointer_X,
-	Mouse_Pointer_Y,
 	Mouse_Delta_X,
 	Mouse_Delta_Y,
 	Mouse_Wheel_Y,
