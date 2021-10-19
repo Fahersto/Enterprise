@@ -1052,14 +1052,8 @@ void Input::Update()
 		{
 			ProcessContext(*it);
 			prev++;
-			if (it != prev)
-			{
-				// The contxt was popped during an action callback.
-				if (prev != contextStack[i].end())
-					it = prev;
-				else
-					break;
-			}
+			it = prev;
+			if (it == contextStack[i].end()) break;
 		}
 	}
 
