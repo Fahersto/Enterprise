@@ -1,6 +1,7 @@
 #pragma once
 #include "EP_PCH.h"
 #include "Core.h"
+#include "Enterprise/StateManager/StateManager.h"
 
 namespace Enterprise
 {
@@ -60,12 +61,18 @@ public:
     /// Register a callback for an event type.
     /// @param type The HashName of the event type.
     /// @param callback A pointer to the callback function.
-    static void Subscribe(HashName type, EventCallbackPtr callback);
+	/// @return @c callback.  Useful for tracking the callback address when it is a lambda expression.
+    static EventCallbackPtr Subscribe(HashName type, EventCallbackPtr callback);
 
     /// Register a callback for multiple event types at once.
     /// @param types A list of HashNames for event types to subscribe to.
     /// @param callback A pointer to the callback function.
     static void Subscribe(std::initializer_list<HashName> types, EventCallbackPtr callback);
+
+	/// Unregister an event callback.
+	/// @param type The HashName of the event type.
+	/// @param callback The pointer to the callback function.
+	static void Unsubscribe(HashName type, EventCallbackPtr callback);
 
     
     /// Dispatch a pre-made event.
@@ -91,8 +98,11 @@ public:
                   callbackit != callbackPtrs[type].rend();
                   ++callbackit)
         {
-            if ((*callbackit)(e))
-                break;
+			StateManager::State* prevActiveState = StateManager::activeState;
+			StateManager::activeState = callbackit->second;
+			bool willBreak = callbackit->first(e);
+			StateManager::activeState = prevActiveState;
+			if (willBreak) break;
         }
     }
 
@@ -114,9 +124,8 @@ public:
     
 private:
 
-    /// Hash table of callback pointer vectors.  Key is the HashName of the event type.
-    /// @note Callbacks are invoked in FILO order.
-    static std::unordered_map<HashName, std::vector<Events::EventCallbackPtr>> callbackPtrs;
+	// Key is the HashName of the event type.  State pointer is address of active state.
+	static std::unordered_map<HashName, std::list<std::pair<Events::EventCallbackPtr, StateManager::State*>>> callbackPtrs;
 
 };
 

@@ -1,20 +1,20 @@
 #include "EP_PCH.h"
 #include "Events.h"
 
-namespace Enterprise
-{
+using Enterprise::Events;
+using Enterprise::StateManager;
 
-std::unordered_map<HashName, std::vector<Events::EventCallbackPtr>> Events::callbackPtrs;
+std::unordered_map<HashName, std::list<std::pair<Events::EventCallbackPtr, StateManager::State*>>> Events::callbackPtrs;
 
-void Events::Subscribe(HashName type, EventCallbackPtr callback)
+Events::EventCallbackPtr Events::Subscribe(HashName type, EventCallbackPtr callback)
 {
-    #ifndef EP_CONFIG_DIST
+    #ifdef EP_CONFIG_DEBUG
 
     // For every callback already registered for this type...
     for (auto it = callbackPtrs[type].begin(); it != callbackPtrs[type].end(); ++it)
     {
         // ...check that it isn't the callback we're trying to register.
-        if ((*it) == callback)
+        if (it->first == callback)
         {
             EP_WARN("Events: Duplicate subscription to single event type on a callback.  "
                     "\nType: {}", HN_ToStr(type));
@@ -24,7 +24,8 @@ void Events::Subscribe(HashName type, EventCallbackPtr callback)
 
     #endif
     
-    callbackPtrs[type].emplace_back(callback);
+    callbackPtrs[type].emplace_back(std::pair(callback, StateManager::activeState));
+	return callback;
 }
 
 void Events::Subscribe(std::initializer_list<HashName> types, EventCallbackPtr callback)
@@ -35,6 +36,20 @@ void Events::Subscribe(std::initializer_list<HashName> types, EventCallbackPtr c
     }
 }
 
+void Events::Unsubscribe(HashName type, EventCallbackPtr callback)
+{
+	for (auto it = callbackPtrs[type].begin(); it != callbackPtrs[type].end(); )
+	{
+		if (it->first == callback)
+		{
+			it = callbackPtrs[type].erase(it);
+			break;
+		}
+		else
+			it++;
+	}
+}
+
 void Events::Dispatch(Event& e)
 {
     // Call each registered callback until one returns true
@@ -42,8 +57,11 @@ void Events::Dispatch(Event& e)
          callbackit != callbackPtrs[e.Type()].rend();
          ++callbackit)
     {
-        if ((*callbackit)(e))
-            break;
+		StateManager::State* prevActiveState = StateManager::activeState;
+		StateManager::activeState = callbackit->second;
+		bool willBreak = callbackit->first(e);
+		StateManager::activeState = prevActiveState;
+		if (willBreak) break;
     }
 }
 
@@ -57,9 +75,10 @@ void Events::Dispatch(HashName type)
          callbackit != callbackPtrs[type].rend();
          ++callbackit)
     {
-        if ((*callbackit)(e))
-            break;
+		StateManager::State* prevActiveState = StateManager::activeState;
+		StateManager::activeState = callbackit->second;
+		bool willBreak = callbackit->first(e);
+		StateManager::activeState = prevActiveState;
+		if (willBreak) break;
     }
-}
-
 }

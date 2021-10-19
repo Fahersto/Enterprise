@@ -2,10 +2,12 @@
 #include "Input.h"
 #include "Enterprise/File/File.h"
 #include "Enterprise/Time/Time.h"
+#include "Enterprise/StateManager/StateManager.h"
 
 using Enterprise::Input;
 using Enterprise::Events;
 using Enterprise::Time;
+using Enterprise::StateManager;
 
 Input::KBMouseBuffer Input::kbmBuffer;
 Enterprise::Math::Vec2 Input::cursorPos;
@@ -15,7 +17,7 @@ bool Input::currentBuffer = 0;
 std::map<HashName, Input::Context> Input::contextRegistry;
 std::forward_list<Input::Context> Input::contextStack[MaxInputContextLayers];
 std::map<Input::ContextHandle, int> Input::layerOfContext;
-std::map<void*, std::map<HashName, std::vector<Input::ActionCallbackPtr>>> Input::actionCallbacks;
+static std::map<void*, std::map<HashName, std::vector<std::pair<Input::ActionCallbackPtr, StateManager::State*>>>> actionCallbacks;
 std::map<void*, std::map<HashName, float>> Input::axisValues[2]; // Array index is Time::inFixedTimestep().
 static float mouseAxisAccumulator[4] = { 0 };
 static float mouseDeltaAccumulator = 0.0f;
@@ -597,6 +599,7 @@ void Input::PopContext(ContextHandle context)
 	EP_ASSERTF(layerOfContext.count(context) > 0,
 			   "Input::PopContext(): 'context' is not currently bound.");
 	int layer = layerOfContext[context];
+	layerOfContext.erase(context);
 
 	auto prev = contextStack[layer].before_begin();
 	for (auto it = contextStack[layer].begin();
@@ -605,10 +608,14 @@ void Input::PopContext(ContextHandle context)
 	{
 		if (&(*it) == context)
 		{
+			axisValues[0].erase(&(*it));
+			axisValues[1].erase(&(*it));
+			actionCallbacks.erase(&(*it));
 			contextStack[layer].erase_after(prev);
 			break;
 		}
-		prev = it;
+		prev++;
+		it = prev;
 	}
 }
 
@@ -619,7 +626,7 @@ void Input::BindAction(ContextHandle context, HashName actionName, ActionCallbac
 	EP_ASSERTF(actionCallbacks[context].count(actionName) > 0,
 			   "Input::BindAction(): context does not contain this action");
 
-	actionCallbacks[context][actionName].push_back(callback);
+	actionCallbacks[context][actionName].emplace_back(std::pair(callback, StateManager::activeState));
 }
 
 float Input::GetAxis(ContextHandle context, HashName axisName)
@@ -841,7 +848,9 @@ void Input::ProcessContext(Input::Context& context)
 				{
 					for (const auto& callback : actionCallbacks[&context][actionName])
 					{
-						callback();
+						StateManager::activeState = callback.second;
+						callback.first();
+						StateManager::activeState = nullptr;
 					}
 				}
 			}
@@ -955,7 +964,9 @@ void Input::ProcessContext(Input::Context& context)
 				{
 					for (const auto& callback : actionCallbacks[&context][actionName])
 					{
-						callback();
+						StateManager::activeState = callback.second;
+						callback.first();
+						StateManager::activeState = nullptr;
 					}
 				}
 			}
@@ -1034,9 +1045,21 @@ void Input::Update()
 	CheckForControllerWake();
 	for (int i = 0; i < MaxInputContextLayers; i++)
 	{
-		for (auto& context : contextStack[i])
+		auto prev = contextStack[i].before_begin();
+		for (auto it = contextStack[i].begin();
+			 it != contextStack[i].end();
+			 ++it)
 		{
-			ProcessContext(context);
+			ProcessContext(*it);
+			prev++;
+			if (it != prev)
+			{
+				// The contxt was popped during an action callback.
+				if (prev != contextStack[i].end())
+					it = prev;
+				else
+					break;
+			}
 		}
 	}
 
