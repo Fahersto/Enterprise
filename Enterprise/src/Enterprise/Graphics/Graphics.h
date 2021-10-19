@@ -223,8 +223,9 @@ public:
 	/// @param texture The handle of the texture.
 	/// @note If the reference count for a texture reaches 0, it is deleted from GPU memory.
 	static void DeleteTexture(TextureHandle texture);
-	/// Bind a texture to a sampler uniform.
+	/// Bind a texture to a sampler uniform in a shader program.
 	/// @param texture The handle of the texture.
+	/// @param uniform The HashName of the sampler uniform to bind to.
 	static void BindTexture(TextureHandle texture, HashName uniform);
 
 
