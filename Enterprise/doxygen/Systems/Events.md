@@ -93,7 +93,7 @@ For an example of event blocking, consider the close button ("X") on the game wi
 
 ## Lambdas as Event Handlers
 
-It is possible to use lambdas as event callbacks, as long as its signature matches that of Events::EventCallbackPtr.  This can consolidate your code considerably in some situations.
+It is possible to use lambdas as event callbacks, as long as they are captureless and have signatures matching Events::EventCallbackPtr.  This can consolidate your code considerably in some situations.
 
 ```cpp
 using Enterprise::Events;

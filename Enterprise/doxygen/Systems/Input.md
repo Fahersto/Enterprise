@@ -341,7 +341,7 @@ void Init()
 }
 ```
 
-The callback must be of type Input::ActionCallbackPtr, which is a simple `void` function which takes no parameters.  Lambdas can be used as action callbacks as well:
+The callback must be of type Input::ActionCallbackPtr, meaning it takes no parameters and returns `void`.  Lambdas can be used as action callbacks as well, provided that they are captureless:
 
 ```cpp
 Input::BindAction(context, HN("Jump"), [](){ player.Jump(); });
