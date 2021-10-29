@@ -44,6 +44,11 @@ group "Dependencies"
             optimize "On"
         filter {}
 
+    include "Enterprise/_vendor/yaml-cpp/pm_library.lua" -- stb_image
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
+
 group "" -- Dependencies
 
 
@@ -51,7 +56,7 @@ group "" -- Dependencies
 project "Enterprise"
     kind "StaticLib"
     location "%{prj.name}"
-    links { "CTSpookyHash", "HotConsts", "Glad", "stb_image" }
+    links { "CTSpookyHash", "HotConsts", "Glad", "stb_image", "yaml-cpp" }
     language "C++"
 
     -- Platform-specific build settings
@@ -106,7 +111,8 @@ project "Enterprise"
         "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include",
         "Enterprise/_vendor/Glad/include",
-        "Enterprise/_vendor/stb_image/include"
+        "Enterprise/_vendor/stb_image/include",
+        "Enterprise/_vendor/yaml-cpp/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CORE"
@@ -190,7 +196,8 @@ project (EP_ProjectName)
         "Enterprise/_vendor/CTSpookyHash/include",
         "Enterprise/_vendor/HotConsts/include",
         "Enterprise/_vendor/Glad/include",
-        "Enterprise/_vendor/stb_image/include"
+        "Enterprise/_vendor/stb_image/include",
+        "Enterprise/_vendor/yaml-cpp/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CLIENT"
