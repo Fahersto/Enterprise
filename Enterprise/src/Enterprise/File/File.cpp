@@ -118,7 +118,25 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 		rewind(fhandle);
 		fread(&(*outString)[0], 1, outString->size(), fhandle);
 		fclose(fhandle);
-		outString->resize(outString->find_last_not_of('\0'));
+
+		// Convert CRLF to LF
+		size_t charsToSkip = 0;
+		for (size_t i = 0; i < outString->size(); i++)
+		{
+			if (i + charsToSkip < outString->size())
+			{
+				if ((*outString)[i + charsToSkip] == '\r' && (*outString)[i + charsToSkip + 1] == '\n')
+				{
+					charsToSkip++;
+				}
+				(*outString)[i] = (*outString)[i + charsToSkip];
+			}
+			else
+			{
+				outString->resize(i);
+			}
+		}
+
 		return ErrorCode::Success;
 	}
 	else
@@ -272,7 +290,13 @@ std::string File::TextFileReader::ReadNextLine()
 				if (returnVal.back() == '\n')
 				{
 					// Get rid of trailing newline character
+#ifdef _WIN32
 					returnVal.resize(returnVal.size() - 1);
+#else
+					// On macOS, CRLF is not automatically converted by fgets().
+					returnVal.resize(returnVal.size() - 1 - (returnVal[returnVal.size() - 2] == '\r'));
+#endif
+
 					m_LineNo++;
 					done = true;
 				}
