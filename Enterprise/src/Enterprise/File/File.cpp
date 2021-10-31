@@ -81,6 +81,7 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 		rewind(fhandle);
 		fread_s(&(*outString)[0], outString->size(), 1, outString->size(), fhandle);
 		fclose(fhandle);
+		outString->resize(outString->find_last_not_of('\0'));
 		return ErrorCode::Success;
 	}
 	else
@@ -117,6 +118,7 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 		rewind(fhandle);
 		fread(&(*outString)[0], 1, outString->size(), fhandle);
 		fclose(fhandle);
+		outString->resize(outString->find_last_not_of('\0'));
 		return ErrorCode::Success;
 	}
 	else
