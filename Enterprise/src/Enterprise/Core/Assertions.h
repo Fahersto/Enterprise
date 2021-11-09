@@ -20,13 +20,16 @@
 	generated as well.
 */
 
-
+#ifndef EP_CONFIG_DIST
 #ifdef _WIN32
 /// Portably triggers a breakpoint in the debugger.
 #define EP_DEBUGBREAK() (__nop(), __debugbreak())
 #elif defined(__APPLE__) && defined(__MACH__)
 /// Portably triggers a breakpoint in the debugger.
 #define EP_DEBUGBREAK() __asm__("int $3")
+#endif
+#else
+#define EP_DEBUGBREAK() 
 #endif
 
 
