@@ -103,7 +103,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 				{
 					if (!inMultilineComment)
 					{
-						cursor = line.find_first_not_of(" \t", cursor);
+						cursor = line.find_first_not_of(" \t\r", cursor);
 						if (cursor != std::string_view::npos)
 						{
 							if (line[cursor] == '/')
@@ -227,7 +227,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 					// TODO: Add support for quoted program names
 					if (!inMultilineComment)
 					{
-						cursor = line.find_first_not_of(" \t", cursor);
+						cursor = line.find_first_not_of(" \t\r", cursor);
 						if (cursor != std::string_view::npos)
 						{
 							if (line[cursor] == '/')
@@ -290,7 +290,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 
 								for (size_t subcursor = cursor; subcursor != std::string_view::npos; )
 								{
-									subcursor = line.find_first_of(" \t/", subcursor);
+									subcursor = line.find_first_of(" \t\r/", subcursor);
 									if (subcursor != std::string_view::npos)
 									{
 										if (line[subcursor] == '/')
@@ -367,7 +367,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 													{
 														if (!inMultilineComment)
 														{
-															subcursor = line.find_first_not_of(" \t", subcursor);
+															subcursor = line.find_first_not_of(" \t\r", subcursor);
 															if (subcursor != std::string_view::npos)
 															{
 																if (line[subcursor] == '/')
@@ -503,7 +503,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 											{
 												if (!inMultilineComment)
 												{
-													subcursor = line.find_first_not_of(" \t", subcursor);
+													subcursor = line.find_first_not_of(" \t\r", subcursor);
 													if (subcursor != std::string_view::npos)
 													{
 														if (line[subcursor] == '/')
@@ -664,7 +664,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 												{
 													if (!inMultilineComment)
 													{
-														cursor = line.find_first_not_of(" \t", cursor);
+														cursor = line.find_first_not_of(" \t\r", cursor);
 														if (cursor != std::string_view::npos)
 														{
 															if (line[cursor] == '/')
@@ -755,7 +755,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 												{
 													if (!inMultilineComment)
 													{
-														cursor = line.find_first_not_of(" \t", cursor);
+														cursor = line.find_first_not_of(" \t\r", cursor);
 														if (cursor != std::string_view::npos)
 														{
 															if (line[cursor] == '/')
@@ -778,14 +778,14 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 																	{
 																		// Invalid token start.
 																		EP_ERROR("Graphics::CompileShaderSrc(): Invalid variant option name!  Token begins with forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
-																		cursor = std::min({line.find_first_of(" \t", cursor), line.find("//", cursor), line.find("/*")});
+																		cursor = std::min({line.find_first_of(" \t\r", cursor), line.find("//", cursor), line.find("/*")});
 																	}
 																}
 															}
 															else
 															{
 																// Valid token start.
-																size_t subcursor = line.find_first_of(" \t/", cursor);
+																size_t subcursor = line.find_first_of(" \t\r/", cursor);
 																if (subcursor != std::string_view::npos)
 																{
 																	if (line[subcursor] == '/')
@@ -817,7 +817,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 																				EP_ERROR("Graphics::CompileShaderSrc(): Invalid variant option name!  Token contains forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
 																				cursor = std::min(
 																				{
-																					line.find_first_of(" \t", subcursor),
+																					line.find_first_of(" \t\r", subcursor),
 																					line.find("//", subcursor),
 																					line.find("/*", subcursor)
 																				});
@@ -1022,7 +1022,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 				{
 					if (!inMultilineComment)
 					{
-						cursor = line.find_first_not_of(" \t", cursor);
+						cursor = line.find_first_not_of(" \t\r", cursor);
 						if (cursor != std::string_view::npos)
 						{
 							if (line.compare(cursor, 6, "vertex") == 0)
@@ -1034,7 +1034,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 								{
 									if (!inMultilineComment)
 									{
-										cursor = line.find_first_not_of(" \t", cursor);
+										cursor = line.find_first_not_of(" \t\r", cursor);
 										if (cursor != std::string_view::npos)
 										{
 											if (line[cursor] == '/')
@@ -1057,7 +1057,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 													{
 														// Slash was the start of an invalid token.
 														EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-														cursor = line.find_first_of(" \t/", cursor);
+														cursor = line.find_first_of(" \t\r/", cursor);
 													}
 												}
 												else
@@ -1071,7 +1071,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 											{
 												// unexpected
 												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-												cursor = line.find_first_of(" \t/", cursor);
+												cursor = line.find_first_of(" \t\r/", cursor);
 											}
 										}
 									}
@@ -1109,7 +1109,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 								{
 									if (!inMultilineComment)
 									{
-										cursor = line.find_first_not_of(" \t", cursor);
+										cursor = line.find_first_not_of(" \t\r", cursor);
 										if (cursor != std::string_view::npos)
 										{
 											if (line[cursor] == '/')
@@ -1132,7 +1132,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 													{
 														// Slash was the start of an invalid token.
 														EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-														cursor = line.find_first_of(" \t/", cursor);
+														cursor = line.find_first_of(" \t\r/", cursor);
 													}
 												}
 												else
@@ -1145,7 +1145,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 											else
 											{
 												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-												cursor = line.find_first_of(" \t/", cursor);
+												cursor = line.find_first_of(" \t\r/", cursor);
 											}
 										}
 									}
