@@ -841,7 +841,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, const std::string
 											else
 												// value is not quoted
 											{
-												pos2 = line.find_first_of(" \t\r)", pos);
+												pos2 = line.find_first_of(" \t\r,)", pos);
 												m_dictdata[section][key].back().emplace(std::make_pair(subkey, line.substr(pos, pos2 - pos)));
 											}
 										}
