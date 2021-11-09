@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include <memory>
 #include <array>
@@ -18,6 +19,7 @@
 #include <algorithm>
 #include <set>
 #include <stack>
+#include <variant>
 
 #include <string>
 #include <wchar.h>

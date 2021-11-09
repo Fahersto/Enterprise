@@ -7,12 +7,12 @@ using Enterprise::Application;
 
 std::string File::contentDirPath;
 std::string File::userDirPath;
-std::string File::machineDirPath;
+std::string File::globalDirPath;
 std::string File::saveDirPath;
 std::string File::tempDirPath;
 
 
-void File::BackslashesToSlashes(std::string& str)
+void File::backslashesToSlashes(std::string& str)
 {
 	for (auto it = str.begin(); it != str.end(); ++it)
 	{
@@ -23,290 +23,174 @@ void File::BackslashesToSlashes(std::string& str)
 	}
 }
 
-void File::SlashesToBackslashes(std::string& str)
+bool File::isAlphanumeric(const std::string& str)
 {
-	for (auto it = str.begin(); it != str.end(); ++it)
+	for (const char& c : str)
 	{
-		if (*it == '\\')
+		if (c != '-' && c != '.' && c != '_' &&
+			!(c >= 0x41 && c <= 0x5A) && !(c >= 0x61 && c <= 0x7A) && // Letters
+			!(c >= 0x30 && c <= 0x39)) // Numbers
 		{
-			*it = '/';
+			return false;
 		}
+	}
+
+	return true;
+}
+
+bool File::isAlphanumeric(const std::string_view& str)
+{
+	for (const char& c : str)
+	{
+		if (c != '-' && c != '.' && c != '_' &&
+			!(c >= 0x41 && c <= 0x5A) && !(c >= 0x61 && c <= 0x7A) && // Letters
+			!(c >= 0x30 && c <= 0x39)) // Numbers
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+std::string Enterprise::File::VirtualPathToNative(const std::string& path)
+{
+	if (path.rfind("c/", 0) == 0)
+	{
+		return contentDirPath + path.substr(2);
+	}
+	else if (path.rfind("u/", 0) == 0)
+	{
+		return userDirPath + path.substr(2);
+	}
+	else if (path.rfind("g/", 0) == 0)
+	{
+		return globalDirPath + path.substr(2);
+	}
+	else if (path.rfind("s/", 0) == 0)
+	{
+		return saveDirPath + path.substr(2);
+	}
+	else
+	{
+		return path;
 	}
 }
 
 
 bool File::Exists(const std::string& path)
 {
-	FILE* handle;
-	errno_t errorcode = 0;
+	std::error_code ec;
+	bool returnVal = std::filesystem::exists(VirtualPathToNative(path), ec);
+	if (ec)
+	{
+		EP_ERROR("File::Exists(): Error checking file!  File: \"{}\", "
+			"Error: {}, {}", path, ec.value(), ec.message());
+	}
 
-#ifdef _WIN32
-	errorcode = fopen_s(&handle, path.c_str(), "r");
-#else
-	handle = fopen(path.c_str(), "r");
-#endif
-
-	if (errorcode == 0)
-	{
-		// File exists and is open
-		fclose(handle);
-		return true;
-	}
-	else if (errorcode != ENOENT)
-	{
-		// File exists, but won't open.
-		return true;
-	}
-	else
-	{
-		// File does not exist.
-		return false;
-	}
+	return returnVal;
 }
 
-
-File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outString)
-{
-	std::string nativePath = VPathToNativePath(path);
-
-#ifdef _WIN32
-
-	FILE* fhandle = NULL;
-	errno_t err = fopen_s(&fhandle, nativePath.c_str(), "r");
-
-	if (err == 0)
-	{
-		fseek(fhandle, 0, SEEK_END);
-		outString->resize(ftell(fhandle));
-		rewind(fhandle);
-		fread_s(&(*outString)[0], outString->size(), 1, outString->size(), fhandle);
-		fclose(fhandle);
-		outString->resize(outString->find_last_not_of('\0'));
-		return ErrorCode::Success;
-	}
-	else
-	{
-		char errormessage[80];
-		strerror_s(errormessage, err);
-		EP_ERROR("File::LoadTextFile(): Error opening file. {}", errormessage);
-
-		if (errno == EACCES)
-		{
-			// Permission Denied
-			return ErrorCode::PermissionFailure;
-		}
-		if (errno == ENOENT)
-		{
-			// File does not exist
-			return ErrorCode::DoesNotExist;
-		}
-		else
-		{
-			// Unhandled error
-			return ErrorCode::Unhandled;
-		}
-	}
-
-#else // macOS
-
-	FILE* fhandle = fopen(nativePath.c_str(), "r");
-
-	if (fhandle)
-	{
-		fseek(fhandle, 0, SEEK_END);
-		outString->resize(ftell(fhandle));
-		rewind(fhandle);
-		fread(&(*outString)[0], 1, outString->size(), fhandle);
-		fclose(fhandle);
-
-		// Convert CRLF to LF
-		size_t charsToSkip = 0;
-		for (size_t i = 0; i < outString->size(); i++)
-		{
-			if (i + charsToSkip < outString->size())
-			{
-				if ((*outString)[i + charsToSkip] == '\r' && (*outString)[i + charsToSkip + 1] == '\n')
-				{
-					charsToSkip++;
-				}
-				(*outString)[i] = (*outString)[i + charsToSkip];
-			}
-			else
-			{
-				outString->resize(i);
-			}
-		}
-
-		return ErrorCode::Success;
-	}
-	else
-	{
-		EP_ERROR("File::LoadTextFile(): Error opening file. {}", strerror(errno));
-
-		if (errno == EACCES)
-		{
-			// Permission Denied
-			return ErrorCode::PermissionFailure;
-		}
-		if (errno == ENOENT)
-		{
-			// File does not exist
-			return ErrorCode::DoesNotExist;
-		}
-		else
-		{
-			// Unhandled error
-			return ErrorCode::Unhandled;
-		}
-	}
-
-#endif
-}
 
 File::ErrorCode File::TextFileReader::Open(const std::string& path)
 {
-	if (m_isHandleOpen)
+	m_LineNo = 0;
+	m_path = path;
+
+	if (m_stream.is_open()) Close();
+	m_stream.open(VirtualPathToNative(path), std::ios_base::in);
+
+	if (m_stream.fail())
 	{
-		this->Close();
-	}
-
-	std::string nativePath = VPathToNativePath(path);
-
-#ifdef _WIN32
-
-	errno_t err = fopen_s(&m_handle, nativePath.c_str(), "r");
-
-	if (err == 0)
-	{
-		m_errorcode = ErrorCode::Success;
-		m_LineNo = 0;
-		m_isHandleOpen = true;
-		m_EOF = false;
+		if (errno == EACCES)
+			m_errorcode = ErrorCode::PermissionFailure;
+		if (errno == ENOENT)
+			m_errorcode = ErrorCode::DoesNotExist;
+		else
+			m_errorcode = ErrorCode::Unhandled;
 	}
 	else
 	{
-		if (errno == EACCES)
-		{
-			// Permission Denied
-			m_errorcode = ErrorCode::PermissionFailure;
-		}
-		if (errno == ENOENT)
-		{
-			// File does not exist
-			m_errorcode = ErrorCode::DoesNotExist;
-		}
-		else
-		{
-			// Unhandled error
-			m_errorcode = ErrorCode::Unhandled;
-		}
-
-		m_isHandleOpen = false;
-
-		char errormessage[80];
-		strerror_s(errormessage, err);
-		EP_ERROR("File::TextFileReader::Open(): Error opening file. {}", errormessage);
-	}
-
-#else // macOS
-
-	m_handle = fopen(nativePath.c_str(), "r");
-
-	if (m_handle)
-	{
 		m_errorcode = ErrorCode::Success;
-		m_LineNo = 0;
-		m_isHandleOpen = true;
-		m_EOF = false;
 	}
-	else
-	{
-		if (errno == EACCES)
-		{
-			// Permission Denied
-			m_errorcode = ErrorCode::PermissionFailure;
-		}
-		if (errno == ENOENT)
-		{
-			// File does not exist
-			m_errorcode = ErrorCode::DoesNotExist;
-		}
-		else
-		{
-			// Unhandled error
-			m_errorcode = ErrorCode::Unhandled;
-		}
-
-		m_isHandleOpen = false;
-		EP_ERROR("File::TextFileReader::Open(): Error opening file. {}", strerror(errno));
-	}
-
-#endif
 
 	return m_errorcode;
 }
 
 void File::TextFileReader::Close()
 {
-	if (m_isHandleOpen)
+	if (m_stream.is_open())
 	{
-		fclose(m_handle);
-		m_isHandleOpen = false;
+		m_stream.clear();
+		m_stream.close();
+		if (m_stream.fail())
+		{
+			char errormessage[1024];
+			strerror_s(errormessage, errno);
+
+			EP_ERROR("TextFileReader::Close(): Error closing file!  "
+				"File: \"{}\", Error: {}, {}", m_path, errno, errormessage);
+		}
 	}
 }
 
-std::string File::TextFileReader::ReadNextLine()
+
+std::string File::TextFileReader::GetLine()
 {
-	EP_ASSERTF(!m_EOF, "File::TextFileReader::ReadNextLine() called when EOF has been reached.");
-
 	std::string returnVal;
-	char buffer[200] = { 0 };
-	bool done = false;
+	returnVal.reserve(250);
 
-	while (!done) // We loop to allow us to handle lines larger than the buffer size.
+	if (m_stream.eof())
 	{
-		if (fgets(buffer, 200, m_handle) == NULL) // Read unsuccessful.
+		EP_WARN("TextFileReader::GetLine(): Attempted to read beyond EOF!  File: {}", m_path);
+	}
+	else
+	{
+		std::getline(m_stream, returnVal);
+		m_LineNo++;
+
+		if (!m_stream.eof() && m_stream.fail())
 		{
-			// TODO: Should this be fatal?
-			if (ferror(m_handle))
-			{
-				EP_FATAL("File System: Error encountered reading line in open text file.");
-//				EP_DEBUGBREAK();
-				throw Exceptions::FatalError();
-			}
+			char errormessage[1024];
+			strerror_s(errormessage, errno);
 
-			if (feof(m_handle)) { m_EOF = true; }
-
-			done = true;
-		}
-		else // Read successful.
-		{
-			if (feof(m_handle)) { m_EOF = true; }
-
-			returnVal.append(buffer);
-
-			if (returnVal.size() != 0)
-			{
-				if (returnVal.back() == '\n')
-				{
-					// Get rid of trailing newline character
-#ifdef _WIN32
-					returnVal.resize(returnVal.size() - 1);
-#else
-					// On macOS, CRLF is not automatically converted by fgets().
-					returnVal.resize(returnVal.size() - 1 - (returnVal[returnVal.size() - 2] == '\r'));
-#endif
-
-					m_LineNo++;
-					done = true;
-				}
-			}
+			EP_ERROR("TextFileReader::GetLine(): Read failure detected!  File will be closed.  "
+				"Line: {} Error: {}, {}", m_LineNo, errno, errormessage);
+			Close();
 		}
 	}
 	return returnVal;
 }
 
-void Enterprise::File::Init()
+
+File::ErrorCode File::TextFileWriter::Open(const std::string& path)
+{
+	m_destinationFileNativePath = VirtualPathToNative(path);
+	m_tempFileNativePath = GetNewTempFilename();
+
+	if (m_stream.is_open()) Close();
+	m_stream.open(m_tempFileNativePath, std::ios_base::out);
+
+	if (m_stream.fail())
+	{
+		if (errno == EACCES)
+			m_errorcode = ErrorCode::PermissionFailure;
+		if (errno == ENOENT)
+			m_errorcode = ErrorCode::DoesNotExist;
+		else
+			m_errorcode = ErrorCode::Unhandled;
+	}
+	else
+	{
+		m_errorcode = ErrorCode::Success;
+	}
+
+	return m_errorcode;
+}
+
+
+void File::Init()
 {
 	Application::RegisterCmdLineOption
 	(
@@ -323,83 +207,55 @@ void Enterprise::File::Init()
 
 	std::vector<std::string> cmdLinePath;
 
-	// Use CONTENT path from command line override
+	// Content directory
 	cmdLinePath = Application::GetCmdLineOption(HN("--content-dir"));
 	if (cmdLinePath.size())
 	{
-		// Custom path specified on command line
-		BackslashesToSlashes(cmdLinePath.front());
+		backslashesToSlashes(cmdLinePath.front());
 
 		if (cmdLinePath.front().back() != '/')
-		{
 			contentDirPath = cmdLinePath.front() + '/';
-		}
 		else
-		{
 			contentDirPath = cmdLinePath.front();
-		}
 	}
 	else
 	{
-		// Use platform's default path
 		SetPlatformContentPath();
 	}
 
-	// Use USER, MACHINE, LOCAL, and TEMP paths from command line override
+	// Data directories
 	cmdLinePath = Application::GetCmdLineOption(HN("--data-dir"));
 	if (cmdLinePath.size())
 	{
-		BackslashesToSlashes(cmdLinePath.front());
+		backslashesToSlashes(cmdLinePath.front());
 
 		if (cmdLinePath.front().back() == '/')
 		{
 			userDirPath = cmdLinePath.front() + "user" + "/";
-			machineDirPath = cmdLinePath.front() + "machine" + "/";
+			globalDirPath = cmdLinePath.front() + "global" + "/";
 			saveDirPath = cmdLinePath.front() + "save" + "/";
 			tempDirPath = cmdLinePath.front() + "temp" + "/";
 		}
 		else
 		{
 			userDirPath = cmdLinePath.front() + "/" + "user" + "/";
-			machineDirPath = cmdLinePath.front() + "/" + "machine" + "/";
+			globalDirPath = cmdLinePath.front() + "/" + "global" + "/";
 			saveDirPath = cmdLinePath.front() + "/" + "save" + "/";
 			tempDirPath = cmdLinePath.front() + "/" + "temp" + "/";
 		}
-	}
-	else
-	{
-		// Use platform's default path
-		SetPlatformDataPaths();
-	}
-}
 
-std::string Enterprise::File::VPathToNativePath(const std::string& path)
-{
-	if (path.rfind("CONTENT/", 0) == 0)
-	{
-		return contentDirPath + path.substr(8);
-	}
-	else if (path.rfind("USER/", 0) == 0)
-	{
-		return userDirPath + path.substr(5);
-	}
-	else if (path.rfind("MACHINE/", 0) == 0)
-	{
-		return machineDirPath + path.substr(8);
-	}
-	else if (path.rfind("SAVE/", 0) == 0)
-	{
-		return saveDirPath + path.substr(5);
-	}
-	else if (path.rfind("TEMP/", 0) == 0)
-	{
-		return tempDirPath + path.substr(5);
+		std::error_code ec;
+		std::filesystem::create_directories(userDirPath, ec);
+		EP_ASSERTF(!ec, "File::Init(): Unable to create user data path!");
+		std::filesystem::create_directories(globalDirPath, ec);
+		EP_ASSERTF(!ec, "File::Init(): Unable to create global data path!");
+		std::filesystem::create_directories(saveDirPath, ec);
+		EP_ASSERTF(!ec, "File::Init(): Unable to create save data path!");
+		std::filesystem::create_directories(tempDirPath, ec);
+		EP_ASSERTF(!ec, "File::Init(): Unable to create temp data path!");
 	}
 	else
 	{
-		EP_FATAL("File: VPathToNativePath() was passed a path that does "
-				 "not start with a virtual drive name.  path: {}", path);
-		EP_ASSERT_NOENTRY();
-		return std::string();
+		SetPlatformDataPaths();
 	}
 }

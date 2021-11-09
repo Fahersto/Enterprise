@@ -445,11 +445,11 @@ static std::pair<bool, bool> StringToDirBool(const std::string& str)
 }
 
 
-void Input::LoadContextFile(std::string filename)
+void Input::LoadContextFile(std::string path, std::string fallbackPath)
 {
-	File::INIReader ini(filename, true, "Input.");
+	File::INIReader ini(path, fallbackPath, { "Input." });
 
-	for (HashName& contextName : ini.Sections())
+	for (HashName contextName : ini.Sections())
 	{
 		// Flush the previously loaded context, if it was loaded before
 		if (contextRegistry.count(contextName))
@@ -458,14 +458,19 @@ void Input::LoadContextFile(std::string filename)
 			contextRegistry[contextName].axes.clear();
 		}
 
-		std::vector<std::unordered_map<HashName, std::string>> mappings;
+		std::vector<std::map<HashName, inivalue_t>> mappings;
 		bool hasActionMappings = false;
 		bool hasAxisMappings = false;
 
-		mappings = ini.GetMultiDictionary(contextName, HN("ActionMapping"));
+		mappings = ini.GetMultiDictionary(contextName, HN("ActionMapping"), 
+			{
+				{HN("name"), INIDataType::String},
+				{HN("control"), INIDataType::String},
+				{HN("dir"), INIDataType::String}
+			});
 		if (!mappings.empty())
 		{
-			for (std::unordered_map<HashName, std::string>& map : mappings)
+			for (std::map<HashName, inivalue_t>& map : mappings)
 			{
 				if (map.count(HN("name")) &&
 					map.count(HN("control")) &&
@@ -473,27 +478,26 @@ void Input::LoadContextFile(std::string filename)
 				{
 					std::pair<bool, ControlID> control_converted = StringToControlID(map[HN("control")]);
 					std::pair<bool, bool> dir_converted = StringToDirBool(map[HN("dir")]);
-					std::pair<bool, float> threshold_converted;
+					float threshold_converted;
 					if (map.count(HN("threshold"))) // threshold is optional
 					{
-						threshold_converted = File::INIStringToFloat(map[HN("threshold")]);
+						threshold_converted = map[HN("threshold")];
 					}
 					else
 					{
-						threshold_converted = std::pair(true, 0.5f);
+						threshold_converted = 0.5f;
 					}
 
 					if (control_converted.first &&
-						dir_converted.first &&
-						threshold_converted.first)
+						dir_converted.first)
 					{
 						contextRegistry[contextName].actions.emplace_back
 						(
 							ActionMapping
 							{
-								HN(map[HN("name")]),
+								map[HN("name")].Hash(),
 								control_converted.second,
-								threshold_converted.second,
+								threshold_converted,
 								dir_converted.second
 							}
 						);
@@ -503,41 +507,45 @@ void Input::LoadContextFile(std::string filename)
 					else
 					{
 						EP_WARN("Input System: An ActionMapping failed to load due to a subvalue conversion error.  "
-								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
+								"The mapping was not loaded.\nFile: {}\nContext: {}", path, HN_ToStr(contextName));
 						continue;
 					}
 				}
 				else
 				{
 					EP_WARN("Input System: An ActionMapping failed to load due to a missing subkey.  "
-							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
+							"The mapping was not loaded.\nFile: {}\nContext: {}", path, HN_ToStr(contextName));
 					continue;
 				}
 			}
 		}
 
-		mappings = ini.GetMultiDictionary(contextName, HN("AxisMapping"));
+		mappings = ini.GetMultiDictionary(contextName, HN("AxisMapping"), 
+			{
+				{ HN("name"), INIDataType::String },
+				{ HN("control"), INIDataType::String },
+				{ HN("scale"), INIDataType::Float}
+			});
 		if (!mappings.empty())
 		{
-			for (std::unordered_map<HashName, std::string>& map : mappings)
+			for (std::map<HashName, inivalue_t>& map : mappings)
 			{
 				if (map.count(HN("name")) &&
 					map.count(HN("control")) &&
 					map.count(HN("scale")))
 				{
 					std::pair<bool, ControlID> control_converted = StringToControlID(map[HN("control")]);
-					std::pair<bool, float> scale_converted = File::INIStringToFloat(map[HN("scale")]);
+					float scale_converted = map[HN("scale")];
 
-					if (control_converted.first &&
-						scale_converted.first)
+					if (control_converted.first)
 					{
 						contextRegistry[contextName].axes.emplace_back
 						(
 							AxisMapping
 							{
-								HN(map[HN("name")]),
+								map[HN("name")].Hash(),
 								control_converted.second,
-								scale_converted.second
+								scale_converted
 							}
 						);
 
@@ -546,14 +554,14 @@ void Input::LoadContextFile(std::string filename)
 					else
 					{
 						EP_WARN("Input System: An AxisMapping failed to load due to a subvalue conversion error.  "
-								"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
+								"The mapping was not loaded.\nFile: {}\nContext: {}", path, HN_ToStr(contextName));
 						continue;
 					}
 				}
 				else
 				{
 					EP_WARN("Input System: An AxisMapping failed to load due to a missing subkey.  "
-							"The mapping was not loaded.\nFile: {}\nContext: {}", filename, HN_ToStr(contextName));
+							"The mapping was not loaded.\nFile: {}\nContext: {}", path, HN_ToStr(contextName));
 					continue;
 				}
 			}
@@ -562,7 +570,7 @@ void Input::LoadContextFile(std::string filename)
 		if (!hasActionMappings && !hasAxisMappings)
 		{
 			EP_WARN("Input System: Input context \"{}\" contains no valid Action or Axis mappings."
-					"  File: {}", HN_ToStr(contextName), filename);
+					"  File: {}", HN_ToStr(contextName), path);
 		}
 	}
 }
@@ -573,8 +581,9 @@ Input::ContextHandle Input::BindContext(HashName contextName,
 										int blockingLevel,
 										unsigned int layer)
 {
-	EP_ASSERTF(contextRegistry.count(contextName) > 0, 
-			   "Input::BindContext(): contextName has not been loaded with Input::LoadContextFile().");
+	if (contextRegistry.count(contextName) == 0)
+		EP_ERROR("Input::BindContext(): \"{}\" has not been loaded with Input::LoadContextFile()!", 
+			HN_ToStr(contextName));
 
 	contextStack[layer].push_front(contextRegistry[contextName]);
 	contextStack[layer].front().blockingLevel = blockingLevel;
@@ -621,10 +630,10 @@ void Input::PopContext(ContextHandle context)
 
 void Input::BindAction(ContextHandle context, HashName actionName, ActionCallbackPtr callback)
 {
-	EP_ASSERTF(actionCallbacks.count(context) > 0,
-			   "Input::BindAction(): context contains no input actions");
-	EP_ASSERTF(actionCallbacks[context].count(actionName) > 0,
-			   "Input::BindAction(): context does not contain this action");
+	if (actionCallbacks.count(context) == 0)
+		EP_WARN("Input::BindAction(): Context contains no input actions!");
+	if (actionCallbacks[context].count(actionName) == 0)
+		EP_WARN("Input::BindAction(): Context does not contain action \"{}\"!", HN_ToStr(actionName));
 
 	actionCallbacks[context][actionName].emplace_back(std::pair(callback, StateManager::activeState));
 }

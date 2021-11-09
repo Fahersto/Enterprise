@@ -32,8 +32,9 @@ public:
 
 
 	/// Load input context definitions from an INI file.
-	/// @param filename Virtual path to the INI file to load.
-	static void LoadContextFile(std::string filename);
+	/// @param path Virtual path to the INI file to load.
+	/// @param fallbackPath Virtual path to the fallback INI file.
+	static void LoadContextFile(std::string path, std::string fallbackPath = "");
 
 	/// Handle to a bound input context.
 	typedef void* ContextHandle;

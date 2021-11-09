@@ -27,9 +27,9 @@ Graphics::TextureHandle Graphics::LoadTexture(std::string path, TextureFilter mi
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, numOfColorComponents;
 		unsigned char* buffer;
-		bool is16Bit = stbi_is_16_bit(File::VPathToNativePath(path).c_str());
-		if (!is16Bit) buffer = stbi_load(File::VPathToNativePath(path).c_str(), &width, &height, &numOfColorComponents, 0);
-		else buffer = (unsigned char*)stbi_load_16(File::VPathToNativePath(path).c_str(), &width, &height, &numOfColorComponents, 0);
+		bool is16Bit = stbi_is_16_bit(File::VirtualPathToNative(path).c_str());
+		if (!is16Bit) buffer = stbi_load(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
+		else buffer = (unsigned char*)stbi_load_16(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
 		EP_ASSERT(buffer);
 		if (!buffer) return 0;
 
