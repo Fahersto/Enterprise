@@ -216,7 +216,7 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(KB_Numpad_7);
 	STRTOCONTROLIDIMPL(KB_Numpad_8);
 	STRTOCONTROLIDIMPL(KB_Numpad_9);
-	STRTOCONTROLIDIMPL(KB_Numpad_Muliply);
+	STRTOCONTROLIDIMPL(KB_Numpad_Multiply);
 	STRTOCONTROLIDIMPL(KB_Numpad_Add);
 	STRTOCONTROLIDIMPL(KB_Numpad_Enter);
 	STRTOCONTROLIDIMPL(KB_Numpad_Subtract);
@@ -368,7 +368,7 @@ static std::string ControlIDToString(Enterprise::ControlID id)
 	CONTROLIDTOSTRIMPL(KB_Numpad_7);
 	CONTROLIDTOSTRIMPL(KB_Numpad_8);
 	CONTROLIDTOSTRIMPL(KB_Numpad_9);
-	CONTROLIDTOSTRIMPL(KB_Numpad_Muliply);
+	CONTROLIDTOSTRIMPL(KB_Numpad_Multiply);
 	CONTROLIDTOSTRIMPL(KB_Numpad_Add);
 	CONTROLIDTOSTRIMPL(KB_Numpad_Enter);
 	CONTROLIDTOSTRIMPL(KB_Numpad_Subtract);

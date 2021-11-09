@@ -111,7 +111,7 @@ enum class ControlID
 	KB_Numpad_7,
 	KB_Numpad_8,
 	KB_Numpad_9,
-	KB_Numpad_Muliply,
+	KB_Numpad_Multiply,
 	KB_Numpad_Add,
 	KB_Numpad_Enter,
 	KB_Numpad_Subtract,

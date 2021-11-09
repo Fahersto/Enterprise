@@ -189,7 +189,7 @@ bool Input::HandlePlatformEvents(Events::Event& e)
 				case kVK_ANSI_Keypad8: 		control = ControlID::KB_Numpad_8; 		break;
 				case kVK_ANSI_Keypad9: 		control = ControlID::KB_Numpad_9; 		break;
 
-				case kVK_ANSI_KeypadMultiply: 	control = ControlID::KB_Numpad_Muliply; 	break;
+				case kVK_ANSI_KeypadMultiply: 	control = ControlID::KB_Numpad_Multiply; 	break;
 				case kVK_ANSI_KeypadPlus: 		control = ControlID::KB_Numpad_Add; 		break;
 				case kVK_ANSI_KeypadEnter: 		control = ControlID::KB_Numpad_Enter; 		break;
 				case kVK_ANSI_KeypadMinus: 		control = ControlID::KB_Numpad_Subtract; 	break;

@@ -93,7 +93,7 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 		static_assert(0x60 /* 0 key */ - 13 == uint16_t(ControlID::KB_Numpad_0));
 		// ... numpad numbers
 		static_assert(0x69 /* 9 key */ - 13 == uint16_t(ControlID::KB_Numpad_9));
-		static_assert(VK_MULTIPLY - 13      == uint16_t(ControlID::KB_Numpad_Muliply));
+		static_assert(VK_MULTIPLY - 13      == uint16_t(ControlID::KB_Numpad_Multiply));
 		static_assert(VK_ADD - 13           == uint16_t(ControlID::KB_Numpad_Add));
 		static_assert(VK_SEPARATOR - 13     == uint16_t(ControlID::KB_Numpad_Enter));
 		static_assert(VK_SUBTRACT - 13      == uint16_t(ControlID::KB_Numpad_Subtract));
