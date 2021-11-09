@@ -24,4 +24,8 @@ HC(double, MaxFrameDelta) = 1.0 / 15.0;
 const unsigned int TEMP_WindowWidth = 1280;
 const unsigned int TEMP_WindowHeight = 720;
 
+// SceneManager constants
+const size_t MaxEntities = 30'000;
+const size_t MaxSpawnedEntities = 5'000;
+
 }

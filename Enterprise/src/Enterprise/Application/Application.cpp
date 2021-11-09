@@ -11,6 +11,7 @@
 #include "Enterprise/Input/Input.h"
 #include "Enterprise/Graphics/Graphics.h"
 #include "Enterprise/Graphics/Window.h"
+#include "Enterprise/SceneManager/SceneManager.h"
 #include "Enterprise/StateManager/StateManager.h"
 
 namespace Enterprise
@@ -176,7 +177,7 @@ Application::Application()
 	Input::Init();
 	Graphics::Init();
 	// Audio::Init();
-	// SceneManager::Init();
+	SceneManager::Init();
 	Game::Init();
 
 	// Implement "--help" command line option
@@ -197,18 +198,18 @@ bool Application::Run()
 	while (Time::ProcessFixedUpdate())
 	{
 		// Fixed update
-		//SceneManager::FixedUpdate();
+		SceneManager::FixedUpdate();
 		StateManager::FixedUpdate();
 	}
 
 	// Update
-	//SceneManager::Update();
+	SceneManager::Update();
 	StateManager::Update();
 
 	// Draw
 	Window::SwapBuffers();
 	Graphics::PreDraw();
-	//SceneManager::Draw()
+	SceneManager::PreDraw();
 	StateManager::Draw();
 
 	return _isRunning;
