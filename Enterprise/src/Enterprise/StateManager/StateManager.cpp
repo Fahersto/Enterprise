@@ -10,9 +10,9 @@ StateManager::State* StateManager::activeState = nullptr;
 static std::vector<bool> stateBlocksFixed;
 static std::vector<bool> stateBlocksUpdates;
 static std::vector<bool> stateBlocksDraws;
-static int highestFixedBlockingState = 0;
-static int highestUpdateBlockingState = 0;
-static int highestDrawBlockingState = 0;
+static size_t highestFixedBlockingState = 0;
+static size_t highestUpdateBlockingState = 0;
+static size_t highestDrawBlockingState = 0;
 
 void StateManager::PushState(State* newState, bool blockLowerFixed, bool blockLowerUpdates, bool blockLowerDraws)
 {
@@ -46,19 +46,19 @@ void StateManager::PopState()
 		Enterprise::Application::Quit();
 
 	int i;
-	for (i = stateBlocksFixed.size() - 1; i >= 0; i--)
+	for (i = (int)stateBlocksFixed.size() - 1; i >= 0; i--)
 	{
 		if (stateBlocksFixed.at(i))
 			break;
 	}
 	highestFixedBlockingState = i;
-	for (i = stateBlocksUpdates.size() - 1; i >= 0; i--)
+	for (i = (int)stateBlocksUpdates.size() - 1; i >= 0; i--)
 	{
 		if (stateBlocksUpdates.at(i))
 			break;
 	}
 	highestUpdateBlockingState = i;
-	for (i = stateBlocksDraws.size() - 1; i >= 0; i--)
+	for (i = (int)stateBlocksDraws.size() - 1; i >= 0; i--)
 	{
 		if (stateBlocksDraws.at(i))
 			break;
