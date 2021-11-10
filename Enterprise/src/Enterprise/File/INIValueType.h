@@ -82,14 +82,14 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0:  return std::get<0>(value);  break; // char
+		case 0:  return (char)std::get<0>(value);  break; // char
 		case 1:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'short' to 'char'!  "
 				"Value: {}", std::get<1>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<1>(value);
+			return (char)std::get<1>(value);
 			break; // short
 		case 2:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned short' to 'char'!  "
@@ -97,7 +97,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<2>(value);
+			return (char)std::get<2>(value);
 			break; // unsigned short
 		case 3:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'int' to 'char'!  "
@@ -105,7 +105,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<3>(value);
+			return (char)std::get<3>(value);
 			break; // int
 		case 4:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned int' to 'char'!  "
@@ -113,7 +113,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<4>(value);
+			return (char)std::get<4>(value);
 			break; // unsigned int
 		case 5:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long' to 'char'!  "
@@ -121,7 +121,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<5>(value);
+			return (char)std::get<5>(value);
 			break; // long
 		case 6:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long' to 'char'!  "
@@ -129,7 +129,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<6>(value);
+			return (char)std::get<6>(value);
 			break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'char'!  "
@@ -137,7 +137,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (char)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'char'!  "
@@ -145,12 +145,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (char)std::get<8>(value);
 			break; // unsigned long long
-		case 9:  return std::get<9>(value);  break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9:  return (char)std::get<9>(value);  break; // float
+		case 10: return (char)std::get<10>(value); break; // double
+		case 11: return (char)std::get<11>(value); break; // long double
+		case 12: return (char)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'char'!"); return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'char'!"); return 0; break; // c string
 		case 15: EP_WARN("inivalue_t: Cannot convert from 'const void*' to 'char'!"); return 0; break; // ptr
@@ -164,16 +164,16 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
+		case 0: return (short)std::get<0>(value); break; // char
+		case 1: return (short)std::get<1>(value); break; // short
+		case 2: return (short)std::get<2>(value); break; // unsigned short
 		case 3:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'int' to 'short'!  "
 				"Value: {}", std::get<3>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<3>(value);
+			return (short)std::get<3>(value);
 			break; // int
 		case 4:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned int' to 'short'!  Value: "
@@ -181,7 +181,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<4>(value);
+			return (short)std::get<4>(value);
 			break; // unsigned int
 		case 5:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long' to 'short'!  "
@@ -189,7 +189,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<5>(value);
+			return (short)std::get<5>(value);
 			break; // long
 		case 6:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long' to 'short'!  "
@@ -197,7 +197,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<6>(value);
+			return (short)std::get<6>(value);
 			break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'short'!  "
@@ -205,7 +205,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (short)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'short'!  "
@@ -213,12 +213,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (short)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (short)std::get<9>(value); break; // float
+		case 10: return (short)std::get<10>(value); break; // double
+		case 11: return (short)std::get<11>(value); break; // long double
+		case 12: return (short)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'short'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'short'!");
@@ -235,16 +235,16 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
+		case 0: return (unsigned short)std::get<0>(value); break; // char
+		case 1: return (unsigned short)std::get<1>(value); break; // short
+		case 2: return (unsigned short)std::get<2>(value); break; // unsigned short
 		case 3:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'int' to 'unsigned short'!  "
 				"Value: {}", std::get<3>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<3>(value);
+			return (unsigned short)std::get<3>(value);
 			break; // int
 		case 4:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned int' to 'unsigned short'!  "
@@ -252,7 +252,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<4>(value);
+			return (unsigned short)std::get<4>(value);
 			break; // unsigned int
 		case 5:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long' to 'unsigned short'!  "
@@ -260,7 +260,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<5>(value);
+			return (unsigned short)std::get<5>(value);
 			break; // long
 		case 6:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long' to 'unsigned short'!  "
@@ -268,7 +268,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<6>(value);
+			return (unsigned short)std::get<6>(value);
 			break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'unsigned short'!  "
@@ -276,7 +276,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (unsigned short)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'unsigned short'!  "
@@ -284,12 +284,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (unsigned short)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (unsigned short)std::get<9>(value); break; // float
+		case 10: return (unsigned short)std::get<10>(value); break; // double
+		case 11: return (unsigned short)std::get<11>(value); break; // long double
+		case 12: return (unsigned short)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'unsigned short'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'unsigned short'!");
@@ -306,18 +306,18 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
+		case 0: return (int)std::get<0>(value); break; // char
+		case 1: return (int)std::get<1>(value); break; // short
+		case 2: return (int)std::get<2>(value); break; // unsigned short
+		case 3: return (int)std::get<3>(value); break; // int
+		case 4: return (int)std::get<4>(value); break; // unsigned int
 		case 5:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long' to 'int'!  "
 				"Value: {}", std::get<5>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<5>(value);
+			return (int)std::get<5>(value);
 			break; // long
 		case 6:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long' to 'int'!  "
@@ -325,7 +325,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<6>(value);
+			return (int)std::get<6>(value);
 			break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'int'!  "
@@ -333,7 +333,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (int)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'int'!  "
@@ -341,12 +341,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (int)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (int)std::get<9>(value); break; // float
+		case 10: return (int)std::get<10>(value); break; // double
+		case 11: return (int)std::get<11>(value); break; // long double
+		case 12: return (int)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'int'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'int'!");
@@ -363,18 +363,18 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
+		case 0: return (unsigned int)std::get<0>(value); break; // char
+		case 1: return (unsigned int)std::get<1>(value); break; // short
+		case 2: return (unsigned int)std::get<2>(value); break; // unsigned short
+		case 3: return (unsigned int)std::get<3>(value); break; // int
+		case 4: return (unsigned int)std::get<4>(value); break; // unsigned int
 		case 5:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long' to 'unsigned int'!  "
 				"Value: {}", std::get<5>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<5>(value);
+			return (unsigned int)std::get<5>(value);
 			break; // long
 		case 6:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long' to 'unsigned int'!  "
@@ -382,7 +382,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<6>(value);
+			return (unsigned int)std::get<6>(value);
 			break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'unsigned int'!  "
@@ -390,7 +390,7 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (unsigned int)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'unsigned int'!  "
@@ -398,12 +398,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (unsigned int)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (unsigned int)std::get<9>(value); break; // float
+		case 10: return (unsigned int)std::get<10>(value); break; // double
+		case 11: return (unsigned int)std::get<11>(value); break; // long double
+		case 12: return (unsigned int)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'unsigned int'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'unsigned int'!");
@@ -420,20 +420,20 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
+		case 0: return (long)std::get<0>(value); break; // char
+		case 1: return (long)std::get<1>(value); break; // short
+		case 2: return (long)std::get<2>(value); break; // unsigned short
+		case 3: return (long)std::get<3>(value); break; // int
+		case 4: return (long)std::get<4>(value); break; // unsigned int
+		case 5: return (long)std::get<5>(value); break; // long
+		case 6: return (long)std::get<6>(value); break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'long'!  "
 				"Value: {}", std::get<7>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (long)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'long'!  "
@@ -441,12 +441,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (long)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (long)std::get<9>(value); break; // float
+		case 10: return (long)std::get<10>(value); break; // double
+		case 11: return (long)std::get<11>(value); break; // long double
+		case 12: return (long)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'long'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'long'!");
@@ -463,20 +463,20 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
+		case 0: return (unsigned long)std::get<0>(value); break; // char
+		case 1: return (unsigned long)std::get<1>(value); break; // short
+		case 2: return (unsigned long)std::get<2>(value); break; // unsigned short
+		case 3: return (unsigned long)std::get<3>(value); break; // int
+		case 4: return (unsigned long)std::get<4>(value); break; // unsigned int
+		case 5: return (unsigned long)std::get<5>(value); break; // long
+		case 6: return (unsigned long)std::get<6>(value); break; // unsigned long
 		case 7:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long long' to 'unsigned long'!  "
 				"Value: {}", std::get<7>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<7>(value);
+			return (unsigned long)std::get<7>(value);
 			break; // long long
 		case 8:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'unsigned long long' to 'unsigned long'!  "
@@ -484,12 +484,12 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<8>(value);
+			return (unsigned long)std::get<8>(value);
 			break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 9: return (unsigned long)std::get<9>(value); break; // float
+		case 10: return (unsigned long)std::get<10>(value); break; // double
+		case 11: return (unsigned long)std::get<11>(value); break; // long double
+		case 12: return (unsigned long)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'unsigned long'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'unsigned long'!");
@@ -506,19 +506,19 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 0: return (long long)std::get<0>(value); break; // char
+		case 1: return (long long)std::get<1>(value); break; // short
+		case 2: return (long long)std::get<2>(value); break; // unsigned short
+		case 3: return (long long)std::get<3>(value); break; // int
+		case 4: return (long long)std::get<4>(value); break; // unsigned int
+		case 5: return (long long)std::get<5>(value); break; // long
+		case 6: return (long long)std::get<6>(value); break; // unsigned long
+		case 7: return (long long)std::get<7>(value); break; // long long
+		case 8: return (long long)std::get<8>(value); break; // unsigned long long
+		case 9: return (long long)std::get<9>(value); break; // float
+		case 10: return (long long)std::get<10>(value); break; // double
+		case 11: return (long long)std::get<11>(value); break; // long double
+		case 12: return (long long)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'long long'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'long long'!");
@@ -535,19 +535,19 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 0: return (unsigned long long)std::get<0>(value); break; // char
+		case 1: return (unsigned long long)std::get<1>(value); break; // short
+		case 2: return (unsigned long long)std::get<2>(value); break; // unsigned short
+		case 3: return (unsigned long long)std::get<3>(value); break; // int
+		case 4: return (unsigned long long)std::get<4>(value); break; // unsigned int
+		case 5: return (unsigned long long)std::get<5>(value); break; // long
+		case 6: return (unsigned long long)std::get<6>(value); break; // unsigned long
+		case 7: return (unsigned long long)std::get<7>(value); break; // long long
+		case 8: return (unsigned long long)std::get<8>(value); break; // unsigned long long
+		case 9: return (unsigned long long)std::get<9>(value); break; // float
+		case 10: return (unsigned long long)std::get<10>(value); break; // double
+		case 11: return (unsigned long long)std::get<11>(value); break; // long double
+		case 12: return (unsigned long long)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'unsigned long long'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'unsigned long long'!");
@@ -564,23 +564,23 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
+		case 0: return (float)std::get<0>(value); break; // char
+		case 1: return (float)std::get<1>(value); break; // short
+		case 2: return (float)std::get<2>(value); break; // unsigned short
+		case 3: return (float)std::get<3>(value); break; // int
+		case 4: return (float)std::get<4>(value); break; // unsigned int
+		case 5: return (float)std::get<5>(value); break; // long
+		case 6: return (float)std::get<6>(value); break; // unsigned long
+		case 7: return (float)std::get<7>(value); break; // long long
+		case 8: return (float)std::get<8>(value); break; // unsigned long long
+		case 9: return (float)std::get<9>(value); break; // float
 		case 10:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'double' to 'float'!  "
 				"Value: {}", std::get<10>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<10>(value);
+			return (float)std::get<10>(value);
 			break; // double
 		case 11:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long double' to 'float'!  "
@@ -588,9 +588,9 @@ struct inivalue_t
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<11>(value);
+			return (float)std::get<11>(value);
 			break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 12: return (float)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'float'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'float'!");
@@ -607,26 +607,26 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
+		case 0: return (double)std::get<0>(value); break; // char
+		case 1: return (double)std::get<1>(value); break; // short
+		case 2: return (double)std::get<2>(value); break; // unsigned short
+		case 3: return (double)std::get<3>(value); break; // int
+		case 4: return (double)std::get<4>(value); break; // unsigned int
+		case 5: return (double)std::get<5>(value); break; // long
+		case 6: return (double)std::get<6>(value); break; // unsigned long
+		case 7: return (double)std::get<7>(value); break; // long long
+		case 8: return (double)std::get<8>(value); break; // unsigned long long
+		case 9: return (double)std::get<9>(value); break; // float
+		case 10: return (double)std::get<10>(value); break; // double
 		case 11:
 			EP_WARN("inivalue_t: Potential narrowing conversion from type 'long double' to 'double'!  "
 				"Value: {}", std::get<11>(value));
 #ifdef EP_GUARDS_INIVALUET_NARROWING
 			EP_DEBUGBREAK();
 #endif
-			return std::get<11>(value);
+			return (double)std::get<11>(value);
 			break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 12: return (double)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'double'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'double'!");
@@ -643,19 +643,19 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 0: return (long double)std::get<0>(value); break; // char
+		case 1: return (long double)std::get<1>(value); break; // short
+		case 2: return (long double)std::get<2>(value); break; // unsigned short
+		case 3: return (long double)std::get<3>(value); break; // int
+		case 4: return (long double)std::get<4>(value); break; // unsigned int
+		case 5: return (long double)std::get<5>(value); break; // long
+		case 6: return (long double)std::get<6>(value); break; // unsigned long
+		case 7: return (long double)std::get<7>(value); break; // long long
+		case 8: return (long double)std::get<8>(value); break; // unsigned long long
+		case 9: return (long double)std::get<9>(value); break; // float
+		case 10: return (long double)std::get<10>(value); break; // double
+		case 11: return (long double)std::get<11>(value); break; // long double
+		case 12: return (long double)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'long double'!");
 			return 0; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'long double'!");
@@ -672,19 +672,19 @@ struct inivalue_t
 	{
 		switch (value.index())
 		{
-		case 0: return std::get<0>(value); break; // char
-		case 1: return std::get<1>(value); break; // short
-		case 2: return std::get<2>(value); break; // unsigned short
-		case 3: return std::get<3>(value); break; // int
-		case 4: return std::get<4>(value); break; // unsigned int
-		case 5: return std::get<5>(value); break; // long
-		case 6: return std::get<6>(value); break; // unsigned long
-		case 7: return std::get<7>(value); break; // long long
-		case 8: return std::get<8>(value); break; // unsigned long long
-		case 9: return std::get<9>(value); break; // float
-		case 10: return std::get<10>(value); break; // double
-		case 11: return std::get<11>(value); break; // long double
-		case 12: return std::get<12>(value); break; // bool
+		case 0: return (bool)std::get<0>(value); break; // char
+		case 1: return (bool)std::get<1>(value); break; // short
+		case 2: return (bool)std::get<2>(value); break; // unsigned short
+		case 3: return (bool)std::get<3>(value); break; // int
+		case 4: return (bool)std::get<4>(value); break; // unsigned int
+		case 5: return (bool)std::get<5>(value); break; // long
+		case 6: return (bool)std::get<6>(value); break; // unsigned long
+		case 7: return (bool)std::get<7>(value); break; // long long
+		case 8: return (bool)std::get<8>(value); break; // unsigned long long
+		case 9: return (bool)std::get<9>(value); break; // float
+		case 10: return (bool)std::get<10>(value); break; // double
+		case 11: return (bool)std::get<11>(value); break; // long double
+		case 12: return (bool)std::get<12>(value); break; // bool
 		case 13: EP_WARN("inivalue_t: Cannot convert from 'std::string' to 'bool'!");
 			return false; break; // std::string
 		case 14: EP_WARN("inivalue_t: Cannot convert from 'const char*' to 'bool'!");
@@ -742,7 +742,7 @@ struct inivalue_t
 	inline operator const void* () const
 	{
 		if (value.index() == 8)
-			return (void*)std::get<unsigned long long>(value);
+			return (const void*)std::get<unsigned long long>(value);
 		if (value.index() == 15)
 			return std::get<const void*>(value);
 		else
