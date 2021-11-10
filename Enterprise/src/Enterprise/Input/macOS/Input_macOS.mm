@@ -65,7 +65,7 @@ void Input::PlatformInit()
 
 			// Release the GamepadID in the engine.
 			Input::gpBuffer[disconnectedGPID] = GamePadBuffer(); // Clear buffer for future connections
-			StreamID disconnectedStream = Input::UnbindController(disconnectedGPID + 2);
+			StreamID disconnectedStream = Input::UnbindController(ControllerID(disconnectedGPID + 2));
 
 			// Notify the game code of the disconnection.
 			if (disconnectedStream != 0)

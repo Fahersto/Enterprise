@@ -781,7 +781,7 @@ void Input::ProcessContext(Input::Context& context)
 			{
 				if (action.control > ControlID::_EndOfGPAxes)
 				{
-					int kbm_control_index = uint64_t(action.control) - uint64_t(ControlID::_EndOfGPAxes) - 1;
+					int kbm_control_index = (int)action.control - (int)ControlID::_EndOfGPAxes - 1;
 
 					if ((kbm_control_index) < 64 &&
 						!(kbmBuffer.keys_blockstatus[0] & BIT(kbm_control_index)))
