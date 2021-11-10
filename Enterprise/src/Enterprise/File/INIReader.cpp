@@ -532,7 +532,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, const std::string
 	std::string line;
 	size_t pos, pos2, pos3;
 	HashName section = HN_NULL;
-	HashName key = HN_NULL;
+	HashName key;
 
 	// Parse the file.
 	while (!ini.isEOF())
@@ -573,7 +573,6 @@ File::ErrorCode File::INIReader::Load(const std::string& path, const std::string
 								// Check for matching prefix
 								if (sectionText.rfind(filterName, 0) == 0)
 								{
-									pos += filterName.length();
 									section = HN(sectionText.data() + filterName.length(), sectionText.length() - filterName.length());
 									m_sections.insert(section);
 									inFilteredSection = true;
@@ -773,7 +772,7 @@ File::ErrorCode File::INIReader::Load(const std::string& path, const std::string
 									// Thanks to the above check, we know in advance that there will be no comments or
 									// unclosed quotes until the next ')'.
 
-									HashName subkey = HN_NULL;
+									HashName subkey;
 									for (pos++; pos < pos3; pos++)
 									{
 										// Look for next subkey
