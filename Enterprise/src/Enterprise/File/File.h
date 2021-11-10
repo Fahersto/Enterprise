@@ -430,8 +430,7 @@ private:
 	static std::string GetNewTempFilename();
 
 	static std::string contentDirPath;
-	static std::string userDirPath;
-	static std::string globalDirPath;
+	static std::string dataDirPath;
 	static std::string saveDirPath;
 	static std::string tempDirPath;
 

@@ -76,6 +76,7 @@ std::string File::GetNewTempFilename()
 			"Error: {}", Win32_LastErrorMsg());
 	}
 
+	delete tempDirPath_Wide;
 	return WCHARtoUTF8(tempFileNameOut);
 }
 
@@ -187,12 +188,8 @@ void File::SetPlatformDataPaths()
 	WCHAR* widePath = NULL;
 
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
-	userDirPath = WCHARtoUTF8(widePath) + '/' + Constants::DeveloperName + '/' + Constants::AppName + '/';
-	backslashesToSlashes(userDirPath);
-
-	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_ProgramData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
-	globalDirPath = WCHARtoUTF8(widePath) + '/' + Constants::DeveloperName + '/' + Constants::AppName + '/';
-	backslashesToSlashes(globalDirPath);
+	dataDirPath = WCHARtoUTF8(widePath) + '/' + Constants::DeveloperName + '/' + Constants::AppName + '/';
+	backslashesToSlashes(dataDirPath);
 
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_SavedGames, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
 	saveDirPath = WCHARtoUTF8(widePath) + '/' + Constants::AppName + '/';
@@ -205,10 +202,8 @@ void File::SetPlatformDataPaths()
 
 	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
-	std::filesystem::create_directories(userDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create user data path!");
-	std::filesystem::create_directories(globalDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create global data path!");
+	std::filesystem::create_directories(dataDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create application data path!");
 	std::filesystem::create_directories(saveDirPath, ec);
 	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
 }

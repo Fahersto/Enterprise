@@ -6,8 +6,7 @@ using Enterprise::File;
 using Enterprise::Application;
 
 std::string File::contentDirPath;
-std::string File::userDirPath;
-std::string File::globalDirPath;
+std::string File::dataDirPath;
 std::string File::saveDirPath;
 std::string File::tempDirPath;
 
@@ -60,13 +59,9 @@ std::string Enterprise::File::VirtualPathToNative(const std::string& path)
 	{
 		return contentDirPath + path.substr(2);
 	}
-	else if (path.rfind("u/", 0) == 0)
+	else if (path.rfind("d/", 0) == 0)
 	{
-		return userDirPath + path.substr(2);
-	}
-	else if (path.rfind("g/", 0) == 0)
-	{
-		return globalDirPath + path.substr(2);
+		return dataDirPath + path.substr(2);
 	}
 	else if (path.rfind("s/", 0) == 0)
 	{
@@ -231,24 +226,20 @@ void File::Init()
 
 		if (cmdLinePath.front().back() == '/')
 		{
-			userDirPath = cmdLinePath.front() + "user" + "/";
-			globalDirPath = cmdLinePath.front() + "global" + "/";
+			dataDirPath = cmdLinePath.front() + "data" + "/";
 			saveDirPath = cmdLinePath.front() + "save" + "/";
 			tempDirPath = cmdLinePath.front() + "temp" + "/";
 		}
 		else
 		{
-			userDirPath = cmdLinePath.front() + "/" + "user" + "/";
-			globalDirPath = cmdLinePath.front() + "/" + "global" + "/";
+			dataDirPath = cmdLinePath.front() + "/" + "data" + "/";
 			saveDirPath = cmdLinePath.front() + "/" + "save" + "/";
 			tempDirPath = cmdLinePath.front() + "/" + "temp" + "/";
 		}
 
 		std::error_code ec;
-		std::filesystem::create_directories(userDirPath, ec);
-		EP_ASSERTF(!ec, "File::Init(): Unable to create user data path!");
-		std::filesystem::create_directories(globalDirPath, ec);
-		EP_ASSERTF(!ec, "File::Init(): Unable to create global data path!");
+		std::filesystem::create_directories(dataDirPath, ec);
+		EP_ASSERTF(!ec, "File::Init(): Unable to create application data path!");
 		std::filesystem::create_directories(saveDirPath, ec);
 		EP_ASSERTF(!ec, "File::Init(): Unable to create save data path!");
 		std::filesystem::create_directories(tempDirPath, ec);

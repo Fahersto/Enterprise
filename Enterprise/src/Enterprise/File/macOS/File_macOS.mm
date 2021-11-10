@@ -7,14 +7,29 @@ using Enterprise::File;
 
 std::string File::GetNewTempFilename()
 {
-	// TODO: Implement
-	return std::string();
+	std::string returnVal = tempDirPath + "EP_XXXX.tmp";
+	int fd = mkstemps(returnVal.data(), 4);
+
+	if (fd != -1)
+	{
+		// success
+		close(fd);
+		return returnVal;
+	}
+	else
+	{
+		// failure
+		char errormessage[1024];
+		strerror_s(errormessage, errno);
+		EP_ERROR("File::GetNewTempFilename(): Error generating filename!  Error: {}", errormessage);
+		return std::string();
+	}
 }
 
 
 File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outString)
 {
-	std::string nativePath = VPathToNativePath(path);
+	std::string nativePath = VirtualPathToNative(path);
 
 	FILE* fhandle = fopen(nativePath.c_str(), "r");
 	if (fhandle)
@@ -62,14 +77,103 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 
 File::ErrorCode File::SaveTextFile(const std::string& path, const std::string& inString)
 {
-	// TODO: Implement
-	return ErrorCode::Null;
+	std::string tempFileName = GetNewTempFilename();
+
+	FILE* fhandle = fopen(tempFileName.c_str(), "w");
+
+	if (fhandle)
+	{
+		fwrite(inString.data(), sizeof(char), inString.size(), fhandle);
+		fclose(fhandle);
+	}
+	else
+	{
+		char errormessage[1024];
+		strerror_s(errormessage, errno);
+		EP_ERROR("File::SaveTextFile(): Error opening file. {}", errormessage);
+
+		if (errno == EACCES)
+			return ErrorCode::PermissionFailure;
+		if (errno == ENOENT)
+			return ErrorCode::DoesNotExist;
+		else
+			return ErrorCode::Unhandled;
+	}
+
+	@autoreleasepool
+	{
+
+		NSURL * tempFileURL = [NSURL fileURLWithFileSystemRepresentation:tempFileName.c_str()
+															 isDirectory:NO
+														   relativeToURL:nil];
+		NSURL * destFileURL = [NSURL fileURLWithFileSystemRepresentation:VirtualPathToNative(path).c_str()
+															 isDirectory:NO
+														   relativeToURL:nil];
+
+		NSError *error = nil;
+		BOOL moveResult = [[NSFileManager defaultManager] replaceItemAtURL:destFileURL
+															 withItemAtURL:tempFileURL
+															backupItemName:nil
+																   options:NSFileManagerItemReplacementUsingNewMetadataOnly
+														  resultingItemURL:nil
+																	 error:&error];
+
+		if (moveResult == NO)
+		{
+			std::string errorDesc = error.localizedDescription.UTF8String;
+			EP_ERROR("File::SaveTextFile(): Error moving temp file to \"{}\"!  "
+					 "Error: {}, {}", VirtualPathToNative(path), error.code, errorDesc);
+
+			if (error.code == EACCES)
+				return ErrorCode::PermissionFailure;
+			if (error.code == ENOENT)
+				return ErrorCode::DoesNotExist;
+			else
+				return ErrorCode::Unhandled;
+		}
+	}
+
+	return ErrorCode::Success;
 }
 
 
 void File::TextFileWriter::Close()
 {
-	// TODO: Implement
+	if (m_stream.is_open())
+	{
+		m_stream.clear();
+		m_stream.close();
+
+		if (m_stream.fail())
+		{
+			EP_ERROR("TextFileWriter::Close(): Could not close the file!  File: {}", m_tempFileNativePath);
+		}
+
+		@autoreleasepool
+		{
+			NSURL * tempFileURL = [NSURL fileURLWithFileSystemRepresentation:m_tempFileNativePath.c_str()
+																 isDirectory:NO
+															   relativeToURL:nil];
+			NSURL * destFileURL = [NSURL fileURLWithFileSystemRepresentation:m_destinationFileNativePath.c_str()
+																 isDirectory:NO
+															   relativeToURL:nil];
+
+			NSError *error = nil;
+			BOOL moveResult = [[NSFileManager defaultManager] replaceItemAtURL:destFileURL
+																 withItemAtURL:tempFileURL
+																backupItemName:nil
+																	   options:NSFileManagerItemReplacementUsingNewMetadataOnly
+															  resultingItemURL:nil
+																		 error:&error];
+
+			if (moveResult == NO)
+			{
+				std::string errorDesc = error.localizedDescription.UTF8String;
+				EP_ERROR("TextFileWriter::Close(): Error moving temp file to \"{}\"!  "
+						 "Error: {}, {}", m_destinationFileNativePath, error.code, errorDesc);
+			}
+		}
+	}
 }
 
 
@@ -92,28 +196,25 @@ void File::SetPlatformDataPaths()
 	@autoreleasepool
 	{
 		// Save is a subfolder of this location.
-		NSURL* userPathURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
+		NSURL* dataPathURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
 																	inDomain:NSUserDomainMask
 														   appropriateForURL:nil
 																	  create:YES
 																	   error:nil];
-		NSURL* globalPathURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
-																	   inDomain:NSLocalDomainMask
-															  appropriateForURL:nil
-																		 create:YES
-																		  error:nil];
+		NSURL* tempPathURL = [[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory
+																	inDomain:NSUserDomainMask
+														   appropriateForURL:dataPathURL
+																	  create:YES
+																	   error:nil];
 
-		userDirPath = std::string(userPathURL.path.UTF8String) + '/' + Constants::DeveloperName + '/' + Constants::AppName + '/';
-		globalDirPath = std::string(globalPathURL.path.UTF8String) + '/' + Constants::DeveloperName + '/' + Constants::AppName + '/';
-		saveDirPath = userDirPath + "save/";
-		tempDirPath = "Plz replace with real path, soon, mmkay?"; // TODO: Get temp path
+		dataDirPath = std::string(dataPathURL.path.UTF8String) + '/' + Constants::DeveloperName + '/' + Constants::AppName + "/data/";
+		saveDirPath = std::string(dataPathURL.path.UTF8String) + '/' + Constants::DeveloperName + '/' + Constants::AppName + "/save/";
+		tempDirPath = std::string(tempPathURL.path.UTF8String) + '/';// + Constants::DeveloperName + '/' + Constants::AppName + '/';
 
 		// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 		std::error_code ec;
-		std::filesystem::create_directories(userDirPath, ec);
-		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create user data path!");
-		std::filesystem::create_directories(globalDirPath, ec);
-		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create global data path!");
+		std::filesystem::create_directories(dataDirPath, ec);
+		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create application data path!");
 		std::filesystem::create_directories(saveDirPath, ec);
 		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
 	}
