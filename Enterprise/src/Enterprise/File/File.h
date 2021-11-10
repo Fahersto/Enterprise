@@ -210,12 +210,17 @@ public:
 		/// Get the HashNames of all loaded INI sections.
 		/// @return The HashNames of every loaded INI section.
 		/// @note If a section was loaded as part of a group filter, the section name will not precede the group name.
-		const std::set<HashName>& Sections() { return m_sections; }
+		inline const std::set<HashName>& Sections() { return m_sections; }
 		/// Get the HashNames of all loaded keys in an INI section.
 		/// @param section The HashName of the section to inspect.
 		/// @return The HashNames of every key loaded from the section.
 		/// @note The keys returned may be either value or dictionary lookup keys.
-		const std::set<HashName>& Keys(HashName section) { return m_keys[section]; }
+		inline const std::set<HashName>& Keys(HashName section) { return m_keys[section]; }
+		/// Check whether a key exists in the loaded INI file.
+		/// @param section The HashName of the section containing the key.
+		/// @param key The HashName of the key to inspect.
+		/// @return @c true if the key exists in the file.
+		inline bool KeyExists(HashName section, HashName key) { return (m_keys[section].count(key)); }
 
 		/// Get a value associated with a key.
 		/// @param section The HashName of the section containing the value.

@@ -924,20 +924,20 @@ inivalue_t File::INIReader::GetValue(HashName section, HashName key, INIDataType
 		{
 			if (m_data[section][key].size() > 1)
 			{
-				EP_WARN("INIReader::GetValue(): File contains multiple \"{}/{}\" keys.  "
-					"Use GetMultiShort() to read all values.", HN_ToStr(section), HN_ToStr(key));
+				EP_WARN("INIReader::GetValue(): File \"{}\" contains multiple \"{}/{}\" keys.  "
+					"Use GetMultiShort() to read all values.", m_nativepath, HN_ToStr(section), HN_ToStr(key));
 			}
 
 			return strToINIData(m_data[section][key].front(), type);
 		}
 		else
 		{
-			EP_WARN("INIReader::GetValue(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
+			EP_WARN("INIReader::GetValue(): Key \"{}/{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key));
 		}
 	}
 	else
 	{
-		EP_WARN("INIReader::GetValue(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
+		EP_WARN("INIReader::GetValue(): Section \"{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section));
 	}
 
 	return 0;
@@ -956,14 +956,6 @@ std::vector<inivalue_t> File::INIReader::GetMultiValue(HashName section, HashNam
 				returnVal.push_back(strToINIData(str, type));
 			}
 		}
-		else
-		{
-			EP_WARN("INIReader::GetMultiValue(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
-		}
-	}
-	else
-	{
-		EP_WARN("INIReader::GetMultiValue(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
 	}
 
 	return returnVal;
@@ -982,7 +974,7 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 		if (undupedSubkeys.count(subkey) != 0)
 		{
 			EP_WARN("INIReader::GetDictionary(): More than one instance of the subkey \"{}\" was provided in 'subkeys'.  ",
-				"Key: \"{}/{}\"", HN_ToStr(subkey), HN_ToStr(section), HN_ToStr(key));
+				"Key: \"{}/{}\", File: \"{}\"", HN_ToStr(subkey), HN_ToStr(section), HN_ToStr(key), m_nativepath);
 		}
 		else
 		{
@@ -997,7 +989,7 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 			if (m_dictdata[section][key].size() > 1)
 			{
 				EP_WARN("INIReader::GetDictionary(): File contains multiple \"{}/{}\" keys.  "
-					"Use GetMultiDictionary() to read all values.", HN_ToStr(section), HN_ToStr(key));
+					"Use GetMultiDictionary() to read all values.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 			}
 
 			for (const auto& [subkey, subvalue] : m_dictdata[section][key].front())
@@ -1010,12 +1002,12 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 		}
 		else
 		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
+			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 		}
 	}
 	else
 	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
+		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), m_nativepath);
 	}
 
 	return returnVal;
@@ -1033,7 +1025,7 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 			if (m_dictdata[section][key].size() > 1)
 			{
 				EP_WARN("INIReader::GetDictionary(): File contains multiple \"{}/{}\" keys.  "
-					"Use GetMultiDictionary() to read all values.", HN_ToStr(section), HN_ToStr(key));
+					"Use GetMultiDictionary() to read all values.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 			}
 
 			for (const auto& [subkey, subvalue] : m_dictdata[section][key].front())
@@ -1046,12 +1038,12 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 		}
 		else
 		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
+			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 		}
 	}
 	else
 	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
+		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), m_nativepath);
 	}
 
 	return returnVal;
@@ -1069,7 +1061,7 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 			if (m_dictdata[section][key].size() > 1)
 			{
 				EP_WARN("INIReader::GetDictionary(): File contains multiple \"{}/{}\" keys.  "
-					"Use GetMultiDictionary() to read all values.", HN_ToStr(section), HN_ToStr(key));
+					"Use GetMultiDictionary() to read all values.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 			}
 
 			for (const auto& [subkey, subvalue] : m_dictdata[section][key].front())
@@ -1082,12 +1074,12 @@ std::map<HashName, inivalue_t> File::INIReader::GetDictionary(HashName section, 
 		}
 		else
 		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
+			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), HN_ToStr(key), m_nativepath);
 		}
 	}
 	else
 	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
+		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.  File: \"{}\"", HN_ToStr(section), m_nativepath);
 	}
 
 	return returnVal;
@@ -1105,8 +1097,8 @@ std::vector<std::map<HashName, inivalue_t>> File::INIReader::GetMultiDictionary(
 	{
 		if (undupedSubkeys.count(subkey) != 0)
 		{
-			EP_WARN("INIReader::GetDictionary(): More than one instance of the subkey \"{}\" was provided in 'subkeys'.  ",
-				"Key: \"{}/{}\"", HN_ToStr(subkey), HN_ToStr(section), HN_ToStr(key));
+			EP_WARN("INIReader::GetMultiDictionary(): More than one instance of the subkey \"{}\" was provided in 'subkeys'.  ",
+				"Key: \"{}/{}\", File: \"{}\"", HN_ToStr(subkey), HN_ToStr(section), HN_ToStr(key), m_nativepath);
 		}
 		else
 		{
@@ -1131,14 +1123,6 @@ std::vector<std::map<HashName, inivalue_t>> File::INIReader::GetMultiDictionary(
 				}
 			}
 		}
-		else
-		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
-		}
-	}
-	else
-	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
 	}
 
 	return returnVal;
@@ -1166,14 +1150,6 @@ std::vector<std::map<HashName, inivalue_t>> File::INIReader::GetMultiDictionary(
 				}
 			}
 		}
-		else
-		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
-		}
-	}
-	else
-	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
 	}
 
 	return returnVal;
@@ -1201,14 +1177,6 @@ std::vector<std::map<HashName, inivalue_t>> File::INIReader::GetMultiDictionary(
 				}
 			}
 		}
-		else
-		{
-			EP_WARN("INIReader::GetDictionary(): Key \"{}/{}\" was not parsed from INI file.", HN_ToStr(section), HN_ToStr(key));
-		}
-	}
-	else
-	{
-		EP_WARN("INIReader::GetDictionary(): Section \"{}\" was not parsed from INI file.", HN_ToStr(section));
 	}
 
 	return returnVal;
