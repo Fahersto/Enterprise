@@ -275,8 +275,7 @@ public:
 	/// @param dynamicIndices Whether the index buffer should be rewriteable.
 	/// @note When this function is called with a non @c nullptr @c vertexData or @c indexData, the number of bytes copied
 	/// is equal to the size of the recipient buffer.
-	static VertexArrayHandle CreateVertexArray(size_t maxVertices, size_t maxIndices,
-											   size_t vertexStride,
+	static VertexArrayHandle CreateVertexArray(size_t maxVertices, size_t maxIndices, size_t vertexStride,
 											   std::initializer_list<std::tuple<HashName, ShaderDataType, size_t, size_t>> vertexLayout,
 											   void* vertexData = nullptr, void* indexData = nullptr,
 											   bool dynamicVertices = true, bool dynamicIndices = true);
@@ -290,13 +289,13 @@ public:
 	/// @param data Pointer to the source buffer.
 	/// @param first Index of the first vertex to replace.
 	/// @param count Number of vertices to copy.
-	static void SetVertexData(VertexArrayHandle array, void* data, unsigned int first, unsigned int count);
+	static void SetVertexData(VertexArrayHandle array, void* data, size_t first, size_t count);
 	/// Update the data in a vertex array's index buffer.
 	/// @param array Handle of the vertex array.
 	/// @param data Pointer to the source buffer.
 	/// @param first Index of the first index to replace.
 	/// @param count Number of indices to copy.
-	static void SetIndexData(VertexArrayHandle array, void* data, unsigned int first, unsigned int count);
+	static void SetIndexData(VertexArrayHandle array, void* data, size_t first, size_t count);
 
 
 	/// Render triangles from a vertex array.
@@ -305,35 +304,35 @@ public:
 	/// @param first The index of the first element to render.
 	/// @note If the array has no index buffer, non-indexed rendering is performed.  In that case, @c count and @c first
 	/// correspond to vertices, not elements.
-	static void DrawTriangles(VertexArrayHandle array, unsigned int count = 0, unsigned int first = 0);
+	static void DrawTriangles(VertexArrayHandle array, size_t count = 0, size_t first = 0);
 	/// Render a triangle strip from a vertex array.
 	/// @param array Handle of the vertex array.
 	/// @param count The number of elements to render.
 	/// @param first The index of the first element to render.
 	/// @note If the array has no index buffer, non-indexed rendering is performed.  In that case, @c count and @c first
 	/// correspond to vertices, not elements.
-	static void DrawTriangleStrip(VertexArrayHandle array, unsigned int count = 0, unsigned int first = 0);
+	static void DrawTriangleStrip(VertexArrayHandle array, size_t count = 0, size_t first = 0);
 	/// Render lines from a vertex array.
 	/// @param array Handle of the vertex array.
 	/// @param count The number of elements to render.
 	/// @param first The index of the first element to render.
 	/// @note If the array has no index buffer, non-indexed rendering is performed.  In that case, @c count and @c first
 	/// correspond to vertices, not elements.
-	static void DrawLines(VertexArrayHandle array, unsigned int count = 0, unsigned int first = 0);
+	static void DrawLines(VertexArrayHandle array, size_t count = 0, size_t first = 0);
 	/// Render a line strip from a vertex array.
 	/// @param array Handle of the vertex array.
 	/// @param count The number of elements to render.
 	/// @param first The index of the first element to render.
 	/// @note If the array has no index buffer, non-indexed rendering is performed.  In that case, @c count and @c first
 	/// correspond to vertices, not elements.
-	static void DrawLineStrip(VertexArrayHandle array, unsigned int count = 0, unsigned int first = 0);
+	static void DrawLineStrip(VertexArrayHandle array, size_t count = 0, size_t first = 0);
 	/// Render points from a vertex array.
 	/// @param array Handle of the vertex array.
 	/// @param count The number of elements to render.
 	/// @param first The index of the first element to render.
 	/// @note If the array has no index buffer, non-indexed rendering is performed.  In that case, @c count and @c first
 	/// correspond to vertices, not elements.
-	static void DrawPoints(VertexArrayHandle array, unsigned int count = 0, unsigned int first = 0);
+	static void DrawPoints(VertexArrayHandle array, size_t count = 0, size_t first = 0);
 
 
 	// Framebuffers
@@ -466,7 +465,7 @@ private:
 
 	// Drawing stuff
 
-	static void BindVertexArrayForDraw(VertexArrayHandle& array, unsigned int& count, unsigned int& first);
+	static void BindVertexArrayForDraw(VertexArrayHandle& array, size_t& count, size_t& first);
 
 
 	friend class Application;

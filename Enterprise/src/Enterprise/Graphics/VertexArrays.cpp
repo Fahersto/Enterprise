@@ -8,16 +8,16 @@ static Graphics::VertexArrayHandle nextVAH = 1;
 static Graphics::VertexArrayHandle boundArray = 0;
 
 static std::map<Graphics::VertexArrayHandle, GLuint> vboHandles;
-static std::map<Graphics::VertexArrayHandle, int> vboNumOfVertices;
+static std::map<Graphics::VertexArrayHandle, size_t> vboNumOfVertices;
 static std::map<Graphics::VertexArrayHandle, size_t> vboVertexStrides;
 static std::map<Graphics::VertexArrayHandle, std::vector<HashName>> vboAttributeNames;
 static std::map<Graphics::VertexArrayHandle, std::map<HashName, size_t>> vboAttributeOffsets;
 static std::map<Graphics::VertexArrayHandle, std::map<HashName, GLenum>> vboAttributeGLBaseTypes;
 static std::map<Graphics::VertexArrayHandle, std::map<HashName, GLint>> vboAttributeGLTypeNumOfComponents;
-static std::map<Graphics::VertexArrayHandle, std::map<HashName, int>> vboAttributeArrayLengths;
+static std::map<Graphics::VertexArrayHandle, std::map<HashName, size_t>> vboAttributeArrayLengths;
 
 static std::map<Graphics::VertexArrayHandle, GLuint> iboHandles;
-static std::map<Graphics::VertexArrayHandle, int> iboNumOfIndices;
+static std::map<Graphics::VertexArrayHandle, size_t> iboNumOfIndices;
 
 extern GLuint oglActiveProgram; // Defined in Shaders.cpp
 
@@ -174,7 +174,7 @@ Graphics::VertexArrayHandle Graphics::CreateVertexArray(size_t maxVertices, size
 	nextVAH++;
 
 	size_t largestAlignment = 1;
-	for (auto& tup : vertexLayout) // 0: Attribute HashName 1: ShaderDataType 2: Array size 3: Attribute offset
+	for (const auto& tup : vertexLayout) // 0: Attribute HashName 1: ShaderDataType 2: Array size 3: Attribute offset
 	{
 		if (std::get<3>(tup) % 4 != 0)
 		{
@@ -253,7 +253,7 @@ void Graphics::DeleteVertexArray(Graphics::VertexArrayHandle array)
 	iboNumOfIndices.erase(array);
 }
 
-void Graphics::SetVertexData(Graphics::VertexArrayHandle array, void* data, unsigned int first, unsigned int count)
+void Graphics::SetVertexData(Graphics::VertexArrayHandle array, void* data, size_t first, size_t count)
 {
 	EP_ASSERT_SLOW(array != 0);
 	EP_ASSERT_SLOW(data != nullptr);
@@ -275,7 +275,7 @@ void Graphics::SetVertexData(Graphics::VertexArrayHandle array, void* data, unsi
 	EP_GL(glBufferSubData(GL_ARRAY_BUFFER, vboVertexStrides[array] * first, vboVertexStrides[array] * count, data));
 }
 
-void Graphics::SetIndexData(Graphics::VertexArrayHandle array, void* src, unsigned int first, unsigned int count)
+void Graphics::SetIndexData(Graphics::VertexArrayHandle array, void* src, size_t first, size_t count)
 {
 	EP_ASSERT_SLOW(src != nullptr);
 	EP_ASSERT_SLOW(count != 0);
@@ -290,7 +290,7 @@ void Graphics::SetIndexData(Graphics::VertexArrayHandle array, void* src, unsign
 	EP_GL(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * first, sizeof(GLuint) * count, src));
 }
 
-void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, unsigned int& count, unsigned int& first)
+void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t& count, size_t& first)
 {
 	// TODO: Check the size of the currently bound uniform buffers against their respective blocks in the program.
 	// TODO: Skip everything if VA / Shader combination hasn't changed.
@@ -353,7 +353,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, unsign
 												vboAttributeGLTypeNumOfComponents[array][attribute],
 												glBaseType,
 												GL_FALSE,
-												vboVertexStrides[array],
+												(GLsizei)vboVertexStrides[array],
 												(void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
 														+ vboAttributeOffsets[array][attribute])));
 				}
@@ -362,7 +362,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, unsign
 					EP_GL(glVertexAttribLPointer(attributeLocation + i,
 												 vboAttributeGLTypeNumOfComponents[array][attribute],
 												 GL_DOUBLE,
-												 vboVertexStrides[array],
+												 (GLsizei)vboVertexStrides[array],
 												 (void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
 														 + vboAttributeOffsets[array][attribute])));
 				}
@@ -371,7 +371,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, unsign
 					EP_GL(glVertexAttribIPointer(attributeLocation + i,
 												 vboAttributeGLTypeNumOfComponents[array][attribute],
 												 glBaseType,
-												 vboVertexStrides[array],
+												 (GLsizei)vboVertexStrides[array],
 												 (void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
 														 + vboAttributeOffsets[array][attribute])));
 				}
@@ -406,69 +406,69 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, unsign
 #endif
 }
 
-void Graphics::DrawTriangles(Graphics::VertexArrayHandle array, unsigned int count, unsigned int first)
+void Graphics::DrawTriangles(Graphics::VertexArrayHandle array, size_t count, size_t first)
 {
 	BindVertexArrayForDraw(array, count, first);
 
 	if (iboHandles.count(array) != 0)
 	{
-		EP_GL(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
+		EP_GL(glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
 	}
 	else
 	{
-		EP_GL(glDrawArrays(GL_TRIANGLES, first, count));
+		EP_GL(glDrawArrays(GL_TRIANGLES, (GLint)first, (GLsizei)count));
 	}
 }
 
-void Graphics::DrawTriangleStrip(Graphics::VertexArrayHandle array, unsigned int count, unsigned int first)
+void Graphics::DrawTriangleStrip(Graphics::VertexArrayHandle array, size_t count, size_t first)
 {
 	BindVertexArrayForDraw(array, count, first);
 
 	if (iboHandles.count(array) != 0)
 	{
-		EP_GL(glDrawElements(GL_TRIANGLE_STRIP, count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
+		EP_GL(glDrawElements(GL_TRIANGLE_STRIP, (GLsizei)count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
 	}
 	else
 	{
-		EP_GL(glDrawArrays(GL_TRIANGLE_STRIP, first, count));
+		EP_GL(glDrawArrays(GL_TRIANGLE_STRIP, (GLint)first, (GLsizei)count));
 	}
 }
-void Graphics::DrawLines(Graphics::VertexArrayHandle array, unsigned int count, unsigned int first)
+void Graphics::DrawLines(Graphics::VertexArrayHandle array, size_t count, size_t first)
 {
 	BindVertexArrayForDraw(array, count, first);
 
 	if (iboHandles.count(array) != 0)
 	{
-		EP_GL(glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
+		EP_GL(glDrawElements(GL_LINES, (GLsizei)count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
 	}
 	else
 	{
-		EP_GL(glDrawArrays(GL_LINES, first, count));
+		EP_GL(glDrawArrays(GL_LINES, (GLint)first, (GLsizei)count));
 	}
 }
-void Graphics::DrawLineStrip(Graphics::VertexArrayHandle array, unsigned int count, unsigned int first)
+void Graphics::DrawLineStrip(Graphics::VertexArrayHandle array, size_t count, size_t first)
 {
 	BindVertexArrayForDraw(array, count, first);
 
 	if (iboHandles.count(array) != 0)
 	{
-		EP_GL(glDrawElements(GL_LINE_STRIP, count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
+		EP_GL(glDrawElements(GL_LINE_STRIP, (GLsizei)count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
 	}
 	else
 	{
-		EP_GL(glDrawArrays(GL_LINE_STRIP, first, count));
+		EP_GL(glDrawArrays(GL_LINE_STRIP, (GLint)first, (GLsizei)count));
 	}
 }
-void Graphics::DrawPoints(Graphics::VertexArrayHandle array, unsigned int count, unsigned int first)
+void Graphics::DrawPoints(Graphics::VertexArrayHandle array, size_t count, size_t first)
 {
 	BindVertexArrayForDraw(array, count, first);
 
 	if (iboHandles.count(array) != 0)
 	{
-		EP_GL(glDrawElements(GL_POINTS, count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
+		EP_GL(glDrawElements(GL_POINTS, (GLsizei)count, GL_UNSIGNED_INT, (void*)(uintptr_t)first));
 	}
 	else
 	{
-		EP_GL(glDrawArrays(GL_POINTS, first, count));
+		EP_GL(glDrawArrays(GL_POINTS, (GLint)first, (GLsizei)count));
 	}
 }

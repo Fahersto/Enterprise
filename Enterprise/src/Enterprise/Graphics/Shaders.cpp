@@ -1411,8 +1411,8 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 			// Upload source code
 			GLuint vshader = EP_GL(glCreateShader(GL_VERTEX_SHADER));
 			GLuint fshader = EP_GL(glCreateShader(GL_FRAGMENT_SHADER));
-			EP_GL(glShaderSource(vshader, oglVertexShaderSourceStrings.size(), oglVertexShaderSourceStrings.data(), oglVertexShaderSourceLengths.data()));
-			EP_GL(glShaderSource(fshader, oglFragmentShaderSourceStrings.size(), oglFragmentShaderSourceStrings.data(), oglFragmentShaderSourceLengths.data()));
+			EP_GL(glShaderSource(vshader, (GLsizei)oglVertexShaderSourceStrings.size(), oglVertexShaderSourceStrings.data(), oglVertexShaderSourceLengths.data()));
+			EP_GL(glShaderSource(fshader, (GLsizei)oglFragmentShaderSourceStrings.size(), oglFragmentShaderSourceStrings.data(), oglFragmentShaderSourceLengths.data()));
 
 			// Compile Vertex
 			GLint compilationResult;
