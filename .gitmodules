@@ -7,3 +7,6 @@
 [submodule "Enterprise/_vendor/yaml-cpp"]
 	path = Enterprise/_vendor/yaml-cpp
 	url = git@github.com:theOtherMichael/yaml-cpp.git
+[submodule "Enterprise/_vendor/glm"]
+	path = Enterprise/_vendor/glm
+	url = git@github.com:g-truc/glm.git

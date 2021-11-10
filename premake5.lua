@@ -112,7 +112,8 @@ project "Enterprise"
         "Enterprise/_vendor/HotConsts/include",
         "Enterprise/_vendor/Glad/include",
         "Enterprise/_vendor/stb_image/include",
-        "Enterprise/_vendor/yaml-cpp/include"
+        "Enterprise/_vendor/yaml-cpp/include",
+        "Enterprise/_vendor/glm"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CORE"
@@ -197,7 +198,8 @@ project (EP_ProjectName)
         "Enterprise/_vendor/HotConsts/include",
         "Enterprise/_vendor/Glad/include",
         "Enterprise/_vendor/stb_image/include",
-        "Enterprise/_vendor/yaml-cpp/include"
+        "Enterprise/_vendor/yaml-cpp/include",
+        "Enterprise/_vendor/glm"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CLIENT"
