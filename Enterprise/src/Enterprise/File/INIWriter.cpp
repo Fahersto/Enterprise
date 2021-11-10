@@ -43,95 +43,98 @@ void File::INIWriter::Close()
 		}
 
 		// Parse original file for merge
-		while (!originalFileIn.isEOF())
+		if (originalFileIn.GetLastError() == ErrorCode::Success)
 		{
-			line = originalFileIn.GetLine();
-			pos = line.find_first_not_of(" \t\r");
-
-			if (pos != std::string::npos)
+			while (!originalFileIn.isEOF())
 			{
-				if (line[pos] == '[')
-					// This line may contain a section.
+				line = originalFileIn.GetLine();
+				pos = line.find_first_not_of(" \t\r");
+
+				if (pos != std::string::npos)
 				{
-					pos2 = line.find_first_of(']', pos);
-					if (pos2 != std::string::npos)
+					if (line[pos] == '[')
+						// This line may contain a section.
 					{
-						// Get the section name
-						pos = line.find_first_not_of(" \t\r", pos + 1);
-						if (pos != pos2)
-							pos2 = line.find_last_not_of(" \t\r", pos2 - 1) + 1;
-						currentSection = HN(line.data() + pos, pos2 - pos);
-
-						if (m_data.count(currentSection))
-							// There is new data to write to this section.
-						{
-							// header
-							mergedFileOut << m_sectionHeaders[currentSection];
-
-							// data
-							if (previouslyParsedSections.emplace(currentSection).second)
-							{
-								for (const auto& [key, text] : m_data[currentSection])
-								{
-									previouslyWrittenKeys.emplace(std::pair(currentSection, key));
-									mergedFileOut << text;
-								}
-							}
-
-							currentlyMergingKeys = m_mergeKeys;
-						}
-						else
-						{
-							if (m_mergeSections)
-								// This section isn't modified, but we are merging it
-							{
-								// header
-								mergedFileOut << commentBuffer.str();
-								mergedFileOut << line << '\n';
-							}
-							currentlyMergingKeys = m_mergeSections;
-						}
-						commentBuffer.str(std::string());
-					}
-				}
-				else if (line[pos] != ';')
-				{
-					// This line may contain a key.
-					if (currentlyMergingKeys)
-					{
-						// Get the key name
-						pos2 = line.find_first_of(" \t\r=;", pos);
+						pos2 = line.find_first_of(']', pos);
 						if (pos2 != std::string::npos)
 						{
-							HashName key = HN(line.data() + pos, pos2 - pos);
+							// Get the section name
+							pos = line.find_first_not_of(" \t\r", pos + 1);
+							if (pos != pos2)
+								pos2 = line.find_last_not_of(" \t\r", pos2 - 1) + 1;
+							currentSection = HN(line.data() + pos, pos2 - pos);
 
-							// copy the key/value pair and any comments
-							if (previouslyWrittenKeys.count(std::pair(currentSection, key)) == 0)
+							if (m_data.count(currentSection))
+								// There is new data to write to this section.
+							{
+								// header
+								mergedFileOut << m_sectionHeaders[currentSection];
+
+								// data
+								if (previouslyParsedSections.emplace(currentSection).second)
+								{
+									for (const auto& [key, text] : m_data[currentSection])
+									{
+										previouslyWrittenKeys.emplace(std::pair(currentSection, key));
+										mergedFileOut << text;
+									}
+								}
+
+								currentlyMergingKeys = m_mergeKeys;
+							}
+							else
+							{
+								if (m_mergeSections)
+									// This section isn't modified, but we are merging it
+								{
+									// header
+									mergedFileOut << commentBuffer.str();
+									mergedFileOut << line << '\n';
+								}
+								currentlyMergingKeys = m_mergeSections;
+							}
+							commentBuffer.str(std::string());
+						}
+					}
+					else if (line[pos] != ';')
+					{
+						// This line may contain a key.
+						if (currentlyMergingKeys)
+						{
+							// Get the key name
+							pos2 = line.find_first_of(" \t\r=;", pos);
+							if (pos2 != std::string::npos)
+							{
+								HashName key = HN(line.data() + pos, pos2 - pos);
+
+								// copy the key/value pair and any comments
+								if (previouslyWrittenKeys.count(std::pair(currentSection, key)) == 0)
+								{
+									mergedFileOut << commentBuffer.str();
+									mergedFileOut << line << '\n';
+								}
+							}
+							else
+								// line is badly formatted: but copy it anyways
+								// warnings will appear on next file read
 							{
 								mergedFileOut << commentBuffer.str();
 								mergedFileOut << line << '\n';
 							}
 						}
-						else
-							// line is badly formatted: but copy it anyways
-							// warnings will appear on next file read
-						{
-							mergedFileOut << commentBuffer.str();
-							mergedFileOut << line << '\n';
-						}
-					}
 
-					commentBuffer.str(std::string());
+						commentBuffer.str(std::string());
+					}
+					else
+					{
+						commentBuffer << line << '\n';
+					}
 				}
 				else
 				{
-					commentBuffer << line << '\n';
+					if (!originalFileIn.isEOF())
+						commentBuffer << '\n';
 				}
-			}
-			else
-			{
-				if (!originalFileIn.isEOF())
-					commentBuffer << '\n';
 			}
 		}
 
