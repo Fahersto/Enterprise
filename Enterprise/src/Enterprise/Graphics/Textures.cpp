@@ -20,151 +20,167 @@ std::map<Graphics::TextureHandle, int> Graphics::currentSlotOfTexture;
 
 Graphics::TextureHandle Graphics::LoadTexture(std::string path, TextureFilter minFilter, TextureFilter magFilter, MipmapMode mipmapMode)
 {
-	GLuint texture;
+	GLuint texture = 0;
 	if (textureReferenceCount[HN(path)] == 0)
 	{
-		// Load image file into local memory
-		stbi_set_flip_vertically_on_load(1);
-		int width, height, numOfColorComponents;
-		unsigned char* buffer;
-		bool is16Bit = stbi_is_16_bit(File::VirtualPathToNative(path).c_str());
-		if (!is16Bit) buffer = stbi_load(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
-		else buffer = (unsigned char*)stbi_load_16(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
-		EP_ASSERT(buffer);
-		if (!buffer) return 0;
-
-		GLenum textureTarget;
-		width == 1 || height == 1 ? textureTarget = GL_TEXTURE_1D : textureTarget = GL_TEXTURE_2D;
-
-		// Create texture
-		EP_GL(glGenTextures(1, &texture));
-		EP_GL(glBindTexture(textureTarget, texture));
-		switch (minFilter)
+		if (File::Exists(path))
 		{
-			case TextureFilter::Nearest:
-				switch(mipmapMode)
-				{
-					case MipmapMode::None:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-						break;
-					case MipmapMode::Nearest:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
-						break;
-					case MipmapMode::Linear:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-						break;
-					default:
-						EP_ASSERT_NOENTRY();
-						break;
-				}
-				break;
-			case TextureFilter::Linear:
-				switch(mipmapMode)
-				{
-					case MipmapMode::None:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-						break;
-					case MipmapMode::Nearest:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
-						break;
-					case MipmapMode::Linear:
-						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-						break;
-					default:
-						EP_ASSERT_NOENTRY();
-						break;
-				}
-				break;
-				//		case TextureFilter::Anisotropic:
-				//			break;
-			default:
-				EP_ASSERT_NOENTRY();
-				break;
-		}
-		switch (magFilter)
-		{
-			case TextureFilter::Nearest:
-				EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-				break;
-			case TextureFilter::Linear:
-				EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-				break;
-				//		case TextureFilter::Anisotropic:
-				//			break;
-			default:
-				EP_ASSERT_NOENTRY();
-				break;
-		}
+			// Load image file into local memory
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, numOfColorComponents;
+			unsigned char* buffer;
 
-		// TODO: Support other wrap modes
-		EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			bool is16Bit = stbi_is_16_bit(File::VirtualPathToNative(path).c_str());
+			if (!is16Bit)
+				buffer = stbi_load(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
+			else
+				buffer = (unsigned char*)stbi_load_16(File::VirtualPathToNative(path).c_str(), &width, &height, &numOfColorComponents, 0);
 
-		// Send image to GPU
-		if (textureTarget == GL_TEXTURE_1D)
-		{
-			switch(numOfColorComponents)
+			if (buffer)
 			{
-				case 1:
-					EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, height == 1 ? width : height, 0, GL_RED, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 2:
-					EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RG, height == 1 ? width : height, 0, GL_RG, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 3:
-					EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, height == 1 ? width : height, 0, GL_RGB, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 4:
-					EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, height == 1 ? width : height, 0, GL_RGBA, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				default:
-					EP_ASSERT_NOENTRY();
-					break;
+				GLenum textureTarget;
+				(width == 1 || height == 1) ? textureTarget = GL_TEXTURE_1D : textureTarget = GL_TEXTURE_2D;
+
+				EP_GL(glGenTextures(1, &texture));
+				EP_GL(glBindTexture(textureTarget, texture));
+
+				switch (minFilter)
+				{
+					case TextureFilter::Nearest:
+						switch(mipmapMode)
+						{
+							case MipmapMode::None:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+								break;
+							case MipmapMode::Nearest:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+								break;
+							case MipmapMode::Linear:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+								break;
+							default:
+								EP_ASSERT_NOENTRY();
+								break;
+						}
+						break;
+					case TextureFilter::Linear:
+						switch(mipmapMode)
+						{
+							case MipmapMode::None:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+								break;
+							case MipmapMode::Nearest:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+								break;
+							case MipmapMode::Linear:
+								EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+								break;
+							default:
+								EP_ASSERT_NOENTRY();
+								break;
+						}
+						break;
+						//		case TextureFilter::Anisotropic:
+						//			break;
+					default:
+						EP_ASSERT_NOENTRY();
+						break;
+				}
+				switch (magFilter)
+				{
+					case TextureFilter::Nearest:
+						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+						break;
+					case TextureFilter::Linear:
+						EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+						break;
+						//		case TextureFilter::Anisotropic:
+						//			break;
+					default:
+						EP_ASSERT_NOENTRY();
+						break;
+				}
+
+				// TODO: Support other wrap modes
+				EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+				EP_GL(glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+				// Send image to GPU
+				if (textureTarget == GL_TEXTURE_1D)
+				{
+					switch(numOfColorComponents)
+					{
+						case 1:
+							EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, height == 1 ? width : height, 0, GL_RED, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 2:
+							EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RG, height == 1 ? width : height, 0, GL_RG, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 3:
+							EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, height == 1 ? width : height, 0, GL_RGB, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 4:
+							EP_GL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, height == 1 ? width : height, 0, GL_RGBA, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						default:
+							EP_ASSERT_NOENTRY();
+							break;
+					}
+					samplerTypeNeededForTexture[texture] = GL_SAMPLER_1D;
+				}
+				else
+				{
+					switch(numOfColorComponents)
+					{
+						case 1:
+							EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 2:
+							EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, width, height, 0, GL_RG, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 3:
+							EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						case 4:
+							EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
+							break;
+						default:
+							EP_ASSERT_NOENTRY();
+							break;
+					}
+					samplerTypeNeededForTexture[texture] = GL_SAMPLER_2D;
+				}
+
+				// Generate mipmaps
+				if (mipmapMode != MipmapMode::None)
+				{
+#ifndef EP_CONFIG_DIST
+					if (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0))
+					{
+						EP_WARN("Graphics::LoadTexture(): Mipmaps generated for non-power-of-two texture \"{}\".", path);
+					}
+#endif
+					EP_GL(glGenerateMipmap(textureTarget));
+				}
+
+				// Unbind texture and release local buffer
+				EP_GL(glBindTexture(textureTarget, 0));
+				stbi_image_free(buffer);
+
+				currentSlotOfTexture[texture] = -1;
+				textureHandlesByPath[HN(path)] = texture;
+				pathOfTextureHandle[texture] = HN(path);
 			}
-			samplerTypeNeededForTexture[texture] = GL_SAMPLER_1D;
+			else
+			{
+				EP_WARN("Graphics::LoadTexture(): stbi_load() failure!  File: \"{}\"", File::VirtualPathToNative(path));
+				textureReferenceCount.erase(HN("path"));
+			}
 		}
 		else
 		{
-			switch(numOfColorComponents)
-			{
-				case 1:
-					EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 2:
-					EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, width, height, 0, GL_RG, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 3:
-					EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				case 4:
-					EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, is16Bit ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE, buffer));
-					break;
-				default:
-					EP_ASSERT_NOENTRY();
-					break;
-			}
-			samplerTypeNeededForTexture[texture] = GL_SAMPLER_2D;
+			textureReferenceCount.erase(HN("path"));
 		}
-
-		// Generate mipmaps
-		if (mipmapMode != MipmapMode::None)
-		{
-#ifndef EP_CONFIG_DIST
-			if (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0))
-			{
-				EP_WARN("Graphics::LoadTexture(): Mipmaps generated for non-power-of-two texture \"{}\".", path);
-			}
-#endif
-			EP_GL(glGenerateMipmap(textureTarget));
-		}
-
-		// Unbind texture and release local buffer
-		EP_GL(glBindTexture(textureTarget, 0));
-		stbi_image_free(buffer);
-
-		currentSlotOfTexture[texture] = -1;
-		textureHandlesByPath[HN(path)] = texture;
-		pathOfTextureHandle[texture] = HN(path);
 	}
 	else
 	{
