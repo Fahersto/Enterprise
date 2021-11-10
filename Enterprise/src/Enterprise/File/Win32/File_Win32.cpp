@@ -59,6 +59,7 @@ static std::string Win32_LastErrorMsg()
 
 std::string File::GetNewTempFilename()
 {
+	// Local singleton: do not call delete on it!
 	static std::wstring* tempDirPath_Wide = nullptr;
 	if (!tempDirPath_Wide)
 	{
@@ -76,7 +77,6 @@ std::string File::GetNewTempFilename()
 			"Error: {}", Win32_LastErrorMsg());
 	}
 
-	delete tempDirPath_Wide;
 	return WCHARtoUTF8(tempFileNameOut);
 }
 
