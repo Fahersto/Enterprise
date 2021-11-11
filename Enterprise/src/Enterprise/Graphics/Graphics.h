@@ -2,8 +2,6 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
-#include "Math.h"
-
 namespace Enterprise
 {
 
