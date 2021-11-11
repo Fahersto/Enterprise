@@ -33,13 +33,13 @@ static size_t sizeofShaderDataType(Graphics::ShaderDataType type)
 			return sizeof(float);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec2:
-			return sizeof(Enterprise::Math::Vec2);
+			return sizeof(glm::vec2);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec3:
-			return sizeof(Enterprise::Math::Vec3);
+			return sizeof(glm::vec3);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec4:
-			return sizeof(Enterprise::Math::Vec4);
+			return sizeof(glm::vec4);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Int:
 			return sizeof(int);
@@ -48,10 +48,10 @@ static size_t sizeofShaderDataType(Graphics::ShaderDataType type)
 			return sizeof(unsigned int);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Mat3:
-			return sizeof(Enterprise::Math::Mat3);
+			return sizeof(glm::mat3);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Mat4:
-			return sizeof(Enterprise::Math::Mat4);
+			return sizeof(glm::mat4);
 			break;
 		default:
 			EP_ASSERT_NOENTRY();
@@ -70,13 +70,13 @@ static size_t alignofShaderDataType(Graphics::ShaderDataType type)
 			return alignof(float);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec2:
-			return alignof(Enterprise::Math::Vec2);
+			return alignof(glm::vec2);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec3:
-			return alignof(Enterprise::Math::Vec3);
+			return alignof(glm::vec3);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Vec4:
-			return alignof(Enterprise::Math::Vec4);
+			return alignof(glm::vec4);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Int:
 			return alignof(int);
@@ -85,10 +85,10 @@ static size_t alignofShaderDataType(Graphics::ShaderDataType type)
 			return alignof(unsigned int);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Mat3:
-			return alignof(Enterprise::Math::Mat3);
+			return alignof(glm::mat3);
 			break;
 		case Enterprise::Graphics::ShaderDataType::Mat4:
-			return alignof(Enterprise::Math::Mat4);
+			return alignof(glm::mat4);
 			break;
 		default:
 			EP_ASSERT_NOENTRY();

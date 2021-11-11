@@ -81,16 +81,16 @@ void Graphics::Init()
 	// Universal uniform buffers
 	perCameraGlobalUBDataStack.emplace
 	(
-		Math::Mat4::Identity(),
-		Math::Mat4::Identity(),
-		Math::Mat4::Identity(),
-		0
+		glm::mat4(1.0f),
+		glm::mat4(1.0f),
+		glm::mat4(1.0f),
+		glm::vec3()
 	);
 	perCameraGlobalUB = CreateUniformBuffer(HN("EP_PERCAMERA"), sizeof(perCameraGlobalUBStruct), &perCameraGlobalUBDataStack.top(), true);
 
-	perDrawGlobalUBData.ep_matrix_m = Math::Mat4::Identity();
-	perDrawGlobalUBData.ep_matrix_mv = Math::Mat4::Identity();
-	perDrawGlobalUBData.ep_matrix_mvp = Math::Mat4::Identity();
+	perDrawGlobalUBData.ep_matrix_m = glm::mat4(1.0f);
+	perDrawGlobalUBData.ep_matrix_mv = glm::mat4(1.0f);
+	perDrawGlobalUBData.ep_matrix_mvp = glm::mat4(1.0f);
 	perDrawGlobalUB = CreateUniformBuffer(HN("EP_PERDRAW"), sizeof(perDrawGlobalUBStruct), &perDrawGlobalUBData, true);
 }
 

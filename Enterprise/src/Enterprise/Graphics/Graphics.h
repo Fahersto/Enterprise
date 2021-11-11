@@ -237,25 +237,25 @@ public:
 	static void PushCamera();
 	/// Add a camera to the camera stack.
 	/// @param cameraPos The position of the camera in world space.
-	/// @param cameraRot The roll, pitch, and yaw of the camera in degrees, expressed as a vector.
+	/// @param cameraRot The orientation of the camera, expressed as a quaternion.
 	/// @param projectionMat The projection matrix for this camera.
 	/// @note The global shader variables @c ep_matrix_mv and @c ep_matrix_mvp will not update with the new view and
 	/// view-projection matrices until the next call to @c Graphics::SetModelMatrix().
-	static void PushCamera(Math::Vec3 cameraPos, Math::Vec3 cameraRot, Math::Mat4 projectionMat);
+	static void PushCamera(glm::vec3 cameraPos, glm::quat cameraRot, glm::mat4 projectionMat);
 	/// Update the camera currently on top of the camera stack.
 	/// @param cameraPos The position of the camera in world space.
-	/// @param cameraRot The roll, pitch, and yaw of the camera in degrees, expressed as a vector.
+	/// @param cameraRot The orientation of the camera, expressed as a quaternion.
 	/// @param projectionMat The projection matrix for this camera.
 	/// @note The global shader variables @c ep_matrix_mv and @c ep_matrix_mvp will not update with the new view and
 	/// view-projection matrices until the next call to @c Graphics::SetModelMatrix().
 	/// @note To use this function, you must first push a camera on the camera stack using @c Graphics::PushCamera().
-	static void SetCamera(Math::Vec3 cameraPos, Math::Vec3 cameraRot, Math::Mat4 projectionMat);
+	static void SetCamera(glm::vec3 cameraPos, glm::quat cameraRot, glm::mat4 projectionMat);
 	/// Remove the topmost camera from the camera stack.
 	static void PopCamera();
 
 	/// Set the model matrix to be used in subsequent draw calls.
 	/// @param modelMat The transformation matrix used to move vertices from model space to world space.
-	static void SetModelMatrix(Math::Mat4 modelMat);
+	static void SetModelMatrix(glm::mat4 modelMat);
 
 
 	// Vertex array functions
@@ -445,12 +445,12 @@ private:
 	static UniformBufferHandle perCameraGlobalUB;
 	struct perCameraGlobalUBStruct
 	{
-		Math::Mat4 ep_matrix_v;
-		Math::Mat4 ep_matrix_p;
-		Math::Mat4 ep_matrix_vp;
-		Math::Vec3 ep_camera_worldpos;
+		glm::mat4 ep_matrix_v;
+		glm::mat4 ep_matrix_p;
+		glm::mat4 ep_matrix_vp;
+		glm::vec3 ep_camera_worldpos;
 
-		perCameraGlobalUBStruct(Math::Mat4 v, Math::Mat4 p, Math::Mat4 vp, Math::Vec3 campos)
+		perCameraGlobalUBStruct(glm::mat4 v, glm::mat4 p, glm::mat4 vp, glm::vec3 campos)
 								: ep_matrix_v(v), ep_matrix_p(p), ep_matrix_vp(vp), ep_camera_worldpos(campos) {}
 	};
 	static std::stack<perCameraGlobalUBStruct> perCameraGlobalUBDataStack;
@@ -458,9 +458,9 @@ private:
 	static UniformBufferHandle perDrawGlobalUB;
 	static struct perDrawGlobalUBStruct
 	{
-		Math::Mat4 ep_matrix_m;
-		Math::Mat4 ep_matrix_mv;
-		Math::Mat4 ep_matrix_mvp;
+		glm::mat4 ep_matrix_m;
+		glm::mat4 ep_matrix_mv;
+		glm::mat4 ep_matrix_mvp;
 	} perDrawGlobalUBData;
 
 	// Drawing stuff

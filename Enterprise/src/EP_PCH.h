@@ -45,6 +45,9 @@
 #include <glad/glad.h>
 #include <stb_image/stb_image.h>
 #include <yaml-cpp/yaml.h>
+#define GLM_FORCE_LEFT_HANDED
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #ifdef _WIN32
     #include <windows.h>

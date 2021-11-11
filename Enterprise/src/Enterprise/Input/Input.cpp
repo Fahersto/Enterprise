@@ -10,7 +10,7 @@ using Enterprise::Time;
 using Enterprise::StateManager;
 
 Input::KBMouseBuffer Input::kbmBuffer;
-Enterprise::Math::Vec2 Input::cursorPos;
+glm::vec2 Input::cursorPos;
 std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID - 2.
 bool Input::currentBuffer = 0;
 
@@ -1003,7 +1003,7 @@ void Input::Init()
 		HN("MousePosition"),
 		[](Events::Event& e)
 		{
-			auto position = Events::Unpack<Math::Vec2>(e);
+			auto position = Events::Unpack<glm::vec2>(e);
 			cursorPos = position;
 			return true;
 		});

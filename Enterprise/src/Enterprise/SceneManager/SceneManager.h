@@ -1,7 +1,6 @@
 #pragma once
 #include "EP_PCH.h"
 #include "Core.h"
-#include "Enterprise/Graphics/Math.h"
 
 namespace Enterprise
 {
@@ -46,9 +45,12 @@ public:
     /// Spawn a new, empty entity.
     /// @param name The HashName of the entity.
     /// @param position The starting position of the entity.
-    /// @param rotation The starting rotation of the entity.
+    /// @param rotation The starting orientation of the entity.
     /// @return The ID of the created entity.
-    static EntityID CreateEntity(HashName name, Math::Vec3 position = 0, Math::Vec3 rotation = 0);
+    static EntityID CreateEntity(HashName name,
+        glm::vec3 position = glm::vec3(),
+        glm::quat rotation = glm::quat(),
+        glm::vec3 scale = glm::vec3());
     /// Remove an entity from the scene.
     /// @param entity The ID of the entity to delete.
     static void DeleteEntity(EntityID entity);
@@ -63,12 +65,16 @@ public:
 
     /// Get the position of an entity.
     /// @param entity The ID of the entity to query.
-    /// @return The position of the entity, expressed as a Vec3.
-    static Math::Vec3 GetEntityPosition(EntityID entity);
+    /// @return The position of the entity, expressed as a vec3.
+    static glm::vec3 GetEntityPosition(EntityID entity);
     /// Get the rotation of an entity.
     /// @param entity The ID of the entity to query.
-    /// @return The entity's roll, pitch, and yaw in degrees, expressed as a Vec3.
-    static Math::Vec3 GetEntityRotation(EntityID entity);
+    /// @return The entity's orientation, expressed as a quaternion.
+    static glm::quat GetEntityRotation(EntityID entity);
+    /// Get the scale values of an entity.
+    /// @param entity The ID of the entity to query.
+    /// @return The entity's scale values, expressed as a vec3.
+    static glm::vec3 GetEntityScale(EntityID entity);
 
     /// Get the IDs of all entities with a specific component type attached.
     /// @param componentType The HashName of the component type.

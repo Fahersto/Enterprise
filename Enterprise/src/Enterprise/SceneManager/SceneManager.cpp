@@ -35,8 +35,9 @@ struct Entity
 	//SceneManager::EntityID parent;
 	//std::set<SceneManager::EntityID> children;
 	//std::set<HashName> tags;
-	Math::Vec3 position;
-	Math::Vec3 rotation;
+	glm::vec3 position;
+	glm::quat rotation;
+	glm::vec3 scale;
 };
 static std::vector<Entity> entityPool(Constants::MaxEntities);
 
@@ -52,10 +53,10 @@ static SceneManager::EntityID genSpawnedEntityID()
 	return returnVal;
 }
 
-SceneManager::EntityID SceneManager::CreateEntity(HashName name, Math::Vec3 position, Math::Vec3 rotation)
+SceneManager::EntityID SceneManager::CreateEntity(HashName name, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
 {
 	EntityID id = genSpawnedEntityID();
-	entityPool[availableEntityPoolIndices.back()] = { id, name, position, rotation };
+	entityPool[availableEntityPoolIndices.back()] = { id, name, position, rotation, scale };
 	entityIndices[id] = availableEntityPoolIndices.back();
 	availableEntityPoolIndices.pop_back();
 	return id;
@@ -117,7 +118,7 @@ bool SceneManager::IsEntityValid(EntityID entity)
 }
 
 
-Math::Vec3 SceneManager::GetEntityPosition(EntityID entity)
+glm::vec3 SceneManager::GetEntityPosition(EntityID entity)
 {
 	if (entityIndices.count(entity) != 0)
 	{
@@ -126,11 +127,11 @@ Math::Vec3 SceneManager::GetEntityPosition(EntityID entity)
 	else
 	{
 		EP_ERROR("SceneManager::GetEntityPosition(): EntityID {} does not exist!", entity);
-		return 0;
+		return glm::vec3();
 	}
 }
 
-Math::Vec3 SceneManager::GetEntityRotation(EntityID entity)
+glm::quat SceneManager::GetEntityRotation(EntityID entity)
 {
 	if (entityIndices.count(entity) != 0)
 	{
@@ -139,7 +140,20 @@ Math::Vec3 SceneManager::GetEntityRotation(EntityID entity)
 	else
 	{
 		EP_ERROR("SceneManager::GetEntityRotation(): EntityID {} does not exist!", entity);
-		return 0;
+		return glm::quat();
+	}
+}
+
+glm::vec3 SceneManager::GetEntityScale(EntityID entity)
+{
+	if (entityIndices.count(entity) != 0)
+	{
+		return entityPool.at(entityIndices[entity]).scale;
+	}
+	else
+	{
+		EP_ERROR("SceneManager::GetEntityScale(): EntityID {} does not exist!", entity);
+		return glm::vec3();
 	}
 }
 
@@ -179,9 +193,15 @@ void SceneManager::SaveEntitiesToTextFile(std::string path, const std::vector<En
 			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).position.z;
 			outYaml << YAML::EndMap;
 			outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
-			outYaml << YAML::Key << "roll" << YAML::Value << entityPool.at(index).rotation.x;
-			outYaml << YAML::Key << "pitch" << YAML::Value << entityPool.at(index).rotation.y;
-			outYaml << YAML::Key << "yaw" << YAML::Value << entityPool.at(index).rotation.z;
+			outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(index).rotation.w;
+			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).rotation.x;
+			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).rotation.y;
+			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).rotation.z;
+			outYaml << YAML::EndMap;
+			outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
+			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).scale.x;
+			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).scale.y;
+			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).scale.z;
 			outYaml << YAML::EndMap;
 			outYaml << YAML::EndMap;
 		}
@@ -200,9 +220,15 @@ void SceneManager::SaveEntitiesToTextFile(std::string path, const std::vector<En
 				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).position.z;
 				outYaml << YAML::EndMap;
 				outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
-				outYaml << YAML::Key << "roll" << YAML::Value << entityPool.at(entityIndices[id]).rotation.x;
-				outYaml << YAML::Key << "pitch" << YAML::Value << entityPool.at(entityIndices[id]).rotation.y;
-				outYaml << YAML::Key << "yaw" << YAML::Value << entityPool.at(entityIndices[id]).rotation.z;
+				outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(entityIndices[id]).rotation.w;
+				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).rotation.x;
+				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).rotation.y;
+				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).rotation.z;
+				outYaml << YAML::EndMap;
+				outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
+				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).scale.x;
+				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).scale.y;
+				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).scale.z;
 				outYaml << YAML::EndMap;
 				outYaml << YAML::EndMap;
 			}
@@ -303,7 +329,8 @@ bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
 			}
 			else if (!entityDataIt->second["Name"] ||
 				!entityDataIt->second["Position"] ||
-				!entityDataIt->second["Rotation"])
+				!entityDataIt->second["Rotation"] ||
+				!entityDataIt->second["Scale"])
 			{
 				EP_WARN("SceneManager::LoadEntitiesFromYAML() : Entity subnode is missing data.  "
 					"ID : {}", entityDataIt->first.as<std::string>());
@@ -311,17 +338,22 @@ bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
 			else
 			{
 				if (entityDataIt->second["Position"].Type() != YAML::NodeType::Map ||
-					entityDataIt->second["Rotation"].Type() != YAML::NodeType::Map)
+					entityDataIt->second["Rotation"].Type() != YAML::NodeType::Map ||
+					entityDataIt->second["Scale"].Type() != YAML::NodeType::Map)
 				{
 					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
 						"for entity \"{}\" are not mappings.", entityDataIt->first.as<std::string>());
 				}
-				else if (!entityDataIt->second["Position"]["x"] || 
-					!entityDataIt->second["Position"]["y"] || 
+				else if (!entityDataIt->second["Position"]["x"] ||
+					!entityDataIt->second["Position"]["y"] ||
 					!entityDataIt->second["Position"]["z"] ||
-					!entityDataIt->second["Rotation"]["roll"] || 
-					!entityDataIt->second["Rotation"]["pitch"] || 
-					!entityDataIt->second["Rotation"]["yaw"])
+					!entityDataIt->second["Rotation"]["w"] ||
+					!entityDataIt->second["Rotation"]["x"] ||
+					!entityDataIt->second["Rotation"]["y"] ||
+					!entityDataIt->second["Rotation"]["z"] ||
+					!entityDataIt->second["Scale"]["x"] ||
+					!entityDataIt->second["Scale"]["y"] ||
+					!entityDataIt->second["Scale"]["z"])
 				{
 					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
 						"for entity \"{}\" are missing data.", entityDataIt->first.as<std::string>());
@@ -334,17 +366,24 @@ bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
 					{
 						// Non-string deserialization done first because they throw exceptions in case of failure
 						id = entityDataIt->first.as<EntityID>();
-						Math::Vec3 outPos =
+						glm::vec3 outPos =
 						{
 							entityDataIt->second["Position"]["x"].as<float>(),
 							entityDataIt->second["Position"]["y"].as<float>(),
 							entityDataIt->second["Position"]["z"].as<float>()
 						};
-						Math::Vec3 outRot =
+						glm::quat outRot =
 						{
-							entityDataIt->second["Rotation"]["roll"].as<float>(),
-							entityDataIt->second["Rotation"]["pitch"].as<float>(),
-							entityDataIt->second["Rotation"]["yaw"].as<float>()
+							entityDataIt->second["Rotation"]["w"].as<float>(),
+							entityDataIt->second["Rotation"]["x"].as<float>(),
+							entityDataIt->second["Rotation"]["y"].as<float>(),
+							entityDataIt->second["Rotation"]["z"].as<float>()
+						};
+						glm::vec3 outScale =
+						{
+							entityDataIt->second["Scale"]["x"].as<float>(),
+							entityDataIt->second["Scale"]["y"].as<float>(),
+							entityDataIt->second["Scale"]["z"].as<float>()
 						};
 
 
@@ -381,6 +420,7 @@ bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
 							HN(entityDataIt->second["Name"].as<std::string>());
 						entityPool[entityIndices[oldIDtoNewID[id]]].position = outPos;
 						entityPool[entityIndices[oldIDtoNewID[id]]].rotation = outRot;
+						entityPool[entityIndices[oldIDtoNewID[id]]].scale = outScale;
 					}
 					catch (const YAML::TypedBadConversion<EntityID>&)
 					{
@@ -390,7 +430,7 @@ bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
 					catch (const YAML::TypedBadConversion<float>& exc)
 					{
 						EP_WARN("SceneManager::LoadEntitiesFromYAML(): Cannot deserialize EntityID {}: "
-							"Invalid position or rotation value.", id);
+							"Invalid transform value(s).", id);
 					}
 				}
 			}

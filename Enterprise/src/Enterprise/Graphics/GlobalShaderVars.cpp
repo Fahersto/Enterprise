@@ -10,9 +10,10 @@ void Graphics::PushCamera()
 	perCameraGlobalUBDataStack.push(perCameraGlobalUBDataStack.top());
 }
 
-void Graphics::PushCamera(Math::Vec3 cameraPos, Math::Vec3 cameraRot, Math::Mat4 projectionMat)
+void Graphics::PushCamera(glm::vec3 cameraPos, glm::quat cameraRot, glm::mat4 projectionMat)
 {
-	Math::Mat4 viewMat = Math::Mat4::Rotation(-cameraRot) * Math::Mat4::Translation(-cameraPos);
+	glm::mat4 rotmat = glm::mat4_cast(glm::inverse(cameraRot));
+	glm::mat4 viewMat = glm::translate(rotmat, -cameraPos);
 	perCameraGlobalUBDataStack.emplace
 	(
 		viewMat,
@@ -23,11 +24,12 @@ void Graphics::PushCamera(Math::Vec3 cameraPos, Math::Vec3 cameraRot, Math::Mat4
 	SetUniformBufferData(perCameraGlobalUB, &perCameraGlobalUBDataStack);
 }
 
-void Graphics::SetCamera(Math::Vec3 cameraPos, Math::Vec3 cameraRot, Math::Mat4 projectionMat)
+void Graphics::SetCamera(glm::vec3 cameraPos, glm::quat cameraRot, glm::mat4 projectionMat)
 {
 	EP_ASSERT(perCameraGlobalUBDataStack.size() > 1); // 0th element is reserved for null camera (identity matrices)
 
-	Math::Mat4 viewMat = Math::Mat4::Rotation(-cameraRot) * Math::Mat4::Translation(-cameraPos);
+	glm::mat4 rotmat = glm::mat4_cast(glm::inverse(cameraRot));
+	glm::mat4 viewMat = glm::translate(rotmat, -cameraPos);
 	perCameraGlobalUBDataStack.top() =
 	{
 		viewMat,
@@ -46,7 +48,7 @@ void Graphics::PopCamera()
 }
 
 
-void Graphics::SetModelMatrix(Math::Mat4 modelMat)
+void Graphics::SetModelMatrix(glm::mat4 modelMat)
 {
 	perDrawGlobalUBData.ep_matrix_m = modelMat;
 	perDrawGlobalUBData.ep_matrix_mv = perCameraGlobalUBDataStack.top().ep_matrix_v * modelMat;

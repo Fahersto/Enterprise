@@ -3,7 +3,6 @@
 #include "Core.h"
 
 #include "../Events/Events.h"
-#include "../Graphics/Math.h"
 #include "ControlIDs.h"
 
 namespace Enterprise
@@ -77,7 +76,7 @@ public:
 	/// @return The current position of the cursor in pixel coordinates.
 	/// @remarks Pixel space is relative to the lower left corner of the window or screen, where that corner is (0, 0)
 	/// and the upper-right corner is (Window::GetWidth(), Window::GetHeight()).
-	static inline Math::Vec2 GetMousePos() { return cursorPos; };
+	static inline glm::vec2 GetMousePos() { return cursorPos; };
 
 private:
 	friend class Application;
@@ -115,7 +114,7 @@ private:
 	};
 
 	static KBMouseBuffer kbmBuffer;
-	static Math::Vec2 cursorPos;
+	static glm::vec2 cursorPos;
 	static std::vector<GamePadBuffer> gpBuffer;
 	static bool currentBuffer; // used as index to double-buffered raw input
 
