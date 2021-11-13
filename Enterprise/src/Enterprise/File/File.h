@@ -427,6 +427,7 @@ public:
 
 private:
 	friend class Application;
+	friend class Graphics;
 
 	static void backslashesToSlashes(std::string& str);
 	static bool isAlphanumeric(const std::string& str);
@@ -438,9 +439,11 @@ private:
 	static std::string dataDirPath;
 	static std::string saveDirPath;
 	static std::string tempDirPath;
+	static std::string engineShadersPath;
 
 	static void SetPlatformContentPath();
 	static void SetPlatformDataPaths();
+	static void SetPlatformEShadersPath();
 
 	static void Init();
 };

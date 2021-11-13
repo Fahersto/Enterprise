@@ -139,6 +139,13 @@ project (EP_ProjectName)
         buildoptions{ "/std:c++17" }
         links { "xinput", "OpenGL32" }
         staticruntime "On"
+        -- These are set in pm_Mac_XCode11.command for macOS
+        debugargs
+        {
+            "--content-dir \"content\"",
+            "--data-dir \"data\"",
+            "--engineshaders-dir \"../Enterprise/engineshaders\""
+        }
     filter "system:macosx"
         systemversion "10.15"
         buildoptions{ "-std=c++17" }

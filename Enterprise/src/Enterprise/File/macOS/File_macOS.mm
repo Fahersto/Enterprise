@@ -54,6 +54,7 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 			}
 			else
 			{
+				// TODO: Ensure that this resize operation doesn't make outString too small
 				outString->resize(i);
 			}
 		}

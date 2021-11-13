@@ -95,7 +95,7 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 		rewind(fhandle);
 		fread_s(&(*outString)[0], outString->size(), sizeof(char), outString->size(), fhandle);
 		fclose(fhandle);
-		outString->resize(outString->find_last_not_of('\0'));
+		outString->resize(outString->find_last_not_of('\0') + 1);
 		return ErrorCode::Success;
 	}
 	else
@@ -206,6 +206,15 @@ void File::SetPlatformDataPaths()
 	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create application data path!");
 	std::filesystem::create_directories(saveDirPath, ec);
 	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
+}
+
+void File::SetPlatformEShadersPath()
+{
+	engineShadersPath = "engineshaders/";
+
+	std::error_code ec;
+	std::filesystem::create_directories(contentDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformEShadersPath(): Unable to create engine shaders data path!");
 }
 
 #endif // Win32

@@ -92,6 +92,28 @@ void Graphics::Init()
 	perDrawGlobalUBData.ep_matrix_mv = glm::mat4(1.0f);
 	perDrawGlobalUBData.ep_matrix_mvp = glm::mat4(1.0f);
 	perDrawGlobalUB = CreateUniformBuffer(HN("EP_PERDRAW"), sizeof(perDrawGlobalUBStruct), &perDrawGlobalUBData, true);
+
+	// Load default fallback shader
+	CompileShaderSrc
+	(
+R"GLSL(
+#epshader EPNULLSHADER
+#include <Enterprise.glsl>
+#vertex
+in vec3 in_pos;
+void main()
+{
+    gl_Position = ep_matrix_mvp * vec4(in_pos, 1.0f);
+}
+#fragment
+out vec4 out_color;
+void main()
+{
+	out_color = vec4(1.0, 0.0, 1.0, 1.0);
+}
+)GLSL"
+	);
+	BindShader(HN("EPNULLSHADER"));
 }
 
 void Graphics::PreDraw()

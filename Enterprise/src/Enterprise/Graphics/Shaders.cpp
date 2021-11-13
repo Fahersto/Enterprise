@@ -8,9 +8,10 @@ using Enterprise::Graphics;
 
 // TODO: Overhaul this file with EP_WASSERT for warning checks.
 
-// Shader stuff
-HashName Graphics::activeShaderName = HN("");
-HashName Graphics::fallbackShaderName = HN("");
+static std::map<HashName, std::string> includeSrcStrings;
+
+HashName Graphics::activeShaderName = HN("EPNULLSHADER");
+HashName Graphics::fallbackShaderName = HN_NULL;
 std::set<HashName> Graphics::activeShaderOptions;
 std::set<HashName> Graphics::fallbackShaderOptions;
 
@@ -18,7 +19,7 @@ static std::map<HashName, std::map<std::set<HashName>, GLuint>> oglShaderProgram
 GLuint oglActiveProgram = 0; // Accessed in VertexArrays.cpp via external linkage
 static std::map<HashName, int> shaderRefCount;
 static std::map<HashName, HashName> shaderSourcePaths;
-static HashName currentShaderSourcePath = HN("");
+static HashName currentShaderSourcePath = HN_NULL;
 
 // Uniform buffer stuff
 std::map<Graphics::UniformBufferHandle, size_t> Graphics::uniformBufferSizes;
@@ -29,7 +30,8 @@ static std::map<HashName, GLuint> uniformBlockBindingPoints;
 static GLuint nextBindingPoint = 0;
 
 // Sampler uniform stuff
-std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformTypes; // Key 1: Program name Key 2: Options Key 3: Uniform name
+// Key 1: Program name Key 2: Options Key 3: Uniform name
+std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformTypes;
 std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformLocations;
 
 // Vertex buffer stuff
@@ -66,9 +68,9 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 	constexpr GLint fragmentdefineLength = 12;
 
 	// Buffers of string pointers and string lengths to pass to glShaderSource()
-	std::vector<GLchar *> oglVertexShaderSourceStrings   = { versionStr, defineStr, vertexdefineStr };
+	std::vector<GLchar*>  oglVertexShaderSourceStrings   = { versionStr, defineStr, vertexdefineStr };
 	std::vector<GLint>    oglVertexShaderSourceLengths   = { versionLength, defineLength, vertexdefineLength };
-	std::vector<GLchar *> oglFragmentShaderSourceStrings = { versionStr, defineStr, fragmentdefineStr };
+	std::vector<GLchar*>  oglFragmentShaderSourceStrings = { versionStr, defineStr, fragmentdefineStr };
 	std::vector<GLint>    oglFragmentShaderSourceLengths = { versionLength, defineLength, fragmentdefineLength };
 
 	// Pragma option string substitution
@@ -77,8 +79,8 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 	std::vector<std::vector<size_t>> pragmaOptionStringNameIndices; // Ordered by "#pragma" line no., then option names l to r
 	std::vector<int> pragmaOptionStringInsertionPoints;
 
-	// Used to handle string length calculation upon encountering "#shader"
-	std::vector<char *>* currentShaderSourceStrings = nullptr;
+	// Used to handle string length calculation upon encountering a shader section directive
+	std::vector<char*>* currentShaderSourceStrings = nullptr;
 	std::vector<int>* currentShaderSourceLengths = nullptr;
 
 	// Parser state tracking
@@ -88,189 +90,521 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 	bool inMultilineComment = false;
 
 	for (size_t charsToLineStart = 0;
-		 charsToLineStart < src.length();
-		 charsToLineStart += line.length() + 1)
+		charsToLineStart < src.length();
+		charsToLineStart += line.length() + 1)
 	{
 		lineNumber++;
 		line = std::string_view(src.data() + charsToLineStart,
-								src.find_first_of("\n\0", charsToLineStart) - charsToLineStart);
+			src.find_first_of("\n\0", charsToLineStart) - charsToLineStart);
 
 		for (size_t cursor = 0; cursor != std::string_view::npos; )
 		{
 			switch (parseState)
 			{
-				case 0: // Looking for "#epshader" line
+			case 0: // Looking for "#epshader" line
+			{
+				if (!inMultilineComment)
 				{
-					if (!inMultilineComment)
+					cursor = line.find_first_not_of(" \t\r", cursor);
+					if (cursor != std::string_view::npos)
 					{
-						cursor = line.find_first_not_of(" \t\r", cursor);
-						if (cursor != std::string_view::npos)
+						if (line[cursor] == '/')
 						{
-							if (line[cursor] == '/')
+							if (line.length() > cursor + 1)
 							{
-								if (line.length() > cursor + 1)
+								if (line[cursor + 1] == '/')
 								{
-									if (line[cursor + 1] == '/')
-									{
-										// End of line comment ("//")
-										cursor = std::string_view::npos;
-									}
-									else if (line[cursor + 1] == '*')
-									{
-										// Start of multiline comment ("/*")
-										cursor += 2;
-										inMultilineComment = true;
-									}
-									else
-									{
-										// First token starts with '/'
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  Line: {}", lineNumber);
-										return false;
-									}
+									// End of line comment ("//")
+									cursor = std::string_view::npos;
+								}
+								else if (line[cursor + 1] == '*')
+								{
+									// Start of multiline comment ("/*")
+									cursor += 2;
+									inMultilineComment = true;
 								}
 								else
 								{
-									// First token is '/', the only token on the line
-									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  Line: {}", lineNumber);
-									return false;
-								}
-							}
-							else if (line[cursor] == '#')
-							{
-								if (line.compare(cursor, 9, "#epshader") == 0)
-								{
-									cursor += 9;
-									if (line.length() > cursor)
-									{
-										if (line[cursor] == '/')
-										{
-											if (line.length() > cursor + 1)
-											{
-												if (line[cursor + 1] != '*')
-												{
-													// Either this is a "//" (in which case there's erroneously no token on the rest of the line)
-													// or a non-comment '/' immediately following "#epshader".
-													EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-													return false;
-												}
-												// else "#epshader" is immediately followed by "/*", which is handled in the next parseState.
-											}
-											else
-											{
-												// '/' immediately following #epshader, last character on the line
-												EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" followed by non-whitespace character.  Line: {}", lineNumber);
-												return false;
-											}
-										}
-										else if (line[cursor] != ' ' && line[cursor] != '\t')
-										{
-											// Non-whitespace immediately after "#epshader"
-											EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" followed by non-whitespace character.  Line: {}", lineNumber);
-											return false;
-										}
-									}
-									else
-									{
-										// "#epshader" is last token on line
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-										return false;
-									}
-									parseState = 1;
-								}
-								else
-								{
-									// '#' is the start of an invalid token
-									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  Line: {}", lineNumber);
+									// First token starts with '/'
+									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  "
+										"Line: {}", lineNumber);
 									return false;
 								}
 							}
 							else
 							{
-								// Invalid token
-								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  Line: {}", lineNumber);
+								// First token is '/', the only token on the line
+								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  "
+									"Line: {}", lineNumber);
 								return false;
 							}
 						}
-					}
-					else // inMultilineComment
-					{
-						cursor = line.find('*', cursor);
-						if (cursor != std::string_view::npos)
+						else if (line[cursor] == '#')
 						{
-							cursor++;
-							if (line.length() > cursor)
+							if (line.compare(cursor, 9, "#epshader") == 0)
 							{
-								if (line[cursor] == '/')
+								cursor += 9;
+								if (line.length() > cursor)
 								{
-									// Comment closure detected
-									inMultilineComment = false;
-									cursor++;
+									if (line[cursor] == '/')
+									{
+										if (line.length() > cursor + 1)
+										{
+											if (line[cursor + 1] != '*')
+											{
+												// Either this is a "//" (in which case there's erroneously no token on the rest of the line)
+												// or a non-comment '/' immediately following "#epshader".
+												EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" is not followed by "
+													"a program name.  Line: {}", lineNumber);
+												return false;
+											}
+											// else "#epshader" is immediately followed by "/*", which is handled in the next parseState.
+										}
+										else
+										{
+											// '/' immediately following #epshader, last character on the line
+											EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" followed by "
+												"a non-whitespace character.  Line: {}", lineNumber);
+											return false;
+										}
+									}
+									else if (line[cursor] != ' ' && line[cursor] != '\t')
+									{
+										// Non-whitespace immediately after "#epshader"
+										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" followed by "
+											"a non-whitespace character.  Line: {}", lineNumber);
+										return false;
+									}
 								}
+								else
+								{
+									// "#epshader" is last token on line
+									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" is not followed by "
+										"a program name.  Line: {}", lineNumber);
+									return false;
+								}
+								parseState = 1;
 							}
 							else
 							{
-								// Star was last character in line, and not part of "*/"
-								cursor = std::string_view::npos;
+								// '#' is the start of an invalid token
+								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  "
+									"Line: {}", lineNumber);
+								return false;
 							}
 						}
 						else
 						{
-							// Didn't find comment closure on this line
-							cursor = std::string_view::npos;
+							// Invalid token
+							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Shader source does not begin with \"#epshader\".  "
+								"Line: {}", lineNumber);
+							return false;
 						}
 					}
 				}
-					break;
-
-				case 1: // Looking for shader name (starts with cursor at character immediately after "#epshader")
+				else // inMultilineComment
 				{
-					// TODO: Add support for quoted program names
-					if (!inMultilineComment)
+					cursor = line.find('*', cursor);
+					if (cursor != std::string_view::npos)
 					{
-						cursor = line.find_first_not_of(" \t\r", cursor);
-						if (cursor != std::string_view::npos)
+						cursor++;
+						if (line.length() > cursor)
 						{
 							if (line[cursor] == '/')
 							{
-								if (line.length() > cursor + 1)
+								// Comment closure detected
+								inMultilineComment = false;
+								cursor++;
+							}
+						}
+						else
+						{
+							// Star was last character in line, and not part of "*/"
+							cursor = std::string_view::npos;
+						}
+					}
+					else
+					{
+						// Didn't find comment closure on this line
+						cursor = std::string_view::npos;
+					}
+				}
+			}
+			break;
+
+			case 1: // Looking for shader name (starts with cursor at character immediately after "#epshader")
+			{
+				// TODO: Add support for quoted program names
+				if (!inMultilineComment)
+				{
+					cursor = line.find_first_not_of(" \t\r", cursor);
+					if (cursor != std::string_view::npos)
+					{
+						if (line[cursor] == '/')
+						{
+							if (line.length() > cursor + 1)
+							{
+								if (line[cursor + 1] == '/')
 								{
-									if (line[cursor + 1] == '/')
+									// End of line comment ("//")
+									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  "
+										"\"#epshader\" is not followed by a program name.  "
+										"Line: {}", lineNumber);
+									return false;
+								}
+								else if (line[cursor + 1] == '*')
+								{
+									// Start of multiline comment ("/*")
+									inMultilineComment = true;
+									cursor += 2;
+								}
+								else
+								{
+									// '/' was start of valid token
+									goto startofvalidtoken;
+								}
+							}
+							else
+							{
+								// Valid one-character name (that just happens to be "/")
+								shaderName = "/";
+
+								// Reference counting
+								if (shaderRefCount.count(HN("/")) == 0)
+								{
+									shaderRefCount[HN("/")] = 1;
+									shaderSourcePaths[HN("/")] = currentShaderSourcePath;
+								}
+								else
+								{
+									shaderRefCount[HN("/")]++;
+									if (shaderSourcePaths[HN("/")] != currentShaderSourcePath)
 									{
-										// End of line comment ("//")
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-										return false;
+										EP_WARN("Graphics::CompileShaderSrc(): Shader program \"/\" was previously compiled from "
+											"a different source location!  Check shader source files for name collisions.  "
+											"First Path: {}, Second Path: {}", shaderSourcePaths[HN("/")], currentShaderSourcePath);
 									}
-									else if (line[cursor + 1] == '*')
+									return true;
+								}
+
+								cursor = std::string_view::npos;
+								parseState = 2;
+
+								// Mark the start of the global section in the shader source arrays
+								oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+								oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+							}
+						}
+						else
+						{
+							// Start of valid token
+						startofvalidtoken: // Used to jump out of previous if block if program name starts with '/'.
+
+							for (size_t subcursor = cursor; subcursor != std::string_view::npos; )
+							{
+								subcursor = line.find_first_of(" \t\r/", subcursor);
+								if (subcursor != std::string_view::npos)
+								{
+									if (line[subcursor] == '/')
 									{
-										// Start of multiline comment ("/*")
-										inMultilineComment = true;
-										cursor += 2;
+										if (line.length() > subcursor + 1)
+										{
+											if (line[subcursor + 1] == '/')
+											{
+												// End of line comment
+												shaderName = line.substr(cursor, subcursor - cursor);
+												HashName hn = HN(shaderName);
+
+												// Reference counting
+												if (shaderRefCount.count(hn) == 0)
+												{
+													shaderRefCount[hn] = 1;
+													shaderSourcePaths[hn] = currentShaderSourcePath;
+												}
+												else
+												{
+													shaderRefCount[hn]++;
+													if (shaderSourcePaths[hn] != currentShaderSourcePath)
+													{
+														EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from "
+															"a different source location!  Check shader source files for name collisions.  "
+															"First Path: {}, Second Path: {}",
+															shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
+													}
+													return true;
+												}
+
+												cursor = std::string_view::npos;
+												parseState = 2;
+
+												// Mark the start of the global section in the shader source arrays
+												oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+												oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+												break;
+											}
+											else if (line[subcursor + 1] == '*')
+											{
+												// Start of multiline comment
+												inMultilineComment = true;
+												shaderName = line.substr(cursor, subcursor - cursor);
+												HashName hn = HN(shaderName);
+
+												// Reference counting
+												if (shaderRefCount.count(hn) == 0)
+												{
+													shaderRefCount[hn] = 1;
+													shaderSourcePaths[hn] = currentShaderSourcePath;
+												}
+												else
+												{
+													shaderRefCount[hn]++;
+													if (shaderSourcePaths[hn] != currentShaderSourcePath)
+													{
+														EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from "
+															"a different source location!  Check shader source files for name collisions.  "
+															"First Path: {}, Second Path: {}",
+															shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
+													}
+													return true;
+												}
+
+												cursor = std::string_view::npos;
+												parseState = 2;
+												subcursor += 2;
+
+												// Mark the start of the global section in the shader source arrays
+												oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+												oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+
+												// Continue to parse for unexpected tokens or multiline comments
+												while (subcursor != std::string_view::npos)
+												{
+													if (!inMultilineComment)
+													{
+														subcursor = line.find_first_not_of(" \t\r", subcursor);
+														if (subcursor != std::string_view::npos)
+														{
+															if (line[subcursor] == '/')
+															{
+																subcursor++;
+																if (line.length() > subcursor)
+																{
+																	if (line[subcursor] == '/')
+																	{
+																		// End of line comment
+																		break;
+																	}
+																	else if (line[subcursor] == '*')
+																	{
+																		// Start of multiline comment
+																		inMultilineComment = true;
+																		subcursor++;
+																	}
+																	else
+																	{
+																		// '/' was not part of a comment
+																		EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+																			"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+																		subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
+																	}
+																}
+																else
+																{
+																	// Not enough room for '/' to be start of a comment.
+																	EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+																		"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+																	break;
+																}
+															}
+															else
+															{
+																// Unexpected token
+																EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+																	"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+																subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
+															}
+														}
+													}
+													else // inMultilineComment
+													{
+														subcursor = line.find('*', subcursor);
+														if (subcursor != std::string_view::npos)
+														{
+															subcursor++;
+															if (line.length() > subcursor)
+															{
+																if (line[subcursor] == '/')
+																{
+																	inMultilineComment = false;
+																	subcursor++;
+																}
+															}
+														}
+													}
+												}
+
+												break;
+											}
+											else
+											{
+												// Just a slash.  Potentially part of valid program name, so we continue
+												subcursor++;
+											}
+										}
+										else
+										{
+											// '/' is last character of program name and source line
+											shaderName = line.substr(cursor);
+											HashName hn = HN(shaderName);
+
+											// Reference counting
+											if (shaderRefCount.count(hn) == 0)
+											{
+												shaderRefCount[hn] = 1;
+												shaderSourcePaths[hn] = currentShaderSourcePath;
+											}
+											else
+											{
+												shaderRefCount[hn]++;
+												if (shaderSourcePaths[hn] != currentShaderSourcePath)
+												{
+													EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from "
+														"a different source location!  Check shader source files for name collisions.  "
+														"First Path: {}, Second Path: {}", shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
+												}
+												return true;
+											}
+
+											cursor = std::string_view::npos;
+											parseState = 2;
+
+											// Mark the start of the global section in the shader source arrays
+											oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+											oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+											break;
+										}
 									}
 									else
 									{
-										// '/' was start of valid token
-										goto startofvalidtoken;
+										// Valid program name terminated by whitespace
+										shaderName = line.substr(cursor, subcursor - cursor);
+										HashName hn = HN(shaderName);
+
+										// Reference counting
+										if (shaderRefCount.count(hn) == 0)
+										{
+											shaderRefCount[hn] = 1;
+											shaderSourcePaths[hn] = currentShaderSourcePath;
+										}
+										else
+										{
+											shaderRefCount[hn]++;
+											if (shaderSourcePaths[hn] != currentShaderSourcePath)
+											{
+												EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from "
+													"a different source location!  Check shader source files for name collisions.  "
+													"First Path: {}, Second Path: {}", shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
+											}
+											return true;
+										}
+
+										cursor = std::string_view::npos;
+										parseState = 2;
+
+										// Mark the start of the global section in the shader source arrays
+										oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+										oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+
+										// Continue to parse for unexpected tokens or multiline comments
+										while (subcursor != std::string_view::npos)
+										{
+											if (!inMultilineComment)
+											{
+												subcursor = line.find_first_not_of(" \t\r", subcursor);
+												if (subcursor != std::string_view::npos)
+												{
+													if (line[subcursor] == '/')
+													{
+														subcursor++;
+														if (line.length() > subcursor)
+														{
+															if (line[subcursor] == '/')
+															{
+																// End of line comment
+																break;
+															}
+															else if (line[subcursor] == '*')
+															{
+																// Start of multiline comment
+																inMultilineComment = true;
+																subcursor++;
+															}
+															else
+															{
+																// '/' was not part of a comment
+																EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+																	"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+																subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
+															}
+														}
+														else
+														{
+															// Not enough room for '/' to be start of a comment.
+															EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+																"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+															break;
+														}
+													}
+													else
+													{
+														// Unexpected token
+														EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  "
+															"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+														subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
+													}
+												}
+											}
+											else // inMultilineComment
+											{
+												subcursor = line.find('*', subcursor);
+												if (subcursor != std::string_view::npos)
+												{
+													subcursor++;
+													if (line.length() > subcursor)
+													{
+														if (line[subcursor] == '/')
+														{
+															inMultilineComment = false;
+															subcursor++;
+														}
+													}
+												}
+											}
+										}
+
+										break;
 									}
 								}
 								else
 								{
-									// Valid one-character name (that just happens to be "/")
-									shaderName = "/";
+									// Valid token terminated by EOL
+									shaderName = line.substr(cursor);
+									HashName hn = HN(shaderName);
 
 									// Reference counting
-									if (shaderRefCount.count(HN("/")) == 0)
+									if (shaderRefCount.count(hn) == 0)
 									{
-										shaderRefCount[HN("/")] = 1;
-										shaderSourcePaths[HN("/")] = currentShaderSourcePath;
+										shaderRefCount[hn] = 1;
+										shaderSourcePaths[hn] = currentShaderSourcePath;
 									}
 									else
 									{
-										shaderRefCount[HN("/")]++;
-										if (shaderSourcePaths[HN("/")] != currentShaderSourcePath)
+										shaderRefCount[hn]++;
+										if (shaderSourcePaths[hn] != currentShaderSourcePath)
 										{
-											EP_WARN("Graphics::CompileShaderSrc(): Shader program \"/\" was previously compiled from a different source location!  "
-													"Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-													shaderSourcePaths[HN("/")], currentShaderSourcePath);
+											EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from "
+												"a different source location!  Check shader source files for name collisions.  "
+												"First Path: {}, Second Path: {}", shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
 										}
 										return true;
 									}
@@ -283,591 +617,413 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 									oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
 								}
 							}
-							else
+						}
+					}
+					else
+					{
+						// No token after "#epshader"
+						EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" is not followed by a program name.  "
+							"Line: {}", lineNumber);
+						return false;
+					}
+				}
+				else // inMultilineComment
+				{
+					cursor = line.find('*', cursor);
+					if (cursor != std::string_view::npos)
+					{
+						cursor++;
+						if (line.length() > cursor)
+						{
+							if (line[cursor] == '/')
 							{
-								// Start of valid token
-							startofvalidtoken: // Used to jump out of previous if block if program name starts with '/'.
-
-								for (size_t subcursor = cursor; subcursor != std::string_view::npos; )
+								// End of multi-line comment
+								inMultilineComment = false;
+								cursor++;
+							}
+						}
+						else
+						{
+							// Line not long enough to contain "*/"
+							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" is not followed by a program name.  "
+								"Line: {}", lineNumber);
+							return false;
+						}
+					}
+					else
+					{
+						// No token after "#epshader"
+						EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" is not followed by a program name.  "
+							"Line: {}", lineNumber);
+						return false;
+					}
+				}
+			}
+			break;
+			case 2: // Parse global section for "#include", "#pragma option", and shader section directives
+			{
+				if (!inMultilineComment)
+				{
+					cursor = line.find_first_of("#/", cursor);
+					if (cursor != std::string_view::npos)
+					{
+						if (line[cursor] == '#')
+						{
+							if (line.compare(cursor, 7, "#pragma") == 0)
+							{
+								cursor += 7;
+								if (line.length() > cursor + 7)
 								{
-									subcursor = line.find_first_of(" \t\r/", subcursor);
-									if (subcursor != std::string_view::npos)
+									if (line[cursor] == ' ' || line[cursor] == '\t' || line.compare(cursor, 2, "/*") == 0)
 									{
-										if (line[subcursor] == '/')
+										// "#pragma" is properly terminated by either whitespace or a multiline comment.
+
+										bool isPragmaOption = false;
+
+										// While loop for looking for "option".
+										while (cursor != std::string_view::npos)
 										{
-											if (line.length() > subcursor + 1)
+											if (!inMultilineComment)
 											{
-												if (line[subcursor + 1] == '/')
+												cursor = line.find_first_not_of(" \t\r", cursor);
+												if (cursor != std::string_view::npos)
 												{
-													// End of line comment
-													shaderName = line.substr(cursor, subcursor - cursor);
-													HashName hn = HN(shaderName);
-
-													// Reference counting
-													if (shaderRefCount.count(hn) == 0)
+													if (line[cursor] == '/')
 													{
-														shaderRefCount[hn] = 1;
-														shaderSourcePaths[hn] = currentShaderSourcePath;
-													}
-													else
-													{
-														shaderRefCount[hn]++;
-														if (shaderSourcePaths[hn] != currentShaderSourcePath)
+														cursor++;
+														if (line.length() > cursor)
 														{
-															EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from a different source location!  "
-																	"Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-																	shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
-														}
-														return true;
-													}
-
-													cursor = std::string_view::npos;
-													parseState = 2;
-
-													// Mark the start of the global section in the shader source arrays
-													oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-													oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-													break;
-												}
-												else if (line[subcursor + 1] == '*')
-												{
-													// Start of multiline comment
-													inMultilineComment = true;
-													shaderName = line.substr(cursor, subcursor - cursor);
-													HashName hn = HN(shaderName);
-
-													// Reference counting
-													if (shaderRefCount.count(hn) == 0)
-													{
-														shaderRefCount[hn] = 1;
-														shaderSourcePaths[hn] = currentShaderSourcePath;
-													}
-													else
-													{
-														shaderRefCount[hn]++;
-														if (shaderSourcePaths[hn] != currentShaderSourcePath)
-														{
-															EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from a different source location!  "
-																	"Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-																	shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
-														}
-														return true;
-													}
-
-													cursor = std::string_view::npos;
-													parseState = 2;
-													subcursor += 2;
-
-													// Mark the start of the global section in the shader source arrays
-													oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-													oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-
-													// Continue to parse for unexpected tokens or multiline comments
-													while (subcursor != std::string_view::npos)
-													{
-														if (!inMultilineComment)
-														{
-															subcursor = line.find_first_not_of(" \t\r", subcursor);
-															if (subcursor != std::string_view::npos)
+															if (line[cursor] == '/')
 															{
-																if (line[subcursor] == '/')
+																// end of line comment
+																cursor = std::string_view::npos;
+															}
+															else if (line[cursor] == '*')
+															{
+																// multiline comment
+																inMultilineComment = true;
+																cursor++;
+															}
+														}
+													}
+													else if (line.compare(cursor, 6, "option") == 0)
+													{
+														// "#pragma option" confirmed!
+														pragmaOptionStringNameIndices.emplace_back();
+														cursor += 6;
+														isPragmaOption = true;
+														break;
+													}
+													else
+													{
+														// Some other "#pragma"
+														// Parse for multiline comments until cursor == npos
+														while (cursor != std::string_view::npos)
+														{
+															if (inMultilineComment)
+															{
+																cursor = line.find('/', cursor);
+																if (cursor != std::string_view::npos)
 																{
-																	subcursor++;
-																	if (line.length() > subcursor)
+																	cursor++;
+																	if (line.length() > cursor)
 																	{
-																		if (line[subcursor] == '/')
+																		if (line[cursor] == '/')
 																		{
-																			// End of line comment
-																			break;
+																			cursor = std::string_view::npos;
 																		}
-																		else if (line[subcursor] == '*')
+																		else if (line[cursor] == '*')
 																		{
-																			// Start of multiline comment
 																			inMultilineComment = true;
-																			subcursor++;
+																			cursor++;
 																		}
-																		else
-																		{
-																			// '/' was not part of a comment
-																			EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-																			subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
-																		}
+																	}
+																}
+															}
+															else // !inMultilineComment
+															{
+																cursor = line.find("*/", cursor);
+																if (cursor != std::string_view::npos)
+																{
+																	inMultilineComment = false;
+																	cursor += 2;
+																}
+															}
+														}
+													}
+												}
+											}
+											else // inMultilineComment
+											{
+												cursor = line.find('*', cursor);
+												if (cursor != std::string_view::npos)
+												{
+													cursor++;
+													if (line.length() > cursor)
+													{
+														if (line[cursor] == '/')
+														{
+															inMultilineComment = false;
+															cursor++;
+														}
+													}
+												}
+											}
+										}
+
+										// Look for option names (if not "#pragma option", cursor == npos already)
+										while (cursor != std::string_view::npos)
+										{
+											if (!inMultilineComment)
+											{
+												cursor = line.find_first_not_of(" \t\r", cursor);
+												if (cursor != std::string_view::npos)
+												{
+													if (line[cursor] == '/')
+													{
+														if (line.length() > cursor + 1)
+														{
+															if (line[cursor + 1] == '/')
+															{
+																// end of line comment.
+																cursor = std::string_view::npos;
+																break;
+															}
+															else if (line[cursor + 1] == '*')
+															{
+																// start of multiline comment.
+																inMultilineComment = true;
+																cursor += 2;
+															}
+															else
+															{
+																// Invalid token start.
+																EP_WARN("Graphics::CompileShaderSrc(): Invalid variant option name!  "
+																	"Token begins with a forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
+																cursor = std::min({ line.find_first_of(" \t\r", cursor), line.find("//", cursor), line.find("/*") });
+															}
+														}
+													}
+													else
+													{
+														// TODO: Enforce alphanumeric variant option names
+														
+														// Valid token start.
+														size_t subcursor = line.find_first_of(" \t\r/", cursor);
+														if (subcursor != std::string_view::npos)
+														{
+															if (line[subcursor] == '/')
+															{
+																if (line.length() > subcursor + 1)
+																{
+																	if (line[subcursor + 1] == '/')
+																	{
+																		// Valid token, terminated by end of line comment
+																		pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
+																		pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
+																		pragmaOptionStringLengths.emplace_back(subcursor - cursor);
+
+																		cursor = subcursor + 2;
+																	}
+																	else if (line[subcursor + 1] == '*')
+																	{
+																		// Valid token, terminated by multiline comment
+																		pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
+																		pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
+																		pragmaOptionStringLengths.emplace_back(subcursor - cursor);
+
+																		cursor = subcursor + 2;
+																		inMultilineComment = true;
 																	}
 																	else
 																	{
-																		// Not enough room for '/' to be start of a comment.
-																		EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-																		break;
+																		// Invalid token, contains forward slash.
+																		EP_WARN("Graphics::CompileShaderSrc(): Invalid variant option name!  "
+																			"Token contains a forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
+																		cursor = std::min(
+																			{
+																				line.find_first_of(" \t\r", subcursor),
+																				line.find("//", subcursor),
+																				line.find("/*", subcursor)
+																			});
 																	}
-																}
-																else
-																{
-																	// Unexpected token
-																	EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-																	subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
-																}
-															}
-														}
-														else // inMultilineComment
-														{
-															subcursor = line.find('*', subcursor);
-															if (subcursor != std::string_view::npos)
-															{
-																subcursor++;
-																if (line.length() > subcursor)
-																{
-																	if (line[subcursor] == '/')
-																	{
-																		inMultilineComment = false;
-																		subcursor++;
-																	}
-																}
-															}
-														}
-													}
-
-													break;
-												}
-												else
-												{
-													// Just a slash.  Potentially part of valid program name, so we continue
-													subcursor++;
-												}
-											}
-											else
-											{
-												// '/' is last character of program name and source line
-												shaderName = line.substr(cursor);
-												HashName hn = HN(shaderName);
-
-												   // Reference counting
-												   if (shaderRefCount.count(hn) == 0)
-												   {
-													   shaderRefCount[hn] = 1;
-													   shaderSourcePaths[hn] = currentShaderSourcePath;
-												   }
-												   else
-												   {
-													   shaderRefCount[hn]++;
-													   if (shaderSourcePaths[hn] != currentShaderSourcePath)
-													   {
-														   EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from a different source location!  "
-																   "Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-																   shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
-													   }
-													   return true;
-												   }
-
-												cursor = std::string_view::npos;
-												parseState = 2;
-
-												// Mark the start of the global section in the shader source arrays
-												oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-												oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-												break;
-											}
-										}
-										else
-										{
-											// Valid program name terminated by whitespace
-											shaderName = line.substr(cursor, subcursor - cursor);
-											HashName hn = HN(shaderName);
-
-												  // Reference counting
-												  if (shaderRefCount.count(hn) == 0)
-												  {
-													  shaderRefCount[hn] = 1;
-													  shaderSourcePaths[hn] = currentShaderSourcePath;
-												  }
-												  else
-												  {
-													  shaderRefCount[hn]++;
-													  if (shaderSourcePaths[hn] != currentShaderSourcePath)
-													  {
-														  EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from a different source location!  "
-																  "Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-																  shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
-													  }
-													  return true;
-												  }
-
-											cursor = std::string_view::npos;
-											parseState = 2;
-
-											// Mark the start of the global section in the shader source arrays
-											oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-											oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-
-											// Continue to parse for unexpected tokens or multiline comments
-											while (subcursor != std::string_view::npos)
-											{
-												if (!inMultilineComment)
-												{
-													subcursor = line.find_first_not_of(" \t\r", subcursor);
-													if (subcursor != std::string_view::npos)
-													{
-														if (line[subcursor] == '/')
-														{
-															subcursor++;
-															if (line.length() > subcursor)
-															{
-																if (line[subcursor] == '/')
-																{
-																	// End of line comment
-																	break;
-																}
-																else if (line[subcursor] == '*')
-																{
-																	// Start of multiline comment
-																	inMultilineComment = true;
-																	subcursor++;
-																}
-																else
-																{
-																	// '/' was not part of a comment
-																	EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-																	subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
 																}
 															}
 															else
 															{
-																// Not enough room for '/' to be start of a comment.
-																EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+																// Valid token, terminated by whitespace
+																pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
+																pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
+																pragmaOptionStringLengths.emplace_back(subcursor - cursor);
+																cursor = subcursor + 1;
+															}
+														}
+														else
+														{
+															// Valid token, terminated by end of line.
+															pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
+															pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
+															pragmaOptionStringLengths.emplace_back(line.length() - cursor);
+
+															cursor = std::string_view::npos;
+														}
+													}
+												}
+											}
+											else // inMultilineComment
+											{
+												cursor = line.find('*', cursor);
+												if (cursor != std::string_view::npos)
+												{
+													cursor++;
+													if (line.length() > cursor)
+													{
+														if (line[cursor] == '/')
+														{
+															inMultilineComment = false;
+															cursor++;
+														}
+													}
+												}
+											}
+										}
+
+										if (isPragmaOption)
+										{
+											// Terminate the current source string
+											oglVertexShaderSourceLengths.emplace_back(
+												charsToLineStart + line.length() + 1 - (oglVertexShaderSourceStrings.back() - src.data()));
+											oglFragmentShaderSourceLengths.emplace_back(
+												charsToLineStart + line.length() + 1 - (oglFragmentShaderSourceStrings.back() - src.data()));
+
+											// Close off multiline comment for insertion purposes
+											if (inMultilineComment)
+											{
+												oglVertexShaderSourceStrings.emplace_back(closeCommentStr);
+												oglVertexShaderSourceLengths.emplace_back(closeCommentLength);
+												oglFragmentShaderSourceStrings.emplace_back(closeCommentStr);
+												oglFragmentShaderSourceLengths.emplace_back(closeCommentLength);
+											}
+
+											// Add "#define "
+											oglVertexShaderSourceStrings.emplace_back(defineStr);
+											oglVertexShaderSourceLengths.emplace_back(defineLength);
+											oglFragmentShaderSourceStrings.emplace_back(defineStr);
+											oglFragmentShaderSourceLengths.emplace_back(defineLength);
+
+											// Add the insertion point
+											pragmaOptionStringInsertionPoints.emplace_back(oglVertexShaderSourceLengths.size());
+											oglVertexShaderSourceLengths.emplace_back(0);
+											oglVertexShaderSourceStrings.emplace_back(nullptr);
+											oglFragmentShaderSourceLengths.emplace_back(0);
+											oglFragmentShaderSourceStrings.emplace_back(nullptr);
+
+											// Add newline
+											oglVertexShaderSourceStrings.emplace_back(newlineStr);
+											oglVertexShaderSourceLengths.emplace_back(newlineLength);
+											oglFragmentShaderSourceStrings.emplace_back(newlineStr);
+											oglFragmentShaderSourceLengths.emplace_back(newlineLength);
+
+											// Reopen multiline comment
+											if (inMultilineComment)
+											{
+												oglVertexShaderSourceStrings.emplace_back(openCommentStr);
+												oglVertexShaderSourceLengths.emplace_back(openCommentLength);
+												oglFragmentShaderSourceStrings.emplace_back(openCommentStr);
+												oglFragmentShaderSourceLengths.emplace_back(openCommentLength);
+											}
+
+											// Start the new source string
+											oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+											oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+										}
+									}
+								}
+							}
+							else if (line.compare(cursor, 8, "#include") == 0)
+							{
+								cursor = line.find_first_not_of(" \t\r", cursor + 8);
+								if (cursor != std::string_view::npos)
+								{
+									if (line[cursor] == '<' || line[cursor] == '\"')
+									{
+										size_t subcursor = line.find_first_of(line[cursor] == '<' ? ">/" : "\"/", cursor + 1);
+										for (; subcursor != std::string_view::npos; )
+										{
+											if (!inMultilineComment)
+											{
+												if (line[subcursor] == '>' || line[subcursor] == '"')
+												{
+													std::string includePath;
+													if (line[subcursor] == '>')
+													{
+														includePath = File::engineShadersPath + std::string(line.substr(cursor + 1, subcursor - cursor - 1));
+													}
+													else // line[subcursor] == '"'
+													{
+														includePath = std::string(line.substr(cursor + 1, subcursor - cursor - 1));
+													}
+
+													HashName includePathHash = HN(includePath);
+													if (!includeSrcStrings.count(includePathHash))
+													{
+														if (File::Exists(includePath))
+														{
+															if (File::LoadTextFile(includePath, &includeSrcStrings[includePathHash])
+																!= File::ErrorCode::Success)
+															{
+																EP_WARN("Graphics::CompileShaderSource(): Could not load include file \"{}\".  "
+																	"Program: {}, Line: {}", includePath, shaderName, lineNumber);
+																cursor = line.find_first_of('/', subcursor + 1);
+																for (; cursor != std::string_view::npos; )
+																{
+																	if (!inMultilineComment)
+																	{
+																		if (line.length() > cursor + 1)
+																		{
+																			if (line[cursor + 1] == '/')
+																			{
+																				break;
+																			}
+																			else if (line[cursor + 1] == '*')
+																			{
+																				inMultilineComment = true;
+																				cursor = line.find_first_of('*', cursor + 2);
+																			}
+																		}
+																	}
+																	else if (line[cursor] == '*')
+																	{
+																		if (line.length() > cursor + 1)
+																		{
+																			if (line[cursor + 1] == '/')
+																			{
+																				inMultilineComment = false;
+																				cursor = line.find_first_of('/', cursor + 2);
+																			}
+																		}
+																	}
+																}
 																break;
 															}
 														}
 														else
 														{
-															// Unexpected token
-															EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after shader program name.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-															subcursor = std::min(line.find("//", subcursor), line.find("/*", subcursor));
+															EP_WARN("Graphics::CompileShaderSource(): Include file \"{}\" does not exist!  "
+																"Program: {}, Line: {}", includePath, shaderName, lineNumber);
+															break;
 														}
 													}
-												}
-												else // inMultilineComment
-												{
-													subcursor = line.find('*', subcursor);
-													if (subcursor != std::string_view::npos)
-													{
-														subcursor++;
-														if (line.length() > subcursor)
-														{
-															if (line[subcursor] == '/')
-															{
-																inMultilineComment = false;
-																subcursor++;
-															}
-														}
-													}
-												}
-											}
 
-											break;
-										}
-									}
-									else
-									{
-										// Valid token terminated by EOL
-										shaderName = line.substr(cursor);
-										HashName hn = HN(shaderName);
+													// Insert the include file
 
-												 // Reference counting
-												 if (shaderRefCount.count(hn) == 0)
-												 {
-													 shaderRefCount[hn] = 1;
-													 shaderSourcePaths[hn] = currentShaderSourcePath;
-												 }
-												 else
-												 {
-													 shaderRefCount[hn]++;
-													 if (shaderSourcePaths[hn] != currentShaderSourcePath)
-													 {
-														 EP_WARN("Graphics::CompileShaderSrc(): Shader program \"{}\" was previously compiled from a different source location!  "
-																 "Check shader programs for name collisions.  First Path: {}, Second Path: {}",
-																 shaderName, shaderSourcePaths[hn], currentShaderSourcePath);
-													 }
-													 return true;
-												 }
-
-										cursor = std::string_view::npos;
-										parseState = 2;
-
-										// Mark the start of the global section in the shader source arrays
-										oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-										oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
-									}
-								}
-							}
-						}
-						else
-						{
-							// No token after "#epshader"
-							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-							return false;
-						}
-					}
-					else // inMultilineComment
-					{
-						cursor = line.find('*', cursor);
-						if (cursor != std::string_view::npos)
-						{
-							cursor++;
-							if (line.length() > cursor)
-							{
-								if (line[cursor] == '/')
-								{
-									// End of multi-line comment
-									inMultilineComment = false;
-									cursor++;
-								}
-							}
-							else
-							{
-								// Line not long enough to contain "*/"
-								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-								return false;
-							}
-						}
-						else
-						{
-							// No token after "#epshader"
-							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#epshader\" not followed by program name.  Line: {}", lineNumber);
-							return false;
-						}
-					}
-				}
-					break;
-				case 2: // Parse global section for "#include", "#pragma option", and "#shader"
-				{
-					if (!inMultilineComment)
-					{
-						cursor = line.find_first_of("#/", cursor);
-						if (cursor != std::string_view::npos)
-						{
-							if (line[cursor] == '#')
-							{
-								if (line.length() > cursor + 10)  // length of "#include__", "#pragma___", or "#shader___"
-								{
-									if (line.compare(cursor, 7, "#pragma") == 0)
-									{
-										cursor += 7;
-										if (line.length() > cursor + 7)
-										{
-											if (line[cursor] == ' ' || line[cursor] == '\t' || line.compare(cursor, 2, "/*") == 0)
-											{
-												// "#pragma" is properly terminated by either whitespace or a multiline comment.
-
-												bool isPragmaOption = false;
-
-												// While loop for looking for "option".
-												while (cursor != std::string_view::npos)
-												{
-													if (!inMultilineComment)
-													{
-														cursor = line.find_first_not_of(" \t\r", cursor);
-														if (cursor != std::string_view::npos)
-														{
-															if (line[cursor] == '/')
-															{
-																cursor++;
-																if (line.length() > cursor)
-																{
-																	if (line[cursor] == '/')
-																	{
-																		// end of line comment
-																		cursor = std::string_view::npos;
-																	}
-																	else if (line[cursor] == '*')
-																	{
-																		// multiline comment
-																		inMultilineComment = true;
-																		cursor++;
-																	}
-																}
-															}
-															else if (line.compare(cursor, 6, "option") == 0)
-															{
-																// "#pragma option" confirmed!
-																pragmaOptionStringNameIndices.emplace_back();
-																cursor += 6;
-																isPragmaOption = true;
-																break;
-															}
-															else
-															{
-																// Some other "#pragma"
-																// Parse for multiline comments until cursor == npos
-																while (cursor != std::string_view::npos)
-																{
-																	if (inMultilineComment)
-																	{
-																		cursor = line.find('/', cursor);
-																		if (cursor != std::string_view::npos)
-																		{
-																			cursor++;
-																			if (line.length() > cursor)
-																			{
-																				if (line[cursor] == '/')
-																				{
-																					cursor = std::string_view::npos;
-																				}
-																				else if (line[cursor] == '*')
-																				{
-																					inMultilineComment = true;
-																					cursor++;
-																				}
-																			}
-																		}
-																	}
-																	else // !inMultilineComment
-																	{
-																		cursor = line.find("*/", cursor);
-																		if (cursor != std::string_view::npos)
-																		{
-																			inMultilineComment = false;
-																			cursor += 2;
-																		}
-																	}
-																}
-															}
-														}
-													}
-													else // inMultilineComment
-													{
-														cursor = line.find('*', cursor);
-														if (cursor != std::string_view::npos)
-														{
-															cursor++;
-															if (line.length() > cursor)
-															{
-																if (line[cursor] == '/')
-																{
-																	inMultilineComment = false;
-																	cursor++;
-																}
-															}
-														}
-													}
-												}
-
-												// Look for option names (if not "#pragma option", cursor == npos already)
-												while (cursor != std::string_view::npos)
-												{
-													if (!inMultilineComment)
-													{
-														cursor = line.find_first_not_of(" \t\r", cursor);
-														if (cursor != std::string_view::npos)
-														{
-															if (line[cursor] == '/')
-															{
-																if (line.length() > cursor + 1)
-																{
-																	if (line[cursor + 1] == '/')
-																	{
-																		// end of line comment.
-																		cursor = std::string_view::npos;
-																		break;
-																	}
-																	else if (line[cursor + 1] == '*')
-																	{
-																		// start of multiline comment.
-																		inMultilineComment = true;
-																		cursor += 2;
-																	}
-																	else
-																	{
-																		// Invalid token start.
-																		EP_ERROR("Graphics::CompileShaderSrc(): Invalid variant option name!  Token begins with forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
-																		cursor = std::min({line.find_first_of(" \t\r", cursor), line.find("//", cursor), line.find("/*")});
-																	}
-																}
-															}
-															else
-															{
-																// Valid token start.
-																size_t subcursor = line.find_first_of(" \t\r/", cursor);
-																if (subcursor != std::string_view::npos)
-																{
-																	if (line[subcursor] == '/')
-																	{
-																		if (line.length() > subcursor + 1)
-																		{
-																			if (line[subcursor + 1] == '/')
-																			{
-																				// Valid token, terminated by end of line comment
-																				pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
-																				pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
-																				pragmaOptionStringLengths.emplace_back(subcursor - cursor);
-
-																				cursor = subcursor + 2;
-																			}
-																			else if (line[subcursor + 1] == '*')
-																			{
-																				// Valid token, terminated by multiline comment
-																				pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
-																				pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
-																				pragmaOptionStringLengths.emplace_back(subcursor - cursor);
-
-																				cursor = subcursor + 2;
-																				inMultilineComment = true;
-																			}
-																			else
-																			{
-																				// Invalid token, contains forward slash.
-																				EP_ERROR("Graphics::CompileShaderSrc(): Invalid variant option name!  Token contains forward slash.  Program: {}, Line: {}", shaderName, lineNumber);
-																				cursor = std::min(
-																				{
-																					line.find_first_of(" \t\r", subcursor),
-																					line.find("//", subcursor),
-																					line.find("/*", subcursor)
-																				});
-																			}
-																		}
-																	}
-																	else
-																	{
-																		// Valid token, terminated by whitespace
-																		pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
-																		pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
-																		pragmaOptionStringLengths.emplace_back(subcursor - cursor);
-																		cursor = subcursor + 1;
-																	}
-																}
-																else
-																{
-																	// Valid token, terminated by end of line.
-																	pragmaOptionStringNameIndices.back().emplace_back(pragmaOptionStringPositions.size());
-																	pragmaOptionStringPositions.emplace_back(charsToLineStart + cursor);
-																	pragmaOptionStringLengths.emplace_back(line.length() - cursor);
-
-																	cursor = std::string_view::npos;
-																}
-															}
-														}
-													}
-													else // inMultilineComment
-													{
-														cursor = line.find('*', cursor);
-														if (cursor != std::string_view::npos)
-														{
-															cursor++;
-															if (line.length() > cursor)
-															{
-																if (line[cursor] == '/')
-																{
-																	inMultilineComment = false;
-																	cursor++;
-																}
-															}
-														}
-													}
-												}
-
-												if (isPragmaOption)
-												{
 													// Terminate the current source string
-													oglVertexShaderSourceLengths.emplace_back(charsToLineStart + line.length() + 1 - (oglVertexShaderSourceStrings.back() - src.data()));
-													oglFragmentShaderSourceLengths.emplace_back(charsToLineStart + line.length() + 1 - (oglFragmentShaderSourceStrings.back() - src.data()));
+													oglVertexShaderSourceLengths.emplace_back(
+														charsToLineStart - (oglVertexShaderSourceStrings.back() - src.data())
+													);
+													oglFragmentShaderSourceLengths.emplace_back(
+														charsToLineStart - (oglFragmentShaderSourceStrings.back() - src.data())
+													);
 
 													// Close off multiline comment for insertion purposes
 													if (inMultilineComment)
@@ -878,18 +1034,11 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 														oglFragmentShaderSourceLengths.emplace_back(closeCommentLength);
 													}
 
-													// Add "#define "
-													oglVertexShaderSourceStrings.emplace_back(defineStr);
-													oglVertexShaderSourceLengths.emplace_back(defineLength);
-													oglFragmentShaderSourceStrings.emplace_back(defineStr);
-													oglFragmentShaderSourceLengths.emplace_back(defineLength);
-
-													// Add the insertion point
-													pragmaOptionStringInsertionPoints.emplace_back(oglVertexShaderSourceLengths.size());
-													oglVertexShaderSourceLengths.emplace_back(0);
-													oglVertexShaderSourceStrings.emplace_back(nullptr);
-													oglFragmentShaderSourceLengths.emplace_back(0);
-													oglFragmentShaderSourceStrings.emplace_back(nullptr);
+													// Add contents of include file
+													oglVertexShaderSourceStrings.emplace_back(includeSrcStrings[includePathHash].data());
+													oglVertexShaderSourceLengths.emplace_back(includeSrcStrings[includePathHash].length());
+													oglFragmentShaderSourceStrings.emplace_back(includeSrcStrings[includePathHash].data());
+													oglFragmentShaderSourceLengths.emplace_back(includeSrcStrings[includePathHash].length());
 
 													// Add newline
 													oglVertexShaderSourceStrings.emplace_back(newlineStr);
@@ -909,186 +1058,116 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 													// Start the new source string
 													oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
 													oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+
+													break;
 												}
-											}
-										}
-									}
-//									else if (line.compare(cursor, 8, "#include") == 0)
-//									{
-//										// TODO: Handle #include here
-//									}
-									else if (line.compare(cursor, 7, "#shader") == 0)
-									{
-										if (line.length() > cursor + 7)
-										{
-											if (line[cursor + 7] == ' ' || line[cursor + 7] == '\t')
-											{
-												// "#shader" followed by a whitespace character
-
-												// Terminate the current source strings to just before "#shader"
-												oglVertexShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
-												oglFragmentShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglFragmentShaderSourceStrings.back() - src.data()));
-
-												cursor += 8;
-												parseState = 3;
-											}
-											else if (line.compare(cursor + 7, 2, "//") == 0)
-											{
-												// #shader followed by end of line comment
-												EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-												return false;
-											}
-											else if (line.compare(cursor + 7, 2, "/*") == 0)
-											{
-												// "#shader" followed by "/*", which may still be valid.
-
-												// Terminate the current source strings to just before "#shader"
-												oglVertexShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
-												oglFragmentShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglFragmentShaderSourceStrings.back() - src.data()));
-
-												cursor += 9;
-												parseState = 3;
-												inMultilineComment = true;
-											}
-											else
-											{
-												// "#shader" immediately followed by non-whitespace character
-												EP_WARN("Graphics::CompileShaderSrc(): \"#shader\" followed by non-whitespace character.  Program: {}, Line: {}", shaderName, lineNumber);
-
-												// Terminate the current source strings to just before "#shader"
-												oglVertexShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
-												oglFragmentShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglFragmentShaderSourceStrings.back() - src.data()));
-
-												cursor += 7;
-												parseState = 3;
-											}
-										}
-										else
-										{
-											// "#shader" is last token on line
-											EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-											return false;
-										}
-									}
-									else
-									{
-										// '#' is not part of "#include", "#pragma", or "#shader".
-										cursor++;
-									}
-								}
-								else
-								{
-									// Not enough room after '#' to be "#include", "#pragma", or "#shader" statement
-									cursor++;
-								}
-							}
-							else // line[cursor] == '/'
-							{
-								cursor++;
-								if (line.length() > cursor)
-								{
-									if (line[cursor] == '/')
-									{
-										cursor = std::string_view::npos;
-									}
-									else if (line[cursor] == '*')
-									{
-										inMultilineComment = true;
-										cursor++;
-									}
-								}
-							}
-						}
-					}
-					else // inMultilineComment
-					{
-						cursor = line.find('*', cursor);
-						if (cursor != std::string_view::npos)
-						{
-							cursor++;
-							if (line.length() > cursor)
-							{
-								if (line[cursor] == '/')
-								{
-									inMultilineComment = false;
-									cursor++;
-								}
-							}
-						}
-					}
-				}
-					break;
-				case 3: // Parse for shader type (cursor starts post-"#shader")
-				{
-					if (!inMultilineComment)
-					{
-						cursor = line.find_first_not_of(" \t\r", cursor);
-						if (cursor != std::string_view::npos)
-						{
-							if (line.compare(cursor, 6, "vertex") == 0)
-							{
-								cursor += 6;
-
-								// Continue parsing for multiline comments, and throw warnings for additional tokens on line
-								while (cursor != std::string_view::npos)
-								{
-									if (!inMultilineComment)
-									{
-										cursor = line.find_first_not_of(" \t\r", cursor);
-										if (cursor != std::string_view::npos)
-										{
-											if (line[cursor] == '/')
-											{
-												cursor++;
-												if (line.length() > cursor)
+												else if (line.length() > subcursor + 1) // Must be '/'.
 												{
-													if (line[cursor] == '/')
+													if (line[subcursor + 1] == '*')
 													{
-														// End-of-line comment, safe to move on
-														cursor = std::string_view::npos;
-													}
-													else if (line[cursor] == '*')
-													{
-														// Start of mult-line comment
 														inMultilineComment = true;
-														cursor++;
+														subcursor = line.find_first_of('*', subcursor + 2);
 													}
-													else
+													else if (line[subcursor + 1] == '/')
 													{
-														// Slash was the start of an invalid token.
-														EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-														cursor = line.find_first_of(" \t\r/", cursor);
+														EP_WARN("Graphics::CompileShaderSource(): \"#include\" followed by illegitimate string.  "
+															"Program: {}, Line:{}", shaderName, lineNumber);
+														break;
 													}
 												}
 												else
 												{
-													// Slash was the start of an invalid token, and last character on line
-													EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-													cursor = std::string_view::npos;
+													EP_WARN("Graphics::CompileShaderSource(): \"#include\" followed by illegitimate string.  "
+														"Program: {}, Line:{}", shaderName, lineNumber);
+													break;
 												}
 											}
-											else
+											else if (subcursor != std::string_view::npos)
 											{
-												// unexpected
-												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-												cursor = line.find_first_of(" \t\r/", cursor);
+												if (line.length() > subcursor + 1)
+												{
+													if (line[subcursor + 1] == '/')
+													{
+														inMultilineComment = false;
+														subcursor = line.find_first_of(line[cursor] == '<' ? ">/" : "\"/", subcursor + 2);
+													}
+													else
+													{
+														subcursor = line.find_first_of('*', subcursor + 2);
+													}
+												}
 											}
 										}
 									}
-									else // inMultilineComment
+									else
 									{
-										cursor = line.find('*', cursor);
-										if (cursor != std::string_view::npos)
+										EP_WARN("Graphics::CompileShaderSource(): \"#include\" followed by illegitimate string.  "
+											"Program: {}, Line:{}", shaderName, lineNumber);
+									}
+								}
+							}
+							else if (line.compare(cursor, 7, "#vertex") == 0)
+							{
+								// Terminate the current source strings to just before "#vertex"
+								oglVertexShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
+								oglFragmentShaderSourceLengths.emplace_back(charsToLineStart + cursor - (oglFragmentShaderSourceStrings.back() - src.data()));
+
+								// Continue parsing for multiline comments
+								for (cursor = line.find_first_not_of(" \t\r", cursor + 7); cursor != std::string_view::npos; )
+								{
+									if (!inMultilineComment)
+									{
+										if (line[cursor] == '/')
 										{
 											cursor++;
 											if (line.length() > cursor)
 											{
 												if (line[cursor] == '/')
 												{
-													// Multi-line comment terminated
-													inMultilineComment = false;
-													cursor++;
+													// End-of-line comment, safe to move on
+													cursor = std::string_view::npos;
+													break;
 												}
+												else if (line[cursor] == '*')
+												{
+													// Start of mult-line comment
+													inMultilineComment = true;
+													cursor = line.find_first_of('*', cursor + 1);
+												}
+												else
+												{
+													// Slash was the start of an invalid token.
+													EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+														"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+													cursor = line.find_first_of(" \t\r/", cursor);
+												}
+											}
+											else
+											{
+												// Slash was the start of an invalid token, and last character on line
+												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+													"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+												cursor = std::string_view::npos;
+											}
+										}
+										else
+										{
+											// unexpected
+											EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+												"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+											cursor = line.find_first_of(" \t\r/", cursor);
+										}
+									}
+									else // inMultilineComment
+									{
+										cursor++;
+										if (line.length() > cursor)
+										{
+											if (line[cursor] == '/')
+											{
+												// Multi-line comment terminated
+												inMultilineComment = false;
+												cursor = line.find_first_not_of(" \t\r", cursor + 1);
 											}
 										}
 									}
@@ -1098,71 +1177,72 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 								oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
 								currentShaderSourceStrings = &oglVertexShaderSourceStrings;
 								currentShaderSourceLengths = &oglVertexShaderSourceLengths;
-								parseState = 4;
+								parseState = 3;
 							}
-							else if (line.compare(cursor, 8, "fragment") == 0)
+							else if (line.compare(cursor, 9, "#fragment") == 0)
 							{
-								cursor += 8;
+								// Terminate the current source strings to just before "#fragment"
+								oglVertexShaderSourceLengths.emplace_back(
+									charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
+								oglFragmentShaderSourceLengths.emplace_back(
+									charsToLineStart + cursor - (oglFragmentShaderSourceStrings.back() - src.data()));
 
-								// Continue parsing for multiline comments, and throw warnings for additional tokens on line
-								while (cursor != std::string_view::npos)
+								// Continue parsing for multiline comments
+								for (cursor = line.find_first_not_of(" \t\r", cursor + 9); cursor != std::string_view::npos; )
 								{
 									if (!inMultilineComment)
 									{
-										cursor = line.find_first_not_of(" \t\r", cursor);
-										if (cursor != std::string_view::npos)
-										{
-											if (line[cursor] == '/')
-											{
-												cursor++;
-												if (line.length() > cursor)
-												{
-													if (line[cursor] == '/')
-													{
-														// End-of-line comment, safe to move on
-														cursor = std::string_view::npos;
-													}
-													else if (line[cursor] == '*')
-													{
-														// Start of mult-line comment
-														inMultilineComment = true;
-														cursor++;
-													}
-													else
-													{
-														// Slash was the start of an invalid token.
-														EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-														cursor = line.find_first_of(" \t\r/", cursor);
-													}
-												}
-												else
-												{
-													// Slash was the start of an invalid token, and last character on line
-													EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-													cursor = std::string_view::npos;
-												}
-											}
-											else
-											{
-												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#shader\" statement.  Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
-												cursor = line.find_first_of(" \t\r/", cursor);
-											}
-										}
-									}
-									else // inMultilineComment
-									{
-										cursor = line.find('*', cursor);
-										if (cursor != std::string_view::npos)
+										if (line[cursor] == '/')
 										{
 											cursor++;
 											if (line.length() > cursor)
 											{
 												if (line[cursor] == '/')
 												{
-													// Multi-line comment terminated
-													inMultilineComment = false;
-													cursor++;
+													// End-of-line comment, safe to move on
+													cursor = std::string_view::npos;
+													break;
 												}
+												else if (line[cursor] == '*')
+												{
+													// Start of mult-line comment
+													inMultilineComment = true;
+													cursor = line.find_first_of('*', cursor + 1);
+												}
+												else
+												{
+													// Slash was the start of an invalid token.
+													EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+														"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+													cursor = line.find_first_of(" \t\r/", cursor);
+												}
+											}
+											else
+											{
+												// Slash was the start of an invalid token, and last character on line
+												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+													"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+												cursor = std::string_view::npos;
+											}
+										}
+										else
+										{
+											// unexpected
+											EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+												"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+											cursor = line.find_first_of(" \t\r/", cursor);
+										}
+									}
+									else // inMultilineComment
+									{
+										cursor++;
+										if (line.length() > cursor)
+										{
+											if (line[cursor] == '/')
+											{
+												// Multi-line comment terminated
+												inMultilineComment = false;
+												cursor = line.find_first_not_of(" \t\r", cursor + 1);
 											}
 										}
 									}
@@ -1172,154 +1252,246 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 								oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
 								currentShaderSourceStrings = &oglFragmentShaderSourceStrings;
 								currentShaderSourceLengths = &oglFragmentShaderSourceLengths;
-								parseState = 4;
-							}
-							else if (line[cursor] == '/')
-							{
-								cursor++;
-								if (line.length() > cursor)
-								{
-									if (line[cursor] == '/')
-									{
-										// End of line comment
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader.\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-										return false;
-									}
-									else if (line[cursor] == '*')
-									{
-										// Start of multiline comment
-										inMultilineComment = true;
-										cursor++;
-									}
-									else
-									{
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Invalid token following \"#shader.\".  Program: {}, Line: {}", shaderName, lineNumber);
-										return false;
-									}
-								}
-								else
-								{
-									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Invalid token following \"#shader.\".  Program: {}, Line: {}", shaderName, lineNumber);
-									return false;
-								}
+								parseState = 3;
 							}
 							else
 							{
-								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Invalid token following \"#shader.\".  Program: {}, Line: {}", shaderName, lineNumber);
-								return false;
+								// '#' is not part of "#include", "#pragma", or a shader section directive.
+								cursor++;
 							}
 						}
-						else
-						{
-							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-							return false;
-						}
-					}
-					else // inMultilineComment
-					{
-						cursor = line.find('*', cursor);
-						if (cursor != std::string_view::npos)
+						else // line[cursor] == '/'
 						{
 							cursor++;
 							if (line.length() > cursor)
 							{
 								if (line[cursor] == '/')
 								{
-									inMultilineComment = false;
+									cursor = std::string_view::npos;
+								}
+								else if (line[cursor] == '*')
+								{
+									inMultilineComment = true;
 									cursor++;
 								}
-								else
-								{
-									EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Invalid token following \"#shader\".  Program: {}, Line: {}", shaderName, lineNumber);
-									return false;
-								}
 							}
-							else
-							{
-								EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  Invalid token following \"#shader\".  Program: {}, Line: {}", shaderName, lineNumber);
-								return false;
-							}
-						}
-						else
-						{
-							EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-							return false;
 						}
 					}
 				}
-					break;
-				case 4: // Shader section parsing (starts immediately following "#shader" line
+				else // inMultilineComment
 				{
-					if (!inMultilineComment)
+					cursor = line.find('*', cursor);
+					if (cursor != std::string_view::npos)
 					{
-						cursor = line.find_first_of("/#", cursor);
-						if (cursor != std::string_view::npos)
+						cursor++;
+						if (line.length() > cursor)
 						{
 							if (line[cursor] == '/')
 							{
+								inMultilineComment = false;
 								cursor++;
-								if (line.length() > cursor)
+							}
+						}
+					}
+				}
+			}
+			break;
+			case 3: // Shader section parsing
+			{
+				if (!inMultilineComment)
+				{
+					cursor = line.find_first_of("/#", cursor);
+					if (cursor != std::string_view::npos)
+					{
+						if (line[cursor] == '/')
+						{
+							cursor++;
+							if (line.length() > cursor)
+							{
+								if (line[cursor] == '/')
+								{
+									cursor = std::string_view::npos;
+								}
+								else if (line[cursor] == '*')
+								{
+									inMultilineComment = true;
+									cursor++;
+								}
+							}
+						}
+						else if (line.compare(cursor, 7, "#vertex") == 0)
+						{
+							// Terminate the current source strings to just before "#vertex"
+							currentShaderSourceLengths->emplace_back(
+								charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
+
+							// Continue parsing for multiline comments
+							for (cursor = line.find_first_not_of(" \t\r", cursor + 7); cursor != std::string_view::npos; )
+							{
+								if (!inMultilineComment)
 								{
 									if (line[cursor] == '/')
 									{
-										cursor = std::string_view::npos;
-									}
-									else if (line[cursor] == '*')
-									{
-										inMultilineComment = true;
 										cursor++;
-									}
-								}
-							}
-							else if (line[cursor] == '#')
-							{
-								if (line.compare(cursor, 7, "#shader") == 0)
-								{
-									if (line.length() > cursor + 7)
-									{
-										if (line[cursor + 7] == ' ' || line[cursor + 7] == '\t')
+										if (line.length() > cursor)
 										{
-											// Terminate the current source string to the character before "#shader"
-											currentShaderSourceLengths->emplace_back(charsToLineStart + cursor - (currentShaderSourceStrings->back() - src.data()));
-
-											cursor += 7;
-											parseState = 3;
+											if (line[cursor] == '/')
+											{
+												// End-of-line comment, safe to move on
+												cursor = std::string_view::npos;
+												break;
+											}
+											else if (line[cursor] == '*')
+											{
+												// Start of mult-line comment
+												inMultilineComment = true;
+												cursor = line.find_first_of('*', cursor + 1);
+											}
+											else
+											{
+												// Slash was the start of an invalid token.
+												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+													"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+												cursor = line.find_first_of(" \t\r/", cursor);
+											}
+										}
+										else
+										{
+											// Slash was the start of an invalid token, and last character on line
+											EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+												"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+											cursor = std::string_view::npos;
 										}
 									}
 									else
 									{
-										EP_ERROR("Graphics::CompileShaderSrc(): Shader compilation failed!  \"#shader.\" not followed by shader type.  Program: {}, Line: {}", shaderName, lineNumber);
-										return false;
+										// unexpected
+										EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#vertex\" statement.  "
+											"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+										cursor = line.find_first_of(" \t\r/", cursor);
 									}
 								}
-								else
+								else // inMultilineComment
 								{
 									cursor++;
+									if (line.length() > cursor)
+									{
+										if (line[cursor] == '/')
+										{
+											// Multi-line comment terminated
+											inMultilineComment = false;
+											cursor = line.find_first_not_of(" \t\r", cursor + 1);
+										}
+									}
 								}
 							}
+
+							// Switch to parsing for vertex shader
+							oglVertexShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+							currentShaderSourceStrings = &oglVertexShaderSourceStrings;
+							currentShaderSourceLengths = &oglVertexShaderSourceLengths;
+							parseState = 3;
 						}
-					}
-					else // inMultilineComment
-					{
-						cursor = line.find('*', cursor);
-						if (cursor != std::string_view::npos)
+						else if (line.compare(cursor, 9, "#fragment") == 0)
+						{
+							// Terminate the current source strings to just before "#fragment"
+							currentShaderSourceLengths->emplace_back(
+								charsToLineStart + cursor - (oglVertexShaderSourceStrings.back() - src.data()));
+
+							// Continue parsing for multiline comments
+							for (cursor = line.find_first_not_of(" \t\r", cursor + 9); cursor != std::string_view::npos; )
+							{
+								if (!inMultilineComment)
+								{
+									if (line[cursor] == '/')
+									{
+										cursor++;
+										if (line.length() > cursor)
+										{
+											if (line[cursor] == '/')
+											{
+												// End-of-line comment, safe to move on
+												cursor = std::string_view::npos;
+												break;
+											}
+											else if (line[cursor] == '*')
+											{
+												// Start of mult-line comment
+												inMultilineComment = true;
+												cursor = line.find_first_of('*', cursor + 1);
+											}
+											else
+											{
+												// Slash was the start of an invalid token.
+												EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+													"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+												cursor = line.find_first_of(" \t\r/", cursor);
+											}
+										}
+										else
+										{
+											// Slash was the start of an invalid token, and last character on line
+											EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+												"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+											cursor = std::string_view::npos;
+										}
+									}
+									else
+									{
+										// unexpected
+										EP_WARN("Graphics::CompileShaderSrc(): Unexpected token after \"#fragment\" statement.  "
+											"Token has been ignored.  Program: {}, Line: {}", shaderName, lineNumber);
+										cursor = line.find_first_of(" \t\r/", cursor);
+									}
+								}
+								else // inMultilineComment
+								{
+									cursor++;
+									if (line.length() > cursor)
+									{
+										if (line[cursor] == '/')
+										{
+											// Multi-line comment terminated
+											inMultilineComment = false;
+											cursor = line.find_first_not_of(" \t\r", cursor + 1);
+										}
+									}
+								}
+							}
+
+							// Switch to parsing for fragment shader
+							oglFragmentShaderSourceStrings.emplace_back((char*)src.data() + charsToLineStart + line.length() + 1);
+							currentShaderSourceStrings = &oglFragmentShaderSourceStrings;
+							currentShaderSourceLengths = &oglFragmentShaderSourceLengths;
+							parseState = 3;
+						}
+						else
 						{
 							cursor++;
-							if (line.length() > cursor)
+						}
+					}
+				}
+				else // inMultilineComment
+				{
+					cursor = line.find('*', cursor);
+					if (cursor != std::string_view::npos)
+					{
+						cursor++;
+						if (line.length() > cursor)
+						{
+							if (line[cursor] == '/')
 							{
-								if (line[cursor] == '/')
-								{
-									inMultilineComment = false;
-									cursor++;
-								}
+								inMultilineComment = false;
+								cursor++;
 							}
 						}
 					}
 				}
-					break;
-				default:
-					EP_ASSERT_NOENTRY();
-					break;
+			}
+			break;
+			default:
+				EP_ASSERT_NOENTRY();
+				break;
 			}
 		}
 	}
@@ -1364,37 +1536,41 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 			if (src[pragmaOptionStringPositions[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]]] == '_'
 				&& pragmaOptionStringLengths[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]] == 1)
 			{
-				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - 1] = spaceStr;
-				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - 1] = spaceLength;
+				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - (GLint)1] = spaceStr;
+				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - (GLint)1] = spaceLength;
 				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] = spaceStr;
 				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] = spaceLength;
 
-				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - 1] = spaceStr;
-				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - 1] = spaceLength;
+				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - (GLint)1] = spaceStr;
+				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - (GLint)1] = spaceLength;
 				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] = spaceStr;
 				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] = spaceLength;
 			}
 			else
 			{
-				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - 1] = defineStr;
-				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - 1] = defineLength;
-				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] = (GLchar*)src.data() + pragmaOptionStringPositions[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]];
-				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] = pragmaOptionStringLengths[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]];
+				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - (GLint)1] = defineStr;
+				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - (GLint)1] = defineLength;
+				oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] =
+					(GLchar*)src.data() + pragmaOptionStringPositions[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]];
+				oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] =
+					pragmaOptionStringLengths[pragmaOptionStringNameIndices[j][i / divvalue % modvalue]];
 
-				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - 1] = defineStr;
-				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - 1] = defineLength;
-				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] = oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]];
-				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] = oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]];
+				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j] - (GLint)1] = defineStr;
+				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j] - (GLint)1] = defineLength;
+				oglFragmentShaderSourceStrings[pragmaOptionStringInsertionPoints[j]] =
+					oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]];
+				oglFragmentShaderSourceLengths[pragmaOptionStringInsertionPoints[j]] =
+					oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]];
 
 				auto keyinsertresult = variantLookupKey.emplace(HN(oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]],
-																   oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]]));
+					oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]]));
 
 				if (!keyinsertresult.second)
 				{
-					EP_WARN("Graphics::CompileShaderSrc(): A shader option is defined twice in a single shader variant.  Program: {}, Option: {}",
-							shaderName,
-							std::string(oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]],
-										oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]]));
+					EP_WARN("Graphics::CompileShaderSrc(): A shader option is defined twice in a single shader variant.  "
+						"Program: {}, Option: {}", shaderName,
+						std::string(oglVertexShaderSourceStrings[pragmaOptionStringInsertionPoints[j]],
+							oglVertexShaderSourceLengths[pragmaOptionStringInsertionPoints[j]]));
 				}
 			}
 
@@ -1411,8 +1587,14 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 			// Upload source code
 			GLuint vshader = EP_GL(glCreateShader(GL_VERTEX_SHADER));
 			GLuint fshader = EP_GL(glCreateShader(GL_FRAGMENT_SHADER));
-			EP_GL(glShaderSource(vshader, (GLsizei)oglVertexShaderSourceStrings.size(), oglVertexShaderSourceStrings.data(), oglVertexShaderSourceLengths.data()));
-			EP_GL(glShaderSource(fshader, (GLsizei)oglFragmentShaderSourceStrings.size(), oglFragmentShaderSourceStrings.data(), oglFragmentShaderSourceLengths.data()));
+			EP_GL(glShaderSource(vshader,
+				(GLsizei)oglVertexShaderSourceStrings.size(),
+				oglVertexShaderSourceStrings.data(),
+				oglVertexShaderSourceLengths.data()));
+			EP_GL(glShaderSource(fshader,
+				(GLsizei)oglFragmentShaderSourceStrings.size(),
+				oglFragmentShaderSourceStrings.data(),
+				oglFragmentShaderSourceLengths.data()));
 
 			// Compile Vertex
 			GLint compilationResult;
@@ -1501,7 +1683,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 			{
 				GLint length;
 				EP_GL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);)
-				GLchar* message = (GLchar*)alloca(length * sizeof(GLchar));
+					GLchar* message = (GLchar*)alloca(length * sizeof(GLchar));
 				EP_GL(glGetProgramInfoLog(program, length, &length, message));
 				EP_ERROR("[OpenGL] Shader program linking error! {}", message);
 				EP_GL(glDeleteProgram(program));
@@ -1538,8 +1720,8 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 				else
 				{
 					EP_ASSERTF(uniformBlockSizes[HN(shaderName)][hn] == size,
-							   "Graphics::CompileShaderSrc(): Definition of uniform block differs between shader variants.  "
-							   "Uniform blocks are required to use std140 layout.");
+						"Graphics::CompileShaderSrc(): Definition of uniform block differs between shader variants.  "
+						"Uniform blocks are required to use std140 layout.");
 				}
 
 				// Bind block
@@ -1592,12 +1774,13 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 						EP_GL(glGetActiveUniformName(program, i, oglStringOutBufferSize, &nameLength, oglStringOutBuffer));
 
 						samplerUniformTypes[HN(shaderName)][variantLookupKey][HN(oglStringOutBuffer, nameLength)] = oglUniformTypes[i];
-						samplerUniformLocations[HN(shaderName)][variantLookupKey][HN(oglStringOutBuffer, nameLength)] = EP_GL(glGetUniformLocation(program, oglStringOutBuffer));
+						samplerUniformLocations[HN(shaderName)][variantLookupKey][HN(oglStringOutBuffer, nameLength)] =
+							EP_GL(glGetUniformLocation(program, oglStringOutBuffer));
 					}
 					else
 					{
 						EP_ERROR("Graphics::CompileShaderSrc(): Shader program contains non-sampler uniform!  "
-								 "Program: {}, Uniform: {}", shaderName, oglStringOutBuffer);
+							"Program: {}, Uniform: {}", shaderName, oglStringOutBuffer);
 					}
 				}
 			}
@@ -1624,8 +1807,8 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 		else
 		{
 			// Equivalent program is already compiled.
-			EP_ERROR("Graphics::CompileShaderSrc(): \"#pragma option\" statements result in equivalent variants.  "
-					 "Duplicate compilation skipped.  Program: {}", shaderName);
+			EP_WARN("Graphics::CompileShaderSrc(): \"#pragma option\" statements result in equivalent variants.  "
+				"Duplicate compilation skipped.  Program: {}", shaderName);
 		}
 	}
 
@@ -1638,15 +1821,15 @@ bool Graphics::LoadShaderFile(std::string path)
 	if (File::LoadTextFile(path, &src) == File::ErrorCode::Success)
 	{
 		currentShaderSourcePath = HN(path);
-		if(CompileShaderSrc(src))
+		if (CompileShaderSrc(src))
 		{
-			currentShaderSourcePath = HN("");
+			currentShaderSourcePath = HN_NULL;
 			return true;
 		}
 		else
 		{
 			EP_ERROR("Graphics::LoadShaderFile(): Error compiling shader!  File: \"{}\"", path);
-			currentShaderSourcePath = HN("");
+			currentShaderSourcePath = HN_NULL;
 			return false;
 		}
 	}
@@ -1659,16 +1842,19 @@ bool Graphics::LoadShaderFile(std::string path)
 
 void Graphics::DeleteShader(HashName program)
 {
-	EP_ASSERT(oglShaderPrograms.count(program) != 0);
-	EP_ASSERT(shaderRefCount.count(program) != 0);
+	if (oglShaderPrograms.count(program) == 0)
+	{
+		EP_WARN("Graphics::DeleteShader(): No shader named \"{}\" has been loaded.", HN_ToStr(program));
+		return;
+	}
 
 	shaderRefCount[program]--;
 	if (shaderRefCount[program] <= 0)
 	{
 		if (activeShaderName == program)
 		{
-			activeShaderName = HN("");
-			oglActiveProgram = 0;
+			activeShaderName = HN("EPNULLSHADER");
+			oglActiveProgram = oglShaderPrograms[HN("EPNULLSHADER")][{}];;
 		}
 
 		for (const auto& [options, variant] : oglShaderPrograms[program])
@@ -1711,7 +1897,7 @@ bool Graphics::isShaderViable(HashName shader)
 
 void Graphics::SetFallbackShader(HashName shader, std::set<HashName> options)
 {
-	if (fallbackShaderName != HN(""))
+	if (fallbackShaderName != HN_NULL)
 	{
 		EP_WARN("Graphics::SetFallbackShader(): A fallback shader is already set!  Old: {}, New: {}", fallbackShaderName, shader);
 	}
@@ -1726,23 +1912,23 @@ void Graphics::SetFallbackShader(HashName shader, std::set<HashName> options)
 		else
 		{
 			EP_ERROR("Graphics::SetFallbackShader(): Shader program does not support provided shader options.  "
-					 "Program: {}, Options: {}", shader, options);
+				"Program: {}, Options: {}", shader, options);
 		}
 	}
 	else
 	{
 		EP_ERROR("Graphics::SetFallbackShader(): No shader program exists with the provided HashName.  "
-				 "Fallback shader remains unset.  Program: {}", shader);
+			"Fallback shader remains unset.  Program: {}", shader);
 	}
 }
 
 void Graphics::UnsetFallbackShader()
 {
-	if (fallbackShaderName == HN(""))
+	if (fallbackShaderName == HN_NULL)
 	{
 		EP_WARN("Graphics::UnsetFallbackShader(): Shader fallback is already unset.");
 	}
-	fallbackShaderName = HN("");
+	fallbackShaderName = HN_NULL;
 	fallbackShaderOptions.clear();
 }
 
@@ -1760,20 +1946,19 @@ void Graphics::BindShader(HashName program)
 	}
 	else
 	{
-		EP_ERROR("Graphics::BindShader(): Shader program not compatible with active shader options.  "
-				 "Fallback shader will be used.  Program: {}", program);
-
-		if (fallbackShaderName != HN(""))
+		if (fallbackShaderName != HN_NULL)
 		{
+			activeShaderName = fallbackShaderName;
 			if (isShaderViable(fallbackShaderName))
 			{
-				EP_GL(glUseProgram(oglShaderPrograms[fallbackShaderName][activeShaderOptions]));
+				if (oglActiveProgram != oglShaderPrograms[fallbackShaderName][activeShaderOptions])
+					EP_GL(glUseProgram(oglShaderPrograms[fallbackShaderName][activeShaderOptions]));
 			}
 			else
 			{
-				EP_WARN("Graphics::BindShader(): Fallback shader is not compatible with active shader options."
-						"Fallback options will be used.  "
-						"Fallback program: {}, Active shader options: {}", fallbackShaderName, fallbackShaderOptions);
+				EP_WARN("Graphics::BindShader(): Fallback shader is not viable with current shader options."
+					"Using fallback options.  "
+					"Fallback Program: {}, Active Shader Options: {}", fallbackShaderName, activeShaderOptions);
 
 				// This combination is guaranteed viable as it was checked in Graphics::SetFallbackShader().
 				EP_GL(glUseProgram(oglShaderPrograms[fallbackShaderName][fallbackShaderOptions]));
@@ -1781,15 +1966,16 @@ void Graphics::BindShader(HashName program)
 		}
 		else
 		{
-			EP_ERROR("Graphics::BindShader(): Unable to bind shader program and no fallback program has been set.  "
-					 "Program: {}", program);
+			activeShaderName = HN("EPNULLSHADER");
+			EP_WARN("Graphics::BindShader(): Unable to bind shader program and no fallback program has been set.  "
+				"Program: {}", program);
 
-			// TODO: Bind a universal default shader here (basic transform in magenta)
+			oglActiveProgram = oglShaderPrograms[HN("EPNULLSHADER")][{}];
+			EP_GL(glUseProgram(oglActiveProgram));
 		}
 	}
 }
 
-// Uniform buffers
 
 Graphics::UniformBufferHandle Graphics::CreateUniformBuffer(HashName name, size_t size, void* data, bool dynamic)
 {

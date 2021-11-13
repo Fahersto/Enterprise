@@ -9,6 +9,7 @@ std::string File::contentDirPath;
 std::string File::dataDirPath;
 std::string File::saveDirPath;
 std::string File::tempDirPath;
+std::string File::engineShadersPath;
 
 
 void File::backslashesToSlashes(std::string& str)
@@ -199,6 +200,12 @@ void File::Init()
 		{ "-d", "--data-dir" },
 		"Set a custom location for the game's data directories.", 1
 	);
+	Application::RegisterCmdLineOption
+	(
+		"Engine Shaders Directory",
+		{ "-e", "--engineshaders-dir" },
+		"Set a custom location for the game's \"engineshaders\" directory.", 1
+	);
 
 	std::vector<std::string> cmdLinePath;
 
@@ -248,5 +255,21 @@ void File::Init()
 	else
 	{
 		SetPlatformDataPaths();
+	}
+
+	// Engine shaders directory	
+	cmdLinePath = Application::GetCmdLineOption(HN("--engineshaders-dir"));
+	if (cmdLinePath.size())
+	{
+		backslashesToSlashes(cmdLinePath.front());
+
+		if (cmdLinePath.front().back() != '/')
+			engineShadersPath = cmdLinePath.front() + '/';
+		else
+			engineShadersPath = cmdLinePath.front();
+	}
+	else
+	{
+		SetPlatformEShadersPath();
 	}
 }
