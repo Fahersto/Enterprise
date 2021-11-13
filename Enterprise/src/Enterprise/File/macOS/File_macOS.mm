@@ -41,23 +41,16 @@ File::ErrorCode File::LoadTextFile(const std::string& path, std::string* outStri
 		fclose(fhandle);
 
 		// Convert CRLF to LF (not handled by fread on macOS)
-		size_t charsToSkip = 0;
-		for (size_t i = 0; i < outString->size(); i++)
+		size_t i = 0, charsToSkip = 0;
+		for ( ; i + charsToSkip + 1 < outString->size(); i++)
 		{
-			if (i + charsToSkip + 1 < outString->size())
+			if ((*outString)[i + charsToSkip] == '\r' && (*outString)[i + charsToSkip + 1] == '\n')
 			{
-				if ((*outString)[i + charsToSkip] == '\r' && (*outString)[i + charsToSkip + 1] == '\n')
-				{
-					charsToSkip++;
-				}
-				(*outString)[i] = (*outString)[i + charsToSkip];
+				charsToSkip++;
 			}
-			else
-			{
-				// TODO: Ensure that this resize operation doesn't make outString too small
-				outString->resize(i);
-			}
+			(*outString)[i] = (*outString)[i + charsToSkip];
 		}
+		outString->resize(i + 1);
 
 		return ErrorCode::Success;
 	}
@@ -219,6 +212,20 @@ void File::SetPlatformDataPaths()
 		std::filesystem::create_directories(saveDirPath, ec);
 		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
 	}
+}
+
+void File::SetPlatformEShadersPath()
+{
+	CFBundleRef bundle = CFBundleGetMainBundle();
+	EP_ASSERT(bundle);
+	CFURLRef contentURL = CFBundleCopyResourcesDirectoryURL(bundle);
+	EP_ASSERT(contentURL);
+	UInt8 contentPath[1025];
+	EP_VERIFY(CFURLGetFileSystemRepresentation(contentURL, true, contentPath, 1024));
+
+	engineShadersPath = std::string((char*)contentPath) + "/engineshaders/";
+
+	CFRelease(contentURL);
 }
 
 #endif // macOS
