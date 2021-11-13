@@ -152,10 +152,12 @@ project (EP_ProjectName)
         links { "AppKit.framework", "GameController.framework", "Cocoa.framework", "OpenGL.framework" }
         postbuildcommands
         {
-            -- Copy content directory into app bundle
+            -- Copy content into app bundle
             "mkdir -p content",
             "mkdir -p ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/content",
-            "rsync -avu --delete --exclude=\".*\" content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/content" 
+            "mkdir -p ..bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/engineshaders",
+            "rsync -avu --delete --exclude=\".*\" content/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/content",
+            "rsync -avu --delete --exclude=\".*\" ../Enterprise/engineshaders/ ../bin/" .. configurationName .. "/%{prj.name}/%{prj.name}.app/Contents/Resources/engineshaders"
         }
         xcodebuildsettings
         {
