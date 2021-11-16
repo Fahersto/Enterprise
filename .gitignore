@@ -2,6 +2,9 @@
 **/bin/
 **/bin-int/
 
+# Data folder
+Sandbox/data/
+
 # Visual Studio Files
 .vs/
 **.sln
