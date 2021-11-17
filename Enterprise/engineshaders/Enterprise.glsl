@@ -16,3 +16,7 @@ layout(std140) uniform EP_PERDRAW
     mat4 ep_matrix_mv;
     mat4 ep_matrix_mvp;
 };
+
+#ifdef EP_VERTEX
+in vec3 ep_position;
+#endif

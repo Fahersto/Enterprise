@@ -30,10 +30,10 @@ void SceneManager::RegisterComponentType(HashName name,
 
 struct Entity
 {
-	SceneManager::EntityID id = 0;
-	HashName name = HN("");
-	//SceneManager::EntityID parent;
-	//std::set<SceneManager::EntityID> children;
+	EntityID id = 0;
+	HashName name = HN_NULL;
+	//EntityID parent;
+	//std::set<EntityID> children;
 	//std::set<HashName> tags;
 	glm::vec3 position;
 	glm::quat rotation;
@@ -41,19 +41,19 @@ struct Entity
 };
 static std::vector<Entity> entityPool(Constants::MaxEntities);
 
-static std::map<SceneManager::EntityID, size_t> entityIndices;
+static std::map<EntityID, size_t> entityIndices;
 static std::vector<size_t> availableEntityPoolIndices(Constants::MaxEntities);
-static std::vector<SceneManager::EntityID> availableSpawnedIDs(Constants::MaxSpawnedEntities);
+static std::vector<EntityID> availableSpawnedIDs(Constants::MaxSpawnedEntities);
 
-static SceneManager::EntityID genSpawnedEntityID()
+static EntityID genSpawnedEntityID()
 	// Helper function: returns a unique EntityID in range [1, Constants::MaxSpawnedIDs].
 {
-	SceneManager::EntityID returnVal = availableSpawnedIDs.back();
+	EntityID returnVal = availableSpawnedIDs.back();
 	availableSpawnedIDs.pop_back();
 	return returnVal;
 }
 
-SceneManager::EntityID SceneManager::CreateEntity(HashName name, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
+EntityID SceneManager::CreateEntity(HashName name, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
 {
 	EntityID id = genSpawnedEntityID();
 	entityPool[availableEntityPoolIndices.back()] = { id, name, position, rotation, scale };
@@ -158,7 +158,7 @@ glm::vec3 SceneManager::GetEntityScale(EntityID entity)
 }
 
 
-std::vector<SceneManager::EntityID> SceneManager::GetEntitiesWithComponent(HashName componentType)
+std::vector<EntityID> SceneManager::GetEntitiesWithComponent(HashName componentType)
 {
 	if (qcfs.count(componentType) != 0)
 	{

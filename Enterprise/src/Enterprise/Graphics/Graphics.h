@@ -2,6 +2,42 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
+
+/// The internal format of a texture or render buffer.
+enum class ImageFormat
+{
+	// Color
+	RGB8,
+	RGB16F,
+	RGB32F,
+
+	// Depth only
+	Depth32F,
+
+	// Stencil only
+	Stencil8,
+
+	// Depth and Stencil
+	Depth24Stencil8
+};
+enum class TextureFilter
+{
+	Nearest, Linear //, Anisotropic
+};
+enum class MipmapMode
+{
+	None, Nearest, Linear
+};
+
+/// A data type accepted by shaders.
+enum class ShaderDataType
+{
+	none = 0,
+	Float, Vec2, Vec3, Vec4,
+	Int, UInt,
+	Mat3, Mat4
+};
+
 namespace Enterprise
 {
 
@@ -11,15 +47,6 @@ class Graphics
 public:
 
 	// Shaders
-
-	/// A data type accepted by shaders.
-	enum class ShaderDataType
-	{
-		none = 0,
-		Float, Vec2, Vec3, Vec4,
-		Int, UInt,
-		Mat3, Mat4
-	};
 
 	/// Compile and link a shader program from a string.
 	/// @param src The source code of the shader program.
@@ -40,14 +67,16 @@ public:
 
 	/// Enable a shader option.
 	/// @param option The HashName of the shader option.
+	/// @param updateShader If @c true, the currently bound shader will switch to the given variant.
 	/// @note The shader option is not used until the next call to Graphics::BindShader() or 
 	/// Graphics::BindFallbackShader().
-	static void EnableShaderOption(HashName option);
+	static void EnableShaderOption(HashName option, bool updateShader = false);
 	/// Disable a shader option.
 	/// @param option The HashName of the option.
+	/// @param updateShader If @c true, the currently bound shader will switch to the given variant.
 	/// @note The shader option is not cleared until the next call to Graphics::BindShader() or 
 	/// Graphics::BindFallbackShader().
-	static void DisableShaderOption(HashName option);
+	static void DisableShaderOption(HashName option, bool updateShader = false);
 	/// Check whether a shader program is compatible with the active shader options.
 	/// @param shader The HashName of the shader program to check.
 	/// @return True if the shader program has a variant compiled that matches the currently active shader options.
@@ -111,33 +140,6 @@ public:
 	// Textures
 
 	typedef unsigned int TextureHandle;
-
-	/// The internal format of a texture or render buffer.
-	enum class ImageFormat
-	{
-		// Color
-		RGB8,
-		RGB16F,
-		RGB32F,
-
-		// Depth only
-		Depth32F,
-
-		// Stencil only
-		Stencil8,
-
-		// Depth and Stencil
-		Depth24Stencil8
-	};
-
-	enum class TextureFilter
-	{
-		Nearest, Linear //, Anisotropic
-	};
-	enum class MipmapMode
-	{
-		None, Nearest, Linear
-	};
 
 	/// Load a texture from an image file.
 	/// @param path Path to the image file to load.
@@ -224,7 +226,8 @@ public:
 	/// Bind a texture to a sampler uniform in a shader program.
 	/// @param texture The handle of the texture.
 	/// @param uniform The HashName of the sampler uniform to bind to.
-	static void BindTexture(TextureHandle texture, HashName uniform);
+	/// @param index If the sampler uniform is an array, the element of the array to bind to.
+	static void BindTexture(TextureHandle texture, HashName uniform, unsigned int index = 0);
 
 
 	// Global shader variables
@@ -414,14 +417,16 @@ private:
 
 	// Shader stuff
 
+	static HashName selectedShaderName;
 	static HashName activeShaderName;
 	static HashName fallbackShaderName;
+	static std::set<HashName> selectedShaderOptions;
 	static std::set<HashName> activeShaderOptions;
 	static std::set<HashName> fallbackShaderOptions;
 
-	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, unsigned int>>> shaderAttributeLocations;
-	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, int>>> shaderAttributeArrayLengths;
-	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, ShaderDataType>>> shaderAttributeTypes;
+	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, unsigned int>>> shaderAttribLocations;
+	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, int>>> shaderAttribArrayLengths;
+	static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, ShaderDataType>>> shaderAttribTypes;
 
 	// Uniform buffer stuff
 

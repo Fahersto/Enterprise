@@ -41,5 +41,4 @@
 
 #endif // Debug / non-debug
 
-// Convert a an OpenGL enum to a Graphics::ShaderDataType.
-Enterprise::Graphics::ShaderDataType oglTypeToShaderDataType(GLenum glType);
+ShaderDataType oglTypeToShaderDataType(GLenum glType);

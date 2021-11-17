@@ -2,6 +2,9 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
+/// A unique identifier for a scene entity.
+typedef uint64_t EntityID;
+
 namespace Enterprise
 {
 
@@ -19,9 +22,6 @@ class SceneManager
 public:
 
     // ECS stuff
-
-    /// A unique identifier for a scene entity.
-    typedef uint64_t EntityID;
 
     /// A pointer to a component deletion callback.  Deletes all components of a type from an entity.
     typedef void (*DelComponentFn)(EntityID entity);

@@ -12,8 +12,8 @@ static std::map<Graphics::TextureHandle, HashName> pathOfTextureHandle;
 
 // externs defined in Shaders.cpp
 extern std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformTypes; // Key 1: Program name Key 2: Options Key 3: Uniform name
-extern std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformLocations;
-static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> currentSamplerAssignment;
+extern std::map<HashName, std::map<std::set<HashName>, std::map<HashName, std::vector<GLint>>>> samplerUniformLocations;
+static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, std::vector<GLint>>>> currentSamplerAssignment;
 static std::map<Graphics::TextureHandle, GLint> samplerTypeNeededForTexture;
 
 std::map<Graphics::TextureHandle, int> Graphics::currentSlotOfTexture;
@@ -238,7 +238,7 @@ void Graphics::DeleteTexture(Graphics::TextureHandle texture)
 	}
 }
 
-void Graphics::BindTexture(Graphics::TextureHandle texture, HashName uniform)
+void Graphics::BindTexture(Graphics::TextureHandle texture, HashName uniform, unsigned int index)
 {
 	EP_ASSERT_SLOW(textureReferenceCount[pathOfTextureHandle[texture]] > 0);
 
@@ -405,10 +405,24 @@ void Graphics::BindTexture(Graphics::TextureHandle texture, HashName uniform)
 		return;
 	}
 
-	// Update sampler uniform if needed
-	if (currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform] != currentSlotOfTexture[texture])
+	if (index < samplerUniformLocations[activeShaderName][activeShaderOptions][uniform].size())
 	{
-		EP_GL(glUniform1i(samplerUniformLocations[activeShaderName][activeShaderOptions][uniform], currentSlotOfTexture[texture]));
-		currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform] = currentSlotOfTexture[texture];
+		// Update sampler uniform if needed
+		while (index >= currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform].size())
+		{
+			currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform].push_back(-1);
+		}
+
+		if (currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform][index] != currentSlotOfTexture[texture])
+		{
+			EP_GL(glUniform1i(samplerUniformLocations[activeShaderName][activeShaderOptions][uniform][index], currentSlotOfTexture[texture]));
+			currentSamplerAssignment[activeShaderName][activeShaderOptions][uniform][index] = currentSlotOfTexture[texture];
+		}
+	}
+	else
+	{
+		EP_ERROR("Graphics::BindTexture(): Sampler uniform \"{}[{}]\" does not exist!  "
+			"Program: {}", HN_ToStr(uniform), index, HN_ToStr(activeShaderName));
+		return;
 	}
 }

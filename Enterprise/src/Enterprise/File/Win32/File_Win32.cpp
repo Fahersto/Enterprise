@@ -163,6 +163,16 @@ void File::TextFileWriter::Close()
 			EP_ERROR("TextFileWriter::Close(): Could not close the file!  File: {}", m_tempFileNativePath);
 		}
 
+		std::error_code ec;
+		std::filesystem::create_directories(m_destinationFileNativePath.substr(0, m_destinationFileNativePath.find_last_of('/')), ec);
+		if (ec)
+		{
+			EP_ERROR("TextFileWriter::Close(): Error creating intermediate directories to \"{}\"!  "
+				"Temporary file remains at \"{}\".  Error: {}", 
+				m_destinationFileNativePath, m_tempFileNativePath, ec.message());
+			return;
+		}
+
 		if (MoveFileEx(UTF8toWCHAR(m_tempFileNativePath).c_str(), 
 					  UTF8toWCHAR(m_destinationFileNativePath).c_str(), 
 					  MOVEFILE_REPLACE_EXISTING) == 0)

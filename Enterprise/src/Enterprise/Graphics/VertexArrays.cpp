@@ -22,35 +22,35 @@ static std::map<Graphics::VertexArrayHandle, size_t> iboNumOfIndices;
 extern GLuint oglActiveProgram; // Defined in Shaders.cpp
 
 
-static size_t sizeofShaderDataType(Graphics::ShaderDataType type)
+static size_t sizeofShaderDataType(ShaderDataType type)
 {
 	switch (type)
 	{
-		case Enterprise::Graphics::ShaderDataType::none:
+		case ShaderDataType::none:
 			return 0;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Float:
+		case ShaderDataType::Float:
 			return sizeof(float);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec2:
+		case ShaderDataType::Vec2:
 			return sizeof(glm::vec2);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec3:
+		case ShaderDataType::Vec3:
 			return sizeof(glm::vec3);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec4:
+		case ShaderDataType::Vec4:
 			return sizeof(glm::vec4);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Int:
+		case ShaderDataType::Int:
 			return sizeof(int);
 			break;
-		case Enterprise::Graphics::ShaderDataType::UInt:
+		case ShaderDataType::UInt:
 			return sizeof(unsigned int);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat3:
+		case ShaderDataType::Mat3:
 			return sizeof(glm::mat3);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat4:
+		case ShaderDataType::Mat4:
 			return sizeof(glm::mat4);
 			break;
 		default:
@@ -59,35 +59,35 @@ static size_t sizeofShaderDataType(Graphics::ShaderDataType type)
 			break;
 	}
 }
-static size_t alignofShaderDataType(Graphics::ShaderDataType type)
+static size_t alignofShaderDataType(ShaderDataType type)
 {
 	switch (type)
 	{
-		case Enterprise::Graphics::ShaderDataType::none:
+		case ShaderDataType::none:
 			return 0;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Float:
+		case ShaderDataType::Float:
 			return alignof(float);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec2:
+		case ShaderDataType::Vec2:
 			return alignof(glm::vec2);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec3:
+		case ShaderDataType::Vec3:
 			return alignof(glm::vec3);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec4:
+		case ShaderDataType::Vec4:
 			return alignof(glm::vec4);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Int:
+		case ShaderDataType::Int:
 			return alignof(int);
 			break;
-		case Enterprise::Graphics::ShaderDataType::UInt:
+		case ShaderDataType::UInt:
 			return alignof(unsigned int);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat3:
+		case ShaderDataType::Mat3:
 			return alignof(glm::mat3);
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat4:
+		case ShaderDataType::Mat4:
 			return alignof(glm::mat4);
 			break;
 		default:
@@ -96,32 +96,32 @@ static size_t alignofShaderDataType(Graphics::ShaderDataType type)
 			break;
 	}
 }
-static GLenum oglBaseTypeOfShaderDataType(Graphics::ShaderDataType type)
+static GLenum oglBaseTypeOfShaderDataType(ShaderDataType type)
 {
 	switch (type)
 	{
-		case Enterprise::Graphics::ShaderDataType::Float:
+		case ShaderDataType::Float:
 			return GL_FLOAT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec2:
+		case ShaderDataType::Vec2:
 			return GL_FLOAT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec3:
+		case ShaderDataType::Vec3:
 			return GL_FLOAT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec4:
+		case ShaderDataType::Vec4:
 			return GL_FLOAT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Int:
+		case ShaderDataType::Int:
 			return GL_INT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::UInt:
+		case ShaderDataType::UInt:
 			return GL_UNSIGNED_INT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat3:
+		case ShaderDataType::Mat3:
 			return GL_FLOAT;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Mat4:
+		case ShaderDataType::Mat4:
 			return GL_FLOAT;
 			break;
 		default:
@@ -130,26 +130,26 @@ static GLenum oglBaseTypeOfShaderDataType(Graphics::ShaderDataType type)
 			break;
 	}
 }
-static GLint oglNumOfComponentsInShaderDataType(Graphics::ShaderDataType type)
+static GLint oglNumOfComponentsInShaderDataType(ShaderDataType type)
 {
 	switch (type)
 	{
-		case Enterprise::Graphics::ShaderDataType::Float:
+		case ShaderDataType::Float:
 			return 1;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec2:
+		case ShaderDataType::Vec2:
 			return 2;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec3:
+		case ShaderDataType::Vec3:
 			return 3;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Vec4:
+		case ShaderDataType::Vec4:
 			return 4;
 			break;
-		case Enterprise::Graphics::ShaderDataType::Int:
+		case ShaderDataType::Int:
 			return 1;
 			break;
-		case Enterprise::Graphics::ShaderDataType::UInt:
+		case ShaderDataType::UInt:
 			return 1;
 			break;
 		default:
@@ -173,6 +173,8 @@ Graphics::VertexArrayHandle Graphics::CreateVertexArray(size_t maxVertices, size
 	boundArray = nextVAH;
 	nextVAH++;
 
+	bool hasEPPos = false;
+
 	size_t largestAlignment = 1;
 	for (const auto& tup : vertexLayout) // 0: Attribute HashName 1: ShaderDataType 2: Array size 3: Attribute offset
 	{
@@ -190,6 +192,13 @@ Graphics::VertexArrayHandle Graphics::CreateVertexArray(size_t maxVertices, size
 		vboAttributeGLBaseTypes[boundArray][std::get<0>(tup)] = oglBaseTypeOfShaderDataType(std::get<1>(tup));
 		vboAttributeGLTypeNumOfComponents[boundArray][std::get<0>(tup)] = oglNumOfComponentsInShaderDataType(std::get<1>(tup));
 		vboAttributeArrayLengths[boundArray][std::get<0>(tup)] = std::get<2>(tup);
+		
+		if (std::get<0>(tup) == HN("ep_position")) hasEPPos = true;
+	}
+
+	if (!hasEPPos)
+	{
+		EP_WARN("Graphics::CreateVertexArray(): Vertex layout does not contain standard member \"ep_position\"!");
 	}
 
 	vboVertexStrides[boundArray] = vertexStride;
@@ -257,22 +266,24 @@ void Graphics::SetVertexData(Graphics::VertexArrayHandle array, void* data, size
 {
 	EP_ASSERT_SLOW(array != 0);
 	EP_ASSERT_SLOW(data != nullptr);
-	EP_ASSERT_SLOW(count > 0);
 
-	if (array != boundArray)
+	if (count > 0)
 	{
-		EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vboHandles[array]));
-		if (iboHandles.count(array) != 0)
+		if (array != boundArray)
 		{
-			EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboHandles[array]));
+			EP_GL(glBindBuffer(GL_ARRAY_BUFFER, vboHandles[array]));
+			if (iboHandles.count(array) != 0)
+			{
+				EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboHandles[array]));
+			}
+			else
+			{
+				EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+			}
+			boundArray = array;
 		}
-		else
-		{
-			EP_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-		}
-		boundArray = array;
+		EP_GL(glBufferSubData(GL_ARRAY_BUFFER, vboVertexStrides[array] * first, vboVertexStrides[array] * count, data));
 	}
-	EP_GL(glBufferSubData(GL_ARRAY_BUFFER, vboVertexStrides[array] * first, vboVertexStrides[array] * count, data));
 }
 
 void Graphics::SetIndexData(Graphics::VertexArrayHandle array, void* src, size_t first, size_t count)
@@ -324,13 +335,13 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t
 	uint32_t enabledAttributesBF = 0;
 	for (HashName attribute : vboAttributeNames[array])
 	{
-		if (shaderAttributeLocations[activeShaderName][activeShaderOptions].count(attribute) > 0)
+		if (shaderAttribLocations[activeShaderName][activeShaderOptions].count(attribute) > 0)
 		{
-			EP_ASSERTF_SLOW(vboAttributeArrayLengths[array][attribute] == shaderAttributeArrayLengths[activeShaderName][activeShaderOptions][attribute],
+			EP_ASSERTF_SLOW(vboAttributeArrayLengths[array][attribute] == shaderAttribArrayLengths[activeShaderName][activeShaderOptions][attribute],
 							"Graphics::DrawTriangles(): Vertex attribute array differs in length between vertex array and bound shader program.");
 
-			unsigned int attributeLocation = shaderAttributeLocations[activeShaderName][activeShaderOptions][attribute];
-			for (int i = 0; i < shaderAttributeArrayLengths[activeShaderName][activeShaderOptions][attribute]; i++)
+			unsigned int attributeLocation = shaderAttribLocations[activeShaderName][activeShaderOptions][attribute];
+			for (int i = 0; i < shaderAttribArrayLengths[activeShaderName][activeShaderOptions][attribute]; i++)
 			{
 				// Enable the vertex attribute index, if it's not already enabled
 				if ((prevEnabledAttributesBF & BIT(attributeLocation + i)) == 0)
@@ -354,7 +365,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t
 												glBaseType,
 												GL_FALSE,
 												(GLsizei)vboVertexStrides[array],
-												(void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
+												(void*)(i * sizeofShaderDataType(shaderAttribTypes[activeShaderName][activeShaderOptions][attribute])
 														+ vboAttributeOffsets[array][attribute])));
 				}
 				else if (glBaseType == GL_DOUBLE)
@@ -363,7 +374,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t
 												 vboAttributeGLTypeNumOfComponents[array][attribute],
 												 GL_DOUBLE,
 												 (GLsizei)vboVertexStrides[array],
-												 (void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
+												 (void*)(i * sizeofShaderDataType(shaderAttribTypes[activeShaderName][activeShaderOptions][attribute])
 														 + vboAttributeOffsets[array][attribute])));
 				}
 				else
@@ -372,7 +383,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t
 												 vboAttributeGLTypeNumOfComponents[array][attribute],
 												 glBaseType,
 												 (GLsizei)vboVertexStrides[array],
-												 (void*)(i * sizeofShaderDataType(shaderAttributeTypes[activeShaderName][activeShaderOptions][attribute])
+												 (void*)(i * sizeofShaderDataType(shaderAttribTypes[activeShaderName][activeShaderOptions][attribute])
 														 + vboAttributeOffsets[array][attribute])));
 				}
 			}

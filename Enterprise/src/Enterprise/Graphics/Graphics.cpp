@@ -100,10 +100,9 @@ R"GLSL(
 #epshader EPNULLSHADER
 #include <Enterprise.glsl>
 #vertex
-in vec3 in_pos;
 void main()
 {
-    gl_Position = ep_matrix_mvp * vec4(in_pos, 1.0f);
+    gl_Position = ep_matrix_mvp * vec4(ep_position, 1.0f);
 }
 #fragment
 out vec4 out_color;
