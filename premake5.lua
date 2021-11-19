@@ -49,6 +49,11 @@ group "Dependencies"
             optimize "On"
         filter {}
 
+    include "Enterprise/_vendor/msdf-atlas-gen/pm_library.lua" -- msdf-atlas-gen
+        filter "configurations:Dev or Dist"
+            optimize "On"
+        filter {}
+
 group "" -- Dependencies
 
 
@@ -56,14 +61,14 @@ group "" -- Dependencies
 project "Enterprise"
     kind "StaticLib"
     location "%{prj.name}"
-    links { "CTSpookyHash", "HotConsts", "Glad", "stb_image", "yaml-cpp" }
+    links { "CTSpookyHash", "HotConsts", "Glad", "stb_image", "yaml-cpp", "msdf-atlas-gen" }
     language "C++"
 
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
         buildoptions{ "/std:c++17" }
-        staticruntime "On"
+        staticruntime "Off"
     filter "system:macosx"
         systemversion "10.15"
         buildoptions{ "-std=c++17" }
@@ -113,7 +118,10 @@ project "Enterprise"
         "Enterprise/_vendor/Glad/include",
         "Enterprise/_vendor/stb_image/include",
         "Enterprise/_vendor/yaml-cpp/include",
-        "Enterprise/_vendor/glm"
+        "Enterprise/_vendor/glm",
+        "Enterprise/_vendor/msdf-atlas-gen",
+        "Enterprise/_vendor/msdf-atlas-gen/msdfgen",
+        "Enterprise/_vendor/msdf-atlas-gen/msdfgen/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CORE"
@@ -138,7 +146,7 @@ project (EP_ProjectName)
         systemversion "latest"
         buildoptions{ "/std:c++17" }
         links { "xinput", "OpenGL32" }
-        staticruntime "On"
+        staticruntime "Off"
         -- These are set in pm_Mac_XCode11.command for macOS
         debugargs
         {
@@ -208,7 +216,10 @@ project (EP_ProjectName)
         "Enterprise/_vendor/Glad/include",
         "Enterprise/_vendor/stb_image/include",
         "Enterprise/_vendor/yaml-cpp/include",
-        "Enterprise/_vendor/glm"
+        "Enterprise/_vendor/glm",
+        "Enterprise/_vendor/msdf-atlas-gen",
+        "Enterprise/_vendor/msdf-atlas-gen/msdfgen",
+        "Enterprise/_vendor/msdf-atlas-gen/msdfgen/include"
     }
     includedirs "%{prj.name}/src"
     defines "EP_SCOPE_CLIENT"
