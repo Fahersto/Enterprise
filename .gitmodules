@@ -10,3 +10,6 @@
 [submodule "Enterprise/_vendor/glm"]
 	path = Enterprise/_vendor/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "Enterprise/_vendor/msdf-atlas-gen"]
+	path = Enterprise/_vendor/msdf-atlas-gen
+	url = git@github.com:theOtherMichael/msdf-atlas-gen.git
