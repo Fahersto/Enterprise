@@ -13,7 +13,7 @@ project "CTSpookyHash"
     -- Platform-specific build settings
     filter "system:windows"
         systemversion "latest"
-        staticruntime "On"
+        staticruntime "Off"
     filter "system:macosx"
         systemversion "10.15"
     filter {}
