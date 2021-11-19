@@ -2215,6 +2215,9 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 			EP_GL(glGetActiveUniformsiv(program, count, oglUniformListIndices, GL_UNIFORM_SIZE, oglUniformArraySizes));
 			for (unsigned int i = 0; i < count; i++)
 			{
+				GLsizei nameLength;
+				EP_GL(glGetActiveUniformName(program, i, 1024, &nameLength, oglStringOutBuffer));
+
 				if (oglUniformBlockIndices[i] == -1) // Not part of a block.
 				{
 					if ((oglUniformTypes[i] >= GL_SAMPLER_1D				&& oglUniformTypes[i] <= GL_SAMPLER_2D_SHADOW) ||
@@ -2223,9 +2226,6 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 						(oglUniformTypes[i] >= GL_SAMPLER_2D_RECT			&& oglUniformTypes[i] <= GL_UNSIGNED_INT_SAMPLER_BUFFER) ||
 						(oglUniformTypes[i] >= GL_SAMPLER_2D_MULTISAMPLE	&& oglUniformTypes[i] <= GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY))
 					{
-						GLsizei nameLength;
-						EP_GL(glGetActiveUniformName(program, i, 1024, &nameLength, oglStringOutBuffer));
-
 						HashName uniformNameHash;
 						if (oglUniformArraySizes[i] > 1) // Is array
 						{
