@@ -2,8 +2,23 @@
 #include "EP_PCH.h"
 #include "Core.h"
 
+enum class TextureFilter
+{
+	Nearest, Linear //, Anisotropic
+};
+enum class MipmapMode
+{
+	None, Nearest, Linear
+};
 
-/// The internal format of a texture or render buffer.
+enum class ShaderDataType
+{
+	none = 0,
+	Float, Vec2, Vec3, Vec4,
+	Int, UInt,
+	Mat3, Mat4
+};
+
 enum class ImageFormat
 {
 	// Color
@@ -20,23 +35,15 @@ enum class ImageFormat
 	// Depth and Stencil
 	Depth24Stencil8
 };
-enum class TextureFilter
+
+enum class BlendMode
 {
-	Nearest, Linear //, Anisotropic
-};
-enum class MipmapMode
-{
-	None, Nearest, Linear
+	Opaque, // f(s, d) = s
+	Translucent, // f(s, d) = s * a + d * 1-a
+	Additive, // f(s, d) = s + d
+	Multiply // f(s, d) = s * d
 };
 
-/// A data type accepted by shaders.
-enum class ShaderDataType
-{
-	none = 0,
-	Float, Vec2, Vec3, Vec4,
-	Int, UInt,
-	Mat3, Mat4
-};
 
 namespace Enterprise
 {
@@ -102,7 +109,6 @@ public:
 
 	// Uniform Buffers
 
-	/// The handle of a uniform buffer.  Created by Graphics::CreateUniformBuffer().
 	typedef unsigned int UniformBufferHandle;
 
 	/// Create a uniform buffer.
@@ -219,6 +225,52 @@ public:
 	static TextureHandle LoadCubemapTextureArray(std::initializer_list<std::string> paths,
 												 TextureFilter minFilter, TextureFilter magFilter, MipmapMode mipmapMode);
 
+	/// Load a TrueType font file and generate a texture atlas for text rendering.
+	/// @param path Path to the TTF file to load.
+	/// @param emSizeMin The minimum font size the texture must have.
+	/// @return The handle of the generated texture atlas.
+	/// @remarks After loading the font, the atlas's TextureHandle can be passed into the "Graphics::GetFont..."
+	/// functions for font metric retrieval.
+	static TextureHandle LoadFontFile(const std::string& path, float emSizeMin = 32.0f);
+
+	/// Get the UV bounds of a specific character in a font's texture atlas.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character for which to look up uv bounds.
+	/// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph in the texture atlas.
+	/// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph in the texture atlas.
+	/// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph in the texture atlas.
+	/// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph in the texture atlas.
+	static void GetFontCharUVBounds(TextureHandle atlas, uint32_t unicodeChar,
+									float& out_l, float& out_r, float& out_b, float& out_t);
+	/// Get the bounds of the quad needed to render a specific character in a font's texture atlas.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character for which to look up quad bounds.
+	/// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph relative to the cursor origin.
+	/// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph relative to the cursor origin.
+	/// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph relative to the cursor origin.
+	/// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph relative to the cursor origin.
+	/// @param prevChar The character immediately preceding @c unicodeChar.  Setting this value will apply kerning.
+	static void GetFontCharQuadBounds(TextureHandle atlas, uint32_t unicodeChar,
+									  float& out_l, float& out_r, float& out_b, float& out_t, uint32_t prevChar = 0);
+	/// Get the advance value associated with a specific character in a font.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character to look up.
+	/// @return The cursor advance value associated with @c unicodeChar.
+	static double GetFontCharAdvance(TextureHandle atlas, uint32_t unicodeChar);
+
+	/// Get vertical alignment metrics for text written with a font.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param[out] out_lineHeight Variable to receive the distance between consecutive baselines, in ems.
+	/// @param[out] out_ascenderHeight Variable to receive the distance between the baseline and the top of the tallest font glyph, in ems.
+	/// @param[out] out_descenderHeight Variable to receive the distance between the baseline and the bottom of the lowest font glyph, in ems.
+	static void GetFontVerticalMetrics(TextureHandle atlas,
+									   double& out_lineHeight, double& out_ascenderHeight, double& out_descenderHeight);
+
+	/// Get the HashName of the path to a loaded texture file.
+	/// @param texture The handle of the texture to look up.
+	/// @return The HashName of the path which was used to load this texture.
+	static HashName GetTextureHashedPath(TextureHandle texture);
+
 	/// Decrement the reference count for a texture.
 	/// @param texture The handle of the texture.
 	/// @note If the reference count for a texture reaches 0, it is deleted from GPU memory.
@@ -261,7 +313,6 @@ public:
 
 	// Vertex array functions
 
-	/// Handle of a vertex array.
 	typedef unsigned int VertexArrayHandle;
 
 	/// Create a vertex array.
@@ -348,7 +399,6 @@ public:
 		bool _makeTexture;
 	};
 
-	/// Handle of a framebuffer.
 	typedef unsigned int FramebufferHandle;
 
 	/// Create a framebuffer.
@@ -401,14 +451,6 @@ public:
 	/// @param height The height, in pixels of the upper-right corner of the viewport.
 	/// @note The framebuffer origin is on the lower-left corner, with coordinates increasing up and to the right.
 	static void SetViewport(int x, int y, int width, int height);
-
-	enum class BlendMode
-	{
-		Opaque, // f(s, d) = s
-		Translucent, // f(s, d) = s * a + d * 1-a
-		Additive, // f(s, d) = s + d
-		Multiply // f(s, d) = s * d
-	};
 
 	static void SetBlendMode(BlendMode mode);
 	static void SetDepthTest(bool enable);
