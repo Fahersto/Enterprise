@@ -22,12 +22,12 @@ uint64_t Time::GetRawTicks()
 
 uint64_t Time::SecondsToTicks(double seconds)
 {
-	return seconds * tickFrequency.QuadPart;
+	return uint64_t(seconds * tickFrequency.QuadPart);
 }
 
 float Time::TicksToSeconds(uint64_t ticks)
 {
-	return double(ticks) / double(tickFrequency.QuadPart);
+	return float(double(ticks) / double(tickFrequency.QuadPart));
 }
 
 #endif
