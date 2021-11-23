@@ -268,18 +268,19 @@ static void parseIncludeFile(HashName inclPathHN)
 						pos = line.find_first_of('/', pos);
 						if (pos != std::string_view::npos)
 						{
-							if (line.length() > pos + 1)
+							pos++;
+							if (line.length() > pos)
 							{
-								if (line[pos + 1] == '/')
+								if (line[pos] == '/')
 								{
 									// end of line comment.
 									break;
 								}
-								else if (line[pos + 1] == '*')
+								else if (line[pos] == '*')
 								{
 									// start of multiline comment.
 									inMultilineComment = true;
-									pos += 2;
+									pos++;
 								}
 							}
 						}
@@ -519,7 +520,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 								else
 								{
 									// '/' was start of valid token
-									goto startofvalidtoken;
+									goto startOfValidatedToken;
 								}
 							}
 							else
@@ -559,7 +560,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 						else
 						{
 							// Start of valid token
-						startofvalidtoken: // Used to jump out of previous if block if program name starts with '/'.
+						startOfValidatedToken: // Used to jump out of previous if block if program name starts with '/'.
 
 							for (size_t subcursor = cursor; subcursor != std::string_view::npos; )
 							{
