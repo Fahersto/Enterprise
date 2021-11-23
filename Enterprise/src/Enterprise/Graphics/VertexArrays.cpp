@@ -395,7 +395,7 @@ void Graphics::BindVertexArrayForDraw(Graphics::VertexArrayHandle& array, size_t
 	unsigned int leastSignificantSetPosition;
 	while (attributesToDisableBF != 0)
 	{
-		leastSignificantSetPosition = log2(attributesToDisableBF & -attributesToDisableBF);
+		leastSignificantSetPosition = log2(attributesToDisableBF & attributesToDisableBF);
 		EP_GL(glDisableVertexAttribArray(leastSignificantSetPosition + 1));
 		attributesToDisableBF &= ~(BIT(leastSignificantSetPosition));
 	}
