@@ -46,6 +46,7 @@ public:
     /// @param name The HashName of the entity.
     /// @param position The starting position of the entity.
     /// @param rotation The starting orientation of the entity.
+    /// @param scale The starting scale of the entity.
     /// @return The ID of the created entity.
     static EntityID CreateEntity(HashName name,
         glm::vec3 position = glm::vec3(),
