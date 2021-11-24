@@ -43,7 +43,7 @@ void Renderer2D::DrawText(std::string text, Graphics::TextureHandle atlas,
 				break;
 			case '\t':
 			{
-				unsigned int cursorPosRoundedDown = unsigned int(lineWidths.back());
+				unsigned int cursorPosRoundedDown = (unsigned int)lineWidths.back();
 				lineWidths.back() = double(cursorPosRoundedDown) + tabWidthInEms - (fmod(cursorPosRoundedDown, tabWidthInEms));
 				break;
 			}
@@ -101,7 +101,7 @@ void Renderer2D::DrawText(std::string text, Graphics::TextureHandle atlas,
 			break;
 		case '\t':
 		{
-			unsigned int cursorPosRoundedDown = unsigned int(cursorPos);
+			unsigned int cursorPosRoundedDown = (unsigned int)cursorPos;
 			cursorPos = double(cursorPosRoundedDown) + tabWidthInEms - fmod(cursorPosRoundedDown, tabWidthInEms);
 			break;
 		}
