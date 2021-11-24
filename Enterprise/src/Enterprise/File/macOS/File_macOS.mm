@@ -152,6 +152,16 @@ void File::TextFileWriter::Close()
 																 isDirectory:NO
 															   relativeToURL:nil];
 
+			std::error_code ec;
+			std::filesystem::create_directories(m_destinationFileNativePath.substr(0, m_destinationFileNativePath.find_last_of('/')), ec);
+			if (ec)
+			{
+				EP_ERROR("TextFileWriter::Close(): Error creating intermediate directories to \"{}\"!  "
+						 "Temporary file remains at \"{}\".  Error: {}",
+						 m_destinationFileNativePath, m_tempFileNativePath, ec.message());
+				return;
+			}
+
 			NSError *error = nil;
 			BOOL moveResult = [[NSFileManager defaultManager] replaceItemAtURL:destFileURL
 																 withItemAtURL:tempFileURL
