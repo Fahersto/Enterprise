@@ -172,10 +172,10 @@ Application::Application()
 						  "Displays command line options supported by this game.", 0);
 	Events::Subscribe(HN("QuitRequested"), OnQuitRequested);
 
-	Time::Init();
 	File::Init();
 	Input::Init();
 	Graphics::Init();
+	Time::Init();
 	// Audio::Init();
 	SceneManager::Init();
 	Game::Init();
@@ -222,6 +222,7 @@ Application::~Application()
 	StateManager::Cleanup();
 	//SceneManager::Cleanup();
 
+	Time::Cleanup();
 	Graphics::Cleanup();
 
 	#ifdef EP_CONFIG_DEBUG

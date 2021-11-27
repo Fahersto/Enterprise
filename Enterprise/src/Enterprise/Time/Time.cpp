@@ -1,5 +1,6 @@
 #include "EP_PCH.h"
 #include "Time.h"
+#include "Enterprise/Graphics/Graphics.h"
 
 using Enterprise::Time;
 
@@ -20,6 +21,17 @@ static float realRunningTime_out, gameRunningTime_out;
 static float realDelta_out, gameDelta_out;
 static float unsimmedRealTime_out, unsimmedGameTime_out;
 static float fixedFrameInterp_out;
+
+static struct timeGlobalUBStruct
+{
+	glm::vec4 ep_time_real;
+	glm::vec4 ep_time_game;
+	glm::vec4 ep_time_sinreal;
+	glm::vec4 ep_time_singame;
+	glm::vec4 ep_time_cosreal;
+	glm::vec4 ep_time_cosgame;
+} timeGlobalUBData;
+static Enterprise::Graphics::UniformBufferHandle timeGlobalUB;
 
 bool Time::inFixedTimestep() { return inFixedTimestep_out; }
 float Time::RealTime() { return realRunningTime_out; }
@@ -54,43 +66,15 @@ void Time::Init()
 	fixedTimestepInRealTicks = SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale);
 	fixedTimestepInGameTicks = SecondsToTicks(Constants::Time::FixedTimestep);
 #endif
+
+	timeGlobalUB = Graphics::CreateUniformBuffer(HN("EP_TIME"), sizeof(timeGlobalUBStruct));
 }
 
-
-void Time::Update()
+void Time::Cleanup()
 {
-	previousSysTimeInTicks = currentSysTimeInTicks;
-	currentSysTimeInTicks  = GetRawTicks();
-
-#ifdef EP_CONFIG_DIST
-	measuredRealTickDelta  = std::min(currentSysTimeInTicks - previousSysTimeInTicks, maxFrameDeltaInRealTicks);
-#else
-	measuredRealTickDelta = std::min(currentSysTimeInTicks - previousSysTimeInTicks, SecondsToTicks(Constants::Time::MaxFrameDelta / currentTimeScale));
-#endif
-	measuredGameTickDelta  = measuredRealTickDelta * currentTimeScale;
-
-	realRunningTicks += measuredRealTickDelta;
-	gameRunningTicks += measuredGameTickDelta;
-
-	unsimmedRealTicks += measuredRealTickDelta;
-	unsimmedGameTicks += measuredGameTickDelta;
-
-	// Going to FixedUpdate()
-	inFixedTimestep_out = true;
-
-#ifdef EP_CONFIG_DIST
-	realDelta_out = TicksToSeconds(fixedTimestepInRealTicks);
-#else
-	realDelta_out = TicksToSeconds(SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale));
-#endif
-	gameDelta_out = Constants::Time::FixedTimestep;
-
-	unsimmedRealTime_out = 0.0f;
-	unsimmedGameTime_out = 0.0f;
-	fixedFrameInterp_out = 0.0f;
-
-	// TODO: Update time variables in shader uniform buffer
+	Graphics::DeleteUniformBuffer(timeGlobalUB);
 }
+
 
 bool Time::ProcessFixedUpdate()
 {
@@ -135,6 +119,69 @@ bool Time::ProcessFixedUpdate()
 
 		return false;
 	}
+}
+
+void Time::Update()
+{
+	previousSysTimeInTicks = currentSysTimeInTicks;
+	currentSysTimeInTicks = GetRawTicks();
+
+#ifdef EP_CONFIG_DIST
+	measuredRealTickDelta = std::min(currentSysTimeInTicks - previousSysTimeInTicks, maxFrameDeltaInRealTicks);
+#else
+	measuredRealTickDelta = std::min(currentSysTimeInTicks - previousSysTimeInTicks, SecondsToTicks(Constants::Time::MaxFrameDelta / currentTimeScale));
+#endif
+	measuredGameTickDelta = measuredRealTickDelta * currentTimeScale;
+
+	realRunningTicks += measuredRealTickDelta;
+	gameRunningTicks += measuredGameTickDelta;
+
+	unsimmedRealTicks += measuredRealTickDelta;
+	unsimmedGameTicks += measuredGameTickDelta;
+
+	// Going to FixedUpdate()
+	inFixedTimestep_out = true;
+
+#ifdef EP_CONFIG_DIST
+	realDelta_out = TicksToSeconds(fixedTimestepInRealTicks);
+#else
+	realDelta_out = TicksToSeconds(SecondsToTicks(Constants::Time::FixedTimestep / currentTimeScale));
+#endif
+	gameDelta_out = Constants::Time::FixedTimestep;
+
+	unsimmedRealTime_out = 0.0f;
+	unsimmedGameTime_out = 0.0f;
+	fixedFrameInterp_out = 0.0f;
+
+	// Update time variables in shader uniform buffer
+	timeGlobalUBData.ep_time_real.x = realRunningTime_out / 20;
+	timeGlobalUBData.ep_time_real.y = realRunningTime_out;
+	timeGlobalUBData.ep_time_real.z = realRunningTime_out * 2;
+	timeGlobalUBData.ep_time_real.w = realRunningTime_out * 3;
+	timeGlobalUBData.ep_time_game.x = gameRunningTime_out / 20;
+	timeGlobalUBData.ep_time_game.y = gameRunningTime_out;
+	timeGlobalUBData.ep_time_game.z = gameRunningTime_out * 2;
+	timeGlobalUBData.ep_time_game.w = gameRunningTime_out * 3;
+
+	timeGlobalUBData.ep_time_sinreal.x = glm::sin(realRunningTime_out / 8);
+	timeGlobalUBData.ep_time_sinreal.y = glm::sin(realRunningTime_out / 4);
+	timeGlobalUBData.ep_time_sinreal.z = glm::sin(realRunningTime_out / 2);
+	timeGlobalUBData.ep_time_sinreal.w = glm::sin(realRunningTime_out);
+	timeGlobalUBData.ep_time_singame.x = glm::sin(gameRunningTime_out / 8);
+	timeGlobalUBData.ep_time_singame.y = glm::sin(gameRunningTime_out / 4);
+	timeGlobalUBData.ep_time_singame.z = glm::sin(gameRunningTime_out / 2);
+	timeGlobalUBData.ep_time_singame.w = glm::sin(gameRunningTime_out);
+
+	timeGlobalUBData.ep_time_cosreal.x = glm::cos(realRunningTime_out / 8);
+	timeGlobalUBData.ep_time_cosreal.y = glm::cos(realRunningTime_out / 4);
+	timeGlobalUBData.ep_time_cosreal.z = glm::cos(realRunningTime_out / 2);
+	timeGlobalUBData.ep_time_cosreal.w = glm::cos(realRunningTime_out);
+	timeGlobalUBData.ep_time_cosgame.x = glm::cos(gameRunningTime_out / 8);
+	timeGlobalUBData.ep_time_cosgame.y = glm::cos(gameRunningTime_out / 4);
+	timeGlobalUBData.ep_time_cosgame.z = glm::cos(gameRunningTime_out / 2);
+	timeGlobalUBData.ep_time_cosgame.w = glm::cos(gameRunningTime_out);
+
+	Graphics::SetUniformBufferData(timeGlobalUB, &timeGlobalUBData);
 }
 
 

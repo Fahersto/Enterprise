@@ -68,6 +68,8 @@ private:
 
 	static void Init();
 	static void PlatformInit();
+	static void Cleanup();
+
 	static uint64_t GetRawTicks();
 	static uint64_t SecondsToTicks(double seconds);
 	static float TicksToSeconds(uint64_t ticks);
