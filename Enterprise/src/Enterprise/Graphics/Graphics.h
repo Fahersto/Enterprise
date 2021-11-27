@@ -27,10 +27,10 @@ enum class ImageFormat
 	RGB32F,
 
 	// Depth only
+	Depth16,
+	Depth24,
+	Depth32,
 	Depth32F,
-
-	// Stencil only
-	Stencil8,
 
 	// Depth and Stencil
 	Depth24Stencil8
@@ -392,22 +392,22 @@ public:
 	/// A description of a framebuffer attachment.
 	struct FramebufferAttachmentSpec
 	{
-		ImageFormat _format;
-		TextureFilter _minFilter = TextureFilter::Nearest;
-		TextureFilter _magFilter = TextureFilter::Nearest;
-		int _samples;
-		bool _makeTexture;
+		ImageFormat format;
+		TextureFilter minFilter;
+		TextureFilter magFilter;
+		bool makeTexture;
 	};
 
 	typedef unsigned int FramebufferHandle;
 
 	/// Create a framebuffer.
+	/// @param attachments A list of specifications for framebuffer attachments.
 	/// @param width The width, in pixels, of the framebuffer.
 	/// @param height The height, in pixels, of the framebuffer.
-	/// @param attachments A list of specifications for framebuffer attachments.
 	/// @return Handle of the created framebuffer object.
-	static FramebufferHandle CreateFramebuffer(int width, int height,
-											   std::initializer_list<FramebufferAttachmentSpec> attachments);
+	/// @note If width and height both equal @c 0, then the framebuffer will take on the dimensions of the game window, and
+	/// automatically adjust to changes in window size.
+	static FramebufferHandle CreateFramebuffer(std::initializer_list<FramebufferAttachmentSpec> attachments, int width = 0, int height = 0);
 	/// Delete a framebuffer.
 	/// @param fb Handle of the framebuffer.
 	static void DeleteFramebuffer(FramebufferHandle fb);
@@ -415,9 +415,15 @@ public:
 	/// Push a framebuffer on top of the framebuffer stack.
 	/// @param fb The handle of the framebuffer.
 	static void PushFramebuffer(FramebufferHandle fb);
-	/// Remove the topmost framebuffer from the framebuffer stack.
+	/// Push a framebuffer on top of the framebuffer stack and immediately set a new viewport.
 	/// @param fb The handle of the framebuffer.
-	static void PopFramebuffer(FramebufferHandle fb);
+	/// @param l The x coordinate, in [0, 1], of the left edge of the viewport.
+	/// @param r The x coordinate, in [0, 1], of the right edge of the viewport.
+	/// @param b The y coordinate, in [0, 1], of the bottom edge of the viewport.
+	/// @param t The y coordinate, in [0, 1], of the top edge of the viewport.
+	static void PushFramebuffer(FramebufferHandle fb, float l, float r, float b, float t);
+	/// Remove the topmost framebuffer from the framebuffer stack.
+	static void PopFramebuffer();
 
 	/// Get the texture handle for a color buffer.
 	/// @param fb Handle of the framebuffer.
@@ -445,15 +451,20 @@ public:
 	static void ResizeFramebuffer(FramebufferHandle fb, int width, int height);
 
 	/// Specify the region of the framebuffer in which to draw.
-	/// @param x The x coordinate, in pixels, of the lower left corner of the viewport.
-	/// @param y The y coordinate, in pixels, of the lower left corner of the viewport.
-	/// @param width The width, in pixels of the upper-right corner of the viewport.
-	/// @param height The height, in pixels of the upper-right corner of the viewport.
-	/// @note The framebuffer origin is on the lower-left corner, with coordinates increasing up and to the right.
-	static void SetViewport(int x, int y, int width, int height);
+	/// @param l The x coordinate, in [0, 1], of the left edge of the viewport.
+	/// @param r The x coordinate, in [0, 1], of the right edge of the viewport.
+	/// @param b The y coordinate, in [0, 1], of the bottom edge of the viewport.
+	/// @param t The y coordinate, in [0, 1], of the top edge of the viewport.
+	static void SetViewport(float l, float r, float b, float t);
+
+	/// Clear the current viewport of the current framebuffer to a flat color.
+	/// @param color The color to clear to.
+	static void ClearCurrentViewport(glm::vec4 color = { 0,0,0,0 });
 
 	static void SetBlendMode(BlendMode mode);
 	static void SetDepthTest(bool enable);
+	static void SetBackfaceCulling(bool enable);
+	
 
 private:
 
@@ -512,6 +523,11 @@ private:
 
 	static void BindVertexArrayForDraw(VertexArrayHandle& array, size_t& count, size_t& first);
 
+	// Framebuffer stuff
+
+	static std::map<Graphics::FramebufferHandle, int> fbWidths;
+	static std::map<Graphics::FramebufferHandle, int> fbHeights;
+	static std::deque<glm::vec4> fbViewports;
 
 	friend class Application;
 

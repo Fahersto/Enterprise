@@ -15,7 +15,7 @@ static std::map<Graphics::TextureHandle, HashName> pathOfTextureHandle;
 extern std::map<HashName, std::map<std::set<HashName>, std::map<HashName, GLint>>> samplerUniformTypes; // Key 1: Program name Key 2: Options Key 3: Uniform name
 extern std::map<HashName, std::map<std::set<HashName>, std::map<HashName, std::vector<GLint>>>> samplerUniformLocations;
 static std::map<HashName, std::map<std::set<HashName>, std::map<HashName, std::vector<GLint>>>> currentSamplerAssignment;
-static std::map<Graphics::TextureHandle, GLint> samplerTypeNeededForTexture;
+std::map<Graphics::TextureHandle, GLint> samplerTypeNeededForTexture; // Referenced in Framebuffers.cpp as extern
 
 std::map<Graphics::TextureHandle, int> Graphics::currentSlotOfTexture;
 
@@ -533,8 +533,6 @@ void Graphics::DeleteTexture(Graphics::TextureHandle texture)
 
 void Graphics::BindTexture(Graphics::TextureHandle texture, HashName uniform, unsigned int index)
 {
-	EP_ASSERT_SLOW(textureReferenceCount[pathOfTextureHandle[texture]] > 0);
-
 	// Bind texture to slot if needed
 	EP_ASSERT_SLOW(currentSlotOfTexture.count(texture) != 0);
 	if (currentSlotOfTexture[texture] == -1) // Not currently bound to a slot

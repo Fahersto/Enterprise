@@ -42,3 +42,121 @@
 #endif // Debug / non-debug
 
 ShaderDataType oglTypeToShaderDataType(GLenum glType);
+
+inline GLint imageFmtToOGLInternalFmt(ImageFormat format)
+{
+	switch (format)
+	{
+	case ImageFormat::RGB8:
+		return GL_RGB8;
+		break;
+	case ImageFormat::RGB16F:
+		return GL_RGB16F;
+		break;
+	case ImageFormat::RGB32F:
+		return GL_RGB32F;
+		break;
+	case ImageFormat::Depth16:
+		return GL_DEPTH_COMPONENT16;
+		break;
+	case ImageFormat::Depth24:
+		return GL_DEPTH_COMPONENT24;
+		break;
+	case ImageFormat::Depth32:
+		return GL_DEPTH_COMPONENT32;
+		break;
+	case ImageFormat::Depth32F:
+		return GL_DEPTH_COMPONENT32F;
+		break;
+	case ImageFormat::Depth24Stencil8:
+		return GL_DEPTH_STENCIL;
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		break;
+	}
+}
+inline GLenum imageFmtToOGLImageFmt(ImageFormat format)
+{
+	switch (format)
+	{
+	case ImageFormat::RGB8:
+		return GL_RGB;
+		break;
+	case ImageFormat::RGB16F:
+		return GL_RGB;
+		break;
+	case ImageFormat::RGB32F:
+		return GL_RGB;
+		break;
+	case ImageFormat::Depth16:
+		return GL_DEPTH_COMPONENT;
+		break;
+	case ImageFormat::Depth24:
+		return GL_DEPTH_COMPONENT;
+		break;
+	case ImageFormat::Depth32:
+		return GL_DEPTH_COMPONENT;
+		break;
+	case ImageFormat::Depth32F:
+		return GL_DEPTH_COMPONENT;
+		break;
+	case ImageFormat::Depth24Stencil8:
+		return GL_DEPTH_STENCIL;
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		break;
+	}
+}
+inline GLenum imageFmtToOGLPixelDataType(ImageFormat format)
+{
+	switch (format)
+	{
+	case ImageFormat::RGB8:
+		return GL_UNSIGNED_BYTE;
+		break;
+	case ImageFormat::RGB16F:
+		return GL_FLOAT;
+		break;
+	case ImageFormat::RGB32F:
+		return GL_FLOAT;
+		break;
+	case ImageFormat::Depth16:
+		return GL_UNSIGNED_SHORT;
+		break;
+	case ImageFormat::Depth24:
+		return GL_UNSIGNED_INT;
+		break;
+	case ImageFormat::Depth32:
+		return GL_UNSIGNED_INT;
+		break;
+	case ImageFormat::Depth32F:
+		return GL_FLOAT;
+		break;
+	case ImageFormat::Depth24Stencil8:
+		return GL_UNSIGNED_INT_24_8;
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		break;
+	}
+}
+
+inline GLint texFilterToOGLFilter(TextureFilter filter)
+{
+	switch (filter)
+	{
+	case TextureFilter::Nearest:
+		return GL_NEAREST;
+		break;
+	//case TextureFilter::Anisotropic:
+	//	break;
+	case TextureFilter::Linear:
+		return GL_LINEAR;
+		break;
+	default:
+		EP_ASSERT_NOENTRY();
+		break;
+	}
+}

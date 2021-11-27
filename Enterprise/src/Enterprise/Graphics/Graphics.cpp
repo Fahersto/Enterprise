@@ -34,6 +34,9 @@ static bool OnWindowClose(Events::Event& e)
 void Graphics::Init()
 {
 	Window::CreatePrimaryWindow();
+	fbWidths[0] = Window::GetWidth();
+	fbHeights[0] = Window::GetHeight();
+	fbViewports.emplace_back(glm::vec4(0,1,0,1));
 	Events::Subscribe(HN("WindowClose"), OnWindowClose);
 
 	// Get maximum number of Uniform Buffer binding points
