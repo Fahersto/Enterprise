@@ -230,8 +230,7 @@ bool Renderer2D::SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut)
 	if (spriteComponentIndices.count(entity))
 	{
 		SpriteComponent& component = spriteComponents[spriteComponentIndices[entity]];
-
-		// TODO: Implement
+		
 		yamlOut["Path"] = HN_ToStr(Graphics::GetTextureHashedPath(component.tex));
 		yamlOut["UVs"]["l"] = component.uv_bounds[0];
 		yamlOut["UVs"]["r"] = component.uv_bounds[1];
@@ -240,18 +239,7 @@ bool Renderer2D::SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut)
 		yamlOut["MinFilter"] = texFilterToStr(minFilters[spriteComponentIndices[entity]]);
 		yamlOut["MagFilter"] = texFilterToStr(magFilters[spriteComponentIndices[entity]]);
 		yamlOut["MipMode"] = mipModeToStr(mipModes[spriteComponentIndices[entity]]);
-
-			//Path : "c/Tex1.png"
-			//UVs :
-				//l : 0
-				//r : 1
-				//b : 0
-				//t : 1
-			//MinFilter : Nearest
-			//MagFilter : Nearest
-			//MipMode : None
-
-			return true;
+		return true;
 	}
 	else
 	{
