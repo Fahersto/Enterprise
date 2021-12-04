@@ -9,10 +9,10 @@ it for these reasons:
 * To practice integrating audio middleware, such as FMOD and Wwise.
 * To serve as a testbed for developing new technologies or game ideas.
 
-The engine is written in C++.  Feel free to clone the project and build on it, or use it as a point of 
+The engine is written in C++17.  Feel free to clone the project and build on it, or use it as a point of 
 reference in your own projects.
 
-## Getting started
+## Build Instructions
 1. Use Git to clone the repository with `--recurse-submodules` set.  If you're cloning with HTTPS, your 
 script should look similar to the following:
 
@@ -22,69 +22,48 @@ script should look similar to the following:
     * Windows: **pm_Win32_VS2019.bat**
     * macOS: **pm_Mac_XCode11.command**
 
-    Mac users need to use `chmod u+x` or `chmod a+x` in Terminal to mark the script as executable before macOS will allow them to run it.
 3. In the root directory, open the newly generated `.sln` file (Visual Studio) or `.xcworkspace` file (Xcode) 
 and build it.
 
-At present, only Visual Studio 2019 (Windows) and Xcode 11 (macOS) have been tested.  I have no plans to 
-add support for other compilers or platforms.
+The build system supports Visual Studio and XCode: there are no plans to support additional environments at this time.
 
-### For Visual Studio Users
-Ensure you have installed the Windows 10 SDK.  It can be installed in the optional components of the Visual 
-Studio 2019 Installer, or as a direct download [here](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/).
+### Windows Developers
+Ensure you have installed the Windows 10 SDK prior to compiling.  It can be installed in the optional components of the 
+Visual Studio 2019 Installer, or as a direct download [here](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/).
 
-### For Xcode Users
-Enterprise uses [Premake](https://premake.github.io/) to generate project files.  At present, Premake does 
-not support custom Xcode schemes.  A default scheme is set up for a test "Sandbox" application, but one is 
-also generated for every library in the solution.  You may need to manually switch to the scheme for Sandbox.
+### Mac Developers
+Mac users must additionally give Premake [permission to run](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac) 
+before the XCode build script will work correctly.  To do this, right-click **premake5** in the *_vendor/premake* 
+folder, then select *Open > Open*.  Then, do the same for **pm_Mac_XCode11.command** during Step 2 of the build instructions.
 
-Eventually, I will find a better way to generate schemes, but for now, I recommend making the following 
-manual changes to the "Sandbox" scheme:
-* Set **Run -> Options -> Console** to **Use Terminal**.  Xcode's built-in console does not support colored
-  text.
-* In **Run -> Arguments -> Environmental Variables**, set `OS_ACTIVITY_MODE = disable`.  This disables
-  OS-level logging.
-
-### Doxygen Documentation Generation
-Enterprise features full Doxygen support (Doxygen 1.91).  If you have installed Doxygen on your system, you can generate Enterprise documentation by running the appropriate script file in `_scripts`:
+## Documentation Generation
+Enterprise features Doxygen documentation.  If you have installed Doxygen on your system, you can generate HTML 
+documentation by running the appropriate script in `_scripts`:
 * Windows: **gendocs_Win32.bat**
 * macOS: **gendocs_Mac.command**
 
-The documentation will be output in `docs`, located in the project root.  Note that Doxygen must be installed in the default location for your platform for the script to work (`Program Files\doxygen` for Windows and `Applications` for Mac), and that Mac users must use `chmod` to mark the script as executable before it will run.
+The generated documentation will appear in the root folder under `docs`.  Note that the script requires Doxygen to be 
+installed in the default location for your platform (*"Program Files/doxygen"* for Windows and *Applications* for Mac), 
+and that Mac users first need to give the script [permission to run](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac).
 
-The Doxygen binary distributions can be downloaded [here](https://www.doxygen.nl/download.html).
+Doxygen can be downloaded at <https://www.doxygen.nl/download.html>.
 
 ## Current State of Development
-The engine is still pretty barebones, but it is now on a solid foundation and is ready for higher systems 
-like `Graphics` and `Audio`.  What I'm calling the "Foundation" systems (`Time`, `Events`, and `File`) aren't 
-completely *finished*, but are all useable MVP's.
+* The `Time` system (done\*)
+* The `Events` system (done\*)
+* The `File` system (done\*)
+* The `Input` system (done\*)
+* The `Graphics` system (done\*)
+* The `SceneManager` system (done\*)
+* The `StateManager` system (done\*)
+* Enterprise editor (**up next**)
+* Script components
+* The `Audio` system
 
-The `Input` system is pretty much done, excepting mouse input.  Up next is the `Graphics` system (finally), 
-after which will be `Audio` and the gameplay helper systems, `ECS` and `StateManager`.
+\* = good enough to move on from.
 
-### Roadmap
-Progress towards an MVP Enterprise Engine can be tracked by the development status of its main systems, which 
-are:
-
-1. The `Time` system (done*)
-2. The `Events` system (done*)
-3. The `File` system (done*)
-4. The `Input` system (done*)
-5. The `Graphics` system (in progress)
-6. The `Audio` system
-7. The `ECS` system
-8. The `StateManager`
-
-\* That is to say, good enough to move on from.
-
-### Extras
-The following are "stretch goals" I may implement after having used the Enterprise MVP for a while:
-
-* An installation package generator
-* Viewers/editors for asset creation
-* Support for Linux and web players
-* Online store integration (Steam, etc.)
-* A Network system
+At this point, all of Enterprise's core systems, except for Audio, have MVP's.  The next big goal is to put 
+together the Enterprise editor, which will allow the creation of much more robust systems and content.
 
 ## APIs Used
 ### Windows
@@ -106,3 +85,6 @@ The following are "stretch goals" I may implement after having used the Enterpri
 * Hot Constants: <https://github.com/theOtherMichael/HotConsts>
 * Glad: <https://glad.dav1d.de/>
 * stb_image: <https://github.com/nothings/stb>
+* yaml-cpp: <https://github.com/jbeder/yaml-cpp>
+* OpenGL Mathematics (GLM): <https://github.com/g-truc/glm>
+* Multi-channel signed distance field atlas generator (msdf-atlas-gen): <https://github.com/Chlumsky/msdf-atlas-gen>
