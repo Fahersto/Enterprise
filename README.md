@@ -13,11 +13,15 @@ cloning with HTTPS, your script should look similar to the following:
 ## Prerequisites
 To build Enterprise, the following must be installed on your system:
 * OS: At least **Windows 10** or **macOS 10.15**
-* (Windows developers) **The Windows 10 SDK**: download it [here](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/) 
-or as an optional component of the [Visual Studio Installer](https://visualstudio.microsoft.com/downloads/)
-* (Mac developers) **Command Line Tools for Xcode**: Download it [here](https://developer.apple.com/download/all/?q=xcode) 
-(requires a free Apple developer account) or install [Xcode itself](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
 * **[CMake](https://cmake.org/download/) version 3.22 or later**
+* (Windows developers) **[Visual Studio](https://visualstudio.microsoft.com/downloads/)** or 
+**[Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)** 
+with the "Desktop development with C++" workload
+* (Windows developers) **[The Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk/)** 
+(also available in the Visual Studio Installer under "optional components")
+* (Mac developers) **[Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12)** or 
+**[Command Line Tools for Xcode](https://developer.apple.com/download/all/?q=xcode)** (requires 
+free Apple developer account)
 
 ## Build Instructions
 
@@ -28,8 +32,8 @@ should be able to build Enterprise using your favorite tools, as long as:
 * Your compiler is either **MSVC** or **Clang**.
 * You target **64-bit architectures**.
 
-*Note: I have only personally tested building Enterprise with the Ninja, Unix Makefile, Visual 
-Studio, and Xcode generators.*
+*Note: I personally test with Ninja, Visual 
+Studio, and Xcode.*
 
 If you are unfamiliar with CMake but still wish to build Enterprise, I recommend installing 
 [Visual Studio Code](https://code.visualstudio.com) and the 
