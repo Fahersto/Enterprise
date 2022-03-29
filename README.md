@@ -1,4 +1,5 @@
-![Enterprise Engine](readme_logo.png)
+![Enterprise Engine](readme_logo.png#gh-light-mode-only)
+![Enterprise Engine](readme_logo_dark.png#gh-dark-mode-only)
 
 # Enterprise Engine
 Enterprise is a "pet project" game engine I'm developing in my free time. It is written in C++17 
