@@ -6,4 +6,4 @@
 #define STBI_NO_PIC
 #define STBI_NO_PNM
 
-#include "stb_image.h"
+#include <stb_image/stb_image.h>

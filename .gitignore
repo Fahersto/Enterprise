@@ -1,20 +1,3 @@
-# Build Folders
-**/bin/
-**/bin-int/
-
-# Data folder
-Sandbox/data/
-
-# Visual Studio Files
-.vs/
-**.sln
-**.vcxproj
-**.vcxproj.filters
-**.vcxproj.user
-
-# Xcode files
-**.xcworkspace/
-**.xcodeproj/
-
-# Doxygen output
+build/
+data/
 docs/

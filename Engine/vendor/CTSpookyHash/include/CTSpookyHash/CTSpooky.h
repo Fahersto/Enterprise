@@ -46,6 +46,7 @@
 // slower than MD5.
 //
 
+// #include "CTSH_SharedLibrary.h"
 #include <stddef.h>
 #include <memory.h>
 
@@ -448,10 +449,13 @@ private:
         {
         case 15:
             d += ((uint64)((uint8)u.p8[14])) << 48;
+            [[fallthrough]];
         case 14:
             d += ((uint64)((uint8)u.p8[13])) << 40;
+            [[fallthrough]];
         case 13:
             d += ((uint64)((uint8)u.p8[12])) << 32;
+            [[fallthrough]];
         case 12:
 			d += (((uint64)((uint8)u.p8[11])) << 24)
 				+ (((uint64)((uint8)u.p8[10])) << 16)
@@ -468,10 +472,13 @@ private:
 			break;
         case 11:
             d += ((uint64)((uint8)u.p8[10])) << 16;
+            [[fallthrough]];
         case 10:
             d += ((uint64)((uint8)u.p8[9])) << 8;
+            [[fallthrough]];
         case 9:
             d += (uint64)((uint8)u.p8[8]);
+            [[fallthrough]];
         case 8:
 			c += (((uint64)((uint8)u.p8[7])) << 56)
 				+ (((uint64)((uint8)u.p8[6])) << 48)
@@ -484,26 +491,32 @@ private:
             break;
         case 7:
             c += ((uint64)((uint8)u.p8[6])) << 48;
+            [[fallthrough]];
         case 6:
             c += ((uint64)((uint8)u.p8[5])) << 40;
+            [[fallthrough]];
         case 5:
             c += ((uint64)((uint8)u.p8[4])) << 32;
+            [[fallthrough]];
         case 4:
-			c += (((uint64)((uint8)u.p8[3])) << 24)
-				+ (((uint64)((uint8)u.p8[2])) << 16)
-				+ (((uint64)((uint8)u.p8[1])) << 8)
-				+ ((uint64)((uint8)u.p8[0]));
+            c += (((uint64)((uint8)u.p8[3])) << 24)
+                + (((uint64)((uint8)u.p8[2])) << 16)
+                + (((uint64)((uint8)u.p8[1])) << 8)
+                + ((uint64)((uint8)u.p8[0]));
             break;
         case 3:
             c += ((uint64)((uint8)u.p8[2])) << 16;
+            [[fallthrough]];
         case 2:
             c += ((uint64)((uint8)u.p8[1])) << 8;
+            [[fallthrough]];
         case 1:
             c += (uint64)((uint8)u.p8[0]);
             break;
         case 0:
             c += sc_const;
             d += sc_const;
+            break;
         }
         ShortEnd(a,b,c,d);
         *hash1 = a;

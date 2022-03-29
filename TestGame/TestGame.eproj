@@ -1,0 +1,20 @@
+FriendlyName="Test Game Project"
+Description="This game project is used for testing Editor, Launcher, and Engine_LIB."
+
+# For engine development
+ContentDir="TestGame/content"
+DataDir="../data/TestGame/data"
+SaveDir="../data/TestGame/save"
+TempDir="../data/TestGame/temp"
+EngineDir="../Engine"
+
+# For most game projects
+ContentDir="content"
+DataDir="data/TestGame/data"
+SaveDir="data/TestGame/save"
+TempDir="data/TestGame/temp"
+# Omitting "EngineDir" causes "include_glsl" to be redirected to the editor installation.
+# The game's install directory is used when '-p' isn't set.
+
+# Global properties set below
+Time.FixedUpdateRate=60

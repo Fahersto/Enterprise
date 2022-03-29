@@ -1,0 +1,15 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: Debug
+      long: Build Enterprise in Debug configuration
+      buildType: Debug
+    dev:
+      short: Dev
+      long: Build Enterprise in Dev configuration
+      buildType: Dev
+    release:
+      short: Release
+      long: Build Enterprise in Release configuration
+      buildType: Release
