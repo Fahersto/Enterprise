@@ -4,9 +4,6 @@
 [submodule "Enterprise/_vendor/HotConsts"]
 	path = Engine/vendor/HotConsts
 	url = git@github.com:theOtherMichael/HotConsts.git
-[submodule "Enterprise/_vendor/yaml-cpp"]
-	path = Engine/vendor/yaml-cpp
-	url = git@github.com:theOtherMichael/yaml-cpp.git
 [submodule "Enterprise/_vendor/glm"]
 	path = Engine/vendor/glm
 	url = git@github.com:g-truc/glm.git
