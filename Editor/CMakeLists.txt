@@ -114,6 +114,10 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "$<TARGET_FILE:Launcher>" "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/MacOS/Launcher"
     )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND "${CMAKE_INSTALL_NAME_TOOL}" "-change"
+        "@executable_path/libEngine.dylib" "@executable_path/../Frameworks/libEngine.dylib"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/MacOS/Launcher" VERBATIM
+    )
     if(NOT CMAKE_GENERATOR MATCHES "Xcode") # In Xcode, libEngine.dylib is embedded automatically.
         add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             "$<TARGET_FILE:Engine_DYN>" "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Frameworks/libEngine.dylib"

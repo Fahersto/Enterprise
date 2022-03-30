@@ -41,7 +41,7 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     # Set up relative path to libEngine.dylib
     add_custom_command (TARGET Launcher
         POST_BUILD COMMAND "${CMAKE_INSTALL_NAME_TOOL}"
-            "-change" "@rpath/libEngine.dylib" "@executable_path/../Frameworks/libEngine.dylib"
+            "-change" "@rpath/libEngine.dylib" "@executable_path/libEngine.dylib"
             "$<TARGET_FILE:Launcher>" VERBATIM
     )
 endif()
