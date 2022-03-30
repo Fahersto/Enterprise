@@ -10,3 +10,6 @@
 [submodule "Enterprise/_vendor/msdf-atlas-gen"]
 	path = Engine/vendor/msdf-atlas-gen
 	url = git@github.com:theOtherMichael/msdf-atlas-gen.git
+[submodule "Engine/vendor/yaml-cpp"]
+	path = Engine/vendor/yaml-cpp
+	url = git@github.com:jbeder/yaml-cpp.git
