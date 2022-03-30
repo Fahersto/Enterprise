@@ -14,15 +14,13 @@ void Renderer2D::Init(size_t maxSpriteComponents)
 	mipModes.resize(maxSpriteComponents);
 	quadVertices.resize(4 * maxSpriteComponents);
 
-	// SceneManager::RegisterSceneDrawFn(SceneDraw);
-	// SceneManager::RegisterComponentType(
-	// 	HN("Sprite"),
-	// 	DeleteSpriteComponent,
-	// 	GetEntitiesWithSpriteComponents,
-	// 	SerializeSpriteComponent,
-	// 	DeserializeSpriteComponent);
-
-	// TODO: Uncomment the stuff above
+	SceneManager::RegisterSceneDrawFn(SceneDraw);
+	SceneManager::RegisterComponentType(
+		HN("Sprite"),
+		DeleteSpriteComponent,
+		GetEntitiesWithSpriteComponents,
+		SerializeSpriteComponent,
+		DeserializeSpriteComponent);
 
 	//Editor::RegisterComponentInspector(
 	//	HN("Sprite"),
@@ -45,14 +43,12 @@ void Renderer2D::Init(size_t maxSpriteComponents)
 		indexInitBuffer[i * 6 + 5] = i * 4;
 	}
 
-// TODO: Uncomment code below
-
-	// quadVAH = Graphics::CreateVertexArray(4 * maxSpriteComponents, 6 * maxSpriteComponents, sizeof(VertexData),
-	// 	{
-	// 		{ HN("ep_position"), ShaderDataType::Vec3, 1, offsetof(VertexData, ep_position) },
-	// 		{ HN("in_uv"), ShaderDataType::Vec2, 1, offsetof(VertexData, in_uv) },
-	// 		{ HN("in_tex"), ShaderDataType::Int, 1, offsetof(VertexData, in_tex) }
-	// 	}, nullptr, indexInitBuffer, true, false);
+	quadVAH = Graphics::CreateVertexArray(4 * maxSpriteComponents, 6 * maxSpriteComponents, sizeof(VertexData),
+		{
+			{ HN("ep_position"), ShaderDataType::Vec3, 1, offsetof(VertexData, ep_position) },
+			{ HN("in_uv"), ShaderDataType::Vec2, 1, offsetof(VertexData, in_uv) },
+			{ HN("in_tex"), ShaderDataType::Int, 1, offsetof(VertexData, in_tex) }
+		}, nullptr, indexInitBuffer, true, false);
 
 	delete[] indexInitBuffer;
 }

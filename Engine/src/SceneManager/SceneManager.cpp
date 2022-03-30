@@ -7,25 +7,24 @@ namespace Enterprise
 
 static std::vector<SceneManager::DelComponentFn> dcfs;
 static std::map<HashName, SceneManager::QueryComponentFn> qcfs;
-// static std::vector<std::pair<HashName, SceneManager::TextSerializeFn>> tsfs;
-// static std::map<HashName, SceneManager::TextDeserializeFn> tdfs;
+static std::vector<std::pair<HashName, SceneManager::TextSerializeFn>> tsfs;
+static std::map<HashName, SceneManager::TextDeserializeFn> tdfs;
 
-// void SceneManager::RegisterComponentType(HashName name,
-// 	DelComponentFn dcf, QueryComponentFn qcf,
-// 	TextSerializeFn tsf, TextDeserializeFn tdf)
-// {
-// 	EP_ASSERT(qcfs.count(name) == 0);
-// 	EP_ASSERT(dcf);
-// 	EP_ASSERT(qcf);
-// 	EP_ASSERT(tsf);
-// 	EP_ASSERT(tdf);
+void SceneManager::RegisterComponentType(HashName name,
+	DelComponentFn dcf, QueryComponentFn qcf,
+	TextSerializeFn tsf, TextDeserializeFn tdf)
+{
+	EP_ASSERT(qcfs.count(name) == 0);
+	EP_ASSERT(dcf);
+	EP_ASSERT(qcf);
+	EP_ASSERT(tsf);
+	EP_ASSERT(tdf);
 
-// 	dcfs.push_back(dcf);
-// 	qcfs[name] = qcf;
-// 	tsfs.emplace_back(std::pair(name, tsf));
-// 	tdfs[name] = tdf;
-// }
-// TODO: Uncomment the stuff above
+	dcfs.push_back(dcf);
+	qcfs[name] = qcf;
+	tsfs.emplace_back(std::pair(name, tsf));
+	tdfs[name] = tdf;
+}
 
 
 struct Entity
@@ -173,377 +172,375 @@ std::vector<EntityID> SceneManager::GetEntitiesWithComponent(HashName componentT
 	}
 }
 
-// TODO: Uncomment the YAML stuff below
+
+void SceneManager::SaveEntitiesToTextFile(std::string path, const std::vector<EntityID>& entities)
+{
+	YAML::Emitter outYaml;
+	outYaml << YAML::BeginMap; // File-wide
+
+	// Entities
+	outYaml << YAML::Key << "Entities" << YAML::Value << YAML::BeginMap;
+	if (entities.size() == 0)
+	{
+		for (const auto& [id, index] : entityIndices)
+		{
+			outYaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+			outYaml << YAML::Key << "Name" << YAML::Value << HN_ToStr(entityPool.at(index).name);
+			outYaml << YAML::Key << "Position" << YAML::Value << YAML::BeginMap;
+			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).position.x;
+			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).position.y;
+			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).position.z;
+			outYaml << YAML::EndMap;
+			outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
+			outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(index).rotation.w;
+			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).rotation.x;
+			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).rotation.y;
+			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).rotation.z;
+			outYaml << YAML::EndMap;
+			outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
+			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).scale.x;
+			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).scale.y;
+			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).scale.z;
+			outYaml << YAML::EndMap;
+			outYaml << YAML::EndMap;
+		}
+	}
+	else
+	{
+		for (EntityID id : entities)
+		{
+			if (entityIndices.count(id) != 0)
+			{
+				outYaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+				outYaml << YAML::Key << "Name" << YAML::Value << HN_ToStr(entityPool.at(entityIndices[id]).name);
+				outYaml << YAML::Key << "Position" << YAML::Value << YAML::BeginMap;
+				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).position.x;
+				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).position.y;
+				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).position.z;
+				outYaml << YAML::EndMap;
+				outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
+				outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(entityIndices[id]).rotation.w;
+				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).rotation.x;
+				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).rotation.y;
+				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).rotation.z;
+				outYaml << YAML::EndMap;
+				outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
+				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).scale.x;
+				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).scale.y;
+				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).scale.z;
+				outYaml << YAML::EndMap;
+				outYaml << YAML::EndMap;
+			}
+			else
+			{
+				EP_WARN("SceneManager::SaveEntitiesToTextFile(): EntityID {} does not exist!", id);
+			}
+		}
+	}
+	outYaml << YAML::EndMap; // Entities section
+
+	// Components
+	outYaml << YAML::Key << "Components" << YAML::Value << YAML::BeginMap;
+	for (const auto& [componentTypeName, tsf] : tsfs)
+	{
+		outYaml << YAML::Key << HN_ToStr(componentTypeName) << YAML::Value << YAML::BeginMap;
+
+		if (entities.size() == 0)
+		{
+			for (const auto& [id, index] : entityIndices)
+			{
+				YAML::Node callbackNode;
+				try
+				{
+					if (tsf(id, callbackNode))
+					{
+						outYaml << YAML::Key << id << YAML::Value << callbackNode;
+					}
+				}
+				catch (const YAML::Exception& except)
+				{
+					EP_ERROR("SceneManager::SaveEntitiesToTextFile(): YAML exception during {} serialization!  "
+						"Message: {}", HN_ToStr(componentTypeName), except.msg);
+				}
+			}
+		}
+		else
+		{
+			for (EntityID id : entities)
+			{
+				YAML::Node callbackNode;
+				try
+				{
+					if (tsf(id, callbackNode))
+					{
+						outYaml << YAML::Key << id << YAML::Value << callbackNode;
+					}
+				}
+				catch (const YAML::Exception& except)
+				{
+					EP_ERROR("SceneManager::SaveEntitiesToTextFile(): YAML exception during {} serialization!  "
+						"Message: {}", HN_ToStr(componentTypeName), except.msg);
+				}
+			}
+		}
+
+		outYaml << YAML::EndMap; // Component type section
+	}
+	outYaml << YAML::EndMap; // Components section
+
+	outYaml << YAML::EndMap; // File-wide
+	File::SaveTextFile(path, outYaml.c_str());
+}
+
+bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
+{
+	try
+	{
+		YAML::Node yamlIn = YAML::Load(yamlSrc);
+
+		if (yamlIn.Type() != YAML::NodeType::Map)
+		{
+			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): Root node is not a map node!");
+			return false;
+		}
+		if (!yamlIn["Entities"])
+		{
+			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): \"Entities\" key not present in root node!");
+			return false;
+		}
+		if (yamlIn["Entities"].Type() != YAML::NodeType::Map)
+		{
+			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): \"Entities\" key is not associated with a map node!");
+			return false;
+		}
+
+		std::map<EntityID, EntityID> oldIDtoNewID;
+
+		// Entities
+		for (auto entityDataIt = yamlIn["Entities"].begin();
+			entityDataIt != yamlIn["Entities"].end();
+			entityDataIt++)
+		{
+			if (entityDataIt->second.Type() != YAML::NodeType::Map)
+			{
+				EP_WARN("SceneManager::LoadEntitiesFromYAML(): Entity subnode is not a mapping.  "
+					"ID: {}", entityDataIt->first.as<std::string>());
+			}
+			else if (!entityDataIt->second["Name"] ||
+				!entityDataIt->second["Position"] ||
+				!entityDataIt->second["Rotation"] ||
+				!entityDataIt->second["Scale"])
+			{
+				EP_WARN("SceneManager::LoadEntitiesFromYAML() : Entity subnode is missing data.  "
+					"ID : {}", entityDataIt->first.as<std::string>());
+			}
+			else
+			{
+				if (entityDataIt->second["Position"].Type() != YAML::NodeType::Map ||
+					entityDataIt->second["Rotation"].Type() != YAML::NodeType::Map ||
+					entityDataIt->second["Scale"].Type() != YAML::NodeType::Map)
+				{
+					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
+						"for entity \"{}\" are not mappings.", entityDataIt->first.as<std::string>());
+				}
+				else if (!entityDataIt->second["Position"]["x"] ||
+					!entityDataIt->second["Position"]["y"] ||
+					!entityDataIt->second["Position"]["z"] ||
+					!entityDataIt->second["Rotation"]["w"] ||
+					!entityDataIt->second["Rotation"]["x"] ||
+					!entityDataIt->second["Rotation"]["y"] ||
+					!entityDataIt->second["Rotation"]["z"] ||
+					!entityDataIt->second["Scale"]["x"] ||
+					!entityDataIt->second["Scale"]["y"] ||
+					!entityDataIt->second["Scale"]["z"])
+				{
+					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
+						"for entity \"{}\" are missing data.", entityDataIt->first.as<std::string>());
+				}
+				else
+				{
+					EntityID id;
+
+					try
+					{
+						// Non-string deserialization done first because they throw exceptions in case of failure
+						id = entityDataIt->first.as<EntityID>();
+						glm::vec3 outPos =
+						{
+							entityDataIt->second["Position"]["x"].as<float>(),
+							entityDataIt->second["Position"]["y"].as<float>(),
+							entityDataIt->second["Position"]["z"].as<float>()
+						};
+						glm::quat outRot =
+						{
+							entityDataIt->second["Rotation"]["w"].as<float>(),
+							entityDataIt->second["Rotation"]["x"].as<float>(),
+							entityDataIt->second["Rotation"]["y"].as<float>(),
+							entityDataIt->second["Rotation"]["z"].as<float>()
+						};
+						glm::vec3 outScale =
+						{
+							entityDataIt->second["Scale"]["x"].as<float>(),
+							entityDataIt->second["Scale"]["y"].as<float>(),
+							entityDataIt->second["Scale"]["z"].as<float>()
+						};
 
 
-// void SceneManager::SaveEntitiesToTextFile(std::string path, const std::vector<EntityID>& entities)
-// {
-// 	YAML::Emitter outYaml;
-// 	outYaml << YAML::BeginMap; // File-wide
+						if (id <= Constants::MaxSpawnedEntities)
+							// Spawnable range ID: Always create new
+						{
+							oldIDtoNewID[id] = genSpawnedEntityID();
+							entityIndices[oldIDtoNewID[id]] = availableEntityPoolIndices.back();
+							availableEntityPoolIndices.pop_back();
+						}
+						else
+							// Scene file range ID: Update existing entity, if it exists
+						{
+							oldIDtoNewID[id] = id;
 
-// 	// Entities
-// 	outYaml << YAML::Key << "Entities" << YAML::Value << YAML::BeginMap;
-// 	if (entities.size() == 0)
-// 	{
-// 		for (const auto& [id, index] : entityIndices)
-// 		{
-// 			outYaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-// 			outYaml << YAML::Key << "Name" << YAML::Value << HN_ToStr(entityPool.at(index).name);
-// 			outYaml << YAML::Key << "Position" << YAML::Value << YAML::BeginMap;
-// 			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).position.x;
-// 			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).position.y;
-// 			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).position.z;
-// 			outYaml << YAML::EndMap;
-// 			outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
-// 			outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(index).rotation.w;
-// 			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).rotation.x;
-// 			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).rotation.y;
-// 			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).rotation.z;
-// 			outYaml << YAML::EndMap;
-// 			outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
-// 			outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(index).scale.x;
-// 			outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(index).scale.y;
-// 			outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(index).scale.z;
-// 			outYaml << YAML::EndMap;
-// 			outYaml << YAML::EndMap;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		for (EntityID id : entities)
-// 		{
-// 			if (entityIndices.count(id) != 0)
-// 			{
-// 				outYaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-// 				outYaml << YAML::Key << "Name" << YAML::Value << HN_ToStr(entityPool.at(entityIndices[id]).name);
-// 				outYaml << YAML::Key << "Position" << YAML::Value << YAML::BeginMap;
-// 				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).position.x;
-// 				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).position.y;
-// 				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).position.z;
-// 				outYaml << YAML::EndMap;
-// 				outYaml << YAML::Key << "Rotation" << YAML::Value << YAML::BeginMap;
-// 				outYaml << YAML::Key << "w" << YAML::Value << entityPool.at(entityIndices[id]).rotation.w;
-// 				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).rotation.x;
-// 				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).rotation.y;
-// 				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).rotation.z;
-// 				outYaml << YAML::EndMap;
-// 				outYaml << YAML::Key << "Scale" << YAML::Value << YAML::BeginMap;
-// 				outYaml << YAML::Key << "x" << YAML::Value << entityPool.at(entityIndices[id]).scale.x;
-// 				outYaml << YAML::Key << "y" << YAML::Value << entityPool.at(entityIndices[id]).scale.y;
-// 				outYaml << YAML::Key << "z" << YAML::Value << entityPool.at(entityIndices[id]).scale.z;
-// 				outYaml << YAML::EndMap;
-// 				outYaml << YAML::EndMap;
-// 			}
-// 			else
-// 			{
-// 				EP_WARN("SceneManager::SaveEntitiesToTextFile(): EntityID {} does not exist!", id);
-// 			}
-// 		}
-// 	}
-// 	outYaml << YAML::EndMap; // Entities section
+							if (entityIndices.count(id))
+								// Entity in scene already: delete attached components
+							{
+								for (const DelComponentFn& dcf : dcfs)
+								{
+									dcf(id);
+								}
+							}
+							else
+								// Entity not in scene yet: create one
+							{
+								entityIndices[id] = availableEntityPoolIndices.back();
+								availableEntityPoolIndices.pop_back();
+							}
+						}
 
-// 	// Components
-// 	outYaml << YAML::Key << "Components" << YAML::Value << YAML::BeginMap;
-// 	for (const auto& [componentTypeName, tsf] : tsfs)
-// 	{
-// 		outYaml << YAML::Key << HN_ToStr(componentTypeName) << YAML::Value << YAML::BeginMap;
+						// Set entity data
+						entityPool[entityIndices[oldIDtoNewID[id]]].name = 
+							HN(entityDataIt->second["Name"].as<std::string>());
+						entityPool[entityIndices[oldIDtoNewID[id]]].position = outPos;
+						entityPool[entityIndices[oldIDtoNewID[id]]].rotation = outRot;
+						entityPool[entityIndices[oldIDtoNewID[id]]].scale = outScale;
+					}
+					catch (const YAML::TypedBadConversion<EntityID>&)
+					{
+						EP_WARN("SceneManager::LoadEntitiesFromYAML(): Invalid EntityID in entities list: {}",
+							entityDataIt->first.as<std::string>());
+					}
+					catch (const YAML::TypedBadConversion<float>& exc)
+					{
+						EP_WARN("SceneManager::LoadEntitiesFromYAML(): Cannot deserialize EntityID {}: "
+							"Invalid transform value(s).", id);
+					}
+				}
+			}
+		}
 
-// 		if (entities.size() == 0)
-// 		{
-// 			for (const auto& [id, index] : entityIndices)
-// 			{
-// 				YAML::Node callbackNode;
-// 				try
-// 				{
-// 					if (tsf(id, callbackNode))
-// 					{
-// 						outYaml << YAML::Key << id << YAML::Value << callbackNode;
-// 					}
-// 				}
-// 				catch (const YAML::Exception& except)
-// 				{
-// 					EP_ERROR("SceneManager::SaveEntitiesToTextFile(): YAML exception during {} serialization!  "
-// 						"Message: {}", HN_ToStr(componentTypeName), except.msg);
-// 				}
-// 			}
-// 		}
-// 		else
-// 		{
-// 			for (EntityID id : entities)
-// 			{
-// 				YAML::Node callbackNode;
-// 				try
-// 				{
-// 					if (tsf(id, callbackNode))
-// 					{
-// 						outYaml << YAML::Key << id << YAML::Value << callbackNode;
-// 					}
-// 				}
-// 				catch (const YAML::Exception& except)
-// 				{
-// 					EP_ERROR("SceneManager::SaveEntitiesToTextFile(): YAML exception during {} serialization!  "
-// 						"Message: {}", HN_ToStr(componentTypeName), except.msg);
-// 				}
-// 			}
-// 		}
+		// Components
+		if (yamlIn["Components"])
+		{
+			if (yamlIn["Components"].Type() == YAML::NodeType::Map)
+			{
+				for (auto componentTypeIt = yamlIn["Components"].begin();
+					componentTypeIt != yamlIn["Components"].end();
+					componentTypeIt++)
+				{
+					if (componentTypeIt->second.Type() == YAML::NodeType::Map)
+					{
+						HashName componentTypeName = HN(componentTypeIt->first.as<std::string>());
+						for (auto componentDataIt = componentTypeIt->second.begin();
+							componentDataIt != componentTypeIt->second.end();
+							componentDataIt++)
+						{
+							if (tdfs.count(componentTypeName))
+							{
+								try
+								{
+									EntityID id = componentDataIt->first.as<EntityID>();
+									if (oldIDtoNewID.count(id) != 0)
+									{
+										try
+										{
+											if (!tdfs[componentTypeName](oldIDtoNewID[id], componentDataIt->second))
+											{
+												EP_WARN("SceneManager::LoadEntitiesFromYAML(): "
+													"Could not deserialize {} component data for entity {}.",
+													HN_ToStr(componentTypeName), id);
+											}
+										}
+										catch (const YAML::Exception& except)
+										{
+											EP_ERROR("SceneManager::LoadEntitiesFromYAML(): "
+												"YAML exception during {} component deserialization!  Message: {}", 
+												HN_ToStr(componentTypeName), except.msg);
+										}
+									}
+									else
+									{
+										EP_WARN("SceneManager::LoadEntitiesFromYAML(): {} component data found for "
+											"EntityID that isn't present in \"Entities\" section!  Component will "
+											"not be loaded.  EntityID: {}", HN_ToStr(componentTypeName), id);
+									}
+								}
+								catch (const YAML::TypedBadConversion<EntityID>&)
+								{
+									EP_WARN("SceneManager::LoadEntitiesFromYAML(): "
+										"Invalid EntityID in \"{}\" component section: {}",
+										HN_ToStr(componentTypeName), componentDataIt->first.as<std::string>());
+								}
+							}
+							else
+							{
+								EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"{}\" is not a valid component type.  "
+									"Did you register the required system using SceneManager::RegisterComponentType()?",
+									HN_ToStr(componentTypeName));
+							}
+						}
+					}
+					else
+					{
+						EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"Components\" subkey \"{}\" is not associated"
+							" with a mapping!  \"{}\" components will not be deserialized.",
+							componentTypeIt->first.as<std::string>());
+					}
+				}
+			}
+			else
+			{
+				EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"Components\" key is not associated with a mapping!"
+					"  No component data can be read.");
+			}
+		}
+		else
+		{
+			EP_WARN("SceneManager::LoadEntitiesFromYAML(): File does not contain \"Components\" section.");
+		}
+	}
+	catch (const YAML::Exception& e)
+	{
+		EP_ERROR("SceneManager::LoadEntitiesFromYAML(): YAML exception thrown!  Message: {}", e.msg);
+		return false;
+	}
 
-// 		outYaml << YAML::EndMap; // Component type section
-// 	}
-// 	outYaml << YAML::EndMap; // Components section
+	return true;
+}
 
-// 	outYaml << YAML::EndMap; // File-wide
-// 	File::SaveTextFile(path, outYaml.c_str());
-// }
-
-// bool SceneManager::LoadEntitiesFromYAML(const std::string& yamlSrc)
-// {
-// 	try
-// 	{
-// 		YAML::Node yamlIn = YAML::Load(yamlSrc);
-
-// 		if (yamlIn.Type() != YAML::NodeType::Map)
-// 		{
-// 			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): Root node is not a map node!");
-// 			return false;
-// 		}
-// 		if (!yamlIn["Entities"])
-// 		{
-// 			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): \"Entities\" key not present in root node!");
-// 			return false;
-// 		}
-// 		if (yamlIn["Entities"].Type() != YAML::NodeType::Map)
-// 		{
-// 			EP_ERROR("SceneManager::LoadEntitiesFromYAML(): \"Entities\" key is not associated with a map node!");
-// 			return false;
-// 		}
-
-// 		std::map<EntityID, EntityID> oldIDtoNewID;
-
-// 		// Entities
-// 		for (auto entityDataIt = yamlIn["Entities"].begin();
-// 			entityDataIt != yamlIn["Entities"].end();
-// 			entityDataIt++)
-// 		{
-// 			if (entityDataIt->second.Type() != YAML::NodeType::Map)
-// 			{
-// 				EP_WARN("SceneManager::LoadEntitiesFromYAML(): Entity subnode is not a mapping.  "
-// 					"ID: {}", entityDataIt->first.as<std::string>());
-// 			}
-// 			else if (!entityDataIt->second["Name"] ||
-// 				!entityDataIt->second["Position"] ||
-// 				!entityDataIt->second["Rotation"] ||
-// 				!entityDataIt->second["Scale"])
-// 			{
-// 				EP_WARN("SceneManager::LoadEntitiesFromYAML() : Entity subnode is missing data.  "
-// 					"ID : {}", entityDataIt->first.as<std::string>());
-// 			}
-// 			else
-// 			{
-// 				if (entityDataIt->second["Position"].Type() != YAML::NodeType::Map ||
-// 					entityDataIt->second["Rotation"].Type() != YAML::NodeType::Map ||
-// 					entityDataIt->second["Scale"].Type() != YAML::NodeType::Map)
-// 				{
-// 					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
-// 						"for entity \"{}\" are not mappings.", entityDataIt->first.as<std::string>());
-// 				}
-// 				else if (!entityDataIt->second["Position"]["x"] ||
-// 					!entityDataIt->second["Position"]["y"] ||
-// 					!entityDataIt->second["Position"]["z"] ||
-// 					!entityDataIt->second["Rotation"]["w"] ||
-// 					!entityDataIt->second["Rotation"]["x"] ||
-// 					!entityDataIt->second["Rotation"]["y"] ||
-// 					!entityDataIt->second["Rotation"]["z"] ||
-// 					!entityDataIt->second["Scale"]["x"] ||
-// 					!entityDataIt->second["Scale"]["y"] ||
-// 					!entityDataIt->second["Scale"]["z"])
-// 				{
-// 					EP_WARN("SceneManager::LoadEntitiesFromYAML() : \"Position\" or \"Rotation\" subvalues "
-// 						"for entity \"{}\" are missing data.", entityDataIt->first.as<std::string>());
-// 				}
-// 				else
-// 				{
-// 					EntityID id;
-
-// 					try
-// 					{
-// 						// Non-string deserialization done first because they throw exceptions in case of failure
-// 						id = entityDataIt->first.as<EntityID>();
-// 						glm::vec3 outPos =
-// 						{
-// 							entityDataIt->second["Position"]["x"].as<float>(),
-// 							entityDataIt->second["Position"]["y"].as<float>(),
-// 							entityDataIt->second["Position"]["z"].as<float>()
-// 						};
-// 						glm::quat outRot =
-// 						{
-// 							entityDataIt->second["Rotation"]["w"].as<float>(),
-// 							entityDataIt->second["Rotation"]["x"].as<float>(),
-// 							entityDataIt->second["Rotation"]["y"].as<float>(),
-// 							entityDataIt->second["Rotation"]["z"].as<float>()
-// 						};
-// 						glm::vec3 outScale =
-// 						{
-// 							entityDataIt->second["Scale"]["x"].as<float>(),
-// 							entityDataIt->second["Scale"]["y"].as<float>(),
-// 							entityDataIt->second["Scale"]["z"].as<float>()
-// 						};
-
-
-// 						if (id <= Constants::MaxSpawnedEntities)
-// 							// Spawnable range ID: Always create new
-// 						{
-// 							oldIDtoNewID[id] = genSpawnedEntityID();
-// 							entityIndices[oldIDtoNewID[id]] = availableEntityPoolIndices.back();
-// 							availableEntityPoolIndices.pop_back();
-// 						}
-// 						else
-// 							// Scene file range ID: Update existing entity, if it exists
-// 						{
-// 							oldIDtoNewID[id] = id;
-
-// 							if (entityIndices.count(id))
-// 								// Entity in scene already: delete attached components
-// 							{
-// 								for (const DelComponentFn& dcf : dcfs)
-// 								{
-// 									dcf(id);
-// 								}
-// 							}
-// 							else
-// 								// Entity not in scene yet: create one
-// 							{
-// 								entityIndices[id] = availableEntityPoolIndices.back();
-// 								availableEntityPoolIndices.pop_back();
-// 							}
-// 						}
-
-// 						// Set entity data
-// 						entityPool[entityIndices[oldIDtoNewID[id]]].name = 
-// 							HN(entityDataIt->second["Name"].as<std::string>());
-// 						entityPool[entityIndices[oldIDtoNewID[id]]].position = outPos;
-// 						entityPool[entityIndices[oldIDtoNewID[id]]].rotation = outRot;
-// 						entityPool[entityIndices[oldIDtoNewID[id]]].scale = outScale;
-// 					}
-// 					catch (const YAML::TypedBadConversion<EntityID>&)
-// 					{
-// 						EP_WARN("SceneManager::LoadEntitiesFromYAML(): Invalid EntityID in entities list: {}",
-// 							entityDataIt->first.as<std::string>());
-// 					}
-// 					catch (const YAML::TypedBadConversion<float>& exc)
-// 					{
-// 						EP_WARN("SceneManager::LoadEntitiesFromYAML(): Cannot deserialize EntityID {}: "
-// 							"Invalid transform value(s).", id);
-// 					}
-// 				}
-// 			}
-// 		}
-
-// 		// Components
-// 		if (yamlIn["Components"])
-// 		{
-// 			if (yamlIn["Components"].Type() == YAML::NodeType::Map)
-// 			{
-// 				for (auto componentTypeIt = yamlIn["Components"].begin();
-// 					componentTypeIt != yamlIn["Components"].end();
-// 					componentTypeIt++)
-// 				{
-// 					if (componentTypeIt->second.Type() == YAML::NodeType::Map)
-// 					{
-// 						HashName componentTypeName = HN(componentTypeIt->first.as<std::string>());
-// 						for (auto componentDataIt = componentTypeIt->second.begin();
-// 							componentDataIt != componentTypeIt->second.end();
-// 							componentDataIt++)
-// 						{
-// 							if (tdfs.count(componentTypeName))
-// 							{
-// 								try
-// 								{
-// 									EntityID id = componentDataIt->first.as<EntityID>();
-// 									if (oldIDtoNewID.count(id) != 0)
-// 									{
-// 										try
-// 										{
-// 											if (!tdfs[componentTypeName](oldIDtoNewID[id], componentDataIt->second))
-// 											{
-// 												EP_WARN("SceneManager::LoadEntitiesFromYAML(): "
-// 													"Could not deserialize {} component data for entity {}.",
-// 													HN_ToStr(componentTypeName), id);
-// 											}
-// 										}
-// 										catch (const YAML::Exception& except)
-// 										{
-// 											EP_ERROR("SceneManager::LoadEntitiesFromYAML(): "
-// 												"YAML exception during {} component deserialization!  Message: {}", 
-// 												HN_ToStr(componentTypeName), except.msg);
-// 										}
-// 									}
-// 									else
-// 									{
-// 										EP_WARN("SceneManager::LoadEntitiesFromYAML(): {} component data found for "
-// 											"EntityID that isn't present in \"Entities\" section!  Component will "
-// 											"not be loaded.  EntityID: {}", HN_ToStr(componentTypeName), id);
-// 									}
-// 								}
-// 								catch (const YAML::TypedBadConversion<EntityID>&)
-// 								{
-// 									EP_WARN("SceneManager::LoadEntitiesFromYAML(): "
-// 										"Invalid EntityID in \"{}\" component section: {}",
-// 										HN_ToStr(componentTypeName), componentDataIt->first.as<std::string>());
-// 								}
-// 							}
-// 							else
-// 							{
-// 								EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"{}\" is not a valid component type.  "
-// 									"Did you register the required system using SceneManager::RegisterComponentType()?",
-// 									HN_ToStr(componentTypeName));
-// 							}
-// 						}
-// 					}
-// 					else
-// 					{
-// 						EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"Components\" subkey \"{}\" is not associated"
-// 							" with a mapping!  \"{}\" components will not be deserialized.",
-// 							componentTypeIt->first.as<std::string>());
-// 					}
-// 				}
-// 			}
-// 			else
-// 			{
-// 				EP_WARN("SceneManager::LoadEntitiesFromYAML(): \"Components\" key is not associated with a mapping!"
-// 					"  No component data can be read.");
-// 			}
-// 		}
-// 		else
-// 		{
-// 			EP_WARN("SceneManager::LoadEntitiesFromYAML(): File does not contain \"Components\" section.");
-// 		}
-// 	}
-// 	catch (const YAML::Exception& e)
-// 	{
-// 		EP_ERROR("SceneManager::LoadEntitiesFromYAML(): YAML exception thrown!  Message: {}", e.msg);
-// 		return false;
-// 	}
-
-// 	return true;
-// }
-
-// bool SceneManager::LoadEntitiesFromTextFile(const std::string& path)
-// {
-// 	std::string src;
-// 	if (File::LoadTextFile(path, &src) == File::ErrorCode::Success)
-// 	{
-// 		bool result = LoadEntitiesFromYAML(src);
-// 		if (!result)
-// 		{
-// 			EP_ERROR("SceneManager::LoadEntitiesFromTextFile(): Failure loading entities from file \"{}\".", path);
-// 		}
-// 		return result;
-// 	}
-// 	else
-// 	{
-// 		return false;
-// 	}
-// }
+bool SceneManager::LoadEntitiesFromTextFile(const std::string& path)
+{
+	std::string src;
+	if (File::LoadTextFile(path, &src) == File::ErrorCode::Success)
+	{
+		bool result = LoadEntitiesFromYAML(src);
+		if (!result)
+		{
+			EP_ERROR("SceneManager::LoadEntitiesFromTextFile(): Failure loading entities from file \"{}\".", path);
+		}
+		return result;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 
 static std::vector<SceneManager::CoreCallFn> fixedUpdateCallbacks;

@@ -224,114 +224,112 @@ std::vector<EntityID> Renderer2D::GetEntitiesWithSpriteComponents()
 }
 
 
-// TODO: Uncomment YAML stuff below
-
-// bool Renderer2D::SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut)
-// {
-// 	if (spriteComponentIndices.count(entity))
-// 	{
-// 		SpriteComponent& component = spriteComponents[spriteComponentIndices[entity]];
+bool Renderer2D::SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut)
+{
+	if (spriteComponentIndices.count(entity))
+	{
+		SpriteComponent& component = spriteComponents[spriteComponentIndices[entity]];
 		
-// 		yamlOut["Path"] = HN_ToStr(Graphics::GetTextureHashedPath(component.tex));
-// 		yamlOut["UVs"]["l"] = component.uv_bounds[0];
-// 		yamlOut["UVs"]["r"] = component.uv_bounds[1];
-// 		yamlOut["UVs"]["b"] = component.uv_bounds[2];
-// 		yamlOut["UVs"]["t"] = component.uv_bounds[3];
-// 		yamlOut["MinFilter"] = texFilterToStr(minFilters[spriteComponentIndices[entity]]);
-// 		yamlOut["MagFilter"] = texFilterToStr(magFilters[spriteComponentIndices[entity]]);
-// 		yamlOut["MipMode"] = mipModeToStr(mipModes[spriteComponentIndices[entity]]);
-// 		return true;
-// 	}
-// 	else
-// 	{
-// 		return false;
-// 	}
-// }
+		yamlOut["Path"] = HN_ToStr(Graphics::GetTextureHashedPath(component.tex));
+		yamlOut["UVs"]["l"] = component.uv_bounds[0];
+		yamlOut["UVs"]["r"] = component.uv_bounds[1];
+		yamlOut["UVs"]["b"] = component.uv_bounds[2];
+		yamlOut["UVs"]["t"] = component.uv_bounds[3];
+		yamlOut["MinFilter"] = texFilterToStr(minFilters[spriteComponentIndices[entity]]);
+		yamlOut["MagFilter"] = texFilterToStr(magFilters[spriteComponentIndices[entity]]);
+		yamlOut["MipMode"] = mipModeToStr(mipModes[spriteComponentIndices[entity]]);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
-// bool Renderer2D::DeserializeSpriteComponent(EntityID entity, const YAML::Node& yamlIn)
-// {
-// 	if (spriteComponentCount < spriteComponents.size())
-// 	{
-// 		if (yamlIn.Type() == YAML::NodeType::Map)
-// 		{
-// 			if (yamlIn["Path"] && yamlIn["UVs"] && yamlIn["MinFilter"] && yamlIn["MagFilter"] && yamlIn["MipMode"])
-// 			{
-// 				if (yamlIn["UVs"].Type() == YAML::NodeType::Map)
-// 				{
-// 					if (yamlIn["UVs"]["l"] &&
-// 						yamlIn["UVs"]["r"] &&
-// 						yamlIn["UVs"]["b"] &&
-// 						yamlIn["UVs"]["t"])
-// 					{
-// 						try
-// 						{
-// 							spriteComponents[spriteComponentCount].uv_bounds[0] = yamlIn["UVs"]["l"].as<float>();
-// 							spriteComponents[spriteComponentCount].uv_bounds[1] = yamlIn["UVs"]["r"].as<float>();
-// 							spriteComponents[spriteComponentCount].uv_bounds[2] = yamlIn["UVs"]["b"].as<float>();
-// 							spriteComponents[spriteComponentCount].uv_bounds[3] = yamlIn["UVs"]["t"].as<float>();
-// 						}
-// 						catch (YAML::BadConversion)
-// 						{
-// 							EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Error reading UV subvalues.  "
-// 								"Sprite component will not be loaded.  Entity: {}", entity);
-// 							return false;
-// 						}
+bool Renderer2D::DeserializeSpriteComponent(EntityID entity, const YAML::Node& yamlIn)
+{
+	if (spriteComponentCount < spriteComponents.size())
+	{
+		if (yamlIn.Type() == YAML::NodeType::Map)
+		{
+			if (yamlIn["Path"] && yamlIn["UVs"] && yamlIn["MinFilter"] && yamlIn["MagFilter"] && yamlIn["MipMode"])
+			{
+				if (yamlIn["UVs"].Type() == YAML::NodeType::Map)
+				{
+					if (yamlIn["UVs"]["l"] &&
+						yamlIn["UVs"]["r"] &&
+						yamlIn["UVs"]["b"] &&
+						yamlIn["UVs"]["t"])
+					{
+						try
+						{
+							spriteComponents[spriteComponentCount].uv_bounds[0] = yamlIn["UVs"]["l"].as<float>();
+							spriteComponents[spriteComponentCount].uv_bounds[1] = yamlIn["UVs"]["r"].as<float>();
+							spriteComponents[spriteComponentCount].uv_bounds[2] = yamlIn["UVs"]["b"].as<float>();
+							spriteComponents[spriteComponentCount].uv_bounds[3] = yamlIn["UVs"]["t"].as<float>();
+						}
+						catch (YAML::BadConversion)
+						{
+							EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Error reading UV subvalues.  "
+								"Sprite component will not be loaded.  Entity: {}", entity);
+							return false;
+						}
 
-// 						minFilters[spriteComponentCount] = strToTexFilter(yamlIn["MinFilter"].as<std::string>());
-// 						magFilters[spriteComponentCount] = strToTexFilter(yamlIn["MagFilter"].as<std::string>());
-// 						mipModes[spriteComponentCount] = strToMipMode(yamlIn["MipMode"].as<std::string>());
+						minFilters[spriteComponentCount] = strToTexFilter(yamlIn["MinFilter"].as<std::string>());
+						magFilters[spriteComponentCount] = strToTexFilter(yamlIn["MagFilter"].as<std::string>());
+						mipModes[spriteComponentCount] = strToMipMode(yamlIn["MipMode"].as<std::string>());
 
-// 						spriteComponents[spriteComponentCount].tex =
-// 							Graphics::LoadTexture(
-// 								yamlIn["Path"].as<std::string>(),
-// 								minFilters[spriteComponentCount],
-// 								magFilters[spriteComponentCount],
-// 								mipModes[spriteComponentCount]);
+						spriteComponents[spriteComponentCount].tex =
+							Graphics::LoadTexture(
+								yamlIn["Path"].as<std::string>(),
+								minFilters[spriteComponentCount],
+								magFilters[spriteComponentCount],
+								mipModes[spriteComponentCount]);
 
-// 						if (spriteComponents[spriteComponentCount].tex == 0)
-// 						{
+						if (spriteComponents[spriteComponentCount].tex == 0)
+						{
 
-// 							EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Texture \"{}\" could not be loaded.  "
-// 								"Sprite component will not be attached.  Entity: {}", entity);
-// 							return false;
-// 						}
+							EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Texture \"{}\" could not be loaded.  "
+								"Sprite component will not be attached.  Entity: {}", entity);
+							return false;
+						}
 
-// 						spriteComponents[spriteComponentCount].id = entity;
-// 						spriteComponentIndices[entity] = spriteComponentCount;
-// 						spriteComponentCount++;
-// 						return true;
-// 					}
-// 					else
-// 					{
-// 						EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data not contain required subkeys!  ,"
-// 							"Sprite component will not be loaded.  Entity: {}", entity);
-// 						return false;
-// 					}
-// 				}
-// 				else
-// 				{
-// 					EP_ERROR("Renderer2D::DeserializeSpriteComponent(): \"UVs\" subnode is not a map node!  ,"
-// 						"Sprite component will not be loaded.  Entity: {}", entity);
-// 					return false;
-// 				}
-// 			}
-// 			else
-// 			{
-// 				EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data does not contain required subkeys!  ,"
-// 					"Sprite component will not be loaded.  Entity: {}", entity);
-// 				return false;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data node is not a map node!  ,"
-// 				"Sprite component will not be loaded.  Entity: {}", entity);
-// 			return false;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Exhausted sprite component buffers!");
-// 		return false;
-// 	}
-// }
+						spriteComponents[spriteComponentCount].id = entity;
+						spriteComponentIndices[entity] = spriteComponentCount;
+						spriteComponentCount++;
+						return true;
+					}
+					else
+					{
+						EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data not contain required subkeys!  ,"
+							"Sprite component will not be loaded.  Entity: {}", entity);
+						return false;
+					}
+				}
+				else
+				{
+					EP_ERROR("Renderer2D::DeserializeSpriteComponent(): \"UVs\" subnode is not a map node!  ,"
+						"Sprite component will not be loaded.  Entity: {}", entity);
+					return false;
+				}
+			}
+			else
+			{
+				EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data does not contain required subkeys!  ,"
+					"Sprite component will not be loaded.  Entity: {}", entity);
+				return false;
+			}
+		}
+		else
+		{
+			EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Sprite component data node is not a map node!  ,"
+				"Sprite component will not be loaded.  Entity: {}", entity);
+			return false;
+		}
+	}
+	else
+	{
+		EP_ERROR("Renderer2D::DeserializeSpriteComponent(): Exhausted sprite component buffers!");
+		return false;
+	}
+}

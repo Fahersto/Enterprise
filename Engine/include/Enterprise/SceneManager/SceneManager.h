@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <yaml-cpp/yaml.h>
 #include "Enterprise/Core.h"
 
 /// A unique identifier for a scene entity.
@@ -32,21 +33,19 @@ public:
     /// A pointer to a component query callback.  Returns all EntityIDs with a component type attached.
     typedef std::vector<EntityID>(*QueryComponentFn)();
     /// A pointer to a text serialization callback for a component type.
-    // typedef bool (*TextSerializeFn)(EntityID entity, YAML::Node& yamlOut);
+    typedef bool (*TextSerializeFn)(EntityID entity, YAML::Node& yamlOut);
     /// A pointer to a text deserialization callback for a component type.
-    // typedef bool (*TextDeserializeFn)(EntityID entity, const YAML::Node& yamlIn);
+    typedef bool (*TextDeserializeFn)(EntityID entity, const YAML::Node& yamlIn);
 
-    // TODO: Uncomment YAML-related things above and below
-
-    // /// Register a new component type with SceneManager.
-    // /// @param name The HashName of the new component type.
-    // /// @param dcf Pointer to the delete function for this component type.
-    // /// @param qcf Pointer to the query function for this component type.
-    // /// @param tsf Pointer to the serialization function for this component type.
-    // /// @param tdf Pointer to the deserialization function for this component type.
-    // EP_API static void RegisterComponentType(HashName name,
-    //     DelComponentFn dcf, QueryComponentFn qcf,
-    //     TextSerializeFn tsf, TextDeserializeFn tdf);
+    /// Register a new component type with SceneManager.
+    /// @param name The HashName of the new component type.
+    /// @param dcf Pointer to the delete function for this component type.
+    /// @param qcf Pointer to the query function for this component type.
+    /// @param tsf Pointer to the serialization function for this component type.
+    /// @param tdf Pointer to the deserialization function for this component type.
+    EP_API static void RegisterComponentType(HashName name,
+        DelComponentFn dcf, QueryComponentFn qcf,
+        TextSerializeFn tsf, TextDeserializeFn tdf);
 
     /// Spawn a new, empty entity.
     /// @param name The HashName of the entity.

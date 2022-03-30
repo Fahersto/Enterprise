@@ -91,9 +91,21 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         )
     endforeach()
 
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/include"
+    )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/LICENSE"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/yaml-cpp.txt"
+    )
+
     # Embed other targets into bundle
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "$<TARGET_FILE:Engine_LIB>" "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/libEngine.a"
+    )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "$<TARGET_FILE:yaml-cpp>" "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/libyaml-cppd.a"
     )
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "$<TARGET_FILE:Launcher>" "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/MacOS/Launcher"
@@ -143,6 +155,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     install(TARGETS Engine_LIB DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
+    
+    install(TARGETS yaml-cpp DESTINATION "Enterprise/developer")
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include" DESTINATION "Enterprise/developer")
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/LICENSE" DESTINATION "Enterprise/developer/licenses/yaml-cpp.txt")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     install(TARGETS Editor DESTINATION ".")
     install(CODE "

@@ -210,13 +210,14 @@ set_source_files_properties(${ENGINE_GLSL_HEADERS} PROPERTIES HEADER_FILE_ONLY T
 # add_subdirectory(vendor/glm)
 # add_subdirectory(vendor/HotConsts)
 # add_subdirectory(vendor/msdf-atlas-gen)
-# add_subdirectory(vendor/yaml-cpp)
+set(BUILD_TESTING OFF CACHE BOOL "Build the testing tree.")
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
+add_subdirectory(vendor/yaml-cpp)
 
 # Dependency linking
 target_link_libraries(Engine_DYN
     PUBLIC
-        # glm::glm
-        # yaml-cpp::yaml-cpp
+        yaml-cpp::yaml-cpp
 
         "$<$<PLATFORM_ID:Darwin>:-framework AppKit>"
     PRIVATE
@@ -229,8 +230,7 @@ target_link_libraries(Engine_DYN
 )
 target_link_libraries(Engine_LIB
     PUBLIC
-        # glm::glm
-        # yaml-cpp::yaml-cpp
+        yaml-cpp::yaml-cpp
         
     PRIVATE
         "$<$<PLATFORM_ID:Windows>:xinput>"

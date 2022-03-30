@@ -57,18 +57,16 @@ public:
 	/// Get a list of entities with a sprite component attached.
 	/// @return A vector of EntityIDs currently associated with a sprite component.
 	EP_API static std::vector<EntityID> GetEntitiesWithSpriteComponents();
-	// /// Write out sprite component data for an entity in YAML format.
-	// /// @param entity The ID of the entity to serialize sprite components for.
-	// /// @param yamlOut A YAML node to receive the serialized sprite component data.
-	// /// @return @c true if serialization was successful.
-	// EP_API static bool SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut);
-	// /// Instantiate a sprite component serialized in YAML format.
-	// /// @param entity The ID of the entity to attach the loaded sprite component to.
-	// /// @param yamlIn A YAML node containing the serialized sprite component data.
-	// /// @return @c true if deserialization was successful.
-	// EP_API static bool DeserializeSpriteComponent(EntityID entity, const YAML::Node& yamlIn);
-
-	// TODO: Uncomment YAML stuff above
+	/// Write out sprite component data for an entity in YAML format.
+	/// @param entity The ID of the entity to serialize sprite components for.
+	/// @param yamlOut A YAML node to receive the serialized sprite component data.
+	/// @return @c true if serialization was successful.
+	EP_API static bool SerializeSpriteComponent(EntityID entity, YAML::Node& yamlOut);
+	/// Instantiate a sprite component serialized in YAML format.
+	/// @param entity The ID of the entity to attach the loaded sprite component to.
+	/// @param yamlIn A YAML node containing the serialized sprite component data.
+	/// @return @c true if deserialization was successful.
+	EP_API static bool DeserializeSpriteComponent(EntityID entity, const YAML::Node& yamlIn);
 
 	/// Initialize Renderer2D.
 	/// @param maxSpriteComponents The maximum number of sprite components to support.
