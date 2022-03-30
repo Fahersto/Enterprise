@@ -90,6 +90,10 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
             "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/${ENGINE_GLSL_HEADER}"
         )
     endforeach()
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/LICENSE.txt"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/Enterprise.txt"
+    )
 
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include"
@@ -155,6 +159,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     install(TARGETS Engine_LIB DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
+    install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses/Enterprise.txt")
     
     install(TARGETS yaml-cpp DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include" DESTINATION "Enterprise/developer")
