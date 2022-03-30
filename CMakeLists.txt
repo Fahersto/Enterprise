@@ -30,6 +30,25 @@ elseif(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Enterprise requires a 64-bit architecture!")
 endif()
 
+# Init git submodules on first configure
+set(GIT_INIT_SUBMODULES TRUE CACHE BOOL "If set, \"git submodule update --init --recursive\" will be invoked next configuration.")
+if(GIT_INIT_SUBMODULES)
+    find_package(Git QUIET)
+    if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+        message(STATUS "Initalizing git submodules...")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMODULE_RESULT)
+        if(NOT GIT_SUBMODULE_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init --recursive failed! Error: ${GIT_SUBMODULE_RESULT}")
+        else()
+            set(GIT_INIT_SUBMODULES FALSE CACHE BOOL
+                "If set, \"git submodule update --init --recursive\" will be invoked next configuration." FORCE)
+            message(STATUS "Initalizing git submodules... ...done!")
+        endif()
+    endif()
+endif()
+
 # Link-time optimization check
 check_ipo_supported(RESULT LTO_SUPPORTED OUTPUT LTO_UNSUPPORTED_ERROR)
 if(NOT LTO_SUPPORTED)

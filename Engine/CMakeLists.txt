@@ -169,6 +169,11 @@ set_target_properties(Engine_LIB PROPERTIES
 )
 
 # Include dirs
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/CMakeLists.txt")
+    message(FATAL_ERROR "The spdlog submodule is not downloaded!  Update submodules, then reattempt configuration.")
+elseif(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/CMakeLists.txt")
+    message(FATAL_ERROR "The glm submodule is not downloaded!  Update submodules, then reattempt configuration.")
+endif()
 target_include_directories(Engine_DYN
     PUBLIC
         "include"
@@ -207,9 +212,11 @@ endif()
 set_source_files_properties(${ENGINE_GLSL_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 # CMake subprojects
-# add_subdirectory(vendor/glm)
 # add_subdirectory(vendor/HotConsts)
 # add_subdirectory(vendor/msdf-atlas-gen)
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/CMakeLists.txt")
+    message(FATAL_ERROR "The yaml-cpp submodule is not downloaded!  Please update submodules and try again.")
+endif()
 set(BUILD_TESTING OFF CACHE BOOL "Build the testing tree.")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
 add_subdirectory(vendor/yaml-cpp)
