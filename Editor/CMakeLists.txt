@@ -171,17 +171,21 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         RUNTIME DESTINATION "Enterprise" COMPONENT Runtime
         LIBRARY DESTINATION "Enterprise" COMPONENT Runtime
     )
+
+    # Developer resources
     install(TARGETS Engine_LIB DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
-    install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses/Enterprise.txt")
+    install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "Enterprise.txt")
     
-    install(DIRECTORY "${CMAKE_SOURCE_DIR}/vendor/glm/glm" DESTINATION "Enterprise/developer/include")
-    install(FILES "${CMAKE_SOURCE_DIR}/vendor/glm/copying.txt" DESTINATION "Enterprise/developer/licenses/glm.txt")
+    # glm
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/glm" DESTINATION "Enterprise/developer/include")
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/copying.txt" DESTINATION "Enterprise/developer/licenses" RENAME "glm.txt")
 
+    # yaml-cpp
     install(TARGETS yaml-cpp DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include" DESTINATION "Enterprise/developer")
-    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/LICENSE" DESTINATION "Enterprise/developer/licenses/yaml-cpp.txt")
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/LICENSE" DESTINATION "Enterprise/developer/licenses" RENAME "yaml-cpp.txt")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     install(TARGETS Editor DESTINATION ".")
     install(CODE "
