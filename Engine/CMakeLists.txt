@@ -264,6 +264,7 @@ target_compile_definitions(Engine_DYN
         $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>
 
         GLM_FORCE_LEFT_HANDED
+        $<$<PLATFORM_ID:Windows>:YAML_CPP_STATIC_DEFINE>
     PRIVATE
         EP_BUILD_CORE
 )
@@ -280,6 +281,7 @@ target_compile_definitions(Engine_LIB
         $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>
 
         GLM_FORCE_LEFT_HANDED
+        $<$<PLATFORM_ID:Windows>:YAML_CPP_STATIC_DEFINE>
     PRIVATE
         EP_BUILD_CORE
 )
