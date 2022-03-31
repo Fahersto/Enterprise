@@ -95,6 +95,16 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/Enterprise.txt"
     )
 
+    # CTSpookyHash
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/include"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/include"
+    )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/UNLICENSE.txt"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/CTSpookyHash.txt"
+    )
+
     # glm
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/glm"
@@ -177,7 +187,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
     install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "Enterprise.txt")
-    
+
+    # CTSpookyHash
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/include" DESTINATION "Enterprise/developer")
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/UNLICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "CTSpookyHash.txt")
+
     # glm
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/glm" DESTINATION "Enterprise/developer/include")
     install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/copying.txt" DESTINATION "Enterprise/developer/licenses" RENAME "glm.txt")
