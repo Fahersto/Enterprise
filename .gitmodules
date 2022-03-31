@@ -1,15 +1,15 @@
-[submodule "Enterprise/_vendor/spdlog"]
+[submodule "Engine/vendor/spdlog"]
 	path = Engine/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "Enterprise/_vendor/HotConsts"]
+[submodule "Engine/vendor/HotConsts"]
 	path = Engine/vendor/HotConsts
 	url = git@github.com:theOtherMichael/HotConsts.git
-[submodule "Enterprise/_vendor/glm"]
+[submodule "Engine/vendor/glm"]
 	path = Engine/vendor/glm
 	url = git@github.com:g-truc/glm.git
-[submodule "Enterprise/_vendor/msdf-atlas-gen"]
+[submodule "Engine/vendor/msdf-atlas-gen"]
 	path = Engine/vendor/msdf-atlas-gen
 	url = git@github.com:theOtherMichael/msdf-atlas-gen.git
 [submodule "Engine/vendor/yaml-cpp"]
 	path = Engine/vendor/yaml-cpp
-	url = git@github.com:jbeder/yaml-cpp.git
+	url = git@github.com:theOtherMichael/yaml-cpp.git
