@@ -95,6 +95,17 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/Enterprise.txt"
     )
 
+    # glm
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/glm"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/include/glm"
+    )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/glm/copying.txt"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/glm.txt"
+    )
+
+    # yaml-cpp
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include"
         "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/include"
@@ -165,6 +176,9 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
     install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses/Enterprise.txt")
     
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/vendor/glm/glm" DESTINATION "Enterprise/developer/include")
+    install(FILES "${CMAKE_SOURCE_DIR}/vendor/glm/copying.txt" DESTINATION "Enterprise/developer/licenses/glm.txt")
+
     install(TARGETS yaml-cpp DESTINATION "Enterprise/developer")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/include" DESTINATION "Enterprise/developer")
     install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/yaml-cpp/LICENSE" DESTINATION "Enterprise/developer/licenses/yaml-cpp.txt")
