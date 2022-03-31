@@ -219,6 +219,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/CMakeLists.txt")
 endif()
 set(BUILD_TESTING OFF CACHE BOOL "Build the testing tree.")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
+set(YAML_CPP_CLANG_FORMAT_TARGET OFF CACHE BOOL "Enable yaml-cpp's clang-format target")
 add_subdirectory(vendor/yaml-cpp)
 
 # Dependency linking
