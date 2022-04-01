@@ -214,7 +214,27 @@ set_source_files_properties(${ENGINE_GLSL_HEADERS} PROPERTIES HEADER_FILE_ONLY T
 
 # CMake subprojects
 # add_subdirectory(vendor/HotConsts)
-# add_subdirectory(vendor/msdf-atlas-gen)
+
+# freetype (used by msdf-atlas-gen)
+set(FT_DISABLE_ZLIB ON CACHE BOOL "")
+set(FT_DISABLE_BZIP2 ON CACHE BOOL "")
+set(FT_DISABLE_PNG ON CACHE BOOL "")
+set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "")
+set(FT_DISABLE_BROTLI ON CACHE BOOL "")
+add_subdirectory(vendor/freetype)
+add_library(Freetype::Freetype ALIAS freetype)
+
+# msdf-atlas-gen
+set(MSDF_ATLAS_GEN_BUILD_STANDALONE OFF CACHE BOOL "")
+add_subdirectory(vendor/msdf-atlas-gen)
+set_source_files_properties(
+    "vendor/msdf-atlas-gen/msdfgen/lib/lodepng.cpp"
+    TARGET_DIRECTORY msdfgen-ext
+    PROPERTIES COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS
+)
+target_compile_definitions(msdf-atlas-gen PRIVATE _CRT_SECURE_NO_WARNINGS)
+
+# yaml-cpp
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/CMakeLists.txt")
     message(FATAL_ERROR "The yaml-cpp submodule is not downloaded!  Please update submodules and try again.")
 endif()
@@ -230,6 +250,8 @@ target_link_libraries(Engine_DYN
 
         "$<$<PLATFORM_ID:Darwin>:-framework AppKit>"
     PRIVATE
+        msdf-atlas-gen::msdf-atlas-gen
+
         "$<$<PLATFORM_ID:Windows>:xinput>"
         "$<$<PLATFORM_ID:Windows>:OpenGL32>"
 
@@ -242,6 +264,8 @@ target_link_libraries(Engine_LIB
         yaml-cpp::yaml-cpp
         
     PRIVATE
+        msdf-atlas-gen::msdf-atlas-gen
+
         "$<$<PLATFORM_ID:Windows>:xinput>"
         "$<$<PLATFORM_ID:Windows>:OpenGL32>"
         

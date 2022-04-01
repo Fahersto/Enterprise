@@ -7,9 +7,12 @@
 [submodule "Engine/vendor/glm"]
 	path = Engine/vendor/glm
 	url = git@github.com:g-truc/glm.git
-[submodule "Engine/vendor/msdf-atlas-gen"]
-	path = Engine/vendor/msdf-atlas-gen
-	url = git@github.com:theOtherMichael/msdf-atlas-gen.git
 [submodule "Engine/vendor/yaml-cpp"]
 	path = Engine/vendor/yaml-cpp
 	url = git@github.com:theOtherMichael/yaml-cpp.git
+[submodule "Engine/vendor/msdf-atlas-gen"]
+	path = Engine/vendor/msdf-atlas-gen
+	url = git@github.com:Chlumsky/msdf-atlas-gen.git
+[submodule "Engine/vendor/freetype"]
+	path = Engine/vendor/freetype
+	url = git@github.com:freetype/freetype.git

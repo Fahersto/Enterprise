@@ -227,48 +227,46 @@ public:
 	EP_API static TextureHandle LoadCubemapTextureArray(std::initializer_list<std::string> paths,
 												 TextureFilter minFilter, TextureFilter magFilter, MipmapMode mipmapMode);
 
-// TODO:  Uncomment the font stuff below
+	/// Load a TrueType font file and generate a texture atlas for text rendering.
+	/// @param path Path to the TTF file to load.
+	/// @param emSizeMin The minimum font size the texture must have.
+	/// @return The handle of the generated texture atlas.
+	/// @remarks After loading the font, the atlas's TextureHandle can be passed into the "Graphics::GetFont..."
+	/// functions for font metric retrieval.
+	EP_API static TextureHandle LoadFontFile(const std::string& path, float emSizeMin = 32.0f);
 
-	// /// Load a TrueType font file and generate a texture atlas for text rendering.
-	// /// @param path Path to the TTF file to load.
-	// /// @param emSizeMin The minimum font size the texture must have.
-	// /// @return The handle of the generated texture atlas.
-	// /// @remarks After loading the font, the atlas's TextureHandle can be passed into the "Graphics::GetFont..."
-	// /// functions for font metric retrieval.
-	// EP_API static TextureHandle LoadFontFile(const std::string& path, float emSizeMin = 32.0f);
+	/// Get the UV bounds of a specific character in a font's texture atlas.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character for which to look up uv bounds.
+	/// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph in the texture atlas.
+	/// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph in the texture atlas.
+	/// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph in the texture atlas.
+	/// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph in the texture atlas.
+	EP_API static void GetFontCharUVBounds(TextureHandle atlas, uint32_t unicodeChar,
+									float& out_l, float& out_r, float& out_b, float& out_t);
+	/// Get the bounds of the quad needed to render a specific character in a font's texture atlas.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character for which to look up quad bounds.
+	/// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph relative to the cursor origin.
+	/// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph relative to the cursor origin.
+	/// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph relative to the cursor origin.
+	/// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph relative to the cursor origin.
+	/// @param prevChar The character immediately preceding @c unicodeChar.  Setting this value will apply kerning.
+	EP_API static void GetFontCharQuadBounds(TextureHandle atlas, uint32_t unicodeChar,
+									  float& out_l, float& out_r, float& out_b, float& out_t, uint32_t prevChar = 0);
+	/// Get the advance value associated with a specific character in a font.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param unicodeChar The character to look up.
+	/// @return The cursor advance value associated with @c unicodeChar.
+	EP_API static double GetFontCharAdvance(TextureHandle atlas, uint32_t unicodeChar);
 
-	// /// Get the UV bounds of a specific character in a font's texture atlas.
-	// /// @param atlas The handle of the font's texture atlas.
-	// /// @param unicodeChar The character for which to look up uv bounds.
-	// /// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph in the texture atlas.
-	// /// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph in the texture atlas.
-	// /// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph in the texture atlas.
-	// /// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph in the texture atlas.
-	// EP_API static void GetFontCharUVBounds(TextureHandle atlas, uint32_t unicodeChar,
-	// 								float& out_l, float& out_r, float& out_b, float& out_t);
-	// /// Get the bounds of the quad needed to render a specific character in a font's texture atlas.
-	// /// @param atlas The handle of the font's texture atlas.
-	// /// @param unicodeChar The character for which to look up quad bounds.
-	// /// @param[out] out_l Variable to receive the x-coordinate of the left edge of the glyph relative to the cursor origin.
-	// /// @param[out] out_r Variable to receive the x-coordinate of the right edge of the glyph relative to the cursor origin.
-	// /// @param[out] out_b Variable to receive the y-coordinate of the bottom edge of the glyph relative to the cursor origin.
-	// /// @param[out] out_t Variable to receive the y-coordinate of the top edge of the glyph relative to the cursor origin.
-	// /// @param prevChar The character immediately preceding @c unicodeChar.  Setting this value will apply kerning.
-	// EP_API static void GetFontCharQuadBounds(TextureHandle atlas, uint32_t unicodeChar,
-	// 								  float& out_l, float& out_r, float& out_b, float& out_t, uint32_t prevChar = 0);
-	// /// Get the advance value associated with a specific character in a font.
-	// /// @param atlas The handle of the font's texture atlas.
-	// /// @param unicodeChar The character to look up.
-	// /// @return The cursor advance value associated with @c unicodeChar.
-	// EP_API static double GetFontCharAdvance(TextureHandle atlas, uint32_t unicodeChar);
-
-	// /// Get vertical alignment metrics for text written with a font.
-	// /// @param atlas The handle of the font's texture atlas.
-	// /// @param[out] out_lineHeight Variable to receive the distance between consecutive baselines, in ems.
-	// /// @param[out] out_ascenderHeight Variable to receive the distance between the baseline and the top of the tallest font glyph, in ems.
-	// /// @param[out] out_descenderHeight Variable to receive the distance between the baseline and the bottom of the lowest font glyph, in ems.
-	// EP_API static void GetFontVerticalMetrics(TextureHandle atlas,
-	// 								   double& out_lineHeight, double& out_ascenderHeight, double& out_descenderHeight);
+	/// Get vertical alignment metrics for text written with a font.
+	/// @param atlas The handle of the font's texture atlas.
+	/// @param[out] out_lineHeight Variable to receive the distance between consecutive baselines, in ems.
+	/// @param[out] out_ascenderHeight Variable to receive the distance between the baseline and the top of the tallest font glyph, in ems.
+	/// @param[out] out_descenderHeight Variable to receive the distance between the baseline and the bottom of the lowest font glyph, in ems.
+	EP_API static void GetFontVerticalMetrics(TextureHandle atlas,
+									   double& out_lineHeight, double& out_ascenderHeight, double& out_descenderHeight);
 
 	/// Get the HashName of the path to a loaded texture file.
 	/// @param texture The handle of the texture to look up.

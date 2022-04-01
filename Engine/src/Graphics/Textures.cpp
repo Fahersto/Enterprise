@@ -1,5 +1,5 @@
 #include <stb_image/stb_image.h>
-// #include <msdf-atlas-gen/msdf-atlas-gen.h>
+#include <msdf-atlas-gen/msdf-atlas-gen.h>
 #include "Enterprise/Graphics/Graphics.h"
 #include "Enterprise/File/File.h"
 #include "Enterprise/Graphics/OpenGLHelpers.h"
@@ -227,260 +227,258 @@ Graphics::TextureHandle Graphics::Load3DTexture(std::string path, TextureFilter 
 #define DEFAULT_MITER_LIMIT 1.0
 #define DEFAULT_ANGLE_THRESHOLD 3.0
 
-// TODO: Uncomment the font stuff below
+Graphics::TextureHandle Graphics::LoadFontFile(const std::string& path, float emSizeMin)
+{
+	if (textureReferenceCount[HN(path)] > 0)
+	{
+		textureReferenceCount[HN(path)]++;
+		return msdfTextureHandles[HN(path)];
+	}
+	else if (File::Exists(path))
+	{
+		std::vector<msdf_atlas::GlyphGeometry> glyphs;
+		msdf_atlas::FontGeometry fontGeometry(&glyphs);
 
-// Graphics::TextureHandle Graphics::LoadFontFile(const std::string& path, float emSizeMin)
-// {
-// 	if (textureReferenceCount[HN(path)] > 0)
-// 	{
-// 		textureReferenceCount[HN(path)]++;
-// 		return msdfTextureHandles[HN(path)];
-// 	}
-// 	else if (File::Exists(path))
-// 	{
-// 		std::vector<msdf_atlas::GlyphGeometry> glyphs;
-// 		msdf_atlas::FontGeometry fontGeometry(&glyphs);
+		// Load font
+		msdfgen::FreetypeHandle* ft = msdfgen::initializeFreetype();
+		if (ft)
+		{
+			msdfgen::FontHandle* font = msdfgen::loadFont(ft, File::VirtualPathToNative(path).c_str());
+			if (font)
+			{
+				int glyphsLoaded = fontGeometry.loadCharset(font, 1.0, msdf_atlas::Charset::ASCII);
+				if (glyphsLoaded < 0)
+				{
+					EP_ERROR("Graphics::LoadFontFile(): Could not load glyphs from font \"{}\"!",
+						File::VirtualPathToNative(path));
+					return Graphics::TextureHandle();
+				}
 
-// 		// Load font
-// 		msdfgen::FreetypeHandle* ft = msdfgen::initializeFreetype();
-// 		if (ft)
-// 		{
-// 			msdfgen::FontHandle* font = msdfgen::loadFont(ft, File::VirtualPathToNative(path).c_str());
-// 			if (font)
-// 			{
-// 				int glyphsLoaded = fontGeometry.loadCharset(font, 1.0, msdf_atlas::Charset::ASCII);
-// 				if (glyphsLoaded < 0)
-// 				{
-// 					EP_ERROR("Graphics::LoadFontFile(): Could not load glyphs from font \"{}\"!",
-// 						File::VirtualPathToNative(path));
-// 					return Graphics::TextureHandle();
-// 				}
+				if (glyphsLoaded < msdf_atlas::Charset::ASCII.size())
+				{
+					EP_WARN("Graphics::LoadFontFile(): Font \"{}\" is missing {} codepoints!  Codepoints:",
+						File::VirtualPathToNative(path),
+						msdf_atlas::Charset::ASCII.size() - glyphsLoaded);
+					bool first = true;
+					for (msdfgen::unicode_t cp : msdf_atlas::Charset::ASCII)
+					{
+						if (!fontGeometry.getGlyph(cp))
+							printf("%c 0x%02X", first ? ((first = false), ':') : ',', cp);
+					}
+					printf("\n");
+				}
 
-// 				if (glyphsLoaded < msdf_atlas::Charset::ASCII.size())
-// 				{
-// 					EP_WARN("Graphics::LoadFontFile(): Font \"{}\" is missing {} codepoints!  Codepoints:",
-// 						File::VirtualPathToNative(path),
-// 						msdf_atlas::Charset::ASCII.size() - glyphsLoaded);
-// 					bool first = true;
-// 					for (msdfgen::unicode_t cp : msdf_atlas::Charset::ASCII)
-// 					{
-// 						if (!fontGeometry.getGlyph(cp))
-// 							printf("%c 0x%02X", first ? ((first = false), ':') : ',', cp);
-// 					}
-// 					printf("\n");
-// 				}
+				msdfgen::destroyFont(font);
+			}
+			msdfgen::deinitializeFreetype(ft);
+		}
 
-// 				msdfgen::destroyFont(font);
-// 			}
-// 			msdfgen::deinitializeFreetype(ft);
-// 		}
+		// Assign glyph edge colors
+		if (glyphs.empty())
+		{
+			EP_ERROR("Graphics::LoadFontFile(): No glyphs loaded from font \"{}\"!",
+				File::VirtualPathToNative(path));
+			return Graphics::TextureHandle();
+		}
+		else
+		{
+			for (msdf_atlas::GlyphGeometry& glyph : glyphs)
+			{
+				glyph.edgeColoring(msdfgen::edgeColoringByDistance, DEFAULT_ANGLE_THRESHOLD, 1);
+			}
+		}
 
-// 		// Assign glyph edge colors
-// 		if (glyphs.empty())
-// 		{
-// 			EP_ERROR("Graphics::LoadFontFile(): No glyphs loaded from font \"{}\"!",
-// 				File::VirtualPathToNative(path));
-// 			return Graphics::TextureHandle();
-// 		}
-// 		else
-// 		{
-// 			for (msdf_atlas::GlyphGeometry& glyph : glyphs)
-// 			{
-// 				glyph.edgeColoring(msdfgen::edgeColoringByDistance, DEFAULT_ANGLE_THRESHOLD, 1);
-// 			}
-// 		}
+		// Pack glyphs
+		msdf_atlas::TightAtlasPacker atlasPacker;
+		atlasPacker.setDimensionsConstraint(msdf_atlas::TightAtlasPacker::DimensionsConstraint::POWER_OF_TWO_RECTANGLE);
+		atlasPacker.setMinimumScale(emSizeMin);
+		atlasPacker.setPixelRange(DEFAULT_PIXEL_RANGE);
+		atlasPacker.setMiterLimit(DEFAULT_MITER_LIMIT);
 
-// 		// Pack glyphs
-// 		msdf_atlas::TightAtlasPacker atlasPacker;
-// 		atlasPacker.setDimensionsConstraint(msdf_atlas::TightAtlasPacker::DimensionsConstraint::POWER_OF_TWO_RECTANGLE);
-// 		atlasPacker.setMinimumScale(emSizeMin);
-// 		atlasPacker.setPixelRange(DEFAULT_PIXEL_RANGE);
-// 		atlasPacker.setMiterLimit(DEFAULT_MITER_LIMIT);
+		int glyphPackFailureCount = atlasPacker.pack(glyphs.data(), glyphs.size());
+		if (glyphPackFailureCount > 0)
+		{
+			EP_WARN("Graphics::LoadFontFile(): Failure to pack glyphs from font \"{}\" into atlas!  "
+				"Unpacked glyphs : {}", File::VirtualPathToNative(path), glyphPackFailureCount);
+		}
 
-// 		int glyphPackFailureCount = atlasPacker.pack(glyphs.data(), glyphs.size());
-// 		if (glyphPackFailureCount > 0)
-// 		{
-// 			EP_WARN("Graphics::LoadFontFile(): Failure to pack glyphs from font \"{}\" into atlas!  "
-// 				"Unpacked glyphs : {}", File::VirtualPathToNative(path), glyphPackFailureCount);
-// 		}
+		int width = -1, height = -1;
+		atlasPacker.getDimensions(width, height);
 
-// 		int width = -1, height = -1;
-// 		atlasPacker.getDimensions(width, height);
+		// Generate the MSDF
+		msdf_atlas::ImmediateAtlasGenerator<float, 3, msdf_atlas::msdfGenerator,
+			msdf_atlas::BitmapAtlasStorage<unsigned char, 3>> generator(width, height);
+		//msdf_atlas::ImmediateAtlasGenerator<float, 4, msdf_atlas::mtsdfGenerator,
+		//	msdf_atlas::BitmapAtlasStorage<unsigned char, 4>> generator(width, height);
+		generator.setThreadCount(std::max((int)std::thread::hardware_concurrency(), 1));
+		generator.generate(glyphs.data(), glyphs.size());
+		auto bitmap = (msdfgen::BitmapConstRef<unsigned char, 3>)generator.atlasStorage();
 
-// 		// Generate the MSDF
-// 		msdf_atlas::ImmediateAtlasGenerator<float, 3, msdf_atlas::msdfGenerator,
-// 			msdf_atlas::BitmapAtlasStorage<unsigned char, 3>> generator(width, height);
-// 		//msdf_atlas::ImmediateAtlasGenerator<float, 4, msdf_atlas::mtsdfGenerator,
-// 		//	msdf_atlas::BitmapAtlasStorage<unsigned char, 4>> generator(width, height);
-// 		generator.setThreadCount(std::max((int)std::thread::hardware_concurrency(), 1));
-// 		generator.generate(glyphs.data(), glyphs.size());
-// 		auto bitmap = (msdfgen::BitmapConstRef<unsigned char, 3>)generator.atlasStorage();
+		// Send to the GPU
+		GLuint texHandleOut = 0;
+		if (bitmap.width * bitmap.height > 0)
+		{
+			EP_GL(glGenTextures(1, &texHandleOut));
+			EP_GL(glBindTexture(GL_TEXTURE_2D, texHandleOut));
 
-// 		// Send to the GPU
-// 		GLuint texHandleOut = 0;
-// 		if (bitmap.width * bitmap.height > 0)
-// 		{
-// 			EP_GL(glGenTextures(1, &texHandleOut));
-// 			EP_GL(glBindTexture(GL_TEXTURE_2D, texHandleOut));
+			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			// TODO: Add support for anisotropic filtering
+			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
-// 			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-// 			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-// 			// TODO: Add support for anisotropic filtering
-// 			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-// 			EP_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap.width, bitmap.height, 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels));
+			//EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap.width, bitmap.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.pixels));
 
-// 			EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap.width, bitmap.height, 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels));
-// 			//EP_GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap.width, bitmap.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.pixels));
+			EP_GL(glBindTexture(GL_TEXTURE_2D, 0));
 
-// 			EP_GL(glBindTexture(GL_TEXTURE_2D, 0));
+			samplerTypeNeededForTexture[texHandleOut] = GL_SAMPLER_2D;
+			currentSlotOfTexture[texHandleOut] = -1;
+			textureHandlesByPath[HN(path)] = texHandleOut;
+			pathOfTextureHandle[texHandleOut] = HN(path);
+		}
 
-// 			samplerTypeNeededForTexture[texHandleOut] = GL_SAMPLER_2D;
-// 			currentSlotOfTexture[texHandleOut] = -1;
-// 			textureHandlesByPath[HN(path)] = texHandleOut;
-// 			pathOfTextureHandle[texHandleOut] = HN(path);
-// 		}
+		// Store font metrics
+		std::map<int, uint32_t> indexToCodePoint;
+		for (const msdf_atlas::GlyphGeometry& glyph : glyphs)
+		{
+			indexToCodePoint[glyph.getIndex()] = glyph.getCodepoint();
+			fontAdvances[texHandleOut][glyph.getCodepoint()] = glyph.getAdvance();
 
-// 		// Store font metrics
-// 		std::map<int, uint32_t> indexToCodePoint;
-// 		for (const msdf_atlas::GlyphGeometry& glyph : glyphs)
-// 		{
-// 			indexToCodePoint[glyph.getIndex()] = glyph.getCodepoint();
-// 			fontAdvances[texHandleOut][glyph.getCodepoint()] = glyph.getAdvance();
+			double l, b, r, t;
+			glyph.getQuadAtlasBounds(l, b, r, t);
+			l /= bitmap.width;
+			r /= bitmap.width;
+			b /= bitmap.height;
+			t /= bitmap.height;
+			fontUVBounds[texHandleOut][glyph.getCodepoint()] = std::tuple(l, r, b, t);
 
-// 			double l, b, r, t;
-// 			glyph.getQuadAtlasBounds(l, b, r, t);
-// 			l /= bitmap.width;
-// 			r /= bitmap.width;
-// 			b /= bitmap.height;
-// 			t /= bitmap.height;
-// 			fontUVBounds[texHandleOut][glyph.getCodepoint()] = std::tuple(l, r, b, t);
-
-// 			glyph.getQuadPlaneBounds(l, b, r, t);
-// 			fontQuadBounds[texHandleOut][glyph.getCodepoint()] = std::tuple(l, r, b, t);
-// 		}
+			glyph.getQuadPlaneBounds(l, b, r, t);
+			fontQuadBounds[texHandleOut][glyph.getCodepoint()] = std::tuple(l, r, b, t);
+		}
 		
-// 		msdfgen::FontMetrics metrics = fontGeometry.getMetrics();
-// 		fontVerticalMetrics[texHandleOut] = std::tuple
-// 		(
-// 			metrics.lineHeight,
-// 			metrics.ascenderY,
-// 			-metrics.descenderY
-// 		);
+		msdfgen::FontMetrics metrics = fontGeometry.getMetrics();
+		fontVerticalMetrics[texHandleOut] = std::tuple
+		(
+			metrics.lineHeight,
+			metrics.ascenderY,
+			-metrics.descenderY
+		);
 
-// 		for (auto& [indicesKey, kernVal] : fontGeometry.getKerning())
-// 		{
-// 			std::pair<uint32_t, uint32_t> codePointsKey
-// 			(
-// 				indexToCodePoint[indicesKey.first],
-// 				indexToCodePoint[indicesKey.second]
-// 			);
-// 			fontKerns[texHandleOut][codePointsKey] = kernVal;
-// 		}
+		for (auto& [indicesKey, kernVal] : fontGeometry.getKerning())
+		{
+			std::pair<uint32_t, uint32_t> codePointsKey
+			(
+				indexToCodePoint[indicesKey.first],
+				indexToCodePoint[indicesKey.second]
+			);
+			fontKerns[texHandleOut][codePointsKey] = kernVal;
+		}
 
-// 		textureReferenceCount[HN(path)]++;
-// 		pathOfTextureHandle[texHandleOut] = HN(path);
-// 		return texHandleOut;
-// 	}
-// 	else
-// 	{
-// 		EP_ERROR("Graphics::LoadFontFile(): \"{}\" does not exist!", File::VirtualPathToNative(path));
-// 		return 0;
-// 	}
-// }
+		textureReferenceCount[HN(path)]++;
+		pathOfTextureHandle[texHandleOut] = HN(path);
+		return texHandleOut;
+	}
+	else
+	{
+		EP_ERROR("Graphics::LoadFontFile(): \"{}\" does not exist!", File::VirtualPathToNative(path));
+		return 0;
+	}
+}
 
 
-// void Graphics::GetFontCharUVBounds(TextureHandle atlas, uint32_t unicodeChar,
-// 	float& out_l, float& out_r, float& out_b, float& out_t)
-// {
-// 	if (fontUVBounds.count(atlas) > 0)
-// 	{
-// 		if (fontUVBounds[atlas].count(unicodeChar) > 0)
-// 		{
-// 			out_l = std::get<0>(fontUVBounds[atlas][unicodeChar]);
-// 			out_r = std::get<1>(fontUVBounds[atlas][unicodeChar]);
-// 			out_b = std::get<2>(fontUVBounds[atlas][unicodeChar]);
-// 			out_t = std::get<3>(fontUVBounds[atlas][unicodeChar]);
-// 		}
-// 		else
-// 		{
-// 			EP_WARN("Graphics::GetFontCharUVBounds(): Font does not contain character {0:x}!  "
-// 				"TextureHandle: {1:d}", unicodeChar, atlas);
-// 		}
-// 	}
-// 	else
-// 	{
-// 		EP_WARN("Graphics::GetFontCharUVBounds(): TextureHandle 'atlas' is not associated with a loaded font!  "
-// 			"TextureHandle: {}", atlas);
-// 	}
-// }
+void Graphics::GetFontCharUVBounds(TextureHandle atlas, uint32_t unicodeChar,
+	float& out_l, float& out_r, float& out_b, float& out_t)
+{
+	if (fontUVBounds.count(atlas) > 0)
+	{
+		if (fontUVBounds[atlas].count(unicodeChar) > 0)
+		{
+			out_l = std::get<0>(fontUVBounds[atlas][unicodeChar]);
+			out_r = std::get<1>(fontUVBounds[atlas][unicodeChar]);
+			out_b = std::get<2>(fontUVBounds[atlas][unicodeChar]);
+			out_t = std::get<3>(fontUVBounds[atlas][unicodeChar]);
+		}
+		else
+		{
+			EP_WARN("Graphics::GetFontCharUVBounds(): Font does not contain character {0:x}!  "
+				"TextureHandle: {1:d}", unicodeChar, atlas);
+		}
+	}
+	else
+	{
+		EP_WARN("Graphics::GetFontCharUVBounds(): TextureHandle 'atlas' is not associated with a loaded font!  "
+			"TextureHandle: {}", atlas);
+	}
+}
 
-// void Graphics::GetFontCharQuadBounds(TextureHandle atlas, uint32_t unicodeChar,
-// 	float& out_l, float& out_r, float& out_b, float& out_t, uint32_t prevChar)
-// {
-// 	if (fontQuadBounds.count(atlas) > 0)
-// 	{
-// 		if (fontQuadBounds[atlas].count(unicodeChar) > 0)
-// 		{
-// 			out_l = std::get<0>(fontQuadBounds[atlas][unicodeChar]);
-// 			out_r = std::get<1>(fontQuadBounds[atlas][unicodeChar]);
-// 			out_b = std::get<2>(fontQuadBounds[atlas][unicodeChar]);
-// 			out_t = std::get<3>(fontQuadBounds[atlas][unicodeChar]);
+void Graphics::GetFontCharQuadBounds(TextureHandle atlas, uint32_t unicodeChar,
+	float& out_l, float& out_r, float& out_b, float& out_t, uint32_t prevChar)
+{
+	if (fontQuadBounds.count(atlas) > 0)
+	{
+		if (fontQuadBounds[atlas].count(unicodeChar) > 0)
+		{
+			out_l = std::get<0>(fontQuadBounds[atlas][unicodeChar]);
+			out_r = std::get<1>(fontQuadBounds[atlas][unicodeChar]);
+			out_b = std::get<2>(fontQuadBounds[atlas][unicodeChar]);
+			out_t = std::get<3>(fontQuadBounds[atlas][unicodeChar]);
 
-// 			if (fontKerns[atlas].count(std::pair(unicodeChar, prevChar)) > 0)
-// 			{
-// 				out_l += fontKerns[atlas][std::pair(unicodeChar, prevChar)];
-// 			}
-// 		}
-// 		else
-// 		{
-// 			EP_WARN("Graphics::GetFontCharQuadBounds(): Font does not contain character {0:x}!  "
-// 				"TextureHandle: {1:d}", unicodeChar, atlas);
-// 		}
-// 	}
-// 	else
-// 	{
-// 		EP_WARN("Graphics::GetFontCharQuadBounds(): TextureHandle 'atlas' is not associated with a loaded font!  "
-// 			"TextureHandle: {}", atlas);
-// 	}
-// }
+			if (fontKerns[atlas].count(std::pair(unicodeChar, prevChar)) > 0)
+			{
+				out_l += fontKerns[atlas][std::pair(unicodeChar, prevChar)];
+			}
+		}
+		else
+		{
+			EP_WARN("Graphics::GetFontCharQuadBounds(): Font does not contain character {0:x}!  "
+				"TextureHandle: {1:d}", unicodeChar, atlas);
+		}
+	}
+	else
+	{
+		EP_WARN("Graphics::GetFontCharQuadBounds(): TextureHandle 'atlas' is not associated with a loaded font!  "
+			"TextureHandle: {}", atlas);
+	}
+}
 
-// double Graphics::GetFontCharAdvance(TextureHandle atlas, uint32_t unicodeChar)
-// {
-// 	if (fontAdvances.count(atlas) > 0)
-// 	{
-// 		if (fontAdvances[atlas].count(unicodeChar) > 0)
-// 		{
-// 			return fontAdvances[atlas][unicodeChar];
-// 		}
-// 		else
-// 		{
-// 			EP_WARN("Graphics::GetFontCharAdvance(): Font does not contain character {0:x}!  "
-// 				"TextureHandle: {1:d}", unicodeChar, atlas);
-// 			return 0.0;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		EP_WARN("Graphics::GetFontCharAdvance(): TextureHandle 'atlas' is not associated with a loaded font!  "
-// 			"TextureHandle: {}", atlas);
-// 		return 0.0;
-// 	}
-// }
+double Graphics::GetFontCharAdvance(TextureHandle atlas, uint32_t unicodeChar)
+{
+	if (fontAdvances.count(atlas) > 0)
+	{
+		if (fontAdvances[atlas].count(unicodeChar) > 0)
+		{
+			return fontAdvances[atlas][unicodeChar];
+		}
+		else
+		{
+			EP_WARN("Graphics::GetFontCharAdvance(): Font does not contain character {0:x}!  "
+				"TextureHandle: {1:d}", unicodeChar, atlas);
+			return 0.0;
+		}
+	}
+	else
+	{
+		EP_WARN("Graphics::GetFontCharAdvance(): TextureHandle 'atlas' is not associated with a loaded font!  "
+			"TextureHandle: {}", atlas);
+		return 0.0;
+	}
+}
 
-// void Graphics::GetFontVerticalMetrics(TextureHandle atlas, double& out_lineHeight, double& out_ascenderHeight, double& out_descenderHeight)
-// {
-// 	if (fontVerticalMetrics.count(atlas) > 0)
-// 	{
-// 		out_lineHeight = std::get<0>(fontVerticalMetrics[atlas]);
-// 		out_ascenderHeight = std::get<1>(fontVerticalMetrics[atlas]);
-// 		out_descenderHeight = std::get<2>(fontVerticalMetrics[atlas]);
-// 	}
-// 	else
-// 	{
-// 		EP_WARN("Graphics::GetFontLineHeight(): TextureHandle 'atlas' is not associated with a loaded font!  "
-// 			"TextureHandle: {}", atlas);
-// 	}
-// }
+void Graphics::GetFontVerticalMetrics(TextureHandle atlas, double& out_lineHeight, double& out_ascenderHeight, double& out_descenderHeight)
+{
+	if (fontVerticalMetrics.count(atlas) > 0)
+	{
+		out_lineHeight = std::get<0>(fontVerticalMetrics[atlas]);
+		out_ascenderHeight = std::get<1>(fontVerticalMetrics[atlas]);
+		out_descenderHeight = std::get<2>(fontVerticalMetrics[atlas]);
+	}
+	else
+	{
+		EP_WARN("Graphics::GetFontLineHeight(): TextureHandle 'atlas' is not associated with a loaded font!  "
+			"TextureHandle: {}", atlas);
+	}
+}
 
 HashName Graphics::GetTextureHashedPath(TextureHandle texture)
 {

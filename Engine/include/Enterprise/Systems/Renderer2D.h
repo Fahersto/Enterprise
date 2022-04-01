@@ -40,16 +40,16 @@ public:
 	/// End a sprite batch and draw it to the screen.
 	EP_API static void EndBatch();
 
-	// /// Render a line of text.
-	// /// @param text The string of text to render.
-	// /// @param atlas The handle of a loaded font's texture atlas.
-	// /// @param position The position of the text in world space.
-	// /// @param rotation The orientation of the text in world space.
-	// /// @param size The font size in world space units.
-	// /// @param alignment The alignment of the rendered text.
-	// EP_API static void DrawText(std::string text, Graphics::TextureHandle atlas,
-	// 	glm::vec3 position, glm::quat rotation, float size,
-	// 	TextAlignment alignment = TextAlignment::TopLeft);
+	/// Render a line of text.
+	/// @param text The string of text to render.
+	/// @param atlas The handle of a loaded font's texture atlas.
+	/// @param position The position of the text in world space.
+	/// @param rotation The orientation of the text in world space.
+	/// @param size The font size in world space units.
+	/// @param alignment The alignment of the rendered text.
+	EP_API static void DrawText(std::string text, Graphics::TextureHandle atlas,
+		glm::vec3 position, glm::quat rotation, float size,
+		TextAlignment alignment = TextAlignment::TopLeft);
 
 	/// Delete any sprite component associated with an entity.
 	/// @param entity The ID of the entity to delete components from.

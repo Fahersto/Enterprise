@@ -12,6 +12,7 @@ set(EP_APPLE_ORGID com.MichaelMartz)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release"
     CACHE STRING "Semicolon-separated list of supported configuration types."
 )
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 set(CMAKE_XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET "${EP_MACOS_MINVERSION}")
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 set(CMAKE_SKIP_RPATH TRUE CACHE BOOL "If set, runtime paths are not added when using shared libraries.")
