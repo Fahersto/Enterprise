@@ -95,6 +95,16 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/Enterprise.txt"
     )
 
+    # cxx-prettyprint
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/cxx-prettyprint/prettyprint.hpp"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/include/cxx-prettyprint/prettyprint.hpp"
+    )
+    add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/Engine/vendor/cxx-prettyprint/LICENSE_1_0.txt"
+        "$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/licenses/cxx-prettyprint.txt"
+    )
+
     # CTSpookyHash
     add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/include"
@@ -187,6 +197,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
     install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "Enterprise.txt")
+
+    # cxx-prettyprint
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/cxx-prettyprint/prettyprint.hpp" DESTINATION "Enterprise/developer/include/cxx-prettyprint")
+    install(FILES "${CMAKE_SOURCE_DIR}/Engine/vendor/cxx-prettyprint/LICENSE_1_0.txt" DESTINATION "Enterprise/developer/licenses" RENAME "cxx-prettyprint.txt")
 
     # CTSpookyHash
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/vendor/CTSpookyHash/include" DESTINATION "Enterprise/developer")

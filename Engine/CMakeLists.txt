@@ -60,7 +60,6 @@ set(ENGINE_PRECOMPILE_HEADERS
     "<string>"
     "<wchar.h>"
     "<sstream>"
-    "<prettyprint.hpp>"
     "<functional>"
     "<map>"
     "<stdio.h>"
@@ -68,6 +67,8 @@ set(ENGINE_PRECOMPILE_HEADERS
     "<exception>"
     "<csignal>"
     "<math.h>"
+    
+    "<prettyprint.hpp>"
 )
 
 # Source files
