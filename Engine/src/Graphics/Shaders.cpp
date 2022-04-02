@@ -2233,7 +2233,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 
 							for (unsigned int j = 0; j < oglUniformArraySizes[i]; j++)
 							{
-								snprintf(oglStringOutBuffer + nameLength - 3, 1024 - (nameLength - 3), "[%u]\0", j);
+								snprintf(oglStringOutBuffer + nameLength - 3, 1024 - (nameLength - 3), "[%u]", j);
 								GLint loc = EP_GL(glGetUniformLocation(program, oglStringOutBuffer));
 								samplerUniformLocations[HN(shaderName)][variantLookupKey][uniformNameHash].push_back(loc);
 							}
