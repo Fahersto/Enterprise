@@ -159,8 +159,6 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 	}
 	else if (ridata->header.dwType == RIM_TYPEMOUSE)
 	{
-		EP_ASSERT((ridata->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0);
-
 		// Mouse Buttons
 		static_assert(BIT((int(ControlID::Mouse_Button_1) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x100000000000);
 		static_assert(BIT((int(ControlID::Mouse_Button_2) - int(ControlID::_EndOfGPAxes) - 1) % 64) == 0x200000000000);
@@ -186,11 +184,11 @@ bool Enterprise::Input::HandlePlatformEvents(Events::Event& e)
 		// Scroll Wheel
 		if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_WHEEL))
 		{
-			kbmBuffer.axes[currentBuffer][4] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
+			kbmBuffer.axes[currentBuffer][2] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
 		}
 		else if ((ridata->data.mouse.usButtonFlags & RI_MOUSE_HWHEEL))
 		{
-			kbmBuffer.axes[currentBuffer][5] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
+			kbmBuffer.axes[currentBuffer][3] += (double)(short)ridata->data.mouse.usButtonData / (double)WHEEL_DELTA;
 		}
 	}
 
