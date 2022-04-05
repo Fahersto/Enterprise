@@ -16,3 +16,6 @@
 [submodule "Engine/vendor/freetype"]
 	path = Engine/vendor/freetype
 	url = git@github.com:freetype/freetype.git
+[submodule "Editor/vendor/imgui"]
+	path = Editor/vendor/imgui
+	url = git@github.com:theOtherMichael/imgui.git
