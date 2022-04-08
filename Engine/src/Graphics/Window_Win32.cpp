@@ -94,8 +94,11 @@ void Window::CreatePrimaryWindow()
 	wc.style = CS_OWNDC;									// Needed for OpenGL
 	wc.hInstance = hInstance;
 	wc.lpfnWndProc = Win32_WinProc;                         // Sets WindowProc() to receive Windows messages
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);             // TODO: Set up an icon
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);           // TODO: Set up a small icon
+#ifdef EP_BUILD_DYNAMIC
+	wc.hIcon = LoadIcon(hInstance, L"ICON_ENTERPRISE");             // TODO: Set up an icon
+#else
+	wc.hIcon = LoadIcon(hInstance, L"ICON_GAME");             // TODO: Set up an icon
+#endif // EP_BUILD_DYN
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);               // Default mouse cursor.
 	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);  // Fill color when window is redrawn (set to none).
 	wc.lpszMenuName = NULL;                                 // Menu name (none, because we have no menus).
