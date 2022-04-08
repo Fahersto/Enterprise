@@ -1,16 +1,16 @@
 #include "Enterprise/Core.h"
 
 // Application stuff
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/Application.h"
 
 // Systems
-#include "Enterprise/Time/Time.h"
-#include "Enterprise/File/File.h"
-#include "Enterprise/Input/Input.h"
-#include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Time.h"
+#include "Enterprise/File.h"
+#include "Enterprise/Input.h"
+#include "Enterprise/Graphics.h"
 #include "Enterprise/Graphics/Window.h"
-#include "Enterprise/SceneManager/SceneManager.h"
-#include "Enterprise/StateManager/StateManager.h"
+#include "Enterprise/SceneManager.h"
+#include "Enterprise/StateManager.h"
 
 #include "Enterprise/Core/Win32APIHelpers.h"
 

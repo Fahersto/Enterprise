@@ -1,7 +1,7 @@
 #ifdef _WIN32
 
 #include "Enterprise/Core.h"
-#include "Enterprise/Time/Time.h"
+#include "Enterprise/Time.h"
 
 using Enterprise::Time;
 

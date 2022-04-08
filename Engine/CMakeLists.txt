@@ -2,11 +2,8 @@
 
 # Headers
 set(ENGINE_HEADERS
-    "include/Enterprise/Core.h"
-    "include/Enterprise/Enterprise.h"
-
     # Core
-    "include/Enterprise/Application/Application.h"
+    "include/Enterprise/Core.h"
     "include/Enterprise/Core/Assertions.h"
     "include/Enterprise/Core/Console.h"
     "include/Enterprise/Core/ErrorMessageBox.h"
@@ -14,22 +11,25 @@ set(ENGINE_HEADERS
     "include/Enterprise/Core/HashNames.h"
     "include/Enterprise/Core/SharedLibraryExports.h"
 
+    # Application
+    "include/Enterprise/Application.h"
+
     # Foundation Systems
-    "include/Enterprise/Time/Time.h"
-    "include/Enterprise/Events/Events.h"
-    "include/Enterprise/File/File.h"
+    "include/Enterprise/Time.h"
+    "include/Enterprise/Events.h"
+    "include/Enterprise/File.h"
     "include/Enterprise/File/INIValueType.h"
 
     # Interface Systems
-    "include/Enterprise/Input/Input.h"
+    "include/Enterprise/Input.h"
     "include/Enterprise/Input/ControlIDs.h"
-    "include/Enterprise/Graphics/Graphics.h"
+    "include/Enterprise/Graphics.h"
     "include/Enterprise/Graphics/OpenGLHelpers.h"
     "include/Enterprise/Graphics/Window.h"
 
     # Behavior Systems
-    "include/Enterprise/SceneManager/SceneManager.h"
-    "include/Enterprise/StateManager/StateManager.h"
+    "include/Enterprise/SceneManager.h"
+    "include/Enterprise/StateManager.h"
 
     # ECS Systems
     "include/Enterprise/Systems/Renderer2D.h"

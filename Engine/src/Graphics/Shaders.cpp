@@ -1,5 +1,5 @@
-#include "Enterprise/Graphics/Graphics.h"
-#include "Enterprise/File/File.h"
+#include "Enterprise/Graphics.h"
+#include "Enterprise/File.h"
 
 #include "Enterprise/Graphics/OpenGLHelpers.h"
 

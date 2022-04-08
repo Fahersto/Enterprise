@@ -1,6 +1,6 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Graphics.h"
 
 using Enterprise::Graphics;
 

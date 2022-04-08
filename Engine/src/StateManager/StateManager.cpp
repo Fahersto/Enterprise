@@ -1,5 +1,5 @@
-#include "Enterprise/StateManager/StateManager.h"
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/StateManager.h"
+#include "Enterprise/Application.h"
 
 using Enterprise::StateManager;
 

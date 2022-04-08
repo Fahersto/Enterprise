@@ -1,5 +1,5 @@
-#include "Enterprise/File/File.h"
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/File.h"
+#include "Enterprise/Application.h"
 
 using Enterprise::File;
 using Enterprise::Application;

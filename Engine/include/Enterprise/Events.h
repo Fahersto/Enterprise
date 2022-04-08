@@ -3,7 +3,7 @@
 #include <initializer_list>
 #include <list>
 #include "Enterprise/Core.h"
-#include "Enterprise/StateManager/StateManager.h"
+#include "Enterprise/StateManager.h"
 
 namespace Enterprise
 {

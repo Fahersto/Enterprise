@@ -2,7 +2,7 @@
 #ifndef EP_BUILD_DYNAMIC
 
 #import <AppKit/AppKit.h>
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/Application.h"
 
 using Enterprise::Application;
 

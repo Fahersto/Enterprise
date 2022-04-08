@@ -1,7 +1,7 @@
 #if defined(__APPLE__) && defined(__MACH__)
 #include <mach/mach_time.h>
 #include "Enterprise/Core.h"
-#include "Enterprise/Time/Time.h"
+#include "Enterprise/Time.h"
 
 using Enterprise::Time;
 

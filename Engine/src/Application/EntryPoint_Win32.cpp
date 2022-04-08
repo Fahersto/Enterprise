@@ -2,7 +2,7 @@
 #ifndef EP_BUILD_DYNAMIC
 
 #include "Enterprise/Core.h"
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/Application.h"
 
 /// The application entry point on Windows systems.
 int WINAPI WinMain(_In_ HINSTANCE hInstance,

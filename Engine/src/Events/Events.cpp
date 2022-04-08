@@ -1,4 +1,4 @@
-#include "Enterprise/Events/Events.h"
+#include "Enterprise/Events.h"
 
 using Enterprise::Events;
 using Enterprise::StateManager;

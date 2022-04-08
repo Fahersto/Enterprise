@@ -1,6 +1,5 @@
 // Example Game entry point.
 
-#include <Enterprise/Enterprise.h>
 
 void GameInit()
 {
@@ -20,4 +19,14 @@ void PIE_Init()
 void PIE_Cleanup()
 {
     // Last-minute tasks before ending play-in-editor.
+}
+
+void SystemsInit()
+{
+    // Used to set up game systems.
+}
+
+void SystemsCleanup()
+{
+    // Used to clean up game systems.
 }

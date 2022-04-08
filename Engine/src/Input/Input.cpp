@@ -1,7 +1,7 @@
-#include "Enterprise/Input/Input.h"
-#include "Enterprise/File/File.h"
-#include "Enterprise/Time/Time.h"
-#include "Enterprise/StateManager/StateManager.h"
+#include "Enterprise/Input.h"
+#include "Enterprise/File.h"
+#include "Enterprise/Time.h"
+#include "Enterprise/StateManager.h"
 
 using Enterprise::Input;
 using Enterprise::Events;

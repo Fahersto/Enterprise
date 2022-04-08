@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "Enterprise/Core.h"
 #include "Enterprise/Graphics/Window.h"
-#include "Enterprise/Events/Events.h"
+#include "Enterprise/Events.h"
 
 using Enterprise::Events;
 using Enterprise::Window;

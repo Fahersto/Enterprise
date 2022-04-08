@@ -1,7 +1,7 @@
 #include <stb_image/stb_image.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
-#include "Enterprise/Graphics/Graphics.h"
-#include "Enterprise/File/File.h"
+#include "Enterprise/Graphics.h"
+#include "Enterprise/File.h"
 #include "Enterprise/Graphics/OpenGLHelpers.h"
 
 using Enterprise::Graphics;

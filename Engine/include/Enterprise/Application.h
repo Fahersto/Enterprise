@@ -1,5 +1,5 @@
 #pragma once
-#include "Enterprise/Events/Events.h"
+#include "Enterprise/Events.h"
 
 #if defined(__APPLE__) && defined (__MACH__)
 int main(int argc, const char * argv[]);

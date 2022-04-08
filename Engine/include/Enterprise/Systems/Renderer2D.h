@@ -1,7 +1,7 @@
 #pragma once
 #include "Enterprise/Core.h"
-#include "Enterprise/Graphics/Graphics.h"
-#include "Enterprise/SceneManager/SceneManager.h"
+#include "Enterprise/Graphics.h"
+#include "Enterprise/SceneManager.h"
 
 // Needed to avoid Win32 name collision
 #ifdef DrawText

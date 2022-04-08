@@ -1,6 +1,6 @@
 #pragma once
 #include "Enterprise/Core.h"
-#include "Enterprise/Application/Application.h"
+#include "Enterprise/Application.h"
 
 namespace Enterprise 
 {

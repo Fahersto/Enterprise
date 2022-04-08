@@ -1,4 +1,4 @@
-#include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Graphics.h"
 #include "Enterprise/Graphics/Window.h"
 #include "Enterprise/Graphics/OpenGLHelpers.h"
 

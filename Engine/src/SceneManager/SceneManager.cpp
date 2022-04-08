@@ -1,6 +1,6 @@
-#include "Enterprise/SceneManager/SceneManager.h"
-#include "Enterprise/File/File.h"
-#include "Enterprise/Events/Events.h"
+#include "Enterprise/SceneManager.h"
+#include "Enterprise/File.h"
+#include "Enterprise/Events.h"
 
 namespace Enterprise
 {

@@ -1,7 +1,7 @@
 #if defined(__APPLE__) && defined(__MACH__)
 
 #import <AppKit/AppKit.h>
-#include "Enterprise/File/File.h"
+#include "Enterprise/File.h"
 using Enterprise::File;
 
 std::string File::GetNewTempFilename()

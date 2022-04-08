@@ -2,7 +2,7 @@
 #import <AppKit/AppKit.h>
 #import <GameController/GameController.h>
 #include <Carbon/Carbon.h>
-#include "Enterprise/Input/Input.h"
+#include "Enterprise/Input.h"
 
 using Enterprise::Input;
 using Enterprise::Events;

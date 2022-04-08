@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <Xinput.h>
 #include "Enterprise/Core.h"
-#include "Enterprise/Input/Input.h"
+#include "Enterprise/Input.h"
 
 using Enterprise::Events;
 

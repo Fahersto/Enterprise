@@ -1,8 +1,8 @@
 
-#include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Graphics.h"
 #include "Enterprise/Graphics/Window.h"
 
-#include "Enterprise/Events/Events.h"
+#include "Enterprise/Events.h"
 
 #include "Enterprise/Graphics/OpenGLHelpers.h"
 

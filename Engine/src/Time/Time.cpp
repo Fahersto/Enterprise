@@ -1,5 +1,5 @@
-#include "Enterprise/Time/Time.h"
-#include "Enterprise/Graphics/Graphics.h"
+#include "Enterprise/Time.h"
+#include "Enterprise/Graphics.h"
 
 using Enterprise::Time;
 

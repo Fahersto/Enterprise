@@ -1,6 +1,6 @@
 #if defined(__APPLE__) && defined(__MACH__)
 
-#include <Enterprise/Application/Application.h>
+#include <Enterprise/Application.h>
 #import <AppKit/AppKit.h>
 
 using Enterprise::Application;
