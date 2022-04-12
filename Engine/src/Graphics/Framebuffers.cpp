@@ -5,19 +5,51 @@
 using Enterprise::Graphics;
 using Enterprise::Window;
 
-static std::deque<Graphics::FramebufferHandle> fbStack = { 0 };
-std::deque<glm::vec4> Graphics::fbViewports;
+static Graphics::FramebufferHandle nextFbHandle = 1;
+static std::list<GLuint> returnedFbHandles;
+
+static std::map<Graphics::FramebufferHandle, std::vector<Graphics::FramebufferAttachmentSpec>> fbAttachmentSpecs;
 std::map<Graphics::FramebufferHandle, int> Graphics::fbWidths;
 std::map<Graphics::FramebufferHandle, int> Graphics::fbHeights;
 
-// First: isTexture Second: ogl texture or rbo name
-static std::map<Graphics::FramebufferHandle, std::vector<std::pair<bool, GLuint>>> colorAttachmentHandles;
-static std::map<Graphics::FramebufferHandle, std::pair<bool, GLuint>> depthAttachmentHandles;
+static std::map<Graphics::FramebufferHandle, GLuint> fbos {{0, 0}};
+static std::map<Graphics::FramebufferHandle, std::vector<std::pair<bool, GLuint>>> colorAttachments;
+static std::map<Graphics::FramebufferHandle, std::pair<bool, GLuint>> depthAttachments;
+
+static std::deque<Graphics::FramebufferHandle> fbStack = { 0 };
+static std::deque<glm::vec4> viewportStack = {{0, 1, 0, 1}};
 
 extern std::map<Graphics::TextureHandle, GLint> samplerTypeNeededForTexture;
 
-Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::initializer_list<FramebufferAttachmentSpec> attachments, int width, int height)
+Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::vector<FramebufferAttachmentSpec> attachments, int width, int height, Graphics::FramebufferHandle fb)
 {
+	FramebufferHandle returnVal = 0;
+
+	if (fb != 0)
+	{
+		if (fb >= nextFbHandle)
+		{
+			EP_ERROR("Graphics::CreateFramebuffer(): Specified FramebufferHandle \"{}\" has not been previously assigned!", fb);
+			return 0;
+		}
+		else
+		{
+			for (auto rit = returnedFbHandles.rbegin(); rit != returnedFbHandles.rend(); ++rit)
+			{
+				if ((*rit) == fb)
+				{
+					returnVal = fb;
+					break;
+				}
+				else
+				{
+					EP_ERROR("Graphics::CreateFramebuffer(): Specified FramebufferHandle \"{}\" is already in use!", fb);
+					return 0;
+				}
+			}
+		}
+	}
+
 	if (width == 0 && height == 0)
 	{
 		// TODO: Link resolution to window width and height changes
@@ -27,9 +59,9 @@ Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::initializer_list<Fr
 
 	EP_ASSERT(attachments.size() > 0);
 
-	GLuint framebufferHandle;
-	EP_GL(glGenFramebuffers(1, &framebufferHandle));
-	glBindFramebuffer(GL_FRAMEBUFFER, framebufferHandle);
+	GLuint fboHandle;
+	EP_GL(glGenFramebuffers(1, &fboHandle));
+	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
 
 	int colorAttachmentCount = 0;
 	bool handledDepthAttachment = false;
@@ -77,19 +109,19 @@ Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::initializer_list<Fr
 				// Depth-only formats
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex, 0);
 				samplerTypeNeededForTexture[tex] = GL_SAMPLER_2D;
-				depthAttachmentHandles[framebufferHandle] = { true, tex };
+				depthAttachments[fboHandle] = { true, tex };
 				break;
 			case ImageFormat::Depth24Stencil8:
 				// Depth + Stencil format
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, tex, 0);
 				samplerTypeNeededForTexture[tex] = GL_SAMPLER_2D;
-				depthAttachmentHandles[framebufferHandle] = { true, tex };
+				depthAttachments[fboHandle] = { true, tex };
 				break;
 			default:
 				// Color formats
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentCount, GL_TEXTURE_2D, tex, 0);
 				samplerTypeNeededForTexture[tex] = GL_SAMPLER_2D;
-				colorAttachmentHandles[framebufferHandle].push_back({ true, tex });
+				colorAttachments[fboHandle].push_back({ true, tex });
 				break;
 			}
 
@@ -129,7 +161,7 @@ Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::initializer_list<Fr
 		EP_DEBUGBREAK();
 
 		// Delete textures and rbos
-		for (const auto& [isTexture, oglHandle] : colorAttachmentHandles[framebufferHandle])
+		for (const auto& [isTexture, oglHandle] : colorAttachments[fboHandle])
 		{
 			if (isTexture)
 			{
@@ -140,32 +172,61 @@ Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::initializer_list<Fr
 				EP_GL(glDeleteRenderbuffers(1, &oglHandle));
 			}
 		}
-		colorAttachmentHandles.erase(framebufferHandle);
+		colorAttachments.erase(fboHandle);
 
-		if (depthAttachmentHandles[framebufferHandle].first)
+		if (depthAttachments[fboHandle].first)
 		{
-			EP_GL(glDeleteTextures(1, &depthAttachmentHandles[framebufferHandle].second));
+			EP_GL(glDeleteTextures(1, &depthAttachments[fboHandle].second));
 		}
 		else
 		{
-			EP_GL(glDeleteTextures(1, &depthAttachmentHandles[framebufferHandle].second));
+			EP_GL(glDeleteTextures(1, &depthAttachments[fboHandle].second));
 		}
-		depthAttachmentHandles.erase(framebufferHandle);
+		depthAttachments.erase(fboHandle);
 
 		return 0;
 	}
 
-	EP_GL(glBindTexture(GL_TEXTURE_2D, textureInSlot[lastBoundTextureSlot]));
-	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+	if (returnVal == 0)
+	{
+		if (returnedFbHandles.size() > 0)
+		{
+			returnVal = returnedFbHandles.back();
+			returnedFbHandles.pop_back();
+		}
+		else
+		{
+			returnVal = nextFbHandle;
+			nextFbHandle++;
+		}
+	}
+	else
+	{
+		for (auto rit = returnedFbHandles.rbegin(); rit != returnedFbHandles.rend(); ++rit)
+		{
+			if ((*rit) == returnVal)
+			{
+				returnedFbHandles.erase(std::next(rit).base());
+				break;
+			}
+		}
+		returnVal = fboHandle;
+	}
 
-	fbWidths[framebufferHandle] = width;
-	fbHeights[framebufferHandle] = height;
-	return framebufferHandle;
+	fbos[returnVal] = fboHandle;
+
+	EP_GL(glBindTexture(GL_TEXTURE_2D, textureInSlot[lastBoundTextureSlot]));
+	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fbos[fbStack.back()]));
+
+	fbWidths[returnVal] = width;
+	fbHeights[returnVal] = height;
+	fbAttachmentSpecs[returnVal] = attachments;
+	return returnVal;
 }
 
 void Graphics::DeleteFramebuffer(FramebufferHandle fb)
 {
-	if (colorAttachmentHandles.count(fb) == 0 && depthAttachmentHandles.count(fb) == 0)
+	if (colorAttachments.count(fb) == 0 && depthAttachments.count(fb) == 0)
 	{
 		EP_ERROR("Graphics::DeleteFramebuffer(): FramebufferHandle does not exist!");
 		return;
@@ -182,10 +243,12 @@ void Graphics::DeleteFramebuffer(FramebufferHandle fb)
 		}
 	}
 
+	fbos.erase(fb);
 	fbWidths.erase(fb);
 	fbHeights.erase(fb);
+	fbAttachmentSpecs.erase(fb);
 
-	for (const auto& [isTexture, oglHandle] : colorAttachmentHandles[fb])
+	for (const auto& [isTexture, oglHandle] : colorAttachments[fb])
 	{
 		if (isTexture)
 		{
@@ -196,34 +259,38 @@ void Graphics::DeleteFramebuffer(FramebufferHandle fb)
 			EP_GL(glDeleteRenderbuffers(1, &oglHandle));
 		}
 	}
-	colorAttachmentHandles.erase(fb);
+	colorAttachments.erase(fb);
 
-	if (depthAttachmentHandles[fb].first)
+	if (depthAttachments[fb].first)
 	{
-		EP_GL(glDeleteTextures(1, &depthAttachmentHandles[fb].second));
+		EP_GL(glDeleteTextures(1, &depthAttachments[fb].second));
 	}
 	else
 	{
-		EP_GL(glDeleteTextures(1, &depthAttachmentHandles[fb].second));
+		EP_GL(glDeleteTextures(1, &depthAttachments[fb].second));
 	}
-	depthAttachmentHandles.erase(fb);
+	depthAttachments.erase(fb);
+
+	returnedFbHandles.push_back(fb);
 
 	EP_GL(glDeleteFramebuffers(1, &fb));
 }
 
 void Graphics::PushFramebuffer(FramebufferHandle fb)
 {
-	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fb));
+	EP_ASSERTF_SLOW(fbos.count(fb), "Graphics::PushFramebuffer(): Framebuffer does not exist!");
+	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fbos[fb]));
 	fbStack.emplace_back(fb);
-	fbViewports.emplace_back();
+	viewportStack.emplace_back();
 }
 
 void Graphics::PushFramebuffer(FramebufferHandle fb, float l, float r, float b, float t)
 {
-	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fb));
+	EP_ASSERTF_SLOW(fbos.count(fb), "Graphics::PushFramebuffer(): Framebuffer does not exist!");
+	EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fbos[fb]));
 	fbStack.emplace_back(fb);
 	SetViewport(l, r, b, t);
-	fbViewports.emplace_back(glm::vec4(l, r, b, t));
+	viewportStack.emplace_back(glm::vec4(l, r, b, t));
 }
 
 void Graphics::PopFramebuffer()
@@ -231,12 +298,12 @@ void Graphics::PopFramebuffer()
 	if (fbStack.size() > 1) // Index 0 is default framebuffer '0'
 	{
 		fbStack.pop_back();
-		fbViewports.pop_back();
-		EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fbStack.back()));
-		SetViewport(fbViewports.back().x,
-					fbViewports.back().y,
-					fbViewports.back().z,
-					fbViewports.back().w);
+		viewportStack.pop_back();
+		EP_GL(glBindFramebuffer(GL_FRAMEBUFFER, fbos[fbStack.back()]));
+		SetViewport(viewportStack.back().x,
+					viewportStack.back().y,
+					viewportStack.back().z,
+					viewportStack.back().w);
 	}
 	else
 	{
@@ -247,13 +314,13 @@ void Graphics::PopFramebuffer()
 
 Graphics::TextureHandle Graphics::GetColorTexture(FramebufferHandle fb, int number)
 {
-	if (colorAttachmentHandles.count(fb))
+	if (colorAttachments.count(fb))
 	{
-		if (number < colorAttachmentHandles[fb].size())
+		if (number < colorAttachments[fb].size())
 		{
-			if (colorAttachmentHandles[fb][number].first)
+			if (colorAttachments[fb][number].first)
 			{
-				return colorAttachmentHandles[fb][number].second;
+				return colorAttachments[fb][number].second;
 			}
 			else
 			{
@@ -279,11 +346,11 @@ Graphics::TextureHandle Graphics::GetColorTexture(FramebufferHandle fb, int numb
 
 Graphics::TextureHandle Graphics::GetDepthTexture(FramebufferHandle fb)
 {
-	if (depthAttachmentHandles.count(fb))
+	if (depthAttachments.count(fb))
 	{
-		if (depthAttachmentHandles[fb].first)
+		if (depthAttachments[fb].first)
 		{
-			return depthAttachmentHandles[fb].second;
+			return depthAttachments[fb].second;
 		}
 		else
 		{
@@ -329,7 +396,19 @@ int Graphics::GetFramebufferHeight(FramebufferHandle fb)
 
 void Graphics::ResizeFramebuffer(FramebufferHandle fb, int width, int height)
 {
-	// TODO: Implement
+	if (fbWidths.count(fb))
+	{
+		if (fbWidths[fb] != width || fbHeights[fb] != height)
+		{
+			std::vector<FramebufferAttachmentSpec> attachments = fbAttachmentSpecs[fb];
+			DeleteFramebuffer(fb);
+			CreateFramebuffer(attachments, width, height, fb);
+		}
+	}
+	else
+	{
+		EP_ERROR("Graphics::ResizeFramebuffer(): Framebuffer \"{}\" does not exist!", fb);
+	}
 }
 
 
@@ -339,7 +418,7 @@ void Graphics::SetViewport(float l, float r, float b, float t)
 	int& height = fbHeights[fbStack.back()];
 
 	EP_GL(glViewport(l * width, b * height, r * width, t * height));
-	fbViewports.back() = { l, r, b, t };
+	viewportStack.back() = { l, r, b, t };
 }
 
 

@@ -2,7 +2,6 @@
 #include <set>
 #include <map>
 #include <stack>
-#include <deque>
 #include <glm/glm.hpp>
 #include "Enterprise/Core.h"
 
@@ -408,10 +407,11 @@ public:
 	/// @param attachments A list of specifications for framebuffer attachments.
 	/// @param width The width, in pixels, of the framebuffer.
 	/// @param height The height, in pixels, of the framebuffer.
+	/// @param fb If specified, the FramebufferHandle to recycle for this framebuffer.
 	/// @return Handle of the created framebuffer object.
 	/// @note If width and height both equal @c 0, then the framebuffer will take on the dimensions of the game window, and
 	/// automatically adjust to changes in window size.
-	EP_API static FramebufferHandle CreateFramebuffer(std::initializer_list<FramebufferAttachmentSpec> attachments, int width = 0, int height = 0);
+	EP_API static FramebufferHandle CreateFramebuffer(std::vector<FramebufferAttachmentSpec> attachments, int width = 0, int height = 0, FramebufferHandle fb = 0);
 	/// Delete a framebuffer.
 	/// @param fb Handle of the framebuffer.
 	EP_API static void DeleteFramebuffer(FramebufferHandle fb);
@@ -531,7 +531,6 @@ private:
 
 	static std::map<Graphics::FramebufferHandle, int> fbWidths;
 	static std::map<Graphics::FramebufferHandle, int> fbHeights;
-	static std::deque<glm::vec4> fbViewports;
 
 	friend class Application;
 
