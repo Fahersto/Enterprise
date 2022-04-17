@@ -1,0 +1,13 @@
+ProjectName: "TestGame"
+ProjectFriendlyName: "Test Game Project"
+
+Directories:
+  Content: "content"
+  Data: "../data/TestGame/data"
+  Save: "../data/TestGame/save"
+  Temp: "../data/TestGame/temp"
+
+Bin:
+  Debug: "../build/bin/Debug/TestGame/module/"
+  Dev: "../build/bin/Dev/TestGame/module/"
+  Release: "../build/bin/Release/TestGame/module/"

@@ -1,20 +1,28 @@
 #pragma once
 #include "Enterprise/Events.h"
 
+// Needed for friending the Win32 entry point
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
+
+// Needed for friending the macOS entry point
 #if defined(__APPLE__) && defined (__MACH__)
 int main(int argc, const char * argv[]);
 #endif
 
 namespace Enterprise
 {
-	/// The heart of an Enterprise program.  Instantiates and manages all of
-	/// Enterprise's systems, and steps all engine and game code.
-	class EP_API Application
+	/// The heart of an Enterprise program.  Instantiates all of
+	/// Enterprise's systems and steps all engine and game code.
+	class EP_API Runtime
 	{
 	public:
 		/// Quit the application at the end of the current frame.
 		static void Quit();
-
 
 		/// Set up the application to handle a command line option.
 		/// @param friendlyname The human-readable name of the option.
@@ -54,17 +62,27 @@ namespace Enterprise
 		static std::vector<std::string> GetCmdLineOption(HashName option);
 
 	private:
-		// Friend the entry function to give it access to Run().
-		#ifdef _WIN32
+#ifdef _WIN32
 		friend int WINAPI ::WinMain(_In_ HINSTANCE hInstance,
 									_In_opt_ HINSTANCE hPrevInstance,
 									_In_ LPSTR lpCmdLine,
 									_In_ int nCmdShow);
-		#elif defined(__APPLE__) && defined(__MACH__)
+#elif defined(__APPLE__) && defined(__MACH__)
 		friend int ::main(int argc, const char* argv[]);
-		#endif
+#endif
 
-		/// A full description of a supported command line option.
+		friend class Window;
+		friend class File;
+
+#ifdef EP_BUILD_DYNAMIC
+		static bool isEditor;
+#endif
+		static bool isRunning;
+		static bool OnQuitRequested(Events::Event& e);
+
+		static std::unordered_map<HashName, std::vector<std::string>> cmdLineOptions;
+		static std::unordered_map<HashName, std::vector<HashName>> cmdLineOptionSynonyms;
+		static std::unordered_map<HashName, uint_fast16_t> cmdLineOptionExpectedArgs;
 		struct cmdLineOptHelpEntry
 		{
 			std::string friendlyname;
@@ -72,31 +90,11 @@ namespace Enterprise
 			std::vector<std::string> synonyms;
 			uint_fast16_t expectedArgCount;
 		};
-
-		// Statics
-		static bool _isRunning;
-		static std::unordered_map<HashName, std::vector<std::string>> _cmdLineOptions;
-		static std::unordered_map<HashName, std::vector<HashName>> _cmdLineOptionSynonyms;
-		static std::unordered_map<HashName, uint_fast16_t> _cmdLineOptionExpectedArgs;
-		static std::vector<cmdLineOptHelpEntry> _cmdLineOptionHelpRegistry;
-
-		/// Print the available command line options to the console.
+		static std::vector<cmdLineOptHelpEntry> cmdLineOptionHelpRegistry;
 		static void PrintCmdLineHelp();
 
-		/// Set up the core systems of the application.
-		Application();
-
-		/// Step the entire Enterprise engine.
-		/// @return Boolean indicating whether the main loop should continue.
-		/// @remarks This function is called continuously by the main loop. Its
-		/// return value is used as the condition for the loop.
+		Runtime();
 		bool Run();
-
-		/// Clean up the application prior to program termination.
-		/// @note This destructor guaranteed to be called even in the case of
-		/// unhandled exceptions.
-		~Application();
-
-		static bool OnQuitRequested(Events::Event& e);
+		~Runtime();
 	};
 }

@@ -2,7 +2,7 @@
 #import <AppKit/AppKit.h>
 #include <glad/glad.h>
 #include "Enterprise/Core.h"
-#include "Enterprise/Graphics/Window.h"
+#include "Enterprise/Window.h"
 #include "Enterprise/Events.h"
 #include "Enterprise/Graphics.h"
 

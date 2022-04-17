@@ -98,3 +98,6 @@ At this point, all of Enterprise's basic systems have basic functionality. Up ne
 * yaml-cpp: <https://github.com/jbeder/yaml-cpp>
 * OpenGL Mathematics (GLM): <https://github.com/g-truc/glm>
 * Multi-channel signed distance field atlas generator (msdf-atlas-gen): <https://github.com/Chlumsky/msdf-atlas-gen>
+
+## Other Resources Used
+* Roboto (Apache License, Version 2.0): <https://fonts.google.com/specimen/Roboto>

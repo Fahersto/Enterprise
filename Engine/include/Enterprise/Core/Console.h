@@ -63,7 +63,7 @@ public:
 
 private:
 	// Needed for access to Init() and Cleanup().
-	friend class Application;
+	friend class Runtime;
 
 	/// The spdlog logger object used in the engine library.
 	static std::shared_ptr<spdlog::logger> s_CoreLogger;

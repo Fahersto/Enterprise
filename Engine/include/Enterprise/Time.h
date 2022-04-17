@@ -1,17 +1,12 @@
 #pragma once
 #include "Enterprise/Core.h"
-#include "Enterprise/Application.h"
+#include "Enterprise/Runtime.h"
 
 namespace Enterprise 
 {
 
 namespace Constants::Time
 {
-///// The length of the fixed timestep in game seconds.
-//HCEX(double, FixedTimestep);
-///// The maximum number of real seconds each frame is allowed to simulate.
-//HCEX(double, MaxFrameDelta);
-
 constexpr double FixedTimestep = 1.0 / 240.0;
 constexpr double MaxFrameDelta = 1.0 / 15.0;
 }
@@ -66,7 +61,7 @@ public:
 	EP_API static void SetTimeScale(double scalar);
 
 private:
-	friend class Application;
+	friend class Runtime;
 	friend class Input;
 
 	static void Init();

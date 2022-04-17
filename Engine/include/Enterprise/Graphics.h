@@ -532,7 +532,7 @@ private:
 	static std::map<Graphics::FramebufferHandle, int> fbWidths;
 	static std::map<Graphics::FramebufferHandle, int> fbHeights;
 
-	friend class Application;
+	friend class Runtime;
 
 	static void Init();
 	static void PreDraw();

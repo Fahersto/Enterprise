@@ -1,5 +1,5 @@
 #include "Enterprise/StateManager.h"
-#include "Enterprise/Application.h"
+#include "Enterprise/Runtime.h"
 
 using Enterprise::StateManager;
 
@@ -42,7 +42,7 @@ void StateManager::PopState()
 	stateBlocksDraws.pop_back();
 
 	if (stateStack.size() == 0)
-		Enterprise::Application::Quit();
+		Enterprise::Runtime::Quit();
 
 	int i;
 	for (i = (int)stateBlocksFixed.size() - 1; i >= 0; i--)

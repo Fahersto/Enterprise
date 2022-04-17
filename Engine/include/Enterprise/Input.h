@@ -79,7 +79,7 @@ public:
 	EP_API static inline glm::vec2 GetMousePos() { return cursorPos; };
 
 private:
-	friend class Application;
+	friend class Runtime;
 
 	// Raw input stuff
 

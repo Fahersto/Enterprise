@@ -1,5 +1,6 @@
 #ifdef _WIN32
 #include <ShlObj.h>
+#include "Enterprise/Runtime.h"
 #include "Enterprise/File.h"
 #include "Enterprise/Core/Win32APIHelpers.h"
 using Enterprise::File;
@@ -134,27 +135,22 @@ void File::TextFileWriter::Close()
 }
 
 
-void File::SetPlatformContentPath()
+void File::SetPlatformPaths()
 {
 	contentDirPath = "content/";
 
-	std::error_code ec;
-	std::filesystem::create_directories(contentDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformContentPath(): Unable to create content data path!");
-}
-
-void File::SetPlatformDataPaths()
-{
+	// Data
 	WCHAR* widePath = NULL;
-
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
 	dataDirPath = WCHARtoUTF8(widePath) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + '/';
 	backslashesToSlashes(dataDirPath);
 
+	// Save
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_SavedGames, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
 	saveDirPath = WCHARtoUTF8(widePath) + '/' + "Constants::AppName" + '/';
 	backslashesToSlashes(saveDirPath);
 
+	// Temp
 	WCHAR buffer[MAX_PATH];
 	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
 	tempDirPath = WCHARtoUTF8(buffer);
@@ -162,19 +158,37 @@ void File::SetPlatformDataPaths()
 
 	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
+	std::filesystem::create_directories(contentDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create content data path!");
 	std::filesystem::create_directories(dataDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create application data path!");
+	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create application data path!");
 	std::filesystem::create_directories(saveDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
+	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create save data path!");
 }
 
-void File::SetPlatformEShadersPath()
+void File::SetPlatformEnginePaths()
 {
 	engineShadersPath = "include_glsl/";
 
+#ifdef EP_BUILD_DYNAMIC
+	editorContentDirPath = "content/";
+
+	WCHAR* widePath = NULL;
+
+	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
+	editorDataDirPath = WCHARtoUTF8(widePath) + '/' + "Michael Martz" + '/' + "Enterprise" + '/';
+	backslashesToSlashes(editorDataDirPath);
+
+	WCHAR buffer[MAX_PATH];
+	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
+	editorTempDirPath = WCHARtoUTF8(buffer);
+	backslashesToSlashes(editorTempDirPath);
+
+	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
-	std::filesystem::create_directories(contentDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformEShadersPath(): Unable to create engine shaders data path!");
+	std::filesystem::create_directories(editorDataDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformEnginePaths(): Unable to create editor data folder!");
+#endif
 }
 
 #endif // _WIN32

@@ -11,8 +11,8 @@ set(ENGINE_HEADERS
     "include/Enterprise/Core/HashNames.h"
     "include/Enterprise/Core/SharedLibraryExports.h"
 
-    # Application
-    "include/Enterprise/Application.h"
+    # Runtime
+    "include/Enterprise/Runtime.h"
 
     # Foundation Systems
     "include/Enterprise/Time.h"
@@ -25,7 +25,7 @@ set(ENGINE_HEADERS
     "include/Enterprise/Input/ControlIDs.h"
     "include/Enterprise/Graphics.h"
     "include/Enterprise/Graphics/OpenGLHelpers.h"
-    "include/Enterprise/Graphics/Window.h"
+    "include/Enterprise/Window.h"
 
     # Behavior Systems
     "include/Enterprise/SceneManager.h"
@@ -33,6 +33,9 @@ set(ENGINE_HEADERS
 
     # ECS Systems
     "include/Enterprise/Systems/Renderer2D.h"
+
+    # Game entry point
+    "include/Enterprise/GameEntryPoint.h"
 
     PARENT_SCOPE
 )
@@ -75,7 +78,9 @@ set(ENGINE_PRECOMPILE_HEADERS
 set(ENGINE_SRC
     # Core
     "src/Core/HashNames.cpp"
-    "src/Application/Application.cpp"
+
+    # Runtime
+    "src/Runtime/Runtime.cpp"
 
     # Foundation Systems
     "src/Time/Time.cpp"
@@ -107,7 +112,8 @@ set(ENGINE_SRC_WIN32
     "src/Core/Console_Win32.cpp"
     "src/Core/ErrorMessageBox_Win32.cpp"
     "src/Core/Win32APIHelpers.cpp"
-    "src/Application/EntryPoint_Win32.cpp"
+
+    "src/Runtime/EntryPoint_Win32.cpp"
 
 	"src/Time/Time_Win32.cpp"
 	"src/File/File_Win32.cpp"
@@ -118,7 +124,8 @@ set(ENGINE_SRC_WIN32
 set(ENGINE_SRC_MACOS
     "src/Core/Console_macOS.cpp"
     "src/Core/ErrorMessageBox_macOS.mm"
-    "src/Application/EntryPoint_macOS.mm"
+
+    "src/Runtime/EntryPoint_macOS.mm"
 
 	"src/Time/Time_macOS.cpp"
 	"src/File/File_macOS.mm"
@@ -289,10 +296,13 @@ target_compile_definitions(Engine_DYN
         $<$<PLATFORM_ID:Windows>:NOMINMAX>
         $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>
 
+        GLAD_GLAPI_EXPORT
         GLM_FORCE_LEFT_HANDED
         $<$<PLATFORM_ID:Windows>:YAML_CPP_STATIC_DEFINE>
     PRIVATE
         EP_BUILD_CORE
+
+        GLAD_GLAPI_EXPORT_BUILD
 )
 target_compile_definitions(Engine_LIB
     PUBLIC

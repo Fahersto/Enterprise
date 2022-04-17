@@ -1,24 +1,14 @@
 #pragma once
+#include "Enterprise/Core.h"
+#include "Enterprise/File/INIValueType.h"
+
 #include <fstream>
 #include <set>
 #include <map>
 #include <sstream>
-#include "Enterprise/Core.h"
-#include "Enterprise/File/INIValueType.h"
 
 namespace Enterprise
 {
-
-namespace Constants
-{
-///// The name of this game's developer.
-//extern const char* DeveloperName;
-///// The name of this game.
-//extern const char* AppName;
-///// The version number of the game.
-//extern const char* Version;
-}
-
 
 /// The Enterprise file system.
 class File
@@ -429,7 +419,7 @@ public:
 
 
 private:
-	friend class Application;
+	friend class Runtime;
 	friend class Graphics;
 
 	static void backslashesToSlashes(std::string& str);
@@ -444,9 +434,14 @@ private:
 	static std::string tempDirPath;
 	static std::string engineShadersPath;
 
-	static void SetPlatformContentPath();
-	static void SetPlatformDataPaths();
-	static void SetPlatformEShadersPath();
+#ifdef EP_BUILD_DYNAMIC
+	static std::string editorContentDirPath;
+	static std::string editorDataDirPath;
+	static std::string editorTempDirPath;
+#endif //EP_BUILD_DYNAMIC
+
+	static void SetPlatformPaths();
+	static void SetPlatformEnginePaths();
 
 	static void Init();
 };

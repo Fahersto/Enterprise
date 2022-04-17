@@ -1,30 +1,52 @@
 #ifdef _WIN32
+#include "Enterprise/Window.h"
+#include "Enterprise/Core.h"
+#include "Enterprise/Events.h"
+#include "Enterprise/Runtime.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <windowsx.h>
+#include "Enterprise/Core/Win32APIHelpers.h"
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include "Enterprise/Core.h"
-#include "Enterprise/Graphics/Window.h"
-#include "Enterprise/Events.h"
 
-using Enterprise::Events;
 using Enterprise::Window;
+using Enterprise::Events;
 
-unsigned int Window::windowWidth;
-unsigned int Window::windowHeight;
-float Window::aspectRatio;
-static Window::WindowMode currentMode = Window::WindowMode::Windowed;
+static Window::WindowMode windowMode;
+static int windowWidth;
+static int windowHeight;
+static float aspectRatio;
 
-static HWND hWnd; // handle to Win32 window
-static HDC hDC = nullptr; // device context
-static HGLRC hRC = nullptr; // rendering context
-static HPALETTE hPalette = nullptr; // custom palette (if needed)
+static HINSTANCE appHandle = NULL;
+static HWND windowHandle = NULL;
+static HDC deviceContext = NULL;
+static HGLRC renderingContext = NULL;
+
+static const PIXELFORMATDESCRIPTOR pixelFormatDescription =
+{
+	sizeof(PIXELFORMATDESCRIPTOR), 1,
+	PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+	PFD_TYPE_RGBA,
+	32, // Color bits
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	24, 8, // Depth + stencil bits
+	0, 0, 0, 0, 0, 0
+};
 
 LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	case WM_CLOSE: // Clicked the close button
+	case WM_ERASEBKGND:
+		return TRUE;
+		break;
+
+	case WM_CLOSE:
 		Events::Dispatch(HN("WindowClose"));
 		break;
 
@@ -41,7 +63,7 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 	case WM_MOUSEMOVE: // Mouse cursor position change
 		Events::Dispatch(HN("MousePosition"),
-			glm::vec2(GET_X_LPARAM(lParam), float(Window::GetHeight()) - GET_Y_LPARAM(lParam)));
+			glm::vec2(GET_X_LPARAM(lParam), float(windowHeight) - GET_Y_LPARAM(lParam)));
 		break;
 
 	case WM_INPUT: // Raw Input API
@@ -72,210 +94,169 @@ LRESULT CALLBACK Win32_WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
-void Window::CreatePrimaryWindow()
-{
-	EP_ASSERT_NOREENTRY();
-
-	/*windowWidth = Constants::TEMP_WindowWidth;
-	windowHeight = Constants::TEMP_WindowHeight;*/
-	windowWidth = 1280;
-	windowHeight = 720;
-	aspectRatio = (double)windowWidth / (double)windowHeight;
-
-	// Get handle to the application (Note, this might* pose problems for multithreading).
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-
-	// Window Class Info
-	WNDCLASSEX wc;                                          // Window Class info
-	ZeroMemory(&wc, sizeof(WNDCLASSEX));                    // Clear the WC for use
-	wc.cbClsExtra = 0;                                      // Extra bits (unused).
-	wc.cbWndExtra = 0;                                      // Extra bits (unused).
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = CS_OWNDC;									// Needed for OpenGL
-	wc.hInstance = hInstance;
-	wc.lpfnWndProc = Win32_WinProc;                         // Sets WindowProc() to receive Windows messages
-#ifdef EP_BUILD_DYNAMIC
-	wc.hIcon = LoadIcon(hInstance, L"ICON_ENTERPRISE");             // TODO: Set up an icon
-#else
-	wc.hIcon = LoadIcon(hInstance, L"ICON_GAME");             // TODO: Set up an icon
-#endif // EP_BUILD_DYN
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);               // Default mouse cursor.
-	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);  // Fill color when window is redrawn (set to none).
-	wc.lpszMenuName = NULL;                                 // Menu name (none, because we have no menus).
-	wc.lpszClassName = L"EP_WNDCLASS";                      // Friendly name for this window class.
-
-	// Register the class
-	EP_VERIFY(RegisterClassEx(&wc)); //TODO: Use EP_ASSERT_CODE here to call GetLastError().
-
-	// Calculate initial window size.
-	RECT wr = { 0, 0, (long)windowWidth, (long)windowHeight};
-	DWORD winStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;    // Window style
-	AdjustWindowRectEx(&wr, winStyle, FALSE, NULL);
-
-	// Create window
-	hWnd = CreateWindowEx(NULL,						// We're not using an extended window style
-						  L"EP_WNDCLASS",
-						  L"Enterprise Window Title", //Constants::WindowTitle,	// Window title
-						  winStyle,
-						  CW_USEDEFAULT,			// X-position of the window
-						  CW_USEDEFAULT,			// Y-position of the window
-						  wr.right - wr.left,		// Width of the window
-						  wr.bottom - wr.top,		// Height of the window
-						  NULL,						// We have no parent window, NULL
-						  NULL,						// We aren't using menus, NULL
-						  hInstance,
-						  NULL);					// We don't have multiple windows, NULL
-
-	EP_ASSERT(hWnd); //TODO: Use EP_ASSERT_CODE here to use GetLastError().
-
-	// Set up OpenGL
-	hDC = GetDC(hWnd);
-
-	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd, 0, sizeof(pfd));
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
-	pfd.cDepthBits = 24;
-	pfd.cStencilBits = 8;
-	pfd.cAuxBuffers = 0;
-
-	int pf = ChoosePixelFormat(hDC, &pfd);
-	EP_ASSERT(pf != 0);
-	EP_VERIFY_NEQ(SetPixelFormat(hDC, pf, &pfd), FALSE);
-	DescribePixelFormat(hDC, pf, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-
-	// Creates a logical palette if needed by the specific system.
-	if (pfd.dwFlags & PFD_NEED_PALETTE || pfd.iPixelType == PFD_TYPE_COLORINDEX)
-	{
-		int n = 1 << pfd.cColorBits;
-		if (n > 256) { n = 256; }
-
-		LOGPALETTE* lpPal = (LOGPALETTE*)malloc(sizeof(LOGPALETTE) +
-												sizeof(PALETTEENTRY) * n);
-		memset(lpPal, 0, sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) * n);
-		lpPal->palVersion = 0x300;
-		lpPal->palNumEntries = n;
-
-		GetSystemPaletteEntries(hDC, 0, n, &lpPal->palPalEntry[0]);
-
-		/* if the pixel type is RGBA, then we want to make an RGB ramp,
-		otherwise (color index) set individual colors. */
-		if (pfd.iPixelType == PFD_TYPE_RGBA)
-		{
-			int redMask = (1 << pfd.cRedBits) - 1;
-			int greenMask = (1 << pfd.cGreenBits) - 1;
-			int blueMask = (1 << pfd.cBlueBits) - 1;
-			int i;
-
-			/* fill in the entries with an RGB color ramp. */
-			for (i = 0; i < n; ++i)
-			{
-				lpPal->palPalEntry[i].peRed =
-					(((i >> pfd.cRedShift) & redMask) * 255) / redMask;
-				lpPal->palPalEntry[i].peGreen =
-					(((i >> pfd.cGreenShift) & greenMask) * 255) / greenMask;
-				lpPal->palPalEntry[i].peBlue =
-					(((i >> pfd.cBlueShift) & blueMask) * 255) / blueMask;
-				lpPal->palPalEntry[i].peFlags = 0;
-			}
-		}
-		else
-		{
-			lpPal->palPalEntry[0].peRed = 0;
-			lpPal->palPalEntry[0].peGreen = 0;
-			lpPal->palPalEntry[0].peBlue = 0;
-			lpPal->palPalEntry[0].peFlags = PC_NOCOLLAPSE;
-			lpPal->palPalEntry[1].peRed = 255;
-			lpPal->palPalEntry[1].peGreen = 0;
-			lpPal->palPalEntry[1].peBlue = 0;
-			lpPal->palPalEntry[1].peFlags = PC_NOCOLLAPSE;
-			lpPal->palPalEntry[2].peRed = 0;
-			lpPal->palPalEntry[2].peGreen = 255;
-			lpPal->palPalEntry[2].peBlue = 0;
-			lpPal->palPalEntry[2].peFlags = PC_NOCOLLAPSE;
-			lpPal->palPalEntry[3].peRed = 0;
-			lpPal->palPalEntry[3].peGreen = 0;
-			lpPal->palPalEntry[3].peBlue = 255;
-			lpPal->palPalEntry[3].peFlags = PC_NOCOLLAPSE;
-		}
-
-		hPalette = CreatePalette(lpPal);
-		if (hPalette)
-		{
-			SelectPalette(hDC, hPalette, FALSE);
-			RealizePalette(hDC);
-		}
-
-		free(lpPal);
-	}
-
-	// Create context and init Glad
-	hRC = wglCreateContext(hDC);
-	wglMakeCurrent(hDC, hRC);
-	EP_VERIFY(gladLoadGL());
-
-	// Display window
-	ShowWindow(hWnd, SW_SHOWNORMAL);
-
-	// Vsync
-	typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
-	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
-	if (wglGetExtensionsStringARB)
-	{
-		std::string_view supportedWGLExtensionsList(wglGetExtensionsStringARB(hDC));
-		if (supportedWGLExtensionsList.find("WGL_EXT_swap_control") != std::string::npos)
-		{
-			typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
-			PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-			if (wglSwapIntervalEXT)
-			{
-				if (wglSwapIntervalEXT(0) == FALSE) // TODO: Set from INI file
-				{
-					switch (GetLastError())
-					{
-					case ERROR_INVALID_DATA:
-						EP_ERROR("Window::CreatePrimaryWindow(): wglSwapIntervalEXT(): 'interval' was invalid!");
-						break;
-					case ERROR_DC_NOT_FOUND:
-						EP_ERROR("Window::CreatePrimaryWindow(): wglSwapIntervalEXT(): Device context not found!");
-						break;
-					}
-				}
-			}
-			else EP_WARN("Window::CreatePrimaryWindow(): wglSwapIntervalEXT() failed to load!  Vertical sync not available.");
-		}
-		else EP_WARN("Window::CreatePrimaryWindow(): WGL_EXT_swap_control unsupported!Vertical sync not available.");
-	}
-	else EP_ERROR("Window::CreatePrimaryWindow(): wglGetExtensionsStringARB() failed to load!  WGL extensions not available.");
-}
-
-void Window::DestroyPrimaryWindow()
-{
-	EP_ASSERT_NOREENTRY();
-	EP_ASSERTF(hWnd,
-			   "Window: Attempted to destroy primary window before creation.");
-
-	wglMakeCurrent(NULL, NULL);
-	ReleaseDC(hWnd, hDC);
-	wglDeleteContext(hRC);
-	DestroyWindow(hWnd);
-	if (hPalette)
-	{
-		DeleteObject(hPalette);
-	}
-}
-
 void Window::SwapBuffers()
 {
-	::SwapBuffers(hDC);
+	EP_ASSERT_SLOW(windowHandle);
+	EP_ASSERT_SLOW(renderingContext);
+
+	if (deviceContext == NULL)
+	{
+		deviceContext = ::GetDC(windowHandle);
+		wglMakeCurrent(deviceContext, renderingContext);
+	}
+	::SwapBuffers(deviceContext);
 }
 
-void Window::SetWindowMode(WindowMode mode)
+void Window::SetMode(Window::WindowMode mode)
 {
 	// TODO: Implement
+	windowMode = mode;
+}
+
+void Window::SetWidth(int width)
+{
+	// TODO: Implement
+	windowWidth = width;
+}
+
+void Window::SetHeight(int height)
+{
+	// TODO: Implement
+	windowHeight = height;
+}
+
+void Window::SetTitle(const std::string& title)
+{
+	// TODO: Implement
+}
+
+Window::WindowMode Window::GetMode()
+{
+	if (windowHandle)
+	{
+		EP_ERROR("Window::GetMode(): Window does not exist!");
+		return WindowMode::WindowedResizable;
+	}
+
+	return windowMode;
+}
+
+int Window::GetWidth()
+{
+	if (windowHandle)
+	{
+		EP_ERROR("Window::GetWidth(): Window does not exist!");
+		return 0;
+	}
+
+	return windowWidth;
+}
+
+int Window::GetHeight()
+{
+	if (windowHandle)
+	{
+		EP_ERROR("Window::GetHeight(): Window does not exist!");
+		return 0;
+	}
+
+	return windowHeight;
+}
+
+float Window::GetAspectRatio()
+{
+	if (windowHandle)
+	{
+		EP_ERROR("Window::GetAspectRatio(): Window does not exist!");
+		return 1.0f;
+	}
+
+	return aspectRatio;
+}
+
+void Window::Init()
+{
+	EP_ASSERT_NOREENTRY();
+
+	Events::Subscribe(HN("WindowClose"), [](Events::Event &e){
+						  Enterprise::Events::Dispatch(HN("QuitRequested"));
+						  return true; });
+
+	appHandle = ::GetModuleHandle(NULL);
+
+	// Register window class
+	WNDCLASSEX wc;
+	memset(&wc, 0, sizeof(WNDCLASSEX));
+	wc.cbSize = sizeof(WNDCLASSEX);
+	wc.style = CS_HREDRAW | CS_VREDRAW;
+	wc.lpfnWndProc = Win32_WinProc;
+	wc.hInstance = appHandle;
+	wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+	wc.lpszClassName = L"EP_WNDCLASS";
+#ifdef EP_BUILD_DYNAMIC
+	wc.hIcon = ::LoadIcon(appHandle, L"ICON_ENTERPRISE");
+#else
+	wc.hIcon = ::LoadIcon(appHandle, L"ICON_GAME");
+#endif // EP_BUILD_DYN
+	EP_VERIFY(::RegisterClassEx(&wc));
+
+	// TODO: Set the following details from INI, then from arguments, then from style
+	std::string title = "Game Window Title";
+	windowMode = WindowMode::WindowedResizable;
+	windowWidth = 1280;
+	windowHeight = 720;
+	aspectRatio = (float)windowWidth / (float)windowHeight;
+	DWORD winStyle = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME;
+	DWORD exWinStyle = WS_EX_APPWINDOW;
+
+	// Create window
+	RECT wr = { 0, 0, (long)windowWidth, (long)windowHeight };
+	::AdjustWindowRectEx(&wr, winStyle, FALSE, exWinStyle);
+	int positionX = CW_USEDEFAULT, positionY = CW_USEDEFAULT;
+
+	windowHandle = ::CreateWindowEx(exWinStyle,
+									L"EP_WNDCLASS",
+									UTF8toWCHAR(title).c_str(),
+									winStyle,
+									positionX, positionY,
+									wr.right - wr.left, wr.bottom - wr.top,
+									NULL, NULL,
+									appHandle,
+									NULL);
+	EP_ASSERT(windowHandle);
+
+	// Device context
+	deviceContext = ::GetDC(windowHandle);
+	int pf = ::ChoosePixelFormat(deviceContext, &pixelFormatDescription);
+	EP_ASSERT(pf != 0);
+	EP_VERIFY_NEQ(::SetPixelFormat(deviceContext, pf, &pixelFormatDescription), FALSE);
+
+	// Rendering context
+	renderingContext = wglCreateContext(deviceContext);
+	EP_ASSERT(wglMakeCurrent(deviceContext, renderingContext));
+
+	// GLAD
+	EP_VERIFY(gladLoadGL());
+	
+	::ShowWindow(windowHandle, SW_SHOWNORMAL);
+}
+
+void Window::Cleanup()
+{
+	EP_ASSERT(windowHandle);
+	EP_ASSERT(renderingContext);
+
+	if (deviceContext)
+	{
+		wglMakeCurrent(NULL, NULL);
+		::ReleaseDC(windowHandle, deviceContext);
+		deviceContext = NULL;
+	}
+
+	wglDeleteContext(renderingContext);
+	renderingContext = NULL;
+	::DestroyWindow(windowHandle);
+	windowHandle = NULL;
 }
 
 #endif // _WIN32

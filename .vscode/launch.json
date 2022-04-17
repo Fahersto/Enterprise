@@ -1,67 +1,61 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "(Windows) Engine Only",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [
-                "-c", "Editor/content",
-                "-d", "data/Editor",
-                "-e", "Engine/include_glsl"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "internalConsole"
-        },
-        {
-            "name": "(Windows) Engine + TestGame",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [
-                "-c", "Editor/content",
-                "-d", "data/Editor",
-                "-e", "Engine/include_glsl"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "internalConsole"
-        },
-        {
-            "name": "(lldb) Engine Only",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [
-                "-c", "Editor/content",
-                "-d", "data/Editor",
-                "-e", "Engine/include_glsl"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
-        },
-        {
-            "name": "(lldb) Engine + TestGame",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [
-                "-c", "Editor/content",
-                "-d", "data/Editor",
-                "-e", "Engine/include_glsl"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
-        },
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "(Windows) Engine Only",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${command:cmake.launchTargetPath}",
+			"args": [
+				"--sandbox"
+			],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"console": "internalConsole"
+		},
+		{
+			"name": "(Windows) Engine + TestGame",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${command:cmake.launchTargetPath}",
+			"args": [
+				"--sandbox",
+				"-p", "TestGame/TestGame.epproj"
+			],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"console": "internalConsole"
+		},
+		{
+			"name": "(lldb) Engine Only",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${command:cmake.launchTargetPath}",
+			"args": [
+				"--sandbox"
+			],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
+			"name": "(lldb) Engine + TestGame",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${command:cmake.launchTargetPath}",
+			"args": [
+				"--sandbox",
+				"-p", "TestGame/TestGame.epproj"
+			],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+	]
 }

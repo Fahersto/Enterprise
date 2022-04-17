@@ -1,10 +1,8 @@
 
 #include "Enterprise/Graphics.h"
-#include "Enterprise/Graphics/Window.h"
-
-#include "Enterprise/Events.h"
-
 #include "Enterprise/Graphics/OpenGLHelpers.h"
+#include "Enterprise/Window.h"
+#include "Enterprise/Events.h"
 
 using Enterprise::Graphics;
 using Enterprise::Events;
@@ -21,21 +19,11 @@ Graphics::UniformBufferHandle Graphics::perCameraGlobalUB;
 Graphics::UniformBufferHandle Graphics::perDrawGlobalUB;
 Graphics::perDrawGlobalUBStruct Graphics::perDrawGlobalUBData;
 
-static bool OnWindowClose(Events::Event& e)
-{
-	EP_ASSERT(e.Type() == HN("WindowClose"));
-
-    // By default, closing the window is equivalent to quitting from the OS.
-    Enterprise::Events::Dispatch(HN("QuitRequested"));
-    return true;
-}
 
 void Graphics::Init()
 {
-	Window::CreatePrimaryWindow();
-	fbWidths[0] = Window::GetWidth();
-	fbHeights[0] = Window::GetHeight();
-	Events::Subscribe(HN("WindowClose"), OnWindowClose);
+	fbWidths[0] = 0;
+	fbHeights[0] = 0;
 
 	// Get maximum number of Uniform Buffer binding points
 	EP_GL(glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize));
@@ -128,6 +116,4 @@ void Graphics::Cleanup()
 
 	delete[] textureInSlot;
 	delete[] isTextureSlotUsedThisDraw;
-
-    Window::DestroyPrimaryWindow();
 }

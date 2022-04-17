@@ -1,5 +1,5 @@
 #include "Enterprise/Graphics.h"
-#include "Enterprise/Graphics/Window.h"
+#include "Enterprise/Window.h"
 #include "Enterprise/Graphics/OpenGLHelpers.h"
 
 using Enterprise::Graphics;
@@ -50,12 +50,7 @@ Graphics::FramebufferHandle Graphics::CreateFramebuffer(std::vector<FramebufferA
 		}
 	}
 
-	if (width == 0 && height == 0)
-	{
-		// TODO: Link resolution to window width and height changes
-		width = Window::GetWidth();
-		height = Window::GetHeight();
-	}
+	// TODO: Link resolution to window width and height changes
 
 	EP_ASSERT(attachments.size() > 0);
 
@@ -372,7 +367,10 @@ int Graphics::GetFramebufferWidth(FramebufferHandle fb)
 {
 	if (fbWidths.count(fb))
 	{
-		return fbWidths[fb];
+		if (fbWidths[fb] == 0) // Default framebuffer
+			return Window::GetWidth();
+		else
+			return fbWidths[fb];
 	}
 	else
 	{

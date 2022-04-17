@@ -59,11 +59,11 @@ public:
 	EP_API static bool IsStateOnTop(State* s = nullptr);
 
 private:
-	friend class Application;
+	friend class Runtime;
 	friend class Events;
 	friend class Input;
 
-	static State* activeState;
+	static EP_API State* activeState;
 
 	static void FixedUpdate();
 	static void Update();

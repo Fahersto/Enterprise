@@ -2,7 +2,7 @@
 #ifndef EP_BUILD_DYNAMIC
 
 #import <AppKit/AppKit.h>
-#include "Enterprise/Application.h"
+#include "Enterprise/Runtime.h"
 
 using Enterprise::Application;
 
@@ -19,20 +19,20 @@ using Enterprise::Application;
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
-    @autoreleasepool
+	@autoreleasepool
 	{
-        // Set up the menu bar
-        NSMenu* MenuBar = [[NSMenu new] autorelease];
-        NSMenuItem* AppMenu = [[NSMenuItem new] autorelease]; // Application menu
-        [MenuBar addItem:AppMenu];
-        NSMenu* AppMenuImpl = [[NSMenu new] autorelease]; // Contents of application menu
-        [AppMenu setSubmenu:AppMenuImpl];
-        NSMenuItem* QuitOption = [[NSMenuItem alloc]initWithTitle:@"Quit" // Quit option
-                                                           action:@selector(terminate:)
-                                                    keyEquivalent:@""];
-        [AppMenuImpl addItem:QuitOption];
-        [NSApp setMainMenu:MenuBar];
-    }
+		// Set up the menu bar
+		NSMenu* MenuBar = [[NSMenu new] autorelease];
+		NSMenuItem* AppMenu = [[NSMenuItem new] autorelease]; // Application menu
+		[MenuBar addItem:AppMenu];
+		NSMenu* AppMenuImpl = [[NSMenu new] autorelease]; // Contents of application menu
+		[AppMenu setSubmenu:AppMenuImpl];
+		NSMenuItem* QuitOption = [[NSMenuItem alloc]initWithTitle:@"Quit" // Quit option
+														   action:@selector(terminate:)
+													keyEquivalent:@""];
+		[AppMenuImpl addItem:QuitOption];
+		[NSApp setMainMenu:MenuBar];
+	}
 }
 
 @end
@@ -40,10 +40,10 @@ using Enterprise::Application;
 /// The application entry point on macOS systems.
 int main(int argc, const char * argv[])
 {
-    @autoreleasepool
+	@autoreleasepool
 	{
 		// Create the NSApplication
-        [NSApplication sharedApplication];
+		[NSApplication sharedApplication];
 
 		// Set up custom app delegate
 		MacAppDelegate * delegate = [[[MacAppDelegate alloc] init] autorelease];
@@ -53,7 +53,7 @@ int main(int argc, const char * argv[])
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 		[NSApp setPresentationOptions:NSApplicationPresentationDefault];
 		[NSApp activateIgnoringOtherApps:YES];
-        [NSApp finishLaunching];
+		[NSApp finishLaunching];
 
 		try
 		{
@@ -92,7 +92,7 @@ int main(int argc, const char * argv[])
 		catch (Enterprise::Exceptions::FatalError&)   { exit(EXIT_FAILURE); }
 	}
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 #endif // !EP_BUILD_DYNAMIC

@@ -1,13 +1,11 @@
 #ifdef _WIN32
-
+#include <Enterprise/Runtime.h>
 #include <Enterprise/Core.h>
-#include <Enterprise/Application.h>
 
-/// The application entry point on Windows systems.
 int WINAPI WinMain(_In_ HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPSTR lpCmdLine,
-	_In_ int nCmdShow)
+				   _In_opt_ HINSTANCE hPrevInstance,
+				   _In_ LPSTR lpCmdLine,
+				   _In_ int nCmdShow)
 {
 	try
 	{
@@ -18,16 +16,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 			if (__argv[i][0] == '-')
 			{
 				currentOption = HN(__argv[i]);
-				Enterprise::Application::_cmdLineOptions[currentOption];
+				Enterprise::Runtime::cmdLineOptions[currentOption];
 			}
 			else
 			{
-				Enterprise::Application::_cmdLineOptions[currentOption].push_back(__argv[i]);
+				Enterprise::Runtime::cmdLineOptions[currentOption].push_back(__argv[i]);
 			}
 		}
 
 		// Enter main loop
-		Enterprise::Application app;
+		Enterprise::Runtime engine;
 		MSG msg = { 0 };
 		do
 		{
@@ -37,7 +35,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		} while (app.Run());
+		} while (engine.Run());
 	}
 	catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 	catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }
@@ -45,4 +43,4 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	return EXIT_SUCCESS;
 }
 
-#endif // Win32
+#endif // _WIN32

@@ -1,8 +1,9 @@
 #include "Enterprise/File.h"
-#include "Enterprise/Application.h"
+#include "Enterprise/Runtime.h"
+#include <yaml-cpp/yaml.h>
 
 using Enterprise::File;
-using Enterprise::Application;
+using Enterprise::Runtime;
 
 std::string File::contentDirPath;
 std::string File::dataDirPath;
@@ -10,6 +11,11 @@ std::string File::saveDirPath;
 std::string File::tempDirPath;
 std::string File::engineShadersPath;
 
+#ifdef EP_BUILD_DYNAMIC
+std::string File::editorContentDirPath;
+std::string File::editorDataDirPath;
+std::string File::editorTempDirPath;
+#endif // EP_BUILD_DYNAMIC
 
 void File::backslashesToSlashes(std::string& str)
 {
@@ -67,6 +73,20 @@ std::string Enterprise::File::VirtualPathToNative(const std::string& path)
 	{
 		return saveDirPath + path.substr(2);
 	}
+#ifdef EP_BUILD_DYNAMIC
+	else if (path.rfind("ec/", 0) == 0)
+	{
+		if (!Runtime::isEditor)
+			EP_WARN("File::VirtualPathToNative(): Dereferencing \"ec/\" outside of editor!");
+		return editorContentDirPath + path.substr(3);
+	}
+	else if (path.rfind("ed/", 0) == 0)
+	{
+		if (!Runtime::isEditor)
+			EP_WARN("File::VirtualPathToNative(): Dereferencing \"ec/\" outside of editor!");
+		return editorDataDirPath + path.substr(3);
+	}
+#endif // EP_BUILD_DYNAMIC
 	else
 	{
 		return path;
@@ -187,88 +207,191 @@ File::ErrorCode File::TextFileWriter::Open(const std::string& path)
 
 void File::Init()
 {
-	Application::RegisterCmdLineOption
+	Runtime::RegisterCmdLineOption
 	(
-		"Content Directory", 
-		{ "-c", "--content-dir" },
-		"Set a custom location for the game's \"content\" directory.", 1
+		"Developer's Sandbox",
+		{ "-s", "--sandbox" },
+		"Redirect virtual paths to the Enterprise source tree.", 0
 	);
-	Application::RegisterCmdLineOption
+	Runtime::RegisterCmdLineOption
 	(
-		"Data Directory",
-		{ "-d", "--data-dir" },
-		"Set a custom location for the game's data directories.", 1
-	);
-	Application::RegisterCmdLineOption
-	(
-		"Engine Shaders Directory",
-		{ "-e", "--engineshaders-dir" },
-		"Set a custom location for the game's \"engineshaders\" directory.", 1
+		"Project File",
+		{ "-p", "--project" },
+		"Specify an Enterprise project file to open.", 1
 	);
 
-	std::vector<std::string> cmdLinePath;
-
-	// Content directory
-	cmdLinePath = Application::GetCmdLineOption(HN("--content-dir"));
-	if (cmdLinePath.size())
+	if (Runtime::CheckCmdLineOption(HN("--sandbox")))
 	{
-		backslashesToSlashes(cmdLinePath.front());
+		engineShadersPath = "Engine/include_glsl/";
+#if EP_BUILD_DYNAMIC
+		if (Runtime::isEditor)
+		{
+			editorContentDirPath = "Editor/content/";
+			editorDataDirPath = "data/Editor/data/";
+			editorTempDirPath = "data/Editor/temp/";
 
-		if (cmdLinePath.front().back() != '/')
-			contentDirPath = cmdLinePath.front() + '/';
-		else
-			contentDirPath = cmdLinePath.front();
+			std::error_code ec;
+			std::filesystem::create_directories(editorDataDirPath, ec);
+			if(ec)
+			{
+				EP_ERROR("File::Init(): Unable to create editor data folder!");
+				EP_DEBUGBREAK();
+			}
+			std::filesystem::create_directories(editorTempDirPath, ec);
+			if(ec)
+			{
+				EP_ERROR("File::Init(): Unable to create editor temp folder!");
+				EP_DEBUGBREAK();
+			}
+		}
+#endif // EP_BUILD_DYNAMIC
 	}
 	else
 	{
-		SetPlatformContentPath();
+		SetPlatformEnginePaths();
 	}
 
-	// Data directories
-	cmdLinePath = Application::GetCmdLineOption(HN("--data-dir"));
-	if (cmdLinePath.size())
+	// Project file loading
+	std::vector<std::string> projectOptionArgs;
+	if (Runtime::CheckCmdLineOption(HN("--project")))
 	{
-		backslashesToSlashes(cmdLinePath.front());
-
-		if (cmdLinePath.front().back() == '/')
+		projectOptionArgs = Runtime::GetCmdLineOption(HN("--project"));
+		if (projectOptionArgs.size())
 		{
-			dataDirPath = cmdLinePath.front() + "data" + "/";
-			saveDirPath = cmdLinePath.front() + "save" + "/";
-			tempDirPath = cmdLinePath.front() + "temp" + "/";
+			std::string& projectFileLocation = projectOptionArgs.front();
+			backslashesToSlashes(projectFileLocation);
+			
+			std::string projectYAML;
+			ErrorCode ec = LoadTextFile(projectFileLocation, &projectYAML);
+			if (ec == ErrorCode::Success)
+			{
+				try
+				{
+					YAML::Node yamlIn = YAML::Load(projectYAML);
+
+					if (yamlIn.Type() != YAML::NodeType::Map)
+					{
+						EP_ERROR("File::Init(): Project file's root node is not a map!");
+						EP_DEBUGBREAK();
+					}
+					else
+					{
+						if (yamlIn["Directories"])
+						{
+							if (yamlIn["Directories"]["Content"])
+							{
+								contentDirPath = yamlIn["Directories"]["Content"].as<std::string>();
+								backslashesToSlashes(contentDirPath);
+
+								if (contentDirPath.back() != '/')
+									contentDirPath.append("/");
+							}
+							if (yamlIn["Directories"]["Data"])
+							{
+								dataDirPath = yamlIn["Directories"]["Data"].as<std::string>();
+								backslashesToSlashes(dataDirPath);
+								if (dataDirPath.back() != '/')
+									dataDirPath.append("/");
+							}
+							if (yamlIn["Directories"]["Save"])
+							{
+								saveDirPath = yamlIn["Directories"]["Save"].as<std::string>();
+								backslashesToSlashes(saveDirPath);
+								if (saveDirPath.back() != '/')
+									saveDirPath.append("/");
+							}
+							if (yamlIn["Directories"]["Temp"])
+							{
+								tempDirPath = yamlIn["Directories"]["Temp"].as<std::string>();
+								backslashesToSlashes(tempDirPath);
+								if (tempDirPath.back() != '/')
+									tempDirPath.append("/");
+							}
+						}
+
+						// Confirm file ends in .epproj
+						if (projectFileLocation.length() > 7)
+						{
+							if (projectFileLocation.compare(projectFileLocation.length() - 7, 7, ".epproj") != 0)
+							{
+								EP_ERROR("File::Init(): Argument to \"--project\" is not an EPPROJ file!  Argument: {}", projectFileLocation);
+								EP_DEBUGBREAK();
+							}
+						}
+						else
+						{
+							EP_ERROR("File::Init(): Argument to \"--project\" is not an EPPROJ file!  Argument: {}", projectFileLocation);
+							EP_DEBUGBREAK();
+						}
+
+						// Make path relative to working directory
+						size_t slashPos = projectFileLocation.find_last_of('/');
+						if (slashPos != std::string::npos)
+						{
+							projectFileLocation.resize(slashPos + 1);
+							contentDirPath = projectFileLocation + contentDirPath;
+							dataDirPath = projectFileLocation + dataDirPath;
+							saveDirPath = projectFileLocation + saveDirPath;
+							tempDirPath = projectFileLocation + tempDirPath;
+						}
+
+						std::error_code ec;
+						std::filesystem::create_directories(contentDirPath, ec);
+						if(ec)
+						{
+							EP_ERROR("File::Init(): Unable to create content folder!");
+							EP_DEBUGBREAK();
+						}
+						std::filesystem::create_directories(dataDirPath, ec);
+						if(ec)
+						{
+							EP_ERROR("File::Init(): Unable to create data folder!");
+							EP_DEBUGBREAK();
+						}
+						std::filesystem::create_directories(saveDirPath, ec);
+						if(ec)
+						{
+							EP_ERROR("File::Init(): Unable to create save folder!");
+							EP_DEBUGBREAK();
+						}
+						std::filesystem::create_directories(tempDirPath, ec);
+						if(ec)
+						{
+							EP_ERROR("File::Init(): Unable to create temp folder!");
+							EP_DEBUGBREAK();
+						}
+					}
+
+					if (contentDirPath.empty())
+						contentDirPath = "content/";
+					if (dataDirPath.empty())
+						dataDirPath = "data/data/";
+					if (saveDirPath.empty())
+						saveDirPath = "data/save/";
+					if (tempDirPath.empty())
+						tempDirPath = "data/temp/";
+				}
+				catch (const YAML::Exception& e)
+				{
+					EP_ERROR("File::Init(): YAML exception thrown!  Message: {}", e.msg);
+				}
+			}
+			else
+			{
+				EP_ERROR("File::Init(): Error loading project file {}!  Error: {}",
+						 projectFileLocation, ErrorCodeToStr(ec));
+				EP_DEBUGBREAK();
+			}
 		}
 		else
 		{
-			dataDirPath = cmdLinePath.front() + "/" + "data" + "/";
-			saveDirPath = cmdLinePath.front() + "/" + "save" + "/";
-			tempDirPath = cmdLinePath.front() + "/" + "temp" + "/";
+			// TODO: Output error onto the command line
+			EP_ERROR("File::Init(): \"--sandbox\" was specified without any arguments!");
+			EP_DEBUGBREAK();
 		}
-
-		std::error_code ec;
-		std::filesystem::create_directories(dataDirPath, ec);
-		EP_ASSERTF(!ec, "File::Init(): Unable to create application data path!");
-		std::filesystem::create_directories(saveDirPath, ec);
-		EP_ASSERTF(!ec, "File::Init(): Unable to create save data path!");
-		std::filesystem::create_directories(tempDirPath, ec);
-		EP_ASSERTF(!ec, "File::Init(): Unable to create temp data path!");
 	}
 	else
 	{
-		SetPlatformDataPaths();
-	}
-
-	// Engine shaders directory	
-	cmdLinePath = Application::GetCmdLineOption(HN("--engineshaders-dir"));
-	if (cmdLinePath.size())
-	{
-		backslashesToSlashes(cmdLinePath.front());
-
-		if (cmdLinePath.front().back() != '/')
-			engineShadersPath = cmdLinePath.front() + '/';
-		else
-			engineShadersPath = cmdLinePath.front();
-	}
-	else
-	{
-		SetPlatformEShadersPath();
+		SetPlatformPaths();
 	}
 }

@@ -1,11 +1,10 @@
 {
-    "cmake.debugConfig": {
-        "args": [
-            "-c", "Editor/content",
-            "-d", "data/Editor",
-            "-e", "Engine/include_glsl"
-        ],
-        "cwd": "${workspaceFolder}"
-    },
-    "debug.allowBreakpointsEverywhere": true
+	"cmake.debugConfig": {
+		"args": [
+			"--sandbox",
+			"-p", "TestGame/TestGame.epproj"
+		],
+		"cwd": "${workspaceFolder}"
+	},
+	"debug.allowBreakpointsEverywhere": true
 }
