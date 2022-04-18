@@ -1,12 +1,8 @@
 #if defined(__APPLE__) && defined(__MACH__)
-
+#include "Runtime.h"
+#include "Window/Window.h"
 #include <Enterprise/Runtime.h>
 #import <AppKit/AppKit.h>
-// #import <GameController/GameController.h>
-// #include <mach/mach_time.h>
-// #include <Carbon/Carbon.h>
-
-using Enterprise::Application;
 
 /// Enterprise's macOS app delegate.  Used to handle messages from macOS.
 @interface MacAppDelegate : NSObject <NSApplicationDelegate>
@@ -15,7 +11,7 @@ using Enterprise::Application;
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)Sender
 {
-	Enterprise::Events::Dispatch(HN("QuitRequested"));
+	Enterprise::Events::Dispatch(HN("Editor_QuitRequested"));
 	return NSTerminateCancel;
 }
 
@@ -66,16 +62,24 @@ int main(int argc, const char * argv[])
 				if (argv[i][0] == '-')
 				{
 					currentOption = HN(argv[i]);
-					Application::_cmdLineOptions[currentOption];
+					Enterprise::Runtime::cmdLineOptions[currentOption];
 				}
 				else
 				{
-					Application::_cmdLineOptions[currentOption].push_back(argv[i]);
+					Enterprise::Runtime::cmdLineOptions[currentOption].push_back(argv[i]);
 				}
 			}
-			
+
+			// Create window (OGL context must exist for engine Init())
+			Editor::Window::CreatePrimary();
+
+			// Create runtimes
+			Enterprise::Runtime::isEditor = true;
+			Enterprise::Runtime engine;
+			engine.isRunning = false; // Disable PIE at launch
+			Editor::Runtime editor;
+
 			// Enter main loop
-			Application app;
 			NSEvent *e;
 			do
 			{
@@ -88,11 +92,14 @@ int main(int argc, const char * argv[])
 					[NSApp sendEvent: e];
 					[NSApp updateWindows];
 				}
-			} while (app.Run());
+				engine.Run();
+			} while (editor.Run());
 		}
 		catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 		catch (Enterprise::Exceptions::FatalError&)   { exit(EXIT_FAILURE); }
 	}
+
+	Editor::Window::DestroyPrimary();
 
 	return EXIT_SUCCESS;
 }

@@ -4,7 +4,7 @@
 #import <AppKit/AppKit.h>
 #include "Enterprise/Runtime.h"
 
-using Enterprise::Application;
+using Enterprise::Runtime;
 
 /// Enterprise's macOS app delegate.  Used to handle messages from macOS.
 @interface MacAppDelegate : NSObject <NSApplicationDelegate>
@@ -64,16 +64,16 @@ int main(int argc, const char * argv[])
 				if (argv[i][0] == '-')
 				{
 					currentOption = HN(argv[i]);
-					Application::_cmdLineOptions[currentOption];
+					Runtime::cmdLineOptions[currentOption];
 				}
 				else
 				{
-					Application::_cmdLineOptions[currentOption].push_back(argv[i]);
+					Runtime::cmdLineOptions[currentOption].push_back(argv[i]);
 				}
 			}
 			
 			// Enter main loop
-			Application app;
+			Runtime engine;
 			NSEvent *e;
 			do
 			{
@@ -86,7 +86,7 @@ int main(int argc, const char * argv[])
 					[NSApp sendEvent: e];
 					[NSApp updateWindows];
 				}
-			} while (app.Run());
+			} while (engine.Run());
 		}
 		catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 		catch (Enterprise::Exceptions::FatalError&)   { exit(EXIT_FAILURE); }

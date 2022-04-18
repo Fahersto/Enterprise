@@ -90,6 +90,7 @@ target_link_libraries(Editor
 	PRIVATE
 		Engine_DYN
 		"$<$<PLATFORM_ID:Windows>:OpenGL32>"
+		"$<$<PLATFORM_ID:Darwin>:-framework GameController>"
 )
 
 # Build flags/settings
@@ -228,9 +229,9 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 # Debugger setup
 set_target_properties(Editor PROPERTIES
 	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-	VS_DEBUGGER_COMMAND_ARGUMENTS "-c \"Editor/content\" -d \"data/Editor\" -e \"Engine/include_glsl\""
+	VS_DEBUGGER_COMMAND_ARGUMENTS "--sandbox -p \"TestGame/TestGame.epproj\""
 	XCODE_SCHEME_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-	XCODE_SCHEME_ARGUMENTS "-c \"Editor/content\";-d \"data/Editor\";-e \"Engine/include_glsl\""
+	XCODE_SCHEME_ARGUMENTS "--sandbox;-p \"TestGame/TestGame.epproj\""
 )
 
 # Install locations

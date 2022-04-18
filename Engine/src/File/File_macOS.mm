@@ -180,8 +180,9 @@ void File::TextFileWriter::Close()
 }
 
 
-void File::SetPlatformContentPath()
+void File::SetPlatformPaths()
 {
+	// Content
 	CFBundleRef bundle = CFBundleGetMainBundle();
 	EP_ASSERT(bundle);
 	CFURLRef contentURL = CFBundleCopyResourcesDirectoryURL(bundle);
@@ -192,10 +193,8 @@ void File::SetPlatformContentPath()
 	contentDirPath = std::string((char*)contentPath) + "/content/";
 
 	CFRelease(contentURL);
-}
 
-void File::SetPlatformDataPaths()
-{
+	// Data
 	@autoreleasepool
 	{
 		// Save is a subfolder of this location.
@@ -212,7 +211,7 @@ void File::SetPlatformDataPaths()
 
 		dataDirPath = std::string(dataPathURL.path.UTF8String) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + "/data/";
 		saveDirPath = std::string(dataPathURL.path.UTF8String) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + "/save/";
-		tempDirPath = std::string(tempPathURL.path.UTF8String) + '/';// + Constants::DeveloperName + '/' + Constants::AppName + '/';
+		tempDirPath = std::string(tempPathURL.path.UTF8String) + '/';
 
 		// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 		std::error_code ec;
@@ -223,7 +222,7 @@ void File::SetPlatformDataPaths()
 	}
 }
 
-void File::SetPlatformEShadersPath()
+void File::SetPlatformEnginePaths()
 {
 	CFBundleRef bundle = CFBundleGetMainBundle();
 	EP_ASSERT(bundle);

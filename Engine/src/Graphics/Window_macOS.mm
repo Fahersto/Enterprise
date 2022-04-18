@@ -9,7 +9,10 @@
 using Enterprise::Events;
 using Enterprise::Window;
 
-static Window::WindowMode currentMode = Window::WindowMode::Windowed;
+static Window::WindowMode windowMode = Window::WindowMode::WindowedFixed;
+static unsigned int windowWidth;
+static unsigned int windowHeight;
+static float aspectRatio;
 
 @interface macOSWindowDelegate : NSWindow <NSWindowDelegate>
 @end
@@ -24,7 +27,7 @@ static Window::WindowMode currentMode = Window::WindowMode::Windowed;
 - (void)windowWillEnterFullScreen:(NSNotification *)notification
 {
 	[self setFrame:[[NSScreen mainScreen] frame] display:YES];
-	currentMode = Enterprise::Window::WindowMode::Fullscreen;
+	windowMode = Enterprise::Window::WindowMode::Fullscreen;
 }
 - (void)windowWillExitFullScreen:(NSNotification *)notification
 {
@@ -32,7 +35,7 @@ static Window::WindowMode currentMode = Window::WindowMode::Windowed;
 	CGFloat yPos = NSHeight([[NSScreen mainScreen] frame]) / 2 - Window::GetHeight() / 2;
 	[self setFrame:NSMakeRect(xPos, yPos, Window::GetWidth(), Window::GetHeight()) display:YES];
 
-	currentMode = Enterprise::Window::WindowMode::Windowed;
+	windowMode = Enterprise::Window::WindowMode::WindowedFixed;
 }
 
 - (void)windowDidMove:(NSNotification *)notification
@@ -40,7 +43,6 @@ static Window::WindowMode currentMode = Window::WindowMode::Windowed;
     // TODO: Set up consistent coordinate system across platforms
     Events::Dispatch(HN("WindowMove"), std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
 }
-
 
 // Keyboard input
 - (void)keyDown:(NSEvent *)event
@@ -58,20 +60,179 @@ static Window::WindowMode currentMode = Window::WindowMode::Windowed;
 
 @end
 
-
-unsigned int Window::windowWidth;
-unsigned int Window::windowHeight;
-float Window::aspectRatio;
-
-static macOSWindowDelegate* _windowReference;
+static macOSWindowDelegate* windowReference = nullptr;
 static NSOpenGLView* view;
 
-void Window::CreatePrimaryWindow()
+void Window::SwapBuffers()
+{
+	[[view openGLContext] flushBuffer];
+}
+
+void Window::SetMode(Window::WindowMode mode)
+{
+	@autoreleasepool
+	{
+		static NSRect windowedRect = [windowReference contentRectForFrameRect:[windowReference frame]];
+
+		switch (mode)
+		{
+			case WindowMode::WindowedFixed:
+			{
+				if (windowMode == WindowMode::Fullscreen)
+				{
+					// Toggle fullscreen
+					[windowReference toggleFullScreen:nil];
+				}
+				else if (windowMode == WindowMode::BorderlessFixed)
+				{
+					// Set resolution to windowed res
+					[windowReference setFrame:windowedRect display:YES];
+
+					// Set window style
+					NSWindowStyleMask style = NSWindowStyleMaskClosable
+											| NSWindowStyleMaskTitled
+											| NSWindowStyleMaskMiniaturizable;
+					[windowReference setStyleMask:style];
+					[windowReference setHidesOnDeactivate:NO];
+					[windowReference setLevel:NSNormalWindowLevel];
+				}
+				windowMode = WindowMode::WindowedFixed;
+			}
+				break;
+			case WindowMode::BorderlessFixed:
+			{
+				if (windowMode == WindowMode::WindowedFixed)
+				{
+					windowedRect = [windowReference contentRectForFrameRect:[windowReference frame]];
+
+					// Set window style
+					[windowReference setStyleMask:NSWindowStyleMaskBorderless];
+					[windowReference setHidesOnDeactivate:YES];
+					[windowReference setLevel:NSMainMenuWindowLevel+1];
+
+					// Set window size
+					[windowReference setFrame:[[NSScreen mainScreen] frame] display:YES];
+				}
+				else if (windowMode == WindowMode::Fullscreen)
+				{
+					// Toggle fullscreen
+					[windowReference toggleFullScreen:nil];
+
+					// Set window style
+					[windowReference setStyleMask:NSWindowStyleMaskBorderless];
+					[windowReference setHidesOnDeactivate:YES];
+					[windowReference setLevel:NSMainMenuWindowLevel+1];
+
+					// Set window size
+					[windowReference setFrame:[[NSScreen mainScreen] frame] display:YES];
+				}
+				windowMode = WindowMode::BorderlessFixed;
+			}
+				break;
+			case WindowMode::Fullscreen:
+			{
+				// TODO: Remove title bar from fullscreen mode
+
+				if (windowMode == WindowMode::WindowedFixed)
+				{
+					// Preserve windowed size
+					windowedRect = [windowReference contentRectForFrameRect:[windowReference frame]];
+
+					// Toggle fullscreen
+					[windowReference toggleFullScreen:nil];
+				}
+				else if (windowMode == WindowMode::BorderlessFixed)
+				{
+					// Set style
+					NSWindowStyleMask style = NSWindowStyleMaskClosable
+											| NSWindowStyleMaskTitled
+											| NSWindowStyleMaskMiniaturizable;
+					[windowReference setStyleMask:style];
+					[windowReference setHidesOnDeactivate:NO];
+					[windowReference setLevel:NSNormalWindowLevel];
+
+					// Toggle fullscreen
+					[windowReference toggleFullScreen:nil];
+				}
+				// windowMode set automatically in window delegate
+			}
+				break;
+			default:
+				// TODO: Support resizeable modes
+				EP_ASSERT_NOENTRY();
+				break;
+		}
+	}
+}
+
+void Window::SetWidth(int width)
+{
+	// TODO: Implement
+	windowWidth = width;
+}
+
+void Window::SetHeight(int height)
+{
+	// TODO: Implement
+	windowHeight = height;
+}
+
+void Window::SetTitle(const std::string& title)
+{
+	// TODO: Implement
+}
+
+Window::WindowMode Window::GetMode()
+{
+	if (!windowReference)
+	{
+		EP_ERROR("Window::GetMode(): Window does not exist!");
+		return WindowMode::WindowedResizable;
+	}
+
+	return windowMode;
+}
+
+int Window::GetWidth()
+{
+	if (!windowReference)
+	{
+		EP_ERROR("Window::GetWidth(): Window does not exist!");
+		return 0;
+	}
+
+	return windowWidth;
+}
+
+int Window::GetHeight()
+{
+	if (!windowReference)
+	{
+		EP_ERROR("Window::GetHeight(): Window does not exist!");
+		return 0;
+	}
+
+	return windowHeight;
+}
+
+float Window::GetAspectRatio()
+{
+	if (!windowReference)
+	{
+		EP_ERROR("Window::GetAspectRatio(): Window does not exist!");
+		return 1.0f;
+	}
+
+	return aspectRatio;
+}
+
+void Window::Init()
 {
 	EP_ASSERT_NOREENTRY();
 
-	windowWidth = 1080;// Constants::TEMP_WindowWidth;
-	windowHeight = 720;// Constants::TEMP_WindowHeight;
+	// TODO: Set default size & position from INI, then from style.
+	windowWidth = 1280;
+	windowHeight = 720;
 	aspectRatio = (double)windowWidth / (double)windowHeight;
 
 	@autoreleasepool
@@ -96,7 +257,7 @@ void Window::CreatePrimaryWindow()
 		view = [[NSOpenGLView alloc] initWithFrame:viewingRect pixelFormat:pixelFormat];
 
 		// Make context current and set up Glad
-		GLint swapInt = 0; // TODO: Set from INI file
+		GLint swapInt = 1; // TODO: Set from INI file
 		[[view openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 		[[view openGLContext] makeCurrentContext];
 		EP_VERIFY(gladLoadGL());
@@ -105,140 +266,38 @@ void Window::CreatePrimaryWindow()
 		NSWindowStyleMask style = NSWindowStyleMaskClosable
 								| NSWindowStyleMaskTitled
 								| NSWindowStyleMaskMiniaturizable;
-		_windowReference = [[macOSWindowDelegate alloc] initWithContentRect:viewingRect
+		windowReference = [[macOSWindowDelegate alloc] initWithContentRect:viewingRect
 																  styleMask:style
 																	backing:NSBackingStoreBuffered
 																	  defer:YES];
 
-		EP_ASSERT( _windowReference != nil );
+		EP_ASSERT( windowReference != nil );
 
 		// Set window properties
 		NSString* convertedTitle = [[[NSString alloc] initWithBytes:L"Enterprise Window Title"//Constants::WindowTitle
 															 length:wcslen(L"Enterprise Window Title"/*Constants::WindowTitle*/) * sizeof(wchar_t)
 														   encoding:NSUTF32LittleEndianStringEncoding] autorelease];
 
-		[_windowReference setTitle: convertedTitle];
-		[_windowReference setDelegate: _windowReference];
-		[_windowReference setLevel:NSNormalWindowLevel];
-		[_windowReference setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary
+		[windowReference setTitle: convertedTitle];
+		[windowReference setDelegate: windowReference];
+		[windowReference setLevel:NSNormalWindowLevel];
+		[windowReference setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary
 											   | NSWindowCollectionBehaviorManaged];
-		[_windowReference setAcceptsMouseMovedEvents: YES];
+		[windowReference setAcceptsMouseMovedEvents: YES];
 
-		[_windowReference setOpaque:YES];
-		[_windowReference setContentView:view];
-		[_windowReference makeFirstResponder:view];
+		[windowReference setOpaque:YES];
+		[windowReference setContentView:view];
+		[windowReference makeFirstResponder:view];
 
 		// Show window
-		[_windowReference makeKeyAndOrderFront:nil];
+		[windowReference makeKeyAndOrderFront:nil];
 	}
 }
 
-void Window::DestroyPrimaryWindow()
+void Window::Cleanup()
 {
 	EP_ASSERT_NOREENTRY();
-	EP_ASSERTF(_windowReference, "Window: Attempted to destroy primary window before creation.");
-}
-
-void Window::SwapBuffers()
-{
-	[[view openGLContext] flushBuffer];
-}
-
-
-void Window::SetWindowMode(WindowMode mode)
-{
-	@autoreleasepool
-	{
-		static NSRect windowedRect = [_windowReference contentRectForFrameRect:[_windowReference frame]];
-
-		switch (mode)
-		{
-			case WindowMode::Windowed:
-			{
-				if (currentMode == WindowMode::Fullscreen)
-				{
-					// Toggle fullscreen
-					[_windowReference toggleFullScreen:nil];
-				}
-				else if (currentMode == WindowMode::Borderless)
-				{
-					// Set resolution to windowed res
-					[_windowReference setFrame:windowedRect display:YES];
-
-					// Set window style
-					NSWindowStyleMask style = NSWindowStyleMaskClosable
-											| NSWindowStyleMaskTitled
-											| NSWindowStyleMaskMiniaturizable;
-					[_windowReference setStyleMask:style];
-					[_windowReference setHidesOnDeactivate:NO];
-					[_windowReference setLevel:NSNormalWindowLevel];
-				}
-				currentMode = WindowMode::Windowed;
-			}
-				break;
-			case WindowMode::Borderless:
-			{
-				if (currentMode == WindowMode::Windowed)
-				{
-					windowedRect = [_windowReference contentRectForFrameRect:[_windowReference frame]];
-
-					// Set window style
-					[_windowReference setStyleMask:NSWindowStyleMaskBorderless];
-					[_windowReference setHidesOnDeactivate:YES];
-					[_windowReference setLevel:NSMainMenuWindowLevel+1];
-
-					// Set window size
-					[_windowReference setFrame:[[NSScreen mainScreen] frame] display:YES];
-				}
-				else if (currentMode == WindowMode::Fullscreen)
-				{
-					// Toggle fullscreen
-					[_windowReference toggleFullScreen:nil];
-
-					// Set window style
-					[_windowReference setStyleMask:NSWindowStyleMaskBorderless];
-					[_windowReference setHidesOnDeactivate:YES];
-					[_windowReference setLevel:NSMainMenuWindowLevel+1];
-
-					// Set window size
-					[_windowReference setFrame:[[NSScreen mainScreen] frame] display:YES];
-				}
-				currentMode = WindowMode::Borderless;
-			}
-				break;
-			case WindowMode::Fullscreen:
-			{
-				// TODO: Remove title bar from fullscreen mode
-
-				if (currentMode == WindowMode::Windowed)
-				{
-					// Preserve windowed size
-					windowedRect = [_windowReference contentRectForFrameRect:[_windowReference frame]];
-
-					// Toggle fullscreen
-					[_windowReference toggleFullScreen:nil];
-				}
-				else if (currentMode == WindowMode::Borderless)
-				{
-					// Set style
-					NSWindowStyleMask style = NSWindowStyleMaskClosable
-											| NSWindowStyleMaskTitled
-											| NSWindowStyleMaskMiniaturizable;
-					[_windowReference setStyleMask:style];
-					[_windowReference setHidesOnDeactivate:NO];
-					[_windowReference setLevel:NSNormalWindowLevel];
-
-					// Toggle fullscreen
-					[_windowReference toggleFullScreen:nil];
-				}
-				// currentMode set automatically in window delegate
-			}
-				break;
-			default:
-				EP_ASSERT_NOENTRY();
-				break;
-		}
-	}
+	EP_ASSERTF(windowReference, "Window: Attempted to destroy primary window before creation.");
 }
 
 #endif // macOS

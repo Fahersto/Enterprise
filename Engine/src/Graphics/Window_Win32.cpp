@@ -132,7 +132,7 @@ void Window::SetTitle(const std::string& title)
 
 Window::WindowMode Window::GetMode()
 {
-	if (windowHandle)
+	if (!windowHandle)
 	{
 		EP_ERROR("Window::GetMode(): Window does not exist!");
 		return WindowMode::WindowedResizable;
@@ -143,7 +143,7 @@ Window::WindowMode Window::GetMode()
 
 int Window::GetWidth()
 {
-	if (windowHandle)
+	if (!windowHandle)
 	{
 		EP_ERROR("Window::GetWidth(): Window does not exist!");
 		return 0;
@@ -154,7 +154,7 @@ int Window::GetWidth()
 
 int Window::GetHeight()
 {
-	if (windowHandle)
+	if (!windowHandle)
 	{
 		EP_ERROR("Window::GetHeight(): Window does not exist!");
 		return 0;
@@ -165,7 +165,7 @@ int Window::GetHeight()
 
 float Window::GetAspectRatio()
 {
-	if (windowHandle)
+	if (!windowHandle)
 	{
 		EP_ERROR("Window::GetAspectRatio(): Window does not exist!");
 		return 1.0f;
