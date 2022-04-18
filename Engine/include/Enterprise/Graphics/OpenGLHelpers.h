@@ -1,7 +1,7 @@
 #pragma once
-#include <glad/glad.h>
 #include "Enterprise/Core.h"
 #include "Enterprise/Graphics.h"
+#include <glad/glad.h>
 
 #ifdef EP_CONFIG_DEBUG
 

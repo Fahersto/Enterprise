@@ -5,7 +5,7 @@ using Enterprise::File;
 
 static std::string inipath;
 
-static void Editor::Window::ConfigureImGui()
+void Editor::Window::ConfigureImGui()
 {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
