@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "Runtime.h"
 #include <Enterprise/Events.h>
 #include <Enterprise/Window.h>
 
@@ -48,6 +49,10 @@ static NSOpenGLView* view;
 {
 	// TODO: Set up consistent coordinate system across platforms
 	Events::Dispatch(HN("WindowMove"), std::pair<int, int>(self.frame.origin.x, self.frame.origin.y));
+}
+- (void)windowDidResize:(NSNotification *)notification
+{
+	Editor::Runtime::Run();
 }
 
 // Mouse input
@@ -103,8 +108,7 @@ void Editor::Window::CreatePrimary()
 		NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
 		{
 			NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
-			NSOpenGLPFAColorSize    , 24                           ,
-			NSOpenGLPFAAlphaSize    , 8                            ,
+			NSOpenGLPFAColorSize    , 32                           ,
 			NSOpenGLPFADepthSize    , 24                           ,
 			NSOpenGLPFAStencilSize  , 8                            ,
 			NSOpenGLPFADoubleBuffer ,
@@ -117,7 +121,8 @@ void Editor::Window::CreatePrimary()
 		// Allocate window
 		NSWindowStyleMask style = NSWindowStyleMaskClosable
 								| NSWindowStyleMaskTitled
-								| NSWindowStyleMaskMiniaturizable;
+								| NSWindowStyleMaskMiniaturizable
+								| NSWindowStyleMaskResizable;
 		windowReference = [[editorWindowDelegate alloc] initWithContentRect:viewingRect
 																  styleMask:style
 																	backing:NSBackingStoreBuffered
