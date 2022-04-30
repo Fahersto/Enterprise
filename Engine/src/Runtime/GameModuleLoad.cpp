@@ -16,6 +16,7 @@
 #include "Enterprise/Core/Win32APIHelpers.h"
 static HMODULE gameModuleHandle = NULL;
 #else // macOS
+#include <dlfcn.h>
 static void* gameModuleHandle = NULL;
 #endif
 
@@ -92,26 +93,26 @@ void Enterprise::LoadGameModule(const std::string& projectFilePath)
 	modulePath = absProjectFilePath + modulePath + moduleName + ".dll";
 	gameModuleHandle = ::LoadLibrary(UTF8toWCHAR(modulePath).c_str());
 	#else // macOS
-	modulePath = absProjectFilePath + modulePath + "lib" + moduleName + ".dylib";
-	// gameModuleHandle = ::dlopen();
+	modulePath = absProjectFilePath + modulePath + "lib" + moduleName + ".so";
+	gameModuleHandle = ::dlopen(modulePath.c_str(), RTLD_LAZY | RTLD_LOCAL);
 	#endif
 	
 	if (gameModuleHandle)
 	{
 		#ifdef _WIN32
-		::GameSysInit_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "SystemInit");
-		::GameSysCleanup_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "SystemCleanup");
+		::GameSysInit_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "GameSysInit");
+		::GameSysCleanup_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "GameSysCleanup");
 		::GameInit_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "GameInit");
 		::GameCleanup_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "GameCleanup");
 		::PieInit_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "PieInit");
 		::PieCleanup_Ptr = (void(*)())::GetProcAddress(gameModuleHandle, "PieCleanup");
 		#else // macOS
-		// ::GameSysInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "SystemInit");
-		// ::GameSysCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "SystemCleanup");
-		// ::GameInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameInit");
-		// ::GameCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameCleanup");
-		// ::PieInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "PieInit");
-		// ::PieCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "PieCleanup");
+		::GameSysInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameSysInit");
+		::GameSysCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameSysCleanup");
+		::GameInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameInit");
+		::GameCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "GameCleanup");
+		::PieInit_Ptr = (void(*)())::dlsym(gameModuleHandle, "PieInit");
+		::PieCleanup_Ptr = (void(*)())::dlsym(gameModuleHandle, "PieCleanup");
 		#endif
 
 		if (!::GameSysInit_Ptr ||
@@ -125,7 +126,8 @@ void Enterprise::LoadGameModule(const std::string& projectFilePath)
 			EP_ERROR("LoadGameModule(): Error loading entry point functions!  Error: {}", Win32_LastErrorMsg());
 			::FreeLibrary(gameModuleHandle);
 			#else // macOS
-			// ::dlclose()
+			EP_ERROR("LoadGameModule(): Error loading entry point functions!  Error: {}", dlerror());
+			::dlclose(gameModuleHandle);
 			#endif
 
 			::GameSysInit_Ptr = nullptr;
@@ -142,7 +144,7 @@ void Enterprise::LoadGameModule(const std::string& projectFilePath)
 		#ifdef _WIN32
 		EP_ERROR("LoadGameModule(): Error loading game module!  Error: {}", Win32_LastErrorMsg());
 		#else
-		// TODO: Report error on macOS
+		EP_ERROR("LoadGameModule(): Error loading game module!  Error: {}", dlerror());
 		#endif
 	}
 }
@@ -154,7 +156,7 @@ void Enterprise::UnloadGameModule()
 		#ifdef _WIN32
 		::FreeLibrary(gameModuleHandle);
 		#else // macOS
-		// ::dlclose()
+		::dlclose(gameModuleHandle);
 		#endif
 	}
 }

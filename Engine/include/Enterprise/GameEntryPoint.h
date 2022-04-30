@@ -6,14 +6,22 @@
 			#define EPGAME_API extern "C" __declspec(dllexport)
 		#elif defined(EP_BUILD_CORE)
 			#define EPGAME_API __declspec(dllexport)
-		#else // !EP_BUILD_GAME
+		#else // Launcher or Editor
 			#define EPGAME_API
 		#endif
-	#else
+	#else // Standalone
 		#define EPGAME_API
 	#endif
 #else // macOS
-	#define EPGAME_API
+	#ifdef EP_BUILD_DYNAMIC
+		#ifdef EP_BUILD_GAME
+			#define EPGAME_API extern "C"
+		#else // Engine, Launcher or Editor
+			#define EPGAME_API
+		#endif
+	#else // Standalone
+		#define EPGAME_API
+	#endif
 #endif
 
 #ifdef EP_BUILD_DYNAMIC
