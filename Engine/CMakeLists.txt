@@ -13,6 +13,8 @@ set(ENGINE_HEADERS
 
     # Runtime
     "include/Enterprise/Runtime.h"
+    "include/Enterprise/GameEntryPoint.h"
+    "include/Enterprise/Runtime/GameModuleLoad.h"
 
     # Foundation Systems
     "include/Enterprise/Time.h"
@@ -33,9 +35,6 @@ set(ENGINE_HEADERS
 
     # ECS Systems
     "include/Enterprise/Systems/Renderer2D.h"
-
-    # Game entry point
-    "include/Enterprise/GameEntryPoint.h"
 
     PARENT_SCOPE
 )
@@ -81,6 +80,8 @@ set(ENGINE_SRC
 
     # Runtime
     "src/Runtime/Runtime.cpp"
+    "src/Runtime/GameEntryPoint.cpp"
+    "src/Runtime/GameModuleLoad.cpp"
 
     # Foundation Systems
     "src/Time/Time.cpp"
@@ -115,11 +116,11 @@ set(ENGINE_SRC_WIN32
 
     "src/Runtime/EntryPoint_Win32.cpp"
 
-	"src/Time/Time_Win32.cpp"
-	"src/File/File_Win32.cpp"
+    "src/Time/Time_Win32.cpp"
+    "src/File/File_Win32.cpp"
 
-	"src/Input/Input_Win32.cpp"
-	"src/Graphics/Window_Win32.cpp"
+    "src/Input/Input_Win32.cpp"
+    "src/Graphics/Window_Win32.cpp"
 )
 set(ENGINE_SRC_MACOS
     "src/Core/Console_macOS.cpp"
@@ -127,11 +128,11 @@ set(ENGINE_SRC_MACOS
 
     "src/Runtime/EntryPoint_macOS.mm"
 
-	"src/Time/Time_macOS.cpp"
-	"src/File/File_macOS.mm"
+    "src/Time/Time_macOS.cpp"
+    "src/File/File_macOS.mm"
 
-	"src/Input/Input_macOS.mm"
-	"src/Graphics/Window_macOS.mm"
+    "src/Input/Input_macOS.mm"
+    "src/Graphics/Window_macOS.mm"
 )
 
 # Resources
@@ -157,13 +158,13 @@ add_library(Engine_DYN SHARED
     ${ENGINE_HEADERS} ${ENGINE_HEADERS_WIN32}
     ${ENGINE_SRC} ${ENGINE_SRC_WIN32} ${ENGINE_SRC_MACOS}
     ${ENGINE_GLSL_HEADERS}
-	${VENDOR_HEADERS} ${VENDOR_SRC}
+    ${VENDOR_HEADERS} ${VENDOR_SRC}
 )
 add_library(Engine_LIB STATIC
     ${ENGINE_HEADERS} ${ENGINE_HEADERS_WIN32}
     ${ENGINE_SRC} ${ENGINE_SRC_WIN32} ${ENGINE_SRC_MACOS}
     ${ENGINE_GLSL_HEADERS}
-	${VENDOR_HEADERS} ${VENDOR_SRC}
+    ${VENDOR_HEADERS} ${VENDOR_SRC}
 )
 set_target_properties(Engine_DYN PROPERTIES
     OUTPUT_NAME "Engine"
@@ -209,11 +210,11 @@ target_include_directories(Engine_LIB
 
 # Don't compile src for other platforms
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-	set_source_files_properties(${ENGINE_SRC_MACOS}
-		PROPERTIES HEADER_FILE_ONLY TRUE)
+    set_source_files_properties(${ENGINE_SRC_MACOS}
+        PROPERTIES HEADER_FILE_ONLY TRUE)
 elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-	set_source_files_properties(${ENGINE_HEADERS_WIN32} ${ENGINE_SRC_WIN32}
-		PROPERTIES HEADER_FILE_ONLY TRUE)
+    set_source_files_properties(${ENGINE_HEADERS_WIN32} ${ENGINE_SRC_WIN32}
+        PROPERTIES HEADER_FILE_ONLY TRUE)
 endif()
 
 # Don't compile developer resources
@@ -339,14 +340,14 @@ endif()
 
 # IDE project organization
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include/Enterprise"
-	PREFIX "include"
-	FILES ${ENGINE_HEADERS} ${ENGINE_HEADERS_WIN32}
+    PREFIX "include"
+    FILES ${ENGINE_HEADERS} ${ENGINE_HEADERS_WIN32}
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src"
-	PREFIX "src"
-	FILES ${ENGINE_SRC} ${ENGINE_SRC_WIN32} ${ENGINE_SRC_MACOS}
+    PREFIX "src"
+    FILES ${ENGINE_SRC} ${ENGINE_SRC_WIN32} ${ENGINE_SRC_MACOS}
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/vendor"
-	PREFIX "vendor"
-	FILES ${VENDOR_HEADERS} ${VENDOR_SRC}
+    PREFIX "vendor"
+    FILES ${VENDOR_HEADERS} ${VENDOR_SRC}
 )

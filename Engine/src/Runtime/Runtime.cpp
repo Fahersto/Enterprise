@@ -9,6 +9,7 @@
 #include "Enterprise/Graphics.h"
 #include "Enterprise/SceneManager.h"
 #include "Enterprise/StateManager.h"
+#include "Enterprise/GameEntryPoint.h"
 
 namespace Enterprise
 {
@@ -174,6 +175,11 @@ Runtime::Runtime()
 	// Audio::Init();
 	SceneManager::Init();
 
+#ifndef EP_BUILD_DYNAMIC
+	::GameSysInit();
+	::GameInit();
+#endif // EP_BUILD_DYNAMIC
+
 	// Implement "--help" command line option
 	if (CheckCmdLineOption(HN("-h")))
 	{
@@ -237,6 +243,11 @@ bool Runtime::Run()
 
 Runtime::~Runtime()
 {
+#ifndef EP_BUILD_DYNAMIC
+	::GameCleanup();
+	::GameSysCleanup();
+#endif // EP_BUILD_DYNAMIC
+
 	StateManager::Cleanup();
 	//SceneManager::Cleanup();
 

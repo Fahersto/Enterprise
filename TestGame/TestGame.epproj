@@ -11,3 +11,5 @@ Bin:
   Debug: "../build/bin/Debug/TestGame/module/"
   Dev: "../build/bin/Dev/TestGame/module/"
   Release: "../build/bin/Release/TestGame/module/"
+  Editor: "Debug"
+  Launcher: "Debug"

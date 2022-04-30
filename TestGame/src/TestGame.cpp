@@ -1,5 +1,15 @@
 // Example Game entry point.
+#include <Enterprise/GameEntryPoint.h>
 
+void GameSysInit()
+{
+    // Used to set up game systems.
+}
+
+void GameSysCleanup()
+{
+    // Used to clean up game systems.
+}
 
 void GameInit()
 {
@@ -11,22 +21,12 @@ void GameCleanup()
     // Last-minute tasks before game close.
 }
 
-void PIE_Init()
+void PieInit()
 {
     // Set up game state for play-in-editor.
 }
 
-void PIE_Cleanup()
+void PieCleanup()
 {
     // Last-minute tasks before ending play-in-editor.
-}
-
-void SystemsInit()
-{
-    // Used to set up game systems.
-}
-
-void SystemsCleanup()
-{
-    // Used to clean up game systems.
 }

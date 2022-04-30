@@ -32,6 +32,10 @@ set_target_properties(TestGame PROPERTIES
 target_link_libraries(TestGame_DYN Engine_DYN)
 target_link_libraries(TestGame Engine_LIB)
 
+# Preprocessor defines
+target_compile_definitions(TestGame_DYN PRIVATE EP_BUILD_GAME)
+target_compile_definitions(TestGame PRIVATE EP_BUILD_GAME)
+
 # Build flags/settings
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     set_target_properties(TestGame PROPERTIES

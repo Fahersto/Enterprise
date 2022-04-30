@@ -1,5 +1,6 @@
 #pragma once
 #include "Enterprise/Events.h"
+#include "Enterprise/Runtime/GameModuleLoad.h"
 
 // Needed for friending the Win32 entry point
 #ifdef _WIN32
@@ -69,6 +70,10 @@ namespace Enterprise
 									_In_ int nCmdShow);
 #elif defined(__APPLE__) && defined(__MACH__)
 		friend int ::main(int argc, const char* argv[]);
+#endif
+
+#ifdef EP_BUILD_DYNAMIC
+		friend void ::Enterprise::LoadGameModule(const std::string& projectFilePath);
 #endif
 
 		friend class Window;
