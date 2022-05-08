@@ -145,6 +145,7 @@ void File::SetPlatformPathsForEditor()
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
 	editorDataDirPath = WCHARtoUTF8(widePath) + '/' + "Michael Martz" + '/' + "Enterprise" + '/';
 	std::replace(editorDataDirPath.begin(), editorDataDirPath.end(), '\\', '/');
+	dataDirPath = editorDataDirPath;
 
 	WCHAR buffer[MAX_PATH];
 	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
@@ -185,8 +186,6 @@ void File::SetPlatformPathsForStandalone()
 
 	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
-	std::filesystem::create_directories(contentDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create content data path!");
 	std::filesystem::create_directories(dataDirPath, ec);
 	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create application data path!");
 	std::filesystem::create_directories(saveDirPath, ec);

@@ -179,61 +179,101 @@ void File::TextFileWriter::Close()
 	}
 }
 
-
-void File::SetPlatformPaths()
+#ifdef EP_BUILD_DYNAMIC
+void File::SetPlatformPathsForEditor()
 {
-	// Content
+	// Get bundle resources folder
 	CFBundleRef bundle = CFBundleGetMainBundle();
 	EP_ASSERT(bundle);
-	CFURLRef contentURL = CFBundleCopyResourcesDirectoryURL(bundle);
-	EP_ASSERT(contentURL);
-	UInt8 contentPath[1025];
-	EP_VERIFY(CFURLGetFileSystemRepresentation(contentURL, true, contentPath, 1024));
+	CFURLRef bundleResourcesURL = CFBundleCopyResourcesDirectoryURL(bundle);
+	EP_ASSERT(bundleResourcesURL);
+	UInt8 bundleResourcesBuffer[1025];
+	EP_VERIFY(CFURLGetFileSystemRepresentation(bundleResourcesURL, true, bundleResourcesBuffer, 1024));
+	CFRelease(bundleResourcesURL);
+	std::string bundleResourcesPath((char*)bundleResourcesBuffer);
 
-	contentDirPath = std::string((char*)contentPath) + "/content/";
+	// Read-only paths
+	editorContentDirPath = bundleResourcesPath + "/content/";
+	shaderHeadersPath = bundleResourcesPath + "/developer/include_glsl/";
 
-	CFRelease(contentURL);
-
-	// Data
+	// Data paths
 	@autoreleasepool
 	{
-		// Save is a subfolder of this location.
-		NSURL* dataPathURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
-																	inDomain:NSUserDomainMask
-														   appropriateForURL:nil
-																	  create:YES
-																	   error:nil];
-		NSURL* tempPathURL = [[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory
-																	inDomain:NSUserDomainMask
-														   appropriateForURL:dataPathURL
-																	  create:YES
-																	   error:nil];
+		NSURL* applicationSupportDirURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
+																				 inDomain:NSUserDomainMask
+																		appropriateForURL:nil
+																				   create:YES
+																					error:nil];
+		NSURL* tempDirURL = [[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory
+																   inDomain:NSUserDomainMask
+														  appropriateForURL:applicationSupportDirURL
+																	 create:YES
+																	  error:nil];
 
-		dataDirPath = std::string(dataPathURL.path.UTF8String) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + "/data/";
-		saveDirPath = std::string(dataPathURL.path.UTF8String) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + "/save/";
-		tempDirPath = std::string(tempPathURL.path.UTF8String) + '/';
+		editorDataDirPath = std::string(applicationSupportDirURL.path.UTF8String) + "/Enterprise/data/";
+		editorTempDirPath = std::string(tempDirURL.path.UTF8String) + '/';
+		dataDirPath = editorDataDirPath;
+		tempDirPath = editorTempDirPath;
+
+		// TODO: Provide exact path in assertion messages when ASSERTF is fixed
+		std::error_code ec;
+		std::filesystem::create_directories(editorDataDirPath, ec);
+		EP_ASSERTF(!ec, "File::SetPlatformPathsForEditor(): Unable to create editor data folder!");
+	}
+}
+
+#else // Static build
+void File::SetPlatformPathsForStandalone()
+{
+	// Get bundle resources folder
+	CFBundleRef bundle = CFBundleGetMainBundle();
+	EP_ASSERT(bundle);
+	CFURLRef bundleResourcesURL = CFBundleCopyResourcesDirectoryURL(bundle);
+	EP_ASSERT(bundleResourcesURL);
+	UInt8 bundleResourcesBuffer[1025];
+	EP_VERIFY(CFURLGetFileSystemRepresentation(bundleResourcesURL, true, bundleResourcesBuffer, 1024));
+	CFRelease(bundleResourcesURL);
+	std::string bundleResourcesPath((char*)bundleResourcesBuffer);
+
+	// Read-only paths
+	contentDirPath = bundleResourcesPath + "/content/";
+	shaderHeadersPath = bundleResourcesPath + "/include_glsl/";
+
+	// Data paths
+	@autoreleasepool
+	{
+		NSURL* applicationSupportDirURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationSupportDirectory
+																				 inDomain:NSUserDomainMask
+																		appropriateForURL:nil
+																				   create:YES
+																					error:nil];
+		NSURL* tempDirURL = [[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory
+																   inDomain:NSUserDomainMask
+														  appropriateForURL:applicationSupportDirURL
+																	 create:YES
+																	  error:nil];
+
+		// TODO: Come back and set app name from Project Properties
+		dataDirPath = std::string(applicationSupportDirURL.path.UTF8String) + '/' + "TestGame" + '/' + "/data/";
+		saveDirPath = std::string(applicationSupportDirURL.path.UTF8String) + '/' + "TestGame" + '/' + "/save/";
+		tempDirPath = std::string(tempDirURL.path.UTF8String) + '/';
 
 		// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 		std::error_code ec;
 		std::filesystem::create_directories(dataDirPath, ec);
-		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create application data path!");
+		EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create game data folder!");
 		std::filesystem::create_directories(saveDirPath, ec);
-		EP_ASSERTF(!ec, "File::SetPlatformDataPaths(): Unable to create save data path!");
+		EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create game save folder!");
 	}
+
 }
 
-void File::SetPlatformEnginePaths()
+void File::SetEditorPathForShaderHeaders()
 {
-	CFBundleRef bundle = CFBundleGetMainBundle();
-	EP_ASSERT(bundle);
-	CFURLRef contentURL = CFBundleCopyResourcesDirectoryURL(bundle);
-	EP_ASSERT(contentURL);
-	UInt8 contentPath[1025];
-	EP_VERIFY(CFURLGetFileSystemRepresentation(contentURL, true, contentPath, 1024));
-
-	engineShadersPath = std::string((char*)contentPath) + "/include_glsl/";
-
-	CFRelease(contentURL);
+	// TODO: Implement more robust editor installation location lookup
+	shaderHeadersPath = "/Applications/Enterprise.app/Contents/Resources/developer/include_glsl/";
 }
+
+#endif // EP_BUILD_DYNAMIC
 
 #endif // macOS
