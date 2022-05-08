@@ -437,20 +437,20 @@ private:
 	static std::string dataDirPath;
 	static std::string saveDirPath;
 	static std::string tempDirPath;
-
 	static std::string shaderHeadersPath;
-	static void SetEditorPathForShaderHeaders();
 
 #ifdef EP_BUILD_DYNAMIC
 	static std::string editorContentDirPath;
 	static std::string editorDataDirPath;
 	static std::string editorTempDirPath;
 
-	// Sets editorContentDirPath, editorDataDirPath, and editorTempDirPath
+	// Sets editorContentDirPath, editorDataDirPath, editorTempDirPath, and shaderHeadersPath (unused with --sandbox)
 	static void SetPlatformPathsForEditor();
 #else
-	// Sets contentDirPath, dataDirPath, saveDirPath, tempDirPath, and shaderHeadersPath
+	// Sets contentDirPath, dataDirPath, saveDirPath, tempDirPath, and shaderHeadersPath (unused with --project)
 	static void SetPlatformPathsForStandalone();
+	// Sets shaderHeadersPath to editor install location (used with --project and without --sandbox)
+	static void SetEditorPathForShaderHeaders();
 #endif
 
 	static void Init();

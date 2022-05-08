@@ -136,7 +136,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 						{
 							EP_ERROR("LoadGameModule(): Unable to create game content folder!  Path: {}  Error: {}", File::contentDirPath, ec.message());
 							File::contentDirPath.clear();
-							File::dataDirPath.clear();
+							File::dataDirPath = File::editorDataDirPath;
 							File::saveDirPath.clear();
 							File::tempDirPath = File::editorTempDirPath;
 							return false;
@@ -146,7 +146,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 						{
 							EP_ERROR("LoadGameModule(): Unable to create game data folder!  Path: {}  Error: {}", File::dataDirPath, ec.message());
 							File::contentDirPath.clear();
-							File::dataDirPath.clear();
+							File::dataDirPath = File::editorDataDirPath;
 							File::saveDirPath.clear();
 							File::tempDirPath = File::editorTempDirPath;
 							return false;
@@ -156,7 +156,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 						{
 							EP_ERROR("LoadGameModule(): Unable to create game save folder!  Path: {}  Error: {}", File::saveDirPath, ec.message());
 							File::contentDirPath.clear();
-							File::dataDirPath.clear();
+							File::dataDirPath = File::editorDataDirPath;
 							File::saveDirPath.clear();
 							File::tempDirPath = File::editorTempDirPath;
 							return false;
@@ -166,7 +166,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 						{
 							EP_ERROR("LoadGameModule(): Unable to create game temp folder!  Path: {}  Error: {}", File::tempDirPath, ec.message());
 							File::contentDirPath.clear();
-							File::dataDirPath.clear();
+							File::dataDirPath = File::editorDataDirPath;
 							File::saveDirPath.clear();
 							File::tempDirPath = File::editorTempDirPath;
 							return false;
@@ -256,7 +256,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 			gameModuleHandle = NULL;
 			
 			File::contentDirPath.clear();
-			File::dataDirPath.clear();
+			File::dataDirPath = File::editorDataDirPath;
 			File::saveDirPath.clear();
 			File::tempDirPath = File::editorTempDirPath;
 
@@ -272,7 +272,7 @@ bool Enterprise::LoadGameModule(const std::string& projectFilePath)
 		#endif
 
 		File::contentDirPath.clear();
-		File::dataDirPath.clear();
+		File::dataDirPath = File::editorDataDirPath;
 		File::saveDirPath.clear();
 		File::tempDirPath = File::editorTempDirPath;
 		return false;
@@ -300,7 +300,7 @@ void Enterprise::UnloadGameModule()
 	}
 
 	File::contentDirPath.clear();
-	File::dataDirPath.clear();
+	File::dataDirPath = File::editorDataDirPath;
 	File::saveDirPath.clear();
 	File::tempDirPath = File::editorTempDirPath;
 }

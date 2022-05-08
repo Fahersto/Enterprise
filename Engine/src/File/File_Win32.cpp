@@ -134,22 +134,11 @@ void File::TextFileWriter::Close()
 	}
 }
 
-void File::SetEditorPathForShaderHeaders()
-{
-	// TODO: Implement more robust editor installation location lookup
-	
-	WCHAR buffer[MAX_PATH];
-	EP_VERIFY_NEQ(GetEnvironmentVariable(L"PROGRAMFILES", buffer, MAX_PATH), 0);
-	shaderHeadersPath = WCHARtoUTF8(buffer);
-
-	std::replace(shaderHeadersPath.begin(), shaderHeadersPath.end(), '\\', '/');
-	shaderHeadersPath += "/Michael Martz/Enterprise/include_glsl/";
-}
-
 #ifdef EP_BUILD_DYNAMIC
 void File::SetPlatformPathsForEditor()
 {
 	editorContentDirPath = "content/";
+	shaderHeadersPath = "developer/include_glsl/";
 
 	WCHAR* widePath = NULL;
 
@@ -161,14 +150,14 @@ void File::SetPlatformPathsForEditor()
 	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
 	editorTempDirPath = WCHARtoUTF8(buffer);
 	std::replace(editorTempDirPath.begin(), editorTempDirPath.end(), '\\', '/');
-
-	tempDirPath = editorTempDirPath; // Default
+	tempDirPath = editorTempDirPath;
 
 	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
 	std::filesystem::create_directories(editorDataDirPath, ec);
 	EP_ASSERTF(!ec, "File::SetPlatformPathsForEditor(): Unable to create editor data folder!");
 }
+
 #else // Static build
 void File::SetPlatformPathsForStandalone()
 {
@@ -202,6 +191,18 @@ void File::SetPlatformPathsForStandalone()
 	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create application data path!");
 	std::filesystem::create_directories(saveDirPath, ec);
 	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create save data path!");
+}
+
+void File::SetEditorPathForShaderHeaders()
+{
+	// TODO: Implement more robust editor installation location lookup
+	
+	WCHAR buffer[MAX_PATH];
+	EP_VERIFY_NEQ(GetEnvironmentVariable(L"PROGRAMFILES", buffer, MAX_PATH), 0);
+	shaderHeadersPath = WCHARtoUTF8(buffer);
+
+	std::replace(shaderHeadersPath.begin(), shaderHeadersPath.end(), '\\', '/');
+	shaderHeadersPath += "/Michael Martz/Enterprise/developer/include_glsl/";
 }
 
 #endif

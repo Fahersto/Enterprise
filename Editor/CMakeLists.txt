@@ -137,7 +137,7 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	foreach(ENGINE_GLSL_HEADER ${ENGINE_GLSL_HEADERS})
 		add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
 			"${CMAKE_SOURCE_DIR}/Engine/${ENGINE_GLSL_HEADER}"
-			"$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/${ENGINE_GLSL_HEADER}"
+			"$<TARGET_BUNDLE_CONTENT_DIR:Editor>/Resources/developer/${ENGINE_GLSL_HEADER}"
 		)
 	endforeach()
 	add_custom_command(TARGET Editor POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
@@ -244,7 +244,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 
 	# Developer resources
 	install(TARGETS Engine_LIB DESTINATION "Enterprise/developer")
-	install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
+	install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise/developer")
 	install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
 	install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "Enterprise.txt")
 

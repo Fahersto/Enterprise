@@ -218,6 +218,7 @@ void File::Init()
 		editorTempDirPath = "data/Editor/temp/";
 		shaderHeadersPath = "Engine/include_glsl/";
 
+		dataDirPath = editorDataDirPath;
 		tempDirPath = editorTempDirPath;
 
 		std::error_code ec;
@@ -239,7 +240,6 @@ void File::Init()
 	else
 	{
 		SetPlatformPathsForEditor();
-		SetEditorPathForShaderHeaders();
 	}
 #else
 	// Set paths for standalone
