@@ -233,7 +233,7 @@ void Window::Init()
 
 	// Rendering context
 	renderingContext = wglCreateContext(deviceContext);
-	EP_ASSERT(wglMakeCurrent(deviceContext, renderingContext));
+	EP_VERIFY(wglMakeCurrent(deviceContext, renderingContext));
 
 	// GLAD
 	EP_VERIFY(gladLoadGL());
