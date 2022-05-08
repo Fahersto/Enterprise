@@ -38,7 +38,8 @@ set(EDITOR_RESOURCES_MACOS
 	"${CMAKE_CURRENT_SOURCE_DIR}/resources/Enterprise.icns"
 )
 set(EDITOR_CONTENT
-	"${CMAKE_CURRENT_SOURCE_DIR}/content/Example.txt"
+	"${CMAKE_CURRENT_SOURCE_DIR}/content/Roboto-Regular.ttf"
+	"${CMAKE_CURRENT_SOURCE_DIR}/content/licenses/Roboto-Regular.txt"
 )
 
 set(EDITOR_VENDOR_SRC
@@ -242,10 +243,17 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 		LIBRARY DESTINATION "Enterprise" COMPONENT Runtime
 	)
 
+	# Editor content
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise")
+
 	# Developer resources
 	install(TARGETS Engine_LIB DESTINATION "Enterprise/developer")
-	install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include_glsl" "${CMAKE_CURRENT_SOURCE_DIR}/content" DESTINATION "Enterprise/developer")
-	install(DIRECTORY "${CMAKE_SOURCE_DIR}/Engine/include" DESTINATION "Enterprise/developer")
+	install(DIRECTORY
+				"${CMAKE_SOURCE_DIR}/Engine/include"
+				"${CMAKE_SOURCE_DIR}/Engine/include_glsl"
+			DESTINATION
+				"Enterprise/developer"
+	)
 	install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "Enterprise/developer/licenses" RENAME "Enterprise.txt")
 
 	# cxx-prettyprint
