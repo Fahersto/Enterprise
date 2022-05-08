@@ -17,6 +17,8 @@ set(CMAKE_XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET "${EP_MACOS_MINVERSION}")
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 set(CMAKE_SKIP_RPATH TRUE CACHE BOOL "If set, runtime paths are not added when using shared libraries.")
 
+set(SKIP_INSTALL_ALL TRUE) #Prevents FreeType2 from installing with Enterprise
+
 # Project declaration
 project(Enterprise VERSION ${EP_VERSION} LANGUAGES C CXX)
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
