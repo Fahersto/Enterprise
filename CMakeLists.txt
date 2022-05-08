@@ -79,7 +79,7 @@ endif()
 # Set default installation location
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-        set(CMAKE_INSTALL_PREFIX "$ENV{PROGRAMFILES}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+        set(CMAKE_INSTALL_PREFIX "$ENV{PROGRAMFILES}/Michael Martz" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
     elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
         set(CMAKE_INSTALL_PREFIX "/Applications" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
     endif()

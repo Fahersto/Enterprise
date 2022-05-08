@@ -7,7 +7,7 @@
 namespace Enterprise
 {
 
-void EP_API LoadGameModule(const std::string& projectFilePath);
+bool EP_API LoadGameModule(const std::string& projectFilePath);
 void EP_API UnloadGameModule();
 
 }

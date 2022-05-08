@@ -1,6 +1,7 @@
 #pragma once
 #include "Enterprise/Core.h"
 #include "Enterprise/File/INIValueType.h"
+#include "Enterprise/Runtime/GameModuleLoad.h"
 
 #include <fstream>
 #include <set>
@@ -422,7 +423,11 @@ private:
 	friend class Runtime;
 	friend class Graphics;
 
-	static void backslashesToSlashes(std::string& str);
+#ifdef EP_BUILD_DYNAMIC
+	friend bool ::Enterprise::LoadGameModule(const std::string& projectFilePath);
+	friend void ::Enterprise::UnloadGameModule();
+#endif
+
 	static bool isAlphanumeric(const std::string& str);
 	static bool isAlphanumeric(const std::string_view& str);
 
@@ -432,16 +437,21 @@ private:
 	static std::string dataDirPath;
 	static std::string saveDirPath;
 	static std::string tempDirPath;
-	static std::string engineShadersPath;
+
+	static std::string shaderHeadersPath;
+	static void SetEditorPathForShaderHeaders();
 
 #ifdef EP_BUILD_DYNAMIC
 	static std::string editorContentDirPath;
 	static std::string editorDataDirPath;
 	static std::string editorTempDirPath;
-#endif //EP_BUILD_DYNAMIC
 
-	static void SetPlatformPaths();
-	static void SetPlatformEnginePaths();
+	// Sets editorContentDirPath, editorDataDirPath, and editorTempDirPath
+	static void SetPlatformPathsForEditor();
+#else
+	// Sets contentDirPath, dataDirPath, saveDirPath, tempDirPath, and shaderHeadersPath
+	static void SetPlatformPathsForStandalone();
+#endif
 
 	static void Init();
 };

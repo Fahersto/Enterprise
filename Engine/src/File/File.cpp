@@ -9,24 +9,13 @@ std::string File::contentDirPath;
 std::string File::dataDirPath;
 std::string File::saveDirPath;
 std::string File::tempDirPath;
-std::string File::engineShadersPath;
+std::string File::shaderHeadersPath;
 
 #ifdef EP_BUILD_DYNAMIC
 std::string File::editorContentDirPath;
 std::string File::editorDataDirPath;
 std::string File::editorTempDirPath;
 #endif // EP_BUILD_DYNAMIC
-
-void File::backslashesToSlashes(std::string& str)
-{
-	for (auto it = str.begin(); it != str.end(); ++it)
-	{
-		if (*it == '\\')
-		{
-			*it = '/';
-		}
-	}
-}
 
 bool File::isAlphanumeric(const std::string& str)
 {
@@ -220,178 +209,204 @@ void File::Init()
 		"Specify an Enterprise project file to open.", 1
 	);
 
+#ifdef EP_BUILD_DYNAMIC
+	// Set paths for the editor and launcher
 	if (Runtime::CheckCmdLineOption(HN("--sandbox")))
 	{
-		engineShadersPath = "Engine/include_glsl/";
-#if EP_BUILD_DYNAMIC
-		if (Runtime::isEditor)
-		{
-			editorContentDirPath = "Editor/content/";
-			editorDataDirPath = "data/Editor/data/";
-			editorTempDirPath = "data/Editor/temp/";
+		editorContentDirPath = "Editor/content/";
+		editorDataDirPath = "data/Editor/data/";
+		editorTempDirPath = "data/Editor/temp/";
+		shaderHeadersPath = "Engine/include_glsl/";
 
-			std::error_code ec;
-			std::filesystem::create_directories(editorDataDirPath, ec);
-			if(ec)
-			{
-				EP_ERROR("File::Init(): Unable to create editor data folder!");
-				EP_DEBUGBREAK();
-			}
-			std::filesystem::create_directories(editorTempDirPath, ec);
-			if(ec)
-			{
-				EP_ERROR("File::Init(): Unable to create editor temp folder!");
-				EP_DEBUGBREAK();
-			}
+		tempDirPath = editorTempDirPath;
+
+		std::error_code ec;
+		std::filesystem::create_directories(editorDataDirPath, ec);
+		if(ec)
+		{
+			EP_FATAL("File::Init(): Unable to create editor data folder!");
+			EP_DEBUGBREAK();
+			throw Exceptions::FatalError();
 		}
-#endif // EP_BUILD_DYNAMIC
+		std::filesystem::create_directories(editorTempDirPath, ec);
+		if(ec)
+		{
+			EP_FATAL("File::Init(): Unable to create editor temp folder!");
+			EP_DEBUGBREAK();
+			throw Exceptions::FatalError();
+		}
 	}
 	else
 	{
-		SetPlatformEnginePaths();
+		SetPlatformPathsForEditor();
+		SetEditorPathForShaderHeaders();
 	}
-
-	// Project file loading
-	std::vector<std::string> projectOptionArgs;
+#else
+	// Set paths for standalone
 	if (Runtime::CheckCmdLineOption(HN("--project")))
 	{
-		projectOptionArgs = Runtime::GetCmdLineOption(HN("--project"));
+		if (Runtime::CheckCmdLineOption(HN("--sandbox")))
+			shaderHeadersPath = "Engine/include_glsl/";
+		else
+			SetEditorPathForShaderHeaders();
+
+		std::vector<std::string> projectOptionArgs = Runtime::GetCmdLineOption(HN("--project"));
 		if (projectOptionArgs.size())
 		{
-			std::string& projectFileLocation = projectOptionArgs.front();
-			backslashesToSlashes(projectFileLocation);
-			
-			std::string projectYAML;
-			ErrorCode ec = LoadTextFile(projectFileLocation, &projectYAML);
-			if (ec == ErrorCode::Success)
+			// Get project file path
+			std::string &projectFilePath = projectOptionArgs.front();
+			std::replace(projectFilePath.begin(), projectFilePath.end(), '\\', '/');
+
+			// Confirm file ends in .epproj
+			if (projectFilePath.length() > 7)
 			{
-				try
+				if (projectFilePath.compare(projectFilePath.length() - 7, 7, ".epproj") != 0)
 				{
-					YAML::Node yamlIn = YAML::Load(projectYAML);
-
-					if (yamlIn.Type() != YAML::NodeType::Map)
-					{
-						EP_ERROR("File::Init(): Project file's root node is not a map!");
-						EP_DEBUGBREAK();
-					}
-					else
-					{
-						if (yamlIn["Directories"])
-						{
-							if (yamlIn["Directories"]["Content"])
-							{
-								contentDirPath = yamlIn["Directories"]["Content"].as<std::string>();
-								backslashesToSlashes(contentDirPath);
-
-								if (contentDirPath.back() != '/')
-									contentDirPath.append("/");
-							}
-							if (yamlIn["Directories"]["Data"])
-							{
-								dataDirPath = yamlIn["Directories"]["Data"].as<std::string>();
-								backslashesToSlashes(dataDirPath);
-								if (dataDirPath.back() != '/')
-									dataDirPath.append("/");
-							}
-							if (yamlIn["Directories"]["Save"])
-							{
-								saveDirPath = yamlIn["Directories"]["Save"].as<std::string>();
-								backslashesToSlashes(saveDirPath);
-								if (saveDirPath.back() != '/')
-									saveDirPath.append("/");
-							}
-							if (yamlIn["Directories"]["Temp"])
-							{
-								tempDirPath = yamlIn["Directories"]["Temp"].as<std::string>();
-								backslashesToSlashes(tempDirPath);
-								if (tempDirPath.back() != '/')
-									tempDirPath.append("/");
-							}
-						}
-
-						// Confirm file ends in .epproj
-						if (projectFileLocation.length() > 7)
-						{
-							if (projectFileLocation.compare(projectFileLocation.length() - 7, 7, ".epproj") != 0)
-							{
-								EP_ERROR("File::Init(): Argument to \"--project\" is not an EPPROJ file!  Argument: {}", projectFileLocation);
-								EP_DEBUGBREAK();
-							}
-						}
-						else
-						{
-							EP_ERROR("File::Init(): Argument to \"--project\" is not an EPPROJ file!  Argument: {}", projectFileLocation);
-							EP_DEBUGBREAK();
-						}
-
-						// Make path relative to working directory
-						size_t slashPos = projectFileLocation.find_last_of('/');
-						if (slashPos != std::string::npos)
-						{
-							projectFileLocation.resize(slashPos + 1);
-							contentDirPath = projectFileLocation + contentDirPath;
-							dataDirPath = projectFileLocation + dataDirPath;
-							saveDirPath = projectFileLocation + saveDirPath;
-							tempDirPath = projectFileLocation + tempDirPath;
-						}
-
-						std::error_code ec;
-						std::filesystem::create_directories(contentDirPath, ec);
-						if(ec)
-						{
-							EP_ERROR("File::Init(): Unable to create content folder!");
-							EP_DEBUGBREAK();
-						}
-						std::filesystem::create_directories(dataDirPath, ec);
-						if(ec)
-						{
-							EP_ERROR("File::Init(): Unable to create data folder!");
-							EP_DEBUGBREAK();
-						}
-						std::filesystem::create_directories(saveDirPath, ec);
-						if(ec)
-						{
-							EP_ERROR("File::Init(): Unable to create save folder!");
-							EP_DEBUGBREAK();
-						}
-						std::filesystem::create_directories(tempDirPath, ec);
-						if(ec)
-						{
-							EP_ERROR("File::Init(): Unable to create temp folder!");
-							EP_DEBUGBREAK();
-						}
-					}
-
-					if (contentDirPath.empty())
-						contentDirPath = "content/";
-					if (dataDirPath.empty())
-						dataDirPath = "data/data/";
-					if (saveDirPath.empty())
-						saveDirPath = "data/save/";
-					if (tempDirPath.empty())
-						tempDirPath = "data/temp/";
-				}
-				catch (const YAML::Exception& e)
-				{
-					EP_ERROR("File::Init(): YAML exception thrown!  Message: {}", e.msg);
+					EP_ERROR("File::Init(): \"{}\" is not an EPPROJ file!  Paths will not be redirected.", projectFilePath);
+					SetPlatformPathsForStandalone();
+					return;
 				}
 			}
 			else
 			{
-				EP_ERROR("File::Init(): Error loading project file {}!  Error: {}",
-						 projectFileLocation, ErrorCodeToStr(ec));
-				EP_DEBUGBREAK();
+				EP_ERROR("File::Init(): \"{}\" is not an EPPROJ file!  Paths will not be redirected.", projectFilePath);
+				SetPlatformPathsForStandalone();
+				return;
+			}
+
+			std::string projectFileContents;
+
+			// Load project file
+			ErrorCode ec = LoadTextFile(projectFilePath, &projectFileContents);
+			if (ec == ErrorCode::Success)
+			{
+				try
+				{
+					YAML::Node yamlIn = YAML::Load(projectFileContents);
+
+					if (yamlIn.Type() == YAML::NodeType::Map)
+					{
+						if (yamlIn["Directories"])
+						{
+							if (yamlIn["Directories"]["Content"] &&
+								yamlIn["Directories"]["Data"] &&
+								yamlIn["Directories"]["Save"] &&
+								yamlIn["Directories"]["Temp"])
+							{
+								// Load paths
+								contentDirPath = yamlIn["Directories"]["Content"].as<std::string>();
+								dataDirPath = yamlIn["Directories"]["Data"].as<std::string>();
+								saveDirPath = yamlIn["Directories"]["Save"].as<std::string>();
+								tempDirPath = yamlIn["Directories"]["Temp"].as<std::string>();
+
+								// Correct backslashes
+								std::replace(contentDirPath.begin(), contentDirPath.end(), '\\', '/');
+								std::replace(dataDirPath.begin(), dataDirPath.end(), '\\', '/');
+								std::replace(saveDirPath.begin(), saveDirPath.end(), '\\', '/');
+								std::replace(tempDirPath.begin(), tempDirPath.end(), '\\', '/');
+
+								// Ensure paths end with slashes
+								if (contentDirPath.back() != '/') contentDirPath.append("/");
+								if (dataDirPath.back() != '/') dataDirPath.append("/");
+								if (saveDirPath.back() != '/') saveDirPath.append("/");
+								if (tempDirPath.back() != '/') tempDirPath.append("/");
+
+								// Make paths relative to working directory
+								size_t slashPos = projectFilePath.find_last_of('/');
+								if (slashPos != std::string::npos)
+								{
+									projectFilePath.resize(slashPos + 1);
+									contentDirPath = projectFilePath + contentDirPath;
+									dataDirPath = projectFilePath + dataDirPath;
+									saveDirPath = projectFilePath + saveDirPath;
+									tempDirPath = projectFilePath + tempDirPath;
+								}
+
+								// Ensure paths exist
+								std::error_code ec;
+								std::filesystem::create_directories(contentDirPath, ec);
+								if (ec)
+								{
+									EP_ERROR("File::Init(): Unable to create game content folder!  "
+											 "Paths will not be redirected.  Path: {}  Error: {}",
+											 contentDirPath, ec.message());
+									SetPlatformPathsForStandalone();
+									return;
+								}
+								std::filesystem::create_directories(dataDirPath, ec);
+								if (ec)
+								{
+									EP_ERROR("File::Init(): Unable to create game data folder!  "
+											 "Paths will not be redirected.  Path: {}  Error: {}",
+											 dataDirPath, ec.message());
+									SetPlatformPathsForStandalone();
+									return;
+								}
+								std::filesystem::create_directories(saveDirPath, ec);
+								if (ec)
+								{
+									EP_ERROR("File::Init(): Unable to create game save folder!  "
+											 "Paths will not be redirected.  Path: {}  Error: {}",
+											 saveDirPath, ec.message());
+									SetPlatformPathsForStandalone();
+									return;
+								}
+								std::filesystem::create_directories(tempDirPath, ec);
+								if (ec)
+								{
+									EP_ERROR("File::Init(): Unable to create game temp folder!  "
+											 "Paths will not be redirected.  Path: {}  Error: {}",
+											 tempDirPath, ec.message());
+									SetPlatformPathsForStandalone();
+									return;
+								}
+							}
+							else
+							{
+								EP_ERROR("File::Init(): Project file's \"Directories\" node is "
+										 "incomplete!  Paths will not be redirected.");
+								SetPlatformPathsForStandalone();
+							}
+						}
+						else
+						{
+							EP_ERROR("File::Init(): Project file does not contain a \"Directories\" "
+									 "key!  Paths will not be redirected.");
+							SetPlatformPathsForStandalone();
+						}
+					}
+					else
+					{
+						EP_ERROR("File::Init(): Project file's root node is not a map!  Paths will "
+								 "not be redirected.");
+						SetPlatformPathsForStandalone();
+					}
+				}
+				catch (const YAML::Exception &e)
+				{
+					EP_ERROR("File::Init(): Unhandled YAML exception thrown!  Paths will not be "
+							 "redirected.  Message: {}", e.msg);
+					SetPlatformPathsForStandalone();
+				}
+			}
+			else
+			{
+				EP_ERROR("File::Init(): \"{}\" failed to open!  Paths will not be redirected.  "
+						 "Error: {}", projectFilePath, File::ErrorCodeToStr(ec));
+				SetPlatformPathsForStandalone();
 			}
 		}
 		else
 		{
-			// TODO: Output error onto the command line
-			EP_ERROR("File::Init(): \"--sandbox\" was specified without any arguments!");
-			EP_DEBUGBREAK();
+			EP_ERROR("File::Init(): \"--project\" was specified without any arguments!  "
+					 "Paths will not be redirected.");
+			SetPlatformPathsForStandalone();
 		}
 	}
 	else
 	{
-		SetPlatformPaths();
+		SetPlatformPathsForStandalone();
 	}
+#endif
+
 }

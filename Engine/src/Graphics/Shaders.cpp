@@ -1283,7 +1283,7 @@ bool Graphics::CompileShaderSrc(const std::string& src)
 													if (line[subcursor] == '>')
 													{
 														inclPath =
-															File::engineShadersPath + 
+															File::shaderHeadersPath + 
 															std::string(line.substr(cursor + 1, subcursor - cursor - 1));
 													}
 													else // line[subcursor] == '"'

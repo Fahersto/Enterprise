@@ -134,61 +134,76 @@ void File::TextFileWriter::Close()
 	}
 }
 
-
-void File::SetPlatformPaths()
+void File::SetEditorPathForShaderHeaders()
 {
-	contentDirPath = "content/";
-
-	// Data
-	WCHAR* widePath = NULL;
-	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
-	dataDirPath = WCHARtoUTF8(widePath) + '/' + "Constants::DeveloperName" + '/' + "Constants::AppName" + '/';
-	backslashesToSlashes(dataDirPath);
-
-	// Save
-	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_SavedGames, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
-	saveDirPath = WCHARtoUTF8(widePath) + '/' + "Constants::AppName" + '/';
-	backslashesToSlashes(saveDirPath);
-
-	// Temp
+	// TODO: Implement more robust editor installation location lookup
+	
 	WCHAR buffer[MAX_PATH];
-	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
-	tempDirPath = WCHARtoUTF8(buffer);
-	backslashesToSlashes(tempDirPath);
+	EP_VERIFY_NEQ(GetEnvironmentVariable(L"PROGRAMFILES", buffer, MAX_PATH), 0);
+	shaderHeadersPath = WCHARtoUTF8(buffer);
 
-	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
-	std::error_code ec;
-	std::filesystem::create_directories(contentDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create content data path!");
-	std::filesystem::create_directories(dataDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create application data path!");
-	std::filesystem::create_directories(saveDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformPaths(): Unable to create save data path!");
+	std::replace(shaderHeadersPath.begin(), shaderHeadersPath.end(), '\\', '/');
+	shaderHeadersPath += "/Michael Martz/Enterprise/include_glsl/";
 }
 
-void File::SetPlatformEnginePaths()
-{
-	engineShadersPath = "include_glsl/";
-
 #ifdef EP_BUILD_DYNAMIC
+void File::SetPlatformPathsForEditor()
+{
 	editorContentDirPath = "content/";
 
 	WCHAR* widePath = NULL;
 
 	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
 	editorDataDirPath = WCHARtoUTF8(widePath) + '/' + "Michael Martz" + '/' + "Enterprise" + '/';
-	backslashesToSlashes(editorDataDirPath);
+	std::replace(editorDataDirPath.begin(), editorDataDirPath.end(), '\\', '/');
 
 	WCHAR buffer[MAX_PATH];
 	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
 	editorTempDirPath = WCHARtoUTF8(buffer);
-	backslashesToSlashes(editorTempDirPath);
+	std::replace(editorTempDirPath.begin(), editorTempDirPath.end(), '\\', '/');
+
+	tempDirPath = editorTempDirPath; // Default
 
 	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
 	std::error_code ec;
 	std::filesystem::create_directories(editorDataDirPath, ec);
-	EP_ASSERTF(!ec, "File::SetPlatformEnginePaths(): Unable to create editor data folder!");
-#endif
+	EP_ASSERTF(!ec, "File::SetPlatformPathsForEditor(): Unable to create editor data folder!");
 }
+#else // Static build
+void File::SetPlatformPathsForStandalone()
+{
+	contentDirPath = "content/";
+	shaderHeadersPath = "include_glsl/";
+
+	// TODO: Come back and set developer name and app name from Project Properties
+
+	// Data
+	WCHAR* widePath = NULL;
+	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
+	dataDirPath = WCHARtoUTF8(widePath) + '/' + "Michael Martz" + '/' + "TestGame" + '/';
+	std::replace(dataDirPath.begin(), dataDirPath.end(), '\\', '/');
+
+	// Save
+	EP_VERIFY_EQ(SHGetKnownFolderPath(FOLDERID_SavedGames, KF_FLAG_DEFAULT, NULL, &widePath), S_OK);
+	saveDirPath = WCHARtoUTF8(widePath) + '/' + "TestGame" + '/';
+	std::replace(saveDirPath.begin(), saveDirPath.end(), '\\', '/');
+
+	// Temp
+	WCHAR buffer[MAX_PATH];
+	EP_VERIFY_NEQ(GetTempPath(MAX_PATH, buffer), 0);
+	tempDirPath = WCHARtoUTF8(buffer);
+	std::replace(tempDirPath.begin(), tempDirPath.end(), '\\', '/');
+
+	// TODO: Provide exact path in assertion messages when ASSERTF is fixed
+	std::error_code ec;
+	std::filesystem::create_directories(contentDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create content data path!");
+	std::filesystem::create_directories(dataDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create application data path!");
+	std::filesystem::create_directories(saveDirPath, ec);
+	EP_ASSERTF(!ec, "File::SetPlatformPathsForStandalone(): Unable to create save data path!");
+}
+
+#endif
 
 #endif // _WIN32

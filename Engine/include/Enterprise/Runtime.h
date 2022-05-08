@@ -73,7 +73,7 @@ namespace Enterprise
 #endif
 
 #ifdef EP_BUILD_DYNAMIC
-		friend void ::Enterprise::LoadGameModule(const std::string& projectFilePath);
+		friend bool ::Enterprise::LoadGameModule(const std::string& projectFilePath);
 #endif
 
 		friend class Window;
