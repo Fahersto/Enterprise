@@ -251,7 +251,7 @@ Graphics::TextureHandle Graphics::LoadFontFile(const std::string& path, float em
 				{
 					EP_ERROR("Graphics::LoadFontFile(): Could not load glyphs from font \"{}\"!",
 						File::VirtualPathToNative(path));
-					return Graphics::TextureHandle();
+					return 0;
 				}
 
 				if (glyphsLoaded < msdf_atlas::Charset::ASCII.size())
@@ -278,7 +278,7 @@ Graphics::TextureHandle Graphics::LoadFontFile(const std::string& path, float em
 		{
 			EP_ERROR("Graphics::LoadFontFile(): No glyphs loaded from font \"{}\"!",
 				File::VirtualPathToNative(path));
-			return Graphics::TextureHandle();
+			return 0;
 		}
 		else
 		{
@@ -377,6 +377,7 @@ Graphics::TextureHandle Graphics::LoadFontFile(const std::string& path, float em
 
 		textureReferenceCount[HN(path)]++;
 		pathOfTextureHandle[texHandleOut] = HN(path);
+		msdfTextureHandles[HN(path)] = texHandleOut;
 		return texHandleOut;
 	}
 	else
