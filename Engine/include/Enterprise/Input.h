@@ -1,5 +1,7 @@
 #pragma once
 #include <forward_list>
+#include <map>
+#include <functional>
 #include <glm/glm.hpp>
 #include "Enterprise/Core.h"
 #include "Enterprise/Events.h"
@@ -55,16 +57,13 @@ public:
 	EP_API static void PopContext(ContextHandle context);
 
 
-	/// A pointer to an input action callback function.
-	typedef void(*ActionCallbackPtr)();
-
 	/// Bind an input action to a callback.
 	/// @param context The handle of the context containing the action. 
 	/// @param actionName The HashName of the action.
-	/// @param callback A pointer to the callback function.
+	/// @param callback The callback to be triggered by the action.
 	EP_API static void BindAction(ContextHandle context,
 						   HashName actionName,
-						   ActionCallbackPtr callback);
+						   std::function<void()> callback);
 
 	/// Get the current value of an axis from an input context.
 	/// @param context The context handle.
@@ -140,10 +139,12 @@ private:
 
 		int blockingLevel = 0;					// set by BindContext()
 		StreamID stream = 0;					// set by BindContext()
+
+		bool toBeDeleted = false;
 	};
 
 	static std::map<HashName, Context> contextRegistry;
-	static std::forward_list<Context> contextStack[MaxInputContextLayers];
+	static std::list<Context> contextStack[MaxInputContextLayers];
 	static std::map<ContextHandle, int> layerOfContext; // The layer number of a given context.
 	static std::map<ContextHandle, std::map<HashName, float>> axisValues[2];
 

@@ -1,5 +1,8 @@
 #pragma once
 #include "Enterprise/Core.h"
+#include <list>
+#include <memory>
+#include <type_traits>
 
 namespace Enterprise
 {
@@ -10,60 +13,216 @@ class StateManager
 public:
 
 	/// An applet which can slot into Enterprise's global state machine.
-	/// @remarks States are the foundation of every Enterprise game.  Extend this generic class to create game rules,
-	/// UIs, and more.
+	/// @remarks Extend this class to create game rules, UIs, and more.
 	class EP_API State
 	{
 	public:
-		/// Invoked immediately after the state is made active with StateManager::PushState() or StateManager::SwapState().
-		/// @note It is a best practice to set up all State initialization code in Init() instead of the class constructor.
-		/// @see [Core Calls](@ref Core_Calls)
+		/// Invoked when the state is made active.
 		virtual void Init() {};
 		/// Invoked once every fixed timestep.
-		/// @see [Core Calls](@ref Core_Calls)
-		/// @see @ref Time
 		virtual void FixedUpdate() {};
 		/// Invoked once every frame.
-		/// @see [Core Calls](@ref Core_Calls)
-		/// @see @ref Time
 		virtual void Update() {};
-		/// Invoked once every frame, after all Update() calls are complete.
-		/// @see [Core Calls](@ref Core_Calls)
-		/// @see @ref Time
+		/// Invoked during each frame's draw stage.
 		virtual void Draw() {};
-		/// Invoked when a state is removed via StateManager::PopState() or StateManager::SwapState().
-		/// @note It is a best practice to set up all State cleanup code in Cleanup() instead of the class destructor.
-		/// @see [Core Calls](@ref Core_Calls)
+		/// Invoked when the state is made inactive.
 		virtual void Cleanup() {};
 
 		virtual ~State() = default;
 	};
 
-	/// Push a new state on top of the state stack.
-	/// @param newState Pointer to the new state.
-	/// @param blockLowerFixed Whether lower states should receive @c FixedUpdate() calls while this state is active.
-	/// @param blockLowerUpdates Whether lower states should receive @c Update() calls while this state is active.
-	/// @param blockLowerDraws Whether lower states should receive @c Draw() calls while this state is active.
-	EP_API static void PushState(State* newState, bool blockLowerFixed = false, bool blockLowerUpdates = false, bool blockLowerDraws = false);
-	/// Pop the topmost state on the state stack.
-	EP_API static void PopState();
-	/// Replace the current state with a new one.
-	/// @param newState Pointer to the new state.
-	/// @note This function can only be invoked from a core call of the state to be replaced.
-	/// @note Higher states are unaffected by SwapState() being invoked by the states beneath them.
-	/// @note The new state will follow the same core call blocking pattern as the state it is replacing.
-	EP_API static void SwapState(State* newState);
-	/// Check whether a state is currently on top of the state stack.
-	/// @param s Pointer to the state to check.  If @c nullptr, the calling state is checked.
-	/// @return @c true if @c s is the highest-ranking state.  Otherwise, @c false.
-	EP_API static bool IsStateOnTop(State* s = nullptr);
+	/// Create a new state and add it to the end of the active state list.
+	/// @tparam S The new state type.  This type must be a class derived from StateManager::State.
+	/// @param args Arguments to forward to the state class's constructor.
+	/// @return An std::weak_ptr to the new state.
+	template <class S, typename... Args>
+	static std::weak_ptr<State> PushState(Args&&... args)
+	{
+		static_assert(std::is_base_of<State, S>::value);
+		std::shared_ptr<State> newState = std::make_shared<S>(std::forward<Args>(args)...);
+
+		stateList.push_back(newState);
+
+		activeState = newState;
+		newState->Init();
+		activeState.reset();
+
+		return newState;
+	}
+
+	/// Add a preallocated state to the end of the active state list.
+	/// @param state An std::shared_ptr to the preallocated state.
+	/// @warning If `state` is already in the active state list, it will not be reinserted.
+	static EP_API void PushExistingState(std::shared_ptr<State> state);
+
+	/// Create a new state and insert it into the active state list.
+	/// @tparam S The new state type.  This type must be a class derived from StateManager::State.
+	/// @param insertionPoint An std::weak_ptr to the state to insert after.
+	/// @param args Arguments to forward to the state class's constructor.
+	/// @return An std::weak_ptr to the newly created state.
+	template <class S, typename... Args>
+	static std::weak_ptr<State> InsertState(std::weak_ptr<State> insertionPoint, Args&&... args)
+	{
+		static_assert(std::is_base_of<State, S>::value);
+		std::shared_ptr<State> newState = std::make_shared<S>(std::forward<Args>(args)...);
+		std::shared_ptr<State> insertionPoint_strong;
+
+		if (insertionPoint.use_count() == 0)
+		{
+			if (activeState.use_count() != 0)
+			{
+				insertionPoint_strong = activeState.lock();
+			}
+			else
+			{
+				EP_WARN("StateManager::InsertExistingState(): No active state and 'insertionPoint' not specified!");
+			}
+		}
+		else
+		{
+			insertionPoint_strong = insertionPoint.lock();
+		}
+
+		auto it = stateList.begin();
+		for (; it != stateList.end(); ++it)
+		{
+			if (*it == insertionPoint_strong)
+			{
+				++it;
+				if (it == stateList.end())
+				{
+					stateList.push_back(newState);
+
+					// Break out of for loop without indicating the state wasn't inserted
+					it = stateList.begin();
+					break;
+				}
+				else
+				{
+					stateList.insert(it, insertionPoint_strong);
+				}
+				break;
+			}
+		}
+		if (it == stateList.end())
+		{
+			EP_WARN("StateManager::InsertState(): Insertion point not present in state list!");
+			stateList.push_back(insertionPoint_strong);
+		}
+
+		std::weak_ptr<State> prevActiveState = activeState;
+
+		activeState = newState;
+		newState->Init();
+		activeState = prevActiveState;
+
+		return newState;
+	}
+
+	/// Create a new state and insert it into the active state list after the calling state.
+	/// @tparam S The new state type.  This type must be a class derived from StateManager::State.
+	/// @param args Arguments to forward to the state class's constructor.
+	/// @return An std::weak_ptr to the newly created state.
+	template <class S, typename... Args>
+	static std::weak_ptr<State> InsertStateAfterCurrent(Args&&... args)
+	{
+		static_assert(std::is_base_of<State, S>::value);
+		return InsertState<S>(std::weak_ptr<State>(), std::forward<Args>(args)...);
+	}
+
+	/// Insert a preallocated state into the active state list.
+	/// @param state An std::shared_ptr to the preallocated state.
+	/// @param insertionPoint An std::weak_ptr to the state to insert after.
+	/// @warning If `state` is already in the active state list, it will not be reinserted.
+	static EP_API void InsertExistingState(std::shared_ptr<State> state, std::weak_ptr<State> insertionPoint);
+
+	/// Insert a preallocated state into the active state list after the calling state.
+	/// @param state An std::shared_ptr to the preallocated state.
+	/// @warning If `state` is already in the active state list, it will not be reinserted.
+	static EP_API void InsertExistingStateAfterCurrent(std::shared_ptr<State> state);
+
+	/// Create a new state and replace an active state with it.
+	/// @tparam S The new state type.  This type must be a class derived from StateManager::State.
+	/// @param targetState An std::weak_ptr to the state to replace.
+	/// @param args Arguments to forward to the state class's constructor.
+	/// @return An std::weak_ptr to the newly created state.
+	/// @remarks This method does not overwrite the state pointed to by `targetState`.  If the state was preallocated, it 
+	/// can be inserted back into the active state list by future calls to PushExistingState() or InsertExistingState().
+	template <class S, typename... Args>
+	static std::weak_ptr<State> SwapState(std::weak_ptr<State> targetState, Args&&... args)
+	{
+		static_assert(std::is_base_of<State, S>::value);
+		std::shared_ptr<State> newState = std::make_shared<S>(std::forward<Args>(args)...);
+		std::shared_ptr<State> targetState_strong;
+
+		if (targetState.use_count() == 0)
+		{
+			if (activeState.use_count() != 0)
+			{
+				targetState_strong = activeState.lock();
+			}
+			else
+			{
+				EP_ERROR("StateManager::SwapState(): No target has been specified for swapping!");
+				return std::weak_ptr<State>();
+			}
+		}
+		else
+		{
+			targetState_strong = targetState.lock();
+		}
+
+		auto it = stateList.begin();
+		for (; it != stateList.end(); ++it)
+		{
+			if (*it == targetState_strong)
+			{
+				std::weak_ptr<State> prevActiveState = activeState;
+				
+				activeState = targetState_strong;
+				targetState_strong->Cleanup();
+				activeState = newState;
+				newState->Init();
+
+				activeState = prevActiveState;
+
+				*it = newState;
+				break;
+			}
+		}
+		if (it == stateList.end())
+		{
+			EP_ERROR("StateManager::SwapState(): Target state not present in state list!  Swap was skipped.");
+			return std::weak_ptr<State>();
+		}
+
+		return newState;
+	}
+
+	/// Create a new state and replace the calling state with it.
+	/// @tparam S The new state type.  This type must be a class derived from StateManager::State.
+	/// @param args Arguments to forward to the state class's constructor.
+	/// @return An std::weak_ptr to the newly created state.
+	/// @remarks This method does not overwrite the state pointed to by `targetState`.  If the state was preallocated, it 
+	/// can be inserted back into the active state list by future calls to PushExistingState() or InsertExistingState().
+	template <class S, typename... Args>
+	static std::weak_ptr<State> SwapCurrentState(Args&&... args)
+	{
+		static_assert(std::is_base_of<State, S>::value);
+		return SwapState<S>(std::weak_ptr<State>(), std::forward<Args>(args)...);
+	}
+
+	/// Make a state inactive and remove it from the state list.
+	/// @param state An std::weak_ptr to the state to end.  If unspecified, the calling state will be terminated.
+	static EP_API void EndState(std::weak_ptr<State> state = std::weak_ptr<State>());
 
 private:
 	friend class Runtime;
 	friend class Events;
 	friend class Input;
 
-	static EP_API State* activeState;
+	static EP_API std::list<std::shared_ptr<State>> stateList;
+	static EP_API std::weak_ptr<State> activeState;
 
 	static void FixedUpdate();
 	static void Update();

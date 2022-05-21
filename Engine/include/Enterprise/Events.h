@@ -100,7 +100,7 @@ public:
 			 callbackit != callbackPtrs[type].rend();
 			 ++callbackit)
 		{
-			StateManager::State* prevActiveState = StateManager::activeState;
+			std::weak_ptr<StateManager::State> prevActiveState = StateManager::activeState;
 			StateManager::activeState = callbackit->second;
 			bool willBreak = callbackit->first(e);
 			StateManager::activeState = prevActiveState;
@@ -127,7 +127,7 @@ public:
 private:
 
 	// Key is the HashName of the event type.  State pointer is address of active state.
-	static EP_API std::unordered_map<HashName, std::list<std::pair<Events::EventCallbackPtr, StateManager::State*>>> callbackPtrs;
+	static EP_API std::unordered_map<HashName, std::list<std::pair<Events::EventCallbackPtr, std::weak_ptr<StateManager::State>>>> callbackPtrs;
 
 };
 

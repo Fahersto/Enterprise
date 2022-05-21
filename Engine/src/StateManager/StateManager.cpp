@@ -3,139 +3,171 @@
 
 using Enterprise::StateManager;
 
-static std::deque<StateManager::State*> stateStack;
-StateManager::State* StateManager::activeState = nullptr;
+std::list<std::shared_ptr<StateManager::State>> StateManager::stateList;
+std::weak_ptr<StateManager::State> StateManager::activeState;
 
-static std::vector<bool> stateBlocksFixed;
-static std::vector<bool> stateBlocksUpdates;
-static std::vector<bool> stateBlocksDraws;
-static size_t highestFixedBlockingState = 0;
-static size_t highestUpdateBlockingState = 0;
-static size_t highestDrawBlockingState = 0;
-
-void StateManager::PushState(State* newState, bool blockLowerFixed, bool blockLowerUpdates, bool blockLowerDraws)
+void StateManager::PushExistingState(std::shared_ptr<StateManager::State> state)
 {
-	stateStack.push_back(newState);
-	stateBlocksFixed.push_back(blockLowerFixed);
-	stateBlocksUpdates.push_back(blockLowerUpdates);
-	stateBlocksDraws.push_back(blockLowerDraws);
-
-	if (blockLowerFixed) highestFixedBlockingState = stateStack.size() - 1;
-	if (blockLowerUpdates) highestUpdateBlockingState = stateStack.size() - 1;
-	if (blockLowerDraws) highestDrawBlockingState = stateStack.size() - 1;
-
-	activeState = newState;
-	newState->Init();
-	activeState = nullptr;
-}
-void StateManager::PopState()
-{
-	EP_ASSERT(stateStack.size() > 0);
-
-	activeState = stateStack.back();
-	activeState->Cleanup();
-	activeState = nullptr;
-
-	stateStack.pop_back();
-	stateBlocksFixed.pop_back();
-	stateBlocksUpdates.pop_back();
-	stateBlocksDraws.pop_back();
-
-	if (stateStack.size() == 0)
-		Enterprise::Runtime::Quit();
-
-	int i;
-	for (i = (int)stateBlocksFixed.size() - 1; i >= 0; i--)
+	for (const std::shared_ptr<State>& s : stateList)
 	{
-		if (stateBlocksFixed.at(i))
-			break;
-	}
-	highestFixedBlockingState = i;
-	for (i = (int)stateBlocksUpdates.size() - 1; i >= 0; i--)
-	{
-		if (stateBlocksUpdates.at(i))
-			break;
-	}
-	highestUpdateBlockingState = i;
-	for (i = (int)stateBlocksDraws.size() - 1; i >= 0; i--)
-	{
-		if (stateBlocksDraws.at(i))
-			break;
-	}
-	highestDrawBlockingState = i;
-}
-
-void StateManager::SwapState(State* newState)
-{
-	EP_ASSERT(newState);
-
-	for (State*& s : stateStack)
-	{
-		if (s == activeState)
+		if(s != state)
 		{
-			activeState->Cleanup();
-
-			s = newState;
-			activeState = newState;
-			newState->Init();
-			activeState = nullptr;
+			EP_ERROR("StateManager::PushExistingState(): State is already in active state list!");
 			return;
 		}
 	}
 
-	EP_ASSERT_NOENTRY();
+	stateList.push_back(state);
+
+	activeState = state;
+	state->Init();
+	activeState.reset();
 }
 
-bool StateManager::IsStateOnTop(State* s)
+void StateManager::InsertExistingState(std::shared_ptr<StateManager::State> state, std::weak_ptr<State> insertionPoint)
 {
-	State* s_actual = s ? s : activeState;
-	EP_ASSERT(s_actual != nullptr);
-	return stateStack.back() == s_actual;
+	for (const std::shared_ptr<State>& s : stateList)
+	{
+		if(s != state)
+		{
+			EP_ERROR("StateManager::InsertExistingState(): State is already in active state list!");
+			return;
+		}
+	}
+
+	std::shared_ptr<State> insertionPoint_strong;
+
+	if (insertionPoint.use_count() == 0)
+	{
+		if (activeState.use_count() != 0)
+		{
+			insertionPoint_strong = activeState.lock();
+		}
+		else
+		{
+			EP_WARN("StateManager::InsertExistingState(): No active state and 'insertionPoint' not specified!");
+		}
+	}
+	else
+	{
+		insertionPoint_strong = insertionPoint.lock();
+	}
+
+	auto it = stateList.begin();
+	for (; it != stateList.end(); ++it)
+	{
+		if (*it == insertionPoint_strong)
+		{
+			++it;
+			if (it == stateList.end())
+			{
+				stateList.push_back(state);
+
+				// Break out of for loop without indicating the state wasn't inserted
+				it = stateList.begin();
+				break;
+			}
+			else
+			{
+				stateList.insert(it, insertionPoint_strong);
+			}
+			break;
+		}
+	}
+	if (it == stateList.end())
+	{
+		EP_WARN("StateManager::InsertState(): Insertion point not present in state list!");
+		stateList.push_back(insertionPoint_strong);
+	}
+
+	std::weak_ptr<State> prevActiveState = activeState;
+
+	activeState = state;
+	state->Init();
+	activeState = prevActiveState;
+}
+
+void StateManager::InsertExistingStateAfterCurrent(std::shared_ptr<StateManager::State> state)
+{
+	InsertExistingState(state, std::weak_ptr<State>());
+}
+
+void StateManager::EndState(std::weak_ptr<State> state)
+{
+	std::shared_ptr<State> state_strong;
+	if (state.use_count() == 0)
+	{
+		if (!activeState.expired())
+		{
+			state_strong = activeState.lock();
+		}
+		else
+		{
+			EP_ERROR("StateManager::EndState(): Target state is not specified, and there is no active state!");
+			return;
+		}
+	}
+	else
+	{
+		state_strong = state.lock();
+	}
+
+	for (auto it = stateList.begin(); it != stateList.end(); ++it)
+	{
+		if (*it == state_strong)
+		{
+			std::weak_ptr<State> prevActiveState = activeState;
+			activeState = state;
+			state_strong->Cleanup();
+			activeState = prevActiveState;
+
+			it = stateList.erase(it);
+			if (stateList.size() == 0)
+				Enterprise::Runtime::Quit();
+
+			return;
+		}
+	}
+
+	EP_WARN("StateManager::EndState(): State was not found!");
 }
 
 
 void StateManager::FixedUpdate()
 {
-	int i = 0;
-	for (State* s : stateStack)
+	for (std::shared_ptr<State> s : stateList)
 	{
 		activeState = s;
-		if (i >= highestFixedBlockingState)
-			s->FixedUpdate();
-		i++;
+		s->FixedUpdate();
 	}
-	activeState = nullptr;
-}
-void StateManager::Update()
-{
-	int i = 0;
-	for (State* s : stateStack)
-	{
-		activeState = s;
-		if (i >= highestUpdateBlockingState)
-			s->Update();
-		i++;
-	}
-	activeState = nullptr;
-}
-void StateManager::Draw()
-{
-	int i = 0;
-	for (State* s : stateStack)
-	{
-		activeState = s;
-		if (i >= highestDrawBlockingState)
-			s->Draw();
-		i++;
-	}
-	activeState = nullptr;
+	activeState.reset();
 }
 
+void StateManager::Update()
+{
+	for (std::shared_ptr<State> s : stateList)
+	{
+		activeState = s;
+		s->Update();
+	}
+	activeState.reset();
+}
+
+void StateManager::Draw()
+{
+	for (std::shared_ptr<State> s : stateList)
+	{
+		activeState = s;
+		s->Draw();
+	}
+	activeState.reset();
+}
 
 void StateManager::Cleanup()
 {
-	for (State* s : stateStack)
+	for (std::shared_ptr<State> s : stateList)
 	{
 		s->Cleanup();
 	}
+	stateList.clear();
 }

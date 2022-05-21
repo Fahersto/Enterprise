@@ -14,9 +14,9 @@ std::vector<Input::GamePadBuffer> Input::gpBuffer; // Accessed by ControllerID -
 bool Input::currentBuffer = 0;
 
 std::map<HashName, Input::Context> Input::contextRegistry;
-std::forward_list<Input::Context> Input::contextStack[MaxInputContextLayers];
+std::list<Input::Context> Input::contextStack[MaxInputContextLayers];
 std::map<Input::ContextHandle, int> Input::layerOfContext;
-static std::map<void*, std::map<HashName, std::vector<std::pair<Input::ActionCallbackPtr, StateManager::State*>>>> actionCallbacks;
+static std::map<void*, std::map<HashName, std::vector<std::pair<std::function<void()>, std::weak_ptr<StateManager::State>>>>> actionCallbacks;
 std::map<void*, std::map<HashName, float>> Input::axisValues[2]; // Array index is Time::inFixedTimestep().
 static float mouseAxisAccumulator[4] = { 0 };
 static float mouseDeltaAccumulator = 0.0f;
@@ -246,11 +246,11 @@ static std::pair<bool, Enterprise::ControlID> StringToControlID(const std::strin
 	STRTOCONTROLIDIMPL(Mouse_Button_3);
 	STRTOCONTROLIDIMPL(Mouse_Button_4);
 	STRTOCONTROLIDIMPL(Mouse_Button_5);
-    STRTOCONTROLIDIMPL(Mouse_Delta_X);
-    STRTOCONTROLIDIMPL(Mouse_Delta_Y);
+	STRTOCONTROLIDIMPL(Mouse_Delta_X);
+	STRTOCONTROLIDIMPL(Mouse_Delta_Y);
 	STRTOCONTROLIDIMPL(Mouse_Wheel_Y);
-    STRTOCONTROLIDIMPL(Mouse_Wheel_X);
-    STRTOCONTROLIDIMPL(KB_Semicolon);
+	STRTOCONTROLIDIMPL(Mouse_Wheel_X);
+	STRTOCONTROLIDIMPL(KB_Semicolon);
 	STRTOCONTROLIDIMPL(KB_Plus);
 	STRTOCONTROLIDIMPL(KB_Comma);
 	STRTOCONTROLIDIMPL(KB_Minus);
@@ -609,7 +609,6 @@ void Input::PopContext(ContextHandle context)
 	int layer = layerOfContext[context];
 	layerOfContext.erase(context);
 
-	auto prev = contextStack[layer].before_begin();
 	for (auto it = contextStack[layer].begin();
 		 it != contextStack[layer].end();
 		 ++it)
@@ -619,15 +618,13 @@ void Input::PopContext(ContextHandle context)
 			axisValues[0].erase(&(*it));
 			axisValues[1].erase(&(*it));
 			actionCallbacks.erase(&(*it));
-			contextStack[layer].erase_after(prev);
+			it->toBeDeleted = true;
 			break;
 		}
-		prev++;
-		it = prev;
 	}
 }
 
-void Input::BindAction(ContextHandle context, HashName actionName, ActionCallbackPtr callback)
+void Input::BindAction(ContextHandle context, HashName actionName, std::function<void()> callback)
 {
 	if (actionCallbacks.count(context) == 0)
 		EP_WARN("Input::BindAction(): Context contains no input actions!");
@@ -858,7 +855,10 @@ void Input::ProcessContext(Input::Context& context)
 					{
 						StateManager::activeState = callback.second;
 						callback.first();
-						StateManager::activeState = nullptr;
+						StateManager::activeState.reset();
+
+						if (actionCallbacks.count(&context) == 0)
+							break;
 					}
 				}
 			}
@@ -974,7 +974,7 @@ void Input::ProcessContext(Input::Context& context)
 					{
 						StateManager::activeState = callback.second;
 						callback.first();
-						StateManager::activeState = nullptr;
+						StateManager::activeState.reset();
 					}
 				}
 			}
@@ -1053,15 +1053,15 @@ void Input::Update()
 	CheckForControllerWake();
 	for (int i = 0; i < MaxInputContextLayers; i++)
 	{
-		auto prev = contextStack[i].before_begin();
 		for (auto it = contextStack[i].begin();
-			 it != contextStack[i].end();
-			 ++it)
+			 it != contextStack[i].end();)
 		{
 			ProcessContext(*it);
-			prev++;
-			it = prev;
-			if (it == contextStack[i].end()) break;
+
+			if (it->toBeDeleted)
+				it = contextStack[i].erase(it);
+			else
+				++it;
 		}
 	}
 
