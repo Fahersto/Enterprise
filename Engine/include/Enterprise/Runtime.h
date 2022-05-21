@@ -15,6 +15,9 @@
 int main(int argc, const char * argv[]);
 #endif
 
+// Needed for friending Launcher runtime
+namespace Launcher { class Runtime; }
+
 namespace Enterprise
 {
 	/// The heart of an Enterprise program.  Instantiates all of
@@ -74,6 +77,8 @@ namespace Enterprise
 
 #ifdef EP_BUILD_DYNAMIC
 		friend bool ::Enterprise::LoadGameModule(const std::string& projectFilePath);
+		friend void ::Enterprise::UnloadGameModule();
+		friend class ::Launcher::Runtime;
 #endif
 
 		friend class Window;

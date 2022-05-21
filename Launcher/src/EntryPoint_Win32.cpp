@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include "Runtime.h"
 #include <Enterprise/Runtime.h>
 #include <Enterprise/Core.h>
 
@@ -25,7 +26,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		}
 
 		// Enter main loop
-		Enterprise::Runtime engine;
+		Launcher::Runtime launcher;
 		MSG msg = { 0 };
 		do
 		{
@@ -35,7 +36,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-		} while (engine.Run());
+		} while (launcher.Run());
 	}
 	catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 	catch (Enterprise::Exceptions::FatalError&) { exit(EXIT_FAILURE); }

@@ -2,6 +2,8 @@
 
 # Source files
 set(LAUNCHER_SRC
+    src/Runtime.h
+    src/Runtime.cpp
 )
 set(LAUNCHER_SRC_WIN32
     src/EntryPoint_Win32.cpp
