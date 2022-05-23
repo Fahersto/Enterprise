@@ -56,7 +56,7 @@
 			if (expression) { } \
 			else \
 			{ \
-				std::wstringstream messagestream; \
+				std::stringstream messagestream; \
 				messagestream << "Assertion failed!  " << message << \
 					"\nExpression: " << #expression << "\nFile: " << __FILE__ << "\nLine: " << __LINE__ << \
 					"\n\nThe Enterprise engine library has encountered a condition that " \
@@ -70,7 +70,7 @@
 			if (expression) { } \
 			else \
 			{ \
-				std::wstringstream messagestream; \
+				std::stringstream messagestream; \
 				messagestream << "Assertion failed!  " << message << \
 					"\nExpression: " << #expression << "\nFile: " << __FILE__ << "\nLine: " << __LINE__ << \
 					"\n\nThis Enterprise application has encountered a condition that " \

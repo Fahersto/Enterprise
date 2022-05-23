@@ -1,9 +1,7 @@
 #if defined(__APPLE__) && defined(__MACH__)
-
+#include "Runtime.h"
 #include <Enterprise/Runtime.h>
 #import <AppKit/AppKit.h>
-
-using Enterprise::Runtime;
 
 /// Enterprise's macOS app delegate.  Used to handle messages from macOS.
 @interface MacAppDelegate : NSObject <NSApplicationDelegate>
@@ -63,16 +61,16 @@ int main(int argc, const char * argv[])
 				if (argv[i][0] == '-')
 				{
 					currentOption = HN(argv[i]);
-					Runtime::cmdLineOptions[currentOption];
+					Enterprise::Runtime::cmdLineOptions[currentOption];
 				}
 				else
 				{
-					Runtime::cmdLineOptions[currentOption].push_back(argv[i]);
+					Enterprise::Runtime::cmdLineOptions[currentOption].push_back(argv[i]);
 				}
 			}
 			
 			// Enter main loop
-			Runtime engine;
+			Launcher::Runtime launcher;
 			NSEvent *e;
 			do
 			{
@@ -85,7 +83,7 @@ int main(int argc, const char * argv[])
 					[NSApp sendEvent: e];
 					[NSApp updateWindows];
 				}
-			} while (engine.Run());
+			} while (launcher.Run());
 		}
 		catch (Enterprise::Exceptions::AssertFailed&) { exit(EXIT_FAILURE); }
 		catch (Enterprise::Exceptions::FatalError&)   { exit(EXIT_FAILURE); }

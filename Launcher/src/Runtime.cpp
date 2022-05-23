@@ -25,22 +25,22 @@ Runtime::Runtime()
 			}
 			else
 			{
-				std::wstring errorMsg = L"Game module load failure!  Project file: " + UTF8toWCHAR(projectOptionArgs.front());
+				std::string errorMsg = "Game module load failure!  Project file: " + projectOptionArgs.front();
 				Enterprise::Platform::DisplayErrorDialog(errorMsg);
 				engine->Quit();
 			}
 		}
 		else
 		{
-			Enterprise::Platform::DisplayErrorDialog(L"Project was not specified!  "
-														"Specify a project file with \"-p\" or \"--project\"");
+			Enterprise::Platform::DisplayErrorDialog("Project was not specified!  "
+													 "Specify a project file with \"-p\" or \"--project\"");
 			engine->Quit();
 		}
 	}
 	else
 	{
-		Enterprise::Platform::DisplayErrorDialog(L"Project was not specified!  "
-													"Specify a project file with \"-p\" or \"--project\"");
+		Enterprise::Platform::DisplayErrorDialog("Project was not specified!  "
+												 "Specify a project file with \"-p\" or \"--project\"");
 		engine->Quit();
 	}
 }

@@ -7,10 +7,10 @@ namespace Enterprise::Platform
 
 /// Display a modal error pop-up.
 /// @param ErrorMessage The error message.
-EP_API void DisplayErrorDialog(std::wstring& ErrorMessage);
+EP_API void DisplayErrorDialog(std::string& ErrorMessage);
 
 /// Display a modal error pop-up.
 /// @param ErrorMessage The error message.
-EP_API void DisplayErrorDialog(const wchar_t* ErrorMessage);
+EP_API void DisplayErrorDialog(const char* ErrorMessage);
 
 }
